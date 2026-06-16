@@ -32,8 +32,11 @@ class Config:
             os.environ.get("PENTEST_MCP_AUDIT_LOG", "/var/log/pentest-mcp/audit.jsonl")
         )
     )
-    # Per-command wall-clock timeout in seconds.
+    # Per-command wall-clock timeout in seconds (default applied to every tool).
     command_timeout: int = field(default_factory=lambda: _int("PENTEST_MCP_TIMEOUT", 900))
+    # Hard ceiling a tool may request via a per-call timeout override. Stops a
+    # slow tool (or the model) from pinning a worker indefinitely.
+    max_command_timeout: int = field(default_factory=lambda: _int("PENTEST_MCP_MAX_TIMEOUT", 3600))
     # Max characters of tool output returned to the model (keeps token use sane).
     max_output_chars: int = field(
         default_factory=lambda: _int("PENTEST_MCP_MAX_OUTPUT", 60_000)

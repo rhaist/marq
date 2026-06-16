@@ -14,6 +14,12 @@ services:
       PENTEST_MCP_SCOPE: "ONLY systems you are authorized to test"
       # Set to "true" to expose the arbitrary-shell tool.
       PENTEST_MCP_ALLOW_RAW_SHELL: "false"
+      # Optional OSINT API keys (inherited from the host shell; blank = keyless).
+      SHODAN_API_KEY: "${SHODAN_API_KEY:-}"
+      CENSYS_API_ID: "${CENSYS_API_ID:-}"
+      CENSYS_API_SECRET: "${CENSYS_API_SECRET:-}"
+      GITHUB_TOKEN: "${GITHUB_TOKEN:-}"
+      NUMVERIFY_API_KEY: "${NUMVERIFY_API_KEY:-}"
     volumes:
       # Persist the audit log on the host so it survives container removal.
       - ./audit:/var/log/pentest-mcp

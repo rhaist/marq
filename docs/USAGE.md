@@ -9,6 +9,21 @@ docker build -t pentest-mcp .
 This pulls the Kali base and installs the full tool suite, so it is large
 (multi-GB) and the first build takes a while.
 
+**Setup baked in at build time.** A few tools fetch data or build a cache on
+first use; the Dockerfile does this during the build (as the runtime
+`pentester` user, so it lands in that user's home) to avoid a slow,
+network-dependent first scan:
+
+- `nuclei` — the template repository (`nuclei -update-templates`)
+- `wpscan` — the WordPress vulnerability database (`wpscan --update`)
+- `metasploit` — the module cache (a one-shot `msfconsole` run)
+- `rockyou` — decompressed to `/usr/share/wordlists/rockyou.txt`
+
+These steps are best-effort: a network hiccup during build won't fail the
+image — the tool just downloads on first run instead. To refresh the data in a
+running container later, re-run e.g. `nuclei -update-templates` or
+`wpscan --update`. All other tools ship their data bundled and need no setup.
+
 ## 2. Smoke-test outside LM Studio
 
 Run a one-off tool to confirm the image works:
@@ -44,22 +59,65 @@ docker run --rm -i pentest-mcp        # prints the authorization banner to stder
 
 ## Available tools
 
+### Recon / network
 | Tool            | Wraps         | Purpose                              |
 |-----------------|---------------|--------------------------------------|
 | `server_info`   | —             | Show authorization banner + scope    |
 | `nmap`          | nmap          | Port/service scanning                |
 | `masscan`       | masscan       | Fast port sweeps                     |
+| `naabu`         | naabu         | Fast modern port scan (top-ports)    |
 | `dns_lookup`    | dig           | DNS records                          |
+| `dnsx`          | dnsx          | Bulk DNS resolution / record enum    |
+| `dnsrecon`      | dnsrecon      | DNS recon, zone transfer, brute      |
 | `whois_lookup`  | whois         | Registration data                    |
 | `subfinder`     | subfinder     | Passive subdomain enum               |
 | `httpx_probe`   | httpx         | Live HTTP probing / tech detect      |
+
+### Information gathering — company & domain footprint
+| Tool             | Wraps             | Purpose                                  |
+|------------------|-------------------|------------------------------------------|
+| `theharvester`   | theHarvester      | Emails, employees, hosts, subdomains     |
+| `spiderfoot`     | spiderfoot        | Broad automated OSINT footprint          |
+| `amass_intel`    | amass intel       | Org/ASN/CIDR → related domains & ranges  |
+| `amass_enum`     | amass enum        | In-depth subdomain/asset enumeration     |
+| `exif_metadata`  | exiftool          | Metadata from a staged file/dir          |
+| `shodan_host`    | shodan            | Exposed ports/services for an IP †       |
+| `shodan_search`  | shodan            | Search exposed assets (e.g. `org:`) †    |
+| `gitleaks`       | gitleaks          | Secrets in a local git repo/dir          |
+| `trufflehog`     | trufflehog        | Verified leaked secrets (git/GitHub) ‡   |
+| `wayback_urls`   | waybackurls       | Historical URLs from the Wayback Machine |
+| `gau_urls`       | gau               | Known URLs (Wayback/CommonCrawl/OTX)     |
+
+### Information gathering — people footprint
+| Tool                | Wraps           | Purpose                                |
+|---------------------|-----------------|----------------------------------------|
+| `sherlock`          | sherlock        | Username across ~400 sites             |
+| `maigret_username`  | maigret         | Deep username sweep (~2500 sites)      |
+| `holehe_email`      | holehe          | Sites where an email has an account    |
+| `h8mail_breach`     | h8mail          | Email breach/leak exposure †           |
+| `phoneinfoga`       | phoneinfoga     | Phone number OSINT                     |
+
+### Web application
+| Tool            | Wraps         | Purpose                              |
+|-----------------|---------------|--------------------------------------|
 | `nuclei`        | nuclei        | Template-based vuln scanning         |
 | `nikto`         | nikto         | Web server scanning                  |
 | `ffuf`          | ffuf          | Content/dir fuzzing                  |
 | `gobuster_dir`  | gobuster      | Directory brute force                |
+| `feroxbuster`   | feroxbuster   | Fast recursive content discovery     |
+| `katana`        | katana        | Endpoint/JS crawler                  |
+| `arjun`         | arjun         | Hidden HTTP parameter discovery      |
 | `whatweb`       | whatweb       | Web tech fingerprinting              |
+| `wafw00f`       | wafw00f       | WAF detection / fingerprint          |
+| `cmseek`        | CMSeeK        | CMS detection (180+ CMSs)            |
 | `wpscan`        | wpscan        | WordPress scanning                   |
+| `testssl`       | testssl.sh    | SSL/TLS configuration analysis       |
+| `dalfox`        | dalfox        | XSS scanning                         |
 | `sqlmap`        | sqlmap        | SQL injection testing                |
+
+### Exploitation / credentials
+| Tool            | Wraps         | Purpose                              |
+|-----------------|---------------|--------------------------------------|
 | `searchsploit`  | exploitdb     | Local exploit DB search              |
 | `msfconsole`    | metasploit    | Run a resource script                |
 | `hydra`         | hydra         | Online credential testing            |
@@ -67,6 +125,39 @@ docker run --rm -i pentest-mcp        # prints the authorization banner to stder
 | `hashcat`       | hashcat       | GPU/CPU hash cracking                |
 | `hash_identify` | hashid        | Identify hash type                   |
 | `run_shell`     | bash          | Arbitrary command (opt-in)           |
+
+### Working files (`/work`, `/tmp`)
+| Tool         | Purpose                                                        |
+|--------------|----------------------------------------------------------------|
+| `list_dir`   | List a directory in the working area                           |
+| `read_file`  | Read back output a tool wrote to disk (cmseek JSON, `nuclei -o`)|
+| `write_file` | Stage an input file (a hash for `john`, a target list, …)      |
+
+These are sandboxed to `/work` and `/tmp` — the model cannot read or write
+anywhere else. They are what make the file-driven tools usable: the model can
+`write_file` a captured hash then `john` it, or `read_file` a result another
+tool dropped on disk. Mount `/work` from the host (see `docker-compose.yml`) to
+exchange files with the operator.
+
+† Needs an API key (see *API keys* below). ‡ GitHub org/repo scans need `GITHUB_TOKEN`.
+
+## API keys for OSINT sources
+
+Several information-gathering tools return far richer data with API keys. Pass
+them into the container via the `env` block in `mcp.json` (and add matching
+`-e VAR` passthrough args). All are optional — without them the tools fall back
+to keyless sources or return limited results.
+
+| Variable                              | Used by                          |
+|---------------------------------------|----------------------------------|
+| `SHODAN_API_KEY`                      | `shodan_host`, `shodan_search`   |
+| `CENSYS_API_ID` / `CENSYS_API_SECRET` | censys (via raw shell)           |
+| `GITHUB_TOKEN`                        | `trufflehog` (GitHub scans)      |
+| `NUMVERIFY_API_KEY`                   | `phoneinfoga`                    |
+| `GOOGLE_API_KEY` / `GOOGLECSE_CX`     | `phoneinfoga` (Google CSE)       |
+
+theHarvester and h8mail read their own config files (`~/.theHarvester/api-keys.yaml`,
+an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.
 
 ## Environment variables
 
@@ -76,7 +167,8 @@ docker run --rm -i pentest-mcp        # prints the authorization banner to stder
 | `PENTEST_MCP_ENGAGEMENT`      | `unspecified`                        | Engagement / SOW identifier               |
 | `PENTEST_MCP_SCOPE`           | `""`                                 | Free-text authorized scope (banner + log) |
 | `PENTEST_MCP_AUDIT_LOG`       | `/var/log/pentest-mcp/audit.jsonl`   | Audit log path                            |
-| `PENTEST_MCP_TIMEOUT`         | `900`                                | Per-command timeout (seconds)             |
+| `PENTEST_MCP_TIMEOUT`         | `900`                                | Default per-command timeout (seconds)     |
+| `PENTEST_MCP_MAX_TIMEOUT`     | `3600`                               | Ceiling for a tool's per-call timeout override |
 | `PENTEST_MCP_MAX_OUTPUT`      | `60000`                              | Max output chars returned to the model    |
 | `PENTEST_MCP_ALLOW_RAW_SHELL` | `false`                              | Expose the arbitrary-shell tool           |
 

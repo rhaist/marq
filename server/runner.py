@@ -25,11 +25,12 @@ class Result:
     duration_s: float
     timed_out: bool = False
     truncated: bool = False
+    timeout_s: int = 0
 
     def render(self) -> str:
         parts = [f"$ {' '.join(self.argv)}"]
         if self.timed_out:
-            parts.append(f"[timed out after {CONFIG.command_timeout}s]")
+            parts.append(f"[timed out after {self.timeout_s}s]")
         parts.append(f"[exit code: {self.exit_code}, {self.duration_s:.1f}s]")
         if self.stdout:
             parts.append("--- stdout ---\n" + self.stdout)
@@ -50,13 +51,23 @@ def _truncate(text: str, budget: int) -> tuple[str, bool]:
     return head + "\n…[truncated]…", True
 
 
-def run(tool: str, argv: list[str], *, target: str = "", stdin: str | None = None) -> Result:
+def run(
+    tool: str,
+    argv: list[str],
+    *,
+    target: str = "",
+    stdin: str | None = None,
+    timeout: int | None = None,
+) -> Result:
     """Run a command with auditing, a timeout and output truncation.
 
     `tool` is the logical tool name (for audit + result), `argv` the full
     command vector, `target` a best-effort extraction of the host/URL under
-    test (recorded in the audit log).
+    test (recorded in the audit log). `timeout` overrides the default
+    per-command wall-clock limit for this call only, clamped to
+    `CONFIG.max_command_timeout` — used by the slow OSINT/scan tools.
     """
+    limit = CONFIG.command_timeout if timeout is None else max(1, min(timeout, CONFIG.max_command_timeout))
     binary = argv[0]
     if shutil.which(binary) is None:
         return Result(
@@ -78,7 +89,7 @@ def run(tool: str, argv: list[str], *, target: str = "", stdin: str | None = Non
             input=stdin,
             capture_output=True,
             text=True,
-            timeout=CONFIG.command_timeout,
+            timeout=limit,
         )
         exit_code = proc.returncode
         stdout, stderr = proc.stdout, proc.stderr
@@ -116,4 +127,5 @@ def run(tool: str, argv: list[str], *, target: str = "", stdin: str | None = Non
         duration_s=duration,
         timed_out=timed_out,
         truncated=out_trunc or err_trunc,
+        timeout_s=limit,
     )

@@ -11,9 +11,18 @@ hash cracking — through a small, auditable Python MCP layer.
 
 ## What you get
 
-- **Full tool suite** on a Kali base: `nmap`, `masscan`, `nuclei`, `httpx`,
-  `subfinder`, `nikto`, `ffuf`, `gobuster`, `whatweb`, `wpscan`, `sqlmap`,
-  `metasploit`, `hydra`, `searchsploit`, `john`, `hashcat`, `hashid`, …
+- **Full tool suite** on a Kali base, best-in-class per category:
+  - *Recon/network*: `nmap`, `masscan`, `naabu`, `dnsx`, `dnsrecon`, `subfinder`, `httpx`
+  - *OSINT — company/domain footprint*: `theHarvester`, `spiderfoot`, `amass`
+    (intel + enum), `exiftool`, `shodan`, `gitleaks`, `trufflehog`, `gau`,
+    `waybackurls`
+  - *OSINT — people footprint*: `sherlock`, `maigret`, `holehe`, `h8mail`,
+    `phoneinfoga`
+  - *Web app*: `nuclei`, `nikto`, `feroxbuster`, `katana`, `ffuf`, `gobuster`,
+    `arjun`, `whatweb`, `wafw00f`, `cmseek`, `wpscan`, `testssl.sh`, `dalfox`, `sqlmap`
+  - *Exploitation/creds*: `metasploit`, `hydra`, `searchsploit`, `john`, `hashcat`, `hashid`
+- **Sandboxed working-file access** (`/work`, `/tmp`) so the model can stage
+  inputs (hashes, target lists) and read back outputs tools write to disk.
 - **MCP over stdio** (Python, official `mcp` SDK / FastMCP). No network port is
   opened — LM Studio launches the container and talks over stdin/stdout.
 - **Audit logging on every invocation** — JSON-lines, append-only, with
@@ -41,10 +50,13 @@ Full instructions: [`docs/USAGE.md`](docs/USAGE.md).
 ```
 LM Studio  ──stdio JSON-RPC──▶  docker run -i pentest-mcp
                                    └─ python -m server.main   (FastMCP)
-                                        ├─ tools/recon.py   nmap, masscan, dns…
-                                        ├─ tools/web.py     nuclei, sqlmap, ffuf…
+                                        ├─ tools/recon.py   nmap, naabu, dnsx, masscan…
+                                        ├─ tools/osint.py   theHarvester, spiderfoot, amass, shodan…
+                                        ├─ tools/people.py  sherlock, maigret, holehe, phoneinfoga…
+                                        ├─ tools/web.py     nuclei, katana, feroxbuster, sqlmap…
                                         ├─ tools/exploit.py msf, hydra, searchsploit
                                         ├─ tools/creds.py   john, hashcat, hashid
+                                        ├─ tools/files.py   read/write/list (sandboxed /work)
                                         └─ runner.py ──▶ audit.jsonl (every call)
 ```
 
@@ -63,7 +75,7 @@ server/               The MCP server
   config.py           Env-driven configuration
   audit.py            Append-only JSON-lines audit log
   runner.py           Shared subprocess runner (audit + timeout + truncation)
-  tools/              recon, web, exploit, creds, shell tool groups
+  tools/              recon, osint, people, web, exploit, creds, files, shell tool groups
 docs/                 SECURITY.md, USAGE.md
 ```
 

@@ -22,9 +22,12 @@ def register(mcp) -> None:
     @mcp.tool()
     def hashcat(hash_file: str, mode: int, wordlist: str, options: str = "") -> str:
         """Crack hashes with hashcat. `mode` is the -m hash type, `wordlist` an
-        attack dictionary path inside the container. Extra flags via `options`.
-        Note: GPU acceleration requires the container to expose a GPU."""
-        argv = ["hashcat", "-m", str(mode), *shlex.split(options), hash_file, wordlist]
+        attack dictionary path inside the container (stage both in `/work` with
+        `write_file` or a host mount). A CPU OpenCL runtime is bundled so it runs
+        without a GPU — fine for weak/fast hashes and short masks, but real
+        cracking needs `--gpus all` at `docker run`. `--force` is added so the
+        CPU device is accepted; pass extra flags via `options`."""
+        argv = ["hashcat", "-m", str(mode), "--force", *shlex.split(options), hash_file, wordlist]
         return run("hashcat", argv, target=hash_file).render()
 
     @mcp.tool()

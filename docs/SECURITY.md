@@ -1,8 +1,10 @@
 # Security & Safe-Use Guide
 
 This project bundles **active, offensive security tooling** (metasploit, hydra,
-sqlmap, hashcat, masscan, …) and exposes it to an LLM through MCP. That is
-powerful and inherently dual-use. Read this before you run anything.
+sqlmap, hashcat, masscan, …) plus **OSINT / footprinting tooling** that profiles
+people and organisations (theHarvester, spiderfoot, sherlock, holehe, h8mail,
+phoneinfoga, …), and exposes it all to an LLM through MCP. That is powerful and
+inherently dual-use. Read this before you run anything.
 
 ## Legal & ethical baseline
 
@@ -14,6 +16,13 @@ powerful and inherently dual-use. Read this before you run anything.
 - Online brute force (hydra), exploitation (metasploit) and aggressive scanning
   (masscan at high rates) can disrupt or lock out production systems. Use the
   least aggressive technique that answers the question.
+- **OSINT on people is still in-scope work, not a free-for-all.** Profiling
+  individuals (usernames, emails, breach data, phone numbers) implicates privacy
+  law (e.g. GDPR) and your engagement's rules. Only footprint people and
+  organisations covered by your authorization, and prefer passive sources.
+- Several OSINT tools call **third-party APIs** (Shodan, Censys, GitHub, HIBP,
+  numverify). Your queries leave the box and are logged by those providers — do
+  not submit data you are not permitted to disclose to a third party.
 
 ## Guardrail model: logging-only
 
@@ -38,13 +47,17 @@ The audit log is append-only and `fsync`'d per write. Default location:
 
 - **Non-root**: the server runs as the unprivileged `pentester` user.
 - **Capabilities dropped**: `cap_drop: ALL`, re-adding only `NET_RAW`,
-  `NET_ADMIN`, `NET_BIND_SERVICE` (needed for SYN scans). `nmap`/`masscan` get
-  exactly those file capabilities via `setcap`, so no root is required.
+  `NET_ADMIN`, `NET_BIND_SERVICE` (needed for SYN scans). `nmap`/`masscan`/`naabu`
+  get exactly those file capabilities via `setcap`, so no root is required.
 - **`no-new-privileges`** is set in the sample run configs.
 - **No network port is opened.** Transport is stdio only; LM Studio spawns the
   container and talks over stdin/stdout. There is no listening service to attack.
 - **Raw shell is opt-in.** The arbitrary-command tool is disabled unless
   `PENTEST_MCP_ALLOW_RAW_SHELL=true`.
+- **File access is sandboxed.** The `read_file`/`write_file`/`list_dir` tools
+  resolve real paths and refuse anything outside `/work` and `/tmp`, so the
+  model can exchange working files without reading or clobbering the rest of the
+  container. These ops are audit-logged like every tool run.
 - Output is truncated to a token budget so a runaway scan can't flood the model.
 - A per-command timeout (`PENTEST_MCP_TIMEOUT`, default 900s) bounds runaway tools.
 

@@ -11,16 +11,19 @@ import sys
 from mcp.server.fastmcp import FastMCP
 
 from .config import CONFIG
-from .tools import creds, exploit, recon, shell, web
+from .tools import creds, exploit, files, osint, people, recon, shell, web
 
 mcp = FastMCP("pentest-mcp")
 
 
 def _register_all() -> None:
     recon.register(mcp)
+    osint.register(mcp)
+    people.register(mcp)
     web.register(mcp)
     exploit.register(mcp)
     creds.register(mcp)
+    files.register(mcp)
     if CONFIG.allow_raw_shell:
         shell.register(mcp)
 

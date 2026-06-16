@@ -47,3 +47,36 @@ def register(mcp) -> None:
         argv = ["httpx", "-silent", "-status-code", "-title", "-tech-detect"]
         stdin = "\n".join(hosts)
         return run("httpx", argv, target=targets, stdin=stdin).render()
+
+    @mcp.tool()
+    def naabu(target: str, ports: str = "", top_ports: int = 100) -> str:
+        """Fast modern port scan with naabu (projectdiscovery). Give explicit
+        `ports` (e.g. "80,443,8000-9000") or rely on `top_ports`. SYN-scans with
+        NET_RAW, else falls back to a connect scan. Pairs well with nmap -sV on
+        the discovered ports."""
+        argv = ["naabu", "-host", target, "-silent"]
+        if ports:
+            argv += ["-p", ports]
+        else:
+            argv += ["-top-ports", str(top_ports)]
+        return run("naabu", argv, target=target).render()
+
+    @mcp.tool()
+    def dnsx(hosts: str, records: str = "a") -> str:
+        """Resolve and enumerate DNS for hosts (comma/newline-separated) with
+        dnsx. `records` is a comma list of types to query
+        (a,aaaa,cname,mx,ns,txt,ptr,srv). Returns the records inline."""
+        names = [h.strip() for h in hosts.replace(",", "\n").splitlines() if h.strip()]
+        argv = ["dnsx", "-silent", "-resp"]
+        for rec in (r.strip().lower() for r in records.split(",") if r.strip()):
+            argv.append(f"-{rec}")
+        return run("dnsx", argv, target=hosts, stdin="\n".join(names)).render()
+
+    @mcp.tool()
+    def dnsrecon(domain: str, scan_type: str = "std") -> str:
+        """DNS reconnaissance with dnsrecon. `scan_type` selects the technique:
+        std (records), brt (bruteforce — needs a wordlist via options is not
+        exposed here), axfr (zone transfer), crt (crt.sh certs), zonewalk.
+        Good for zone-transfer checks and record sweeps."""
+        argv = ["dnsrecon", "-d", domain, "-t", scan_type]
+        return run("dnsrecon", argv, target=domain).render()

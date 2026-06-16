@@ -17,13 +17,24 @@
         "-e", "PENTEST_MCP_ENGAGEMENT",
         "-e", "PENTEST_MCP_SCOPE",
         "-e", "PENTEST_MCP_ALLOW_RAW_SHELL",
+        "-e", "SHODAN_API_KEY",
+        "-e", "CENSYS_API_ID",
+        "-e", "CENSYS_API_SECRET",
+        "-e", "GITHUB_TOKEN",
+        "-e", "NUMVERIFY_API_KEY",
         "pentest-mcp"
       ],
       "env": {
         "PENTEST_MCP_OPERATOR": "your-name",
         "PENTEST_MCP_ENGAGEMENT": "acme-webapp-2026-06",
         "PENTEST_MCP_SCOPE": "*.example.com, 203.0.113.0/24 — per signed SOW",
-        "PENTEST_MCP_ALLOW_RAW_SHELL": "false"
+        "PENTEST_MCP_ALLOW_RAW_SHELL": "false",
+        "//keys": "Optional — enrich OSINT tools. Leave blank to use keyless sources.",
+        "SHODAN_API_KEY": "",
+        "CENSYS_API_ID": "",
+        "CENSYS_API_SECRET": "",
+        "GITHUB_TOKEN": "",
+        "NUMVERIFY_API_KEY": ""
       }
     }
   }
