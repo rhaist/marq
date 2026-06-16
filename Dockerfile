@@ -21,11 +21,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates curl wget git libcap2-bin golang-go \
         python3 python3-pip python3-venv \
         # recon / network
-        nmap masscan dnsutils whois subfinder nuclei httpx-toolkit \
+        nmap masscan bind9-dnsutils whois subfinder nuclei httpx-toolkit \
         naabu dnsx amass dnsrecon fierce \
-        # web app
+        # web app  (dalfox is not in apt — installed via go below)
         nikto ffuf gobuster whatweb wpscan sqlmap \
-        feroxbuster arjun dalfox wafw00f cmseek testssl.sh sslscan gospider \
+        feroxbuster arjun wafw00f cmseek testssl.sh sslscan gospider \
         # osint / information gathering — company & domain footprint
         theharvester spiderfoot recon-ng libimage-exiftool-perl \
         python3-shodan python3-censys gitleaks trufflehog \
@@ -33,20 +33,27 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         sherlock h8mail \
         # exploitation
         metasploit-framework hydra exploitdb \
-        # credentials / hashes (pocl gives hashcat a CPU OpenCL device)
-        john hashcat hashid pocl-opencl-icd \
+        # credentials / hashes (mesa-opencl-icd gives hashcat a CPU OpenCL device)
+        john hashcat hashid mesa-opencl-icd ocl-icd-libopencl1 \
         # wordlists
         wordlists \
     && rm -rf /var/lib/apt/lists/*
 
 # Go-built tools not packaged in Kali apt: active crawler + archive harvesters
-# + phone OSINT. Installed system-wide so the dropped-privilege user can run them.
+# + XSS scanner. Installed system-wide so the dropped-privilege user can run
+# them (GOBIN puts the binaries in /usr/local/bin).
 ENV GOBIN=/usr/local/bin GOPATH=/root/go
 RUN go install github.com/projectdiscovery/katana/cmd/katana@latest \
     && go install github.com/lc/gau/v2/cmd/gau@latest \
     && go install github.com/tomnomnom/waybackurls@latest \
-    && go install github.com/sundowndev/phoneinfoga/v2@latest \
+    && go install github.com/hahwul/dalfox/v2@latest \
     && rm -rf /root/go /root/.cache/go-build
+
+# phoneinfoga can't be `go install`ed (its web client go:embeds built frontend
+# assets that aren't in the module), so use the pinned prebuilt release binary.
+RUN curl -sSL https://github.com/sundowndev/phoneinfoga/releases/download/v2.11.0/phoneinfoga_Linux_x86_64.tar.gz \
+        | tar -xz -C /usr/local/bin phoneinfoga \
+    && chmod +x /usr/local/bin/phoneinfoga
 
 # Allow unprivileged SYN scans (nmap/masscan/naabu) without running as root.
 RUN setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip /usr/bin/nmap || true \
@@ -92,7 +99,10 @@ RUN (nuclei -update-templates -silent 2>/dev/null || nuclei -update-templates 2>
     && (wpscan --update 2>/dev/null || true) \
     && (msfconsole -q -x "version; exit" 2>/dev/null || true)
 
-ENV PENTEST_MCP_AUDIT_LOG=/var/log/pentest-mcp/audit.jsonl \
+# The server package lives in /app but the runtime workdir is /work; put /app on
+# the import path so `python3 -m server.main` resolves from any directory.
+ENV PYTHONPATH=/app \
+    PENTEST_MCP_AUDIT_LOG=/var/log/pentest-mcp/audit.jsonl \
     PENTEST_MCP_OPERATOR=unknown \
     PENTEST_MCP_ENGAGEMENT=unspecified
 
