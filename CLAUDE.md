@@ -54,7 +54,9 @@ client --stdio--> server/main.py (FastMCP)
 
 The transport is **synchronous, one-shot, stateless, no interactivity** (`subprocess.run`, `stdin` fixed or `None`). When adding/editing tools, respect:
 - **No interactive tools** — anything that prompts or needs a TTY will hang until timeout. Always pass non-interactive flags (`--batch`, `-x "...; exit"`, `--silence`, etc.).
-- **15-min default timeout** (`PENTEST_MCP_TIMEOUT`), truncation at `PENTEST_MCP_MAX_OUTPUT` chars. Slow tools accept a `minutes`/`timeout` arg that calls `run(..., timeout=...)`, clamped to `PENTEST_MCP_MAX_TIMEOUT` (default 3600).
+- **15-min default timeout** (`PENTEST_MCP_TIMEOUT`), truncation at `PENTEST_MCP_MAX_OUTPUT` chars. `run()` takes an optional `timeout` override clamped to `PENTEST_MCP_MAX_TIMEOUT` (default 3600) for moderately slow tools.
+- **Tools that can't finish in an interactive window run in the background** via `runner.run_background()` (e.g. `spiderfoot`): it spawns the process detached, streams `stdout.log`/`stderr.log` to a job dir under `/work/jobs/`, writes a `status` file when done, and returns the path immediately. The model polls results with the `read_file`/`list_dir` file tools. Reach for this instead of a long synchronous `run()` — the MCP client has its own call timeout that a 15-min scan will blow regardless of the server-side limit.
+- **Watch for Kali `sudo`-wrapper binaries under `no-new-privileges`.** Some packages ship `/usr/bin/<tool>` as a shell wrapper that calls `sudo` (e.g. amass → libpostal); the container's `no-new-privileges` makes `sudo` fail instantly (exit 1). Call the real binary directly or pick a tool that doesn't wrap sudo.
 - **No file upload** — the model passes strings only. File inputs/outputs go through the `/work` mount + the `files.py` tools.
 - Tools needing **API keys** (shodan, censys, h8mail breaches, trufflehog GitHub, phoneinfoga enrichment) degrade quietly without them; the key env vars are passed through in `mcp.json.example` / `docker-compose.yml` and documented in `docs/USAGE.md`.
 

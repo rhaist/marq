@@ -22,13 +22,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         python3 python3-pip python3-venv \
         # recon / network
         nmap masscan bind9-dnsutils whois subfinder nuclei httpx-toolkit \
-        naabu dnsx amass dnsrecon fierce \
+        naabu dnsx dnsrecon fierce \
         # web app  (dalfox is not in apt — installed via go below)
         nikto ffuf gobuster whatweb wpscan sqlmap \
         feroxbuster arjun wafw00f cmseek testssl.sh sslscan gospider \
         # osint / information gathering — company & domain footprint
+        # (python3-pkg-resources: shodan CLI imports pkg_resources at runtime)
         theharvester spiderfoot recon-ng libimage-exiftool-perl \
-        python3-shodan python3-censys gitleaks trufflehog \
+        python3-shodan python3-censys python3-pkg-resources gitleaks trufflehog \
         # osint — people footprint
         sherlock h8mail \
         # exploitation

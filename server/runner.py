@@ -6,9 +6,12 @@ through `run` so that auditing can never be bypassed.
 """
 from __future__ import annotations
 
+import os
+import shlex
 import shutil
 import subprocess
 import time
+import uuid
 from dataclasses import dataclass
 
 from . import audit
@@ -129,3 +132,45 @@ def run(
         truncated=out_trunc or err_trunc,
         timeout_s=limit,
     )
+
+
+def run_background(tool: str, argv: list[str], *, target: str = "", job_root: str = "/work/jobs") -> tuple[str | None, str | None]:
+    """Launch a long-running tool detached and return immediately.
+
+    For tools that can't finish inside an interactive tool-call window (broad
+    OSINT scans, etc.). Output streams to files under a per-job directory in the
+    working area, which the operator/model reads back with the `read_file` /
+    `list_dir` tools. Returns `(job_dir, None)` on success or `(None, error)`.
+
+    Layout of the job dir: `stdout.log` (results), `stderr.log` (diagnostics),
+    `status` (written last, contains `exit=<code>` once the tool finishes — its
+    presence is the done-signal). The child is audit-logged at launch.
+    """
+    if shutil.which(argv[0]) is None:
+        return None, f"binary not found in image: {argv[0]}"
+    job_dir = os.path.join(job_root, f"{tool}-{uuid.uuid4().hex[:8]}")
+    try:
+        os.makedirs(job_dir, exist_ok=True)
+    except OSError as exc:
+        return None, f"could not create job dir {job_dir}: {exc}"
+
+    out, err, status = (os.path.join(job_dir, n) for n in ("stdout.log", "stderr.log", "status"))
+    inv = audit.log_start(f"{tool}:bg", target or "(unspecified)", argv)
+    # Wrap so the child redirects its streams and records its own exit code.
+    cmd = (
+        f"( {shlex.join(argv)} ) >{shlex.quote(out)} 2>{shlex.quote(err)}; "
+        f'echo "exit=$?" >{shlex.quote(status)}'
+    )
+    try:
+        subprocess.Popen(  # noqa: S603 - detached background job, intentional
+            ["/bin/bash", "-c", cmd],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+    except Exception as exc:  # noqa: BLE001 - report any spawn failure
+        audit.log_end(inv, f"{tool}:bg", exit_code=None, duration_s=0.0, error=repr(exc))
+        return None, f"failed to launch: {exc}"
+    audit.log_end(inv, f"{tool}:bg", exit_code=None, duration_s=0.0)
+    return job_dir, None

@@ -13,9 +13,8 @@ hash cracking — through a small, auditable Python MCP layer.
 
 - **Full tool suite** on a Kali base, best-in-class per category:
   - *Recon/network*: `nmap`, `masscan`, `naabu`, `dnsx`, `dnsrecon`, `subfinder`, `httpx`
-  - *OSINT — company/domain footprint*: `theHarvester`, `spiderfoot`, `amass`
-    (intel + enum), `exiftool`, `shodan`, `gitleaks`, `trufflehog`, `gau`,
-    `waybackurls`
+  - *OSINT — company/domain footprint*: `theHarvester`, `spiderfoot`,
+    `exiftool`, `shodan`, `gitleaks`, `trufflehog`, `gau`, `waybackurls`
   - *OSINT — people footprint*: `sherlock`, `maigret`, `holehe`, `h8mail`,
     `phoneinfoga`
   - *Web app*: `nuclei`, `nikto`, `feroxbuster`, `katana`, `ffuf`, `gobuster`,
@@ -28,7 +27,8 @@ hash cracking — through a small, auditable Python MCP layer.
 - **Audit logging on every invocation** — JSON-lines, append-only, with
   operator, engagement, target and full argument vector.
 - **Hardened container** — non-root user, dropped capabilities (only the few
-  needed for SYN scans), `no-new-privileges`, opt-in raw shell.
+  needed for SYN scans), `no-new-privileges`, audit-logged raw shell (default
+  on; disable with `PENTEST_MCP_ALLOW_RAW_SHELL=false`).
 
 ## Quick start
 
@@ -51,7 +51,7 @@ Full instructions: [`docs/USAGE.md`](docs/USAGE.md).
 LM Studio  ──stdio JSON-RPC──▶  docker run -i pentest-mcp
                                    └─ python -m server.main   (FastMCP)
                                         ├─ tools/recon.py   nmap, naabu, dnsx, masscan…
-                                        ├─ tools/osint.py   theHarvester, spiderfoot, amass, shodan…
+                                        ├─ tools/osint.py   theHarvester, spiderfoot, shodan, gitleaks…
                                         ├─ tools/people.py  sherlock, maigret, holehe, phoneinfoga…
                                         ├─ tools/web.py     nuclei, katana, feroxbuster, sqlmap…
                                         ├─ tools/exploit.py msf, hydra, searchsploit

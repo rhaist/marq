@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import shlex
 
-from ..runner import run
+from ..runner import run, run_background
 
 # Keyless theHarvester sources — work with zero configuration. The model can
 # override with `sources` (e.g. add shodan/hunter once keys are configured).
@@ -32,47 +32,30 @@ def register(mcp) -> None:
         return run("theharvester", argv, target=domain).render()
 
     @mcp.tool()
-    def spiderfoot(target: str, use_case: str = "footprint", minutes: int = 20) -> str:
+    def spiderfoot(target: str, use_case: str = "passive") -> str:
         """Broad automated OSINT footprint of a target (spiderfoot, 200+
         modules) — domains, IPs, netblocks, ASN, emails, names, breach data.
-        `target` may be a domain, IP, email, name or username. `use_case` is
-        one of all/footprint/investigate/passive. Runs headless (no web UI) and
-        emits JSON. It is slow: `minutes` raises this call's timeout above the
-        default (clamped server-side) so it can finish; on timeout you still get
-        the partial JSON gathered so far. Many modules use optional API keys."""
-        argv = ["spiderfoot", "-s", target, "-u", use_case, "-o", "json", "-q"]
-        return run("spiderfoot", argv, target=target, timeout=minutes * 60).render()
+        `target` may be a domain, IP, email, name or username. `use_case` is one
+        of all/footprint/investigate/passive (`passive` is safe + fastest;
+        `footprint` also does active DNS work — scope-sensitive).
 
-    # --- asset / netblock discovery ---------------------------------------
-    @mcp.tool()
-    def amass_intel(org: str = "", domain: str = "", asn: str = "", cidr: str = "") -> str:
-        """Discover an organisation's attack surface with `amass intel`: map an
-        org name, root domain, ASN or CIDR to related domains, ASNs and IP
-        ranges. Supply exactly one of `org`, `domain`, `asn`, `cidr`. With a
-        domain it does reverse-WHOIS to find sibling domains."""
-        argv = ["amass", "intel"]
-        if org:
-            argv += ["-org", org]
-        elif asn:
-            argv += ["-asn", asn]
-        elif cidr:
-            argv += ["-cidr", cidr]
-        elif domain:
-            argv += ["-whois", "-d", domain]
-        else:
-            return "error: provide one of org, domain, asn or cidr"
-        return run("amass-intel", argv, target=org or domain or asn or cidr).render()
-
-    @mcp.tool()
-    def amass_enum(domain: str, active: bool = False, minutes: int = 15) -> str:
-        """In-depth subdomain/asset enumeration for a DOMAIN (OWASP amass).
-        Passive by default (OSINT sources only); set `active=True` to also do
-        DNS resolution and light probing of discovered names. Active runs are
-        slow — `minutes` raises this call's timeout (clamped server-side)."""
-        argv = ["amass", "enum", "-d", domain, "-silent"]
-        if not active:
-            argv.append("-passive")
-        return run("amass-enum", argv, target=domain, timeout=minutes * 60).render()
+        SpiderFoot is too slow for a synchronous call, so this launches it in the
+        BACKGROUND and returns immediately with a job directory. Read results as
+        they stream in with `read_file('<job>/stdout.log')`; the scan is finished
+        once `<job>/status` exists. Many modules use optional API keys."""
+        argv = ["spiderfoot", "-s", target, "-u", use_case, "-o", "json"]
+        job_dir, err = run_background("spiderfoot", argv, target=target)
+        if err:
+            return f"error: {err}"
+        return (
+            f"SpiderFoot ({use_case}) launched in the background for {target}.\n"
+            f"  results (JSON) : {job_dir}/stdout.log\n"
+            f"  diagnostics    : {job_dir}/stderr.log\n"
+            f"  done-signal    : {job_dir}/status  (appears with 'exit=<code>' when finished)\n"
+            f"Poll with read_file('{job_dir}/stdout.log') or list_dir('{job_dir}'); "
+            "give it a few minutes. Note: subfinder/dnsx/theharvester are faster "
+            "for quick subdomain/email recon."
+        )
 
     # --- document metadata ------------------------------------------------
     @mcp.tool()
@@ -94,7 +77,7 @@ def register(mcp) -> None:
             'if [ -n "$SHODAN_API_KEY" ]; then shodan init "$SHODAN_API_KEY" >/dev/null 2>&1; fi; '
             f"shodan host {shlex.quote(ip)}"
         )
-        return run("shodan-host", ["/bin/bash", "-lc", cmd], target=ip).render()
+        return run("shodan-host", ["/bin/bash", "-c", cmd], target=ip).render()
 
     @mcp.tool()
     def shodan_search(query: str, limit: int = 100) -> str:
@@ -106,7 +89,7 @@ def register(mcp) -> None:
             'if [ -n "$SHODAN_API_KEY" ]; then shodan init "$SHODAN_API_KEY" >/dev/null 2>&1; fi; '
             f"shodan search --fields {fields} --limit {int(limit)} {shlex.quote(query)}"
         )
-        return run("shodan-search", ["/bin/bash", "-lc", cmd], target=query).render()
+        return run("shodan-search", ["/bin/bash", "-c", cmd], target=query).render()
 
     # --- leaked secrets / code exposure -----------------------------------
     @mcp.tool()
@@ -134,7 +117,7 @@ def register(mcp) -> None:
         without touching the live target. `include_subs` also fetches subdomains."""
         flag = "" if include_subs else "-no-subs"
         cmd = f"echo {shlex.quote(domain)} | waybackurls {flag}".strip()
-        return run("waybackurls", ["/bin/bash", "-lc", cmd], target=domain).render()
+        return run("waybackurls", ["/bin/bash", "-c", cmd], target=domain).render()
 
     @mcp.tool()
     def gau_urls(domain: str) -> str:
@@ -142,4 +125,4 @@ def register(mcp) -> None:
         URLScan (gau) — broader historical coverage than waybackurls alone.
         Passive: queries archives, not the target."""
         cmd = f"echo {shlex.quote(domain)} | gau --subs --providers wayback,commoncrawl,otx,urlscan"
-        return run("gau", ["/bin/bash", "-lc", cmd], target=domain).render()
+        return run("gau", ["/bin/bash", "-c", cmd], target=domain).render()

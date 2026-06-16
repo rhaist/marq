@@ -12,8 +12,8 @@ services:
       PENTEST_MCP_OPERATOR: "${USER:-operator}"
       PENTEST_MCP_ENGAGEMENT: "local-lab"
       PENTEST_MCP_SCOPE: "ONLY systems you are authorized to test"
-      # Set to "true" to expose the arbitrary-shell tool.
-      PENTEST_MCP_ALLOW_RAW_SHELL: "false"
+      # Arbitrary-shell tool. On by default; set "false" to disable.
+      PENTEST_MCP_ALLOW_RAW_SHELL: "true"
       # Optional OSINT API keys (inherited from the host shell; blank = keyless).
       SHODAN_API_KEY: "${SHODAN_API_KEY:-}"
       CENSYS_API_ID: "${CENSYS_API_ID:-}"

@@ -77,9 +77,7 @@ docker run --rm -i pentest-mcp        # prints the authorization banner to stder
 | Tool             | Wraps             | Purpose                                  |
 |------------------|-------------------|------------------------------------------|
 | `theharvester`   | theHarvester      | Emails, employees, hosts, subdomains     |
-| `spiderfoot`     | spiderfoot        | Broad automated OSINT footprint          |
-| `amass_intel`    | amass intel       | Org/ASN/CIDR → related domains & ranges  |
-| `amass_enum`     | amass enum        | In-depth subdomain/asset enumeration     |
+| `spiderfoot`     | spiderfoot        | Broad automated OSINT footprint (background; poll with `read_file`) |
 | `exif_metadata`  | exiftool          | Metadata from a staged file/dir          |
 | `shodan_host`    | shodan            | Exposed ports/services for an IP †       |
 | `shodan_search`  | shodan            | Search exposed assets (e.g. `org:`) †    |
@@ -139,6 +137,13 @@ anywhere else. They are what make the file-driven tools usable: the model can
 tool dropped on disk. Mount `/work` from the host (see `docker-compose.yml`) to
 exchange files with the operator.
 
+**Background scans.** Tools too slow for a synchronous call (currently
+`spiderfoot`) launch in the background and return a job directory under
+`/work/jobs/<tool>-<id>/`. Results stream to `stdout.log`, diagnostics to
+`stderr.log`, and a `status` file (containing `exit=<code>`) appears when the
+scan finishes. Poll progress with `read_file('<job>/stdout.log')` /
+`list_dir('<job>')` — the work survives individual tool-call timeouts.
+
 † Needs an API key (see *API keys* below). ‡ GitHub org/repo scans need `GITHUB_TOKEN`.
 
 ## API keys for OSINT sources
@@ -170,7 +175,7 @@ an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.
 | `PENTEST_MCP_TIMEOUT`         | `900`                                | Default per-command timeout (seconds)     |
 | `PENTEST_MCP_MAX_TIMEOUT`     | `3600`                               | Ceiling for a tool's per-call timeout override |
 | `PENTEST_MCP_MAX_OUTPUT`      | `60000`                              | Max output chars returned to the model    |
-| `PENTEST_MCP_ALLOW_RAW_SHELL` | `false`                              | Expose the arbitrary-shell tool           |
+| `PENTEST_MCP_ALLOW_RAW_SHELL` | `true`                               | Expose the arbitrary-shell tool (set `false` to disable) |
 
 ## Reading the audit log
 

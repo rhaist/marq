@@ -16,5 +16,5 @@ def register(mcp) -> None:
         """Run an arbitrary shell command inside the pentest container. Use for
         tools without a dedicated wrapper. `target` should name the host/URL
         under test for the audit record. Audit-logged; authorized use only."""
-        argv = ["/bin/bash", "-lc", command]
+        argv = ["/bin/bash", "-c", command]
         return run("run_shell", argv, target=target).render()

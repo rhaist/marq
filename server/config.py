@@ -49,8 +49,11 @@ class Config:
     # Optional scope note shown in the authorization banner. Free text describing
     # the authorized targets / rules of engagement for this session.
     scope_note: str = field(default_factory=lambda: os.environ.get("PENTEST_MCP_SCOPE", ""))
-    # When true, the generic `run_shell` escape hatch is exposed. Off by default.
-    allow_raw_shell: bool = field(default_factory=lambda: _bool("PENTEST_MCP_ALLOW_RAW_SHELL", False))
+    # When true, the generic `run_shell` escape hatch is exposed. On by default:
+    # the image is a full offensive toolkit with hundreds of tools that have no
+    # dedicated wrapper, and the model needs shell access to chain/stage them.
+    # Still fully audit-logged. Set PENTEST_MCP_ALLOW_RAW_SHELL=false to disable.
+    allow_raw_shell: bool = field(default_factory=lambda: _bool("PENTEST_MCP_ALLOW_RAW_SHELL", True))
 
     def banner(self) -> str:
         return (

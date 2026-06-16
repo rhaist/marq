@@ -44,7 +44,9 @@ def register(mcp) -> None:
         """Probe one or more hosts (comma- or newline-separated) for live HTTP
         services, returning status, title and tech. Wraps projectdiscovery httpx."""
         hosts = [h.strip() for h in targets.replace(",", "\n").splitlines() if h.strip()]
-        argv = ["httpx", "-silent", "-status-code", "-title", "-tech-detect"]
+        # Kali ships ProjectDiscovery httpx as `httpx-toolkit` (plain `httpx` is
+        # the unrelated python HTTP client).
+        argv = ["httpx-toolkit", "-silent", "-status-code", "-title", "-tech-detect"]
         stdin = "\n".join(hosts)
         return run("httpx", argv, target=targets, stdin=stdin).render()
 

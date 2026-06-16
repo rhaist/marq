@@ -52,8 +52,12 @@ The audit log is append-only and `fsync`'d per write. Default location:
 - **`no-new-privileges`** is set in the sample run configs.
 - **No network port is opened.** Transport is stdio only; LM Studio spawns the
   container and talks over stdin/stdout. There is no listening service to attack.
-- **Raw shell is opt-in.** The arbitrary-command tool is disabled unless
-  `PENTEST_MCP_ALLOW_RAW_SHELL=true`.
+- **Raw shell is enabled by default but audit-logged.** The image is a full
+  offensive toolkit (hundreds of tools without dedicated wrappers), so the
+  arbitrary-command tool ships on so the model can chain and stage them; every
+  invocation is logged like any other. It is still the broadest capability the
+  server grants — set `PENTEST_MCP_ALLOW_RAW_SHELL=false` to remove it for a
+  more locked-down deployment.
 - **File access is sandboxed.** The `read_file`/`write_file`/`list_dir` tools
   resolve real paths and refuse anything outside `/work` and `/tmp`, so the
   model can exchange working files without reading or clobbering the rest of the
