@@ -1,0 +1,11 @@
+.git
+.gitignore
+**/__pycache__
+**/*.pyc
+docs
+*.md
+!README.md
+.venv
+venv
+audit.jsonl
+*.log

@@ -1,0 +1,30 @@
+{
+  "//": "LM Studio MCP config. In LM Studio: Program > Edit mcp.json, paste the",
+  "//2": "'pentest-mcp' entry below into your mcpServers, then adjust env values.",
+  "//3": "The container talks to LM Studio over stdio (-i keeps stdin open).",
+  "mcpServers": {
+    "pentest-mcp": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "--security-opt", "no-new-privileges:true",
+        "--cap-drop", "ALL",
+        "--cap-add", "NET_RAW",
+        "--cap-add", "NET_ADMIN",
+        "--cap-add", "NET_BIND_SERVICE",
+        "-v", "pentest-mcp-audit:/var/log/pentest-mcp",
+        "-e", "PENTEST_MCP_OPERATOR",
+        "-e", "PENTEST_MCP_ENGAGEMENT",
+        "-e", "PENTEST_MCP_SCOPE",
+        "-e", "PENTEST_MCP_ALLOW_RAW_SHELL",
+        "pentest-mcp"
+      ],
+      "env": {
+        "PENTEST_MCP_OPERATOR": "your-name",
+        "PENTEST_MCP_ENGAGEMENT": "acme-webapp-2026-06",
+        "PENTEST_MCP_SCOPE": "*.example.com, 203.0.113.0/24 — per signed SOW",
+        "PENTEST_MCP_ALLOW_RAW_SHELL": "false"
+      }
+    }
+  }
+}

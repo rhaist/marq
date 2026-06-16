@@ -1,0 +1,31 @@
+# Convenience compose file. Primarily useful for building and for an
+# interactive shell; LM Studio itself launches the container via mcp.json
+# (see mcp.json.example).
+services:
+  pentest-mcp:
+    build: .
+    image: pentest-mcp
+    # stdio server needs an attached stdin; compose is mainly for build/shell.
+    stdin_open: true
+    tty: false
+    environment:
+      PENTEST_MCP_OPERATOR: "${USER:-operator}"
+      PENTEST_MCP_ENGAGEMENT: "local-lab"
+      PENTEST_MCP_SCOPE: "ONLY systems you are authorized to test"
+      # Set to "true" to expose the arbitrary-shell tool.
+      PENTEST_MCP_ALLOW_RAW_SHELL: "false"
+    volumes:
+      # Persist the audit log on the host so it survives container removal.
+      - ./audit:/var/log/pentest-mcp
+      # Optional working dir for wordlists, hash files, scan output.
+      - ./work:/work
+    # Hardening: no new privileges. Network is needed for scanning, so it is
+    # left on the default bridge — restrict it at the host/firewall level.
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+      - NET_BIND_SERVICE

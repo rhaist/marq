@@ -1,0 +1,20 @@
+[project]
+name = "pentest-mcp"
+version = "0.1.0"
+description = "MCP server exposing a containerized pentesting toolkit for LM Studio"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "mcp>=1.2.0",
+]
+
+[project.scripts]
+pentest-mcp = "server.main:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["server", "server.tools"]
