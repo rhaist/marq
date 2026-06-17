@@ -40,8 +40,9 @@ The audit log is append-only and `fsync`'d per write. Default location:
 `mcp.json.example` and `docker-compose.yml`).
 
 > If you later want hard controls, the natural place to add them is
-> `server/runner.py::run` (e.g. a scope allowlist check before `subprocess.run`)
-> — auditing already funnels through that one function, so enforcement can too.
+> `internal/runner/runner.go::Run` (e.g. a scope allowlist check before the
+> subprocess is spawned) — auditing already funnels through that one function,
+> so enforcement can too.
 
 ## Container hardening applied
 
@@ -50,8 +51,10 @@ The audit log is append-only and `fsync`'d per write. Default location:
   `NET_ADMIN`, `NET_BIND_SERVICE` (needed for SYN scans). `nmap`/`masscan`/`naabu`
   get exactly those file capabilities via `setcap`, so no root is required.
 - **`no-new-privileges`** is set in the sample run configs.
-- **No network port is opened.** Transport is stdio only; LM Studio spawns the
-  container and talks over stdin/stdout. There is no listening service to attack.
+- **No network port is opened.** Transport is stdio only; the MCP client spawns
+  the container and talks over stdin/stdout. There is no listening service to
+  attack. (The local TUI/agent mode makes only an outbound call to the model
+  runtime you configure.)
 - **Raw shell is enabled by default but audit-logged.** The image is a full
   offensive toolkit (hundreds of tools without dedicated wrappers), so the
   arbitrary-command tool ships on so the model can chain and stage them; every

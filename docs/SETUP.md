@@ -7,6 +7,14 @@ installed and how the container reaches it.
 
 > Authorized testing only. Read [`SECURITY.md`](SECURITY.md) first.
 
+**Contents**
+
+- [Two ways to run](#two-ways-to-run)
+- [macOS](#macos)
+- [Debian Testing (rolling)](#debian-testing-rolling)
+- [Local Go development](#local-go-development-both-oses)
+- [Verify](#verify)
+
 ## Two ways to run
 
 | Mode | Command | Needs a local model? | Who drives the model |
@@ -176,4 +184,3 @@ docker run --rm -i <networking flags for your OS> \
 ```
 The full end-to-end harness is `scripts/verify_tools.sh` (drives the built image
 over MCP).
-```

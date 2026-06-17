@@ -1,5 +1,21 @@
 # Usage
 
+How to build, smoke-test and drive the toolkit. For a guided per-OS install
+(macOS / Debian Testing) see [`SETUP.md`](SETUP.md); for the safety model see
+[`SECURITY.md`](SECURITY.md).
+
+**Contents**
+
+- [1. Build the image](#1-build-the-image)
+- [2. Smoke-test the image](#2-smoke-test-the-image)
+- [3. Wire it into an MCP client](#3-wire-it-into-an-mcp-client)
+- [4. Agent host (TUI) with a local model](#4-agent-host-tui-with-a-local-model)
+- [Available tools](#available-tools)
+- [API keys for OSINT sources](#api-keys-for-osint-sources)
+- [Environment variables](#environment-variables)
+- [Reading the audit log](#reading-the-audit-log)
+- [GPU hash cracking (optional)](#gpu-hash-cracking-optional)
+
 ## 1. Build the image
 
 ```bash
@@ -24,7 +40,7 @@ image — the tool just downloads on first run instead. To refresh the data in a
 running container later, re-run e.g. `nuclei -update-templates` or
 `wpscan --update`. All other tools ship their data bundled and need no setup.
 
-## 2. Smoke-test outside LM Studio
+## 2. Smoke-test the image
 
 Run a one-off tool to confirm the image works:
 
@@ -48,7 +64,10 @@ Confirm the MCP server starts (it will wait for JSON-RPC on stdin; Ctrl-C to exi
 docker run --rm -i pentest-mcp        # prints the authorization banner to stderr
 ```
 
-## 3. Wire it into LM Studio
+## 3. Wire it into an MCP client
+
+These steps use LM Studio; Claude Desktop and other MCP clients are equivalent
+(point them at the same `docker run` command).
 
 1. In LM Studio open the MCP config (**Program → Edit `mcp.json`**, or the
    "Integrations" panel).
