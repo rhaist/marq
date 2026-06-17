@@ -13,6 +13,7 @@ import (
 
 	"pentest-mcp/internal/config"
 	"pentest-mcp/internal/registry"
+	"pentest-mcp/internal/skills"
 )
 
 // Version is the server's reported implementation version.
@@ -92,6 +93,37 @@ func addResources(s *mcp.Server) {
 			return resourceText("pentest://methodology", registry.Methodology), nil
 		},
 	)
+	addSkillResources(s)
+}
+
+// addSkillResources exposes the skills library: an index plus one resource per
+// skill (pentest://skills and pentest://skills/<name>).
+func addSkillResources(s *mcp.Server) {
+	s.AddResource(
+		&mcp.Resource{
+			URI:         "pentest://skills",
+			Name:        "skills",
+			Description: "Index of technique/vuln-class playbooks. Load a body with the load_skill tool or read pentest://skills/<name>.",
+			MIMEType:    "text/markdown",
+		},
+		func(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
+			return resourceText("pentest://skills", "# Skills\n\n"+skills.IndexText()), nil
+		},
+	)
+	for _, meta := range skills.List() {
+		name := meta.Name // capture
+		uri := "pentest://skills/" + name
+		s.AddResource(
+			&mcp.Resource{URI: uri, Name: name, Description: meta.Description, MIMEType: "text/markdown"},
+			func(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
+				body, err := skills.Load(name)
+				if err != nil {
+					return nil, err
+				}
+				return resourceText(uri, body), nil
+			},
+		)
+	}
 }
 
 func textResult(text string) *mcp.CallToolResult {

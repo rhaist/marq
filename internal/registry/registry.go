@@ -187,6 +187,7 @@ func All() []Tool {
 	tools = append(tools, creds()...)
 	tools = append(tools, fileTools()...)
 	tools = append(tools, reportTools()...)
+	tools = append(tools, knowledgeTools()...)
 	if config.C.AllowRawShell {
 		tools = append(tools, shell()...)
 	}

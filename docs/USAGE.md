@@ -168,13 +168,20 @@ anywhere else. They are what make the file-driven tools usable: the model can
 tool dropped on disk. Mount `/work` from the host (see `docker-compose.yml`) to
 exchange files with the operator.
 
-### Findings & background jobs
+### Findings, jobs & knowledge
 | Tool             | Purpose                                                         |
 |------------------|-----------------------------------------------------------------|
-| `report_finding` | Record a validated issue (title, severity, target, evidence, recommendation) to `/work/findings.jsonl` |
+| `report_finding` | Record a validated issue (title, severity, target, evidence, recommendation; optional CVSS 3.1 vector, CWE, references) to `/work/findings.jsonl` |
 | `render_report`  | Write the severity-sorted `findings.md` + `findings.csv` deliverable |
 | `list_jobs`      | List background jobs and whether each is running or done        |
 | `job_status`     | A background job's state (running/done + exit code) + output tail |
+| `load_skill`     | Load a technique/vuln-class playbook (sqli, xss, ssrf, idor, recon-footprint, …) tied to these tool names |
+
+A `report_finding` with a `cvss` vector (e.g. `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`)
+gets its base score computed. Your explicit `severity` stays authoritative; the
+vector only sets severity when you omit one, and a divergent vector is flagged in
+the report rather than overriding your call. The skills library is also exposed as
+MCP resources: `pentest://skills` (index) and `pentest://skills/<name>`.
 
 **Background scans.** Tools too slow for a synchronous call (currently
 `spiderfoot`) launch in the background and return a job directory under

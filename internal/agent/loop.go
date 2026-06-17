@@ -8,6 +8,7 @@ import (
 
 	"pentest-mcp/internal/config"
 	"pentest-mcp/internal/registry"
+	"pentest-mcp/internal/skills"
 )
 
 // EventKind tags an agent-loop event for the UI/headless consumer.
@@ -35,9 +36,11 @@ func systemPrompt() string {
 	return config.C.Banner() + "\n\n" + registry.Methodology + "\n\n" +
 		"You are an autonomous penetration-testing assistant operating the tools above. " +
 		"Call server_info first to confirm scope. Stay strictly within the authorized targets. " +
-		"Work through the methodology, chaining tools as needed. Record each validated issue with " +
-		"report_finding, then call render_report to produce the deliverable. When the task is complete, " +
-		"reply with a concise summary and no further tool call."
+		"Work through the methodology, chaining tools as needed. When you start on a specific " +
+		"technique or vulnerability class, call load_skill to pull its playbook first. Record each " +
+		"validated issue with report_finding, then call render_report to produce the deliverable. " +
+		"When the task is complete, call the finish tool with a concise summary.\n\n" +
+		"Available skills (load_skill):\n" + skills.IndexText()
 }
 
 // Loop holds the conversation state for one agent session.
@@ -84,14 +87,37 @@ func (l *Loop) Run(ctx context.Context, emit func(Event)) {
 			emit(Event{Kind: EventDone})
 			return
 		}
+		finished := false
 		for _, tc := range msg.ToolCalls {
+			if tc.Function.Name == finishToolName {
+				// Lifecycle tool: acknowledge, surface the summary, end the run.
+				l.msgs = append(l.msgs, openai.ToolMessage("session finished", tc.ID))
+				if s := finishSummary(tc.Function.Arguments); s != "" {
+					emit(Event{Kind: EventAssistant, Text: s})
+				}
+				finished = true
+				continue
+			}
 			emit(Event{Kind: EventToolCall, Tool: tc.Function.Name, Args: tc.Function.Arguments})
 			out := l.dispatch(tc.Function.Name, tc.Function.Arguments)
 			emit(Event{Kind: EventToolResult, Tool: tc.Function.Name, Text: out})
 			l.msgs = append(l.msgs, openai.ToolMessage(out, tc.ID))
 		}
+		if finished {
+			emit(Event{Kind: EventDone})
+			return
+		}
 	}
 	emit(Event{Kind: EventError, Text: "max turns reached"})
+}
+
+// finishSummary extracts the summary field from the finish tool's arguments.
+func finishSummary(rawArgs string) string {
+	var a struct {
+		Summary string `json:"summary"`
+	}
+	_ = json.Unmarshal([]byte(rawArgs), &a)
+	return a.Summary
 }
 
 // dispatch runs one tool call through the shared registry.

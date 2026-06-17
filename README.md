@@ -24,9 +24,13 @@ as a self-contained **TUI agent host** driving a local model runtime.
 - **Sandboxed working-file access** (`/work`, `/tmp`) so the model can stage
   inputs (hashes, target lists) and read back outputs tools write to disk.
 - **Findings deliverable** — `report_finding` / `render_report` record validated
-  issues and write a severity-sorted `findings.md` + `findings.csv`.
+  issues (optional CVSS 3.1 vector → computed base score, CWE, references) and
+  write a severity-sorted `findings.md` + `findings.csv`.
 - **Background-job visibility** — `list_jobs` / `job_status` for long scans
   (e.g. spiderfoot) instead of polling files by hand.
+- **Skills library** — `load_skill` pulls technique/vuln-class playbooks (sqli,
+  xss, ssrf, idor, recon, …) tied to these tool names, so a local model chains
+  the tools competently.
 - **MCP over stdio** (Go, official `modelcontextprotocol/go-sdk`). No network
   port is opened — the client launches the container and talks over stdin/stdout.
 - **Audit logging on every invocation** — JSON-lines, append-only, with
@@ -65,7 +69,7 @@ MCP client  ──stdio JSON-RPC──▶  docker run -i pentest-mcp   (pentest 
                                              ├─ exploit   msf, hydra, searchsploit
                                              ├─ creds     john, hashcat, hashid
                                              ├─ files     read/write/list (sandboxed /work)
-                                             ├─ extras    report_finding, render_report, list_jobs, job_status
+                                             ├─ extras    report_finding, render_report, list_jobs, job_status, load_skill
                                              └─ runner.Run ──▶ audit.jsonl (every call)
 ```
 

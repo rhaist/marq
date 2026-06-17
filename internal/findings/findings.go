@@ -23,13 +23,18 @@ func nowTS() string { return time.Now().UTC().Format(time.RFC3339) }
 
 // Finding is one recorded result. Stored as a JSON line in findings.jsonl.
 type Finding struct {
-	ID             string `json:"id"`
-	Title          string `json:"title"`
-	Severity       string `json:"severity"`
-	Target         string `json:"target"`
-	Evidence       string `json:"evidence"`
-	Recommendation string `json:"recommendation"`
-	TS             string `json:"ts"`
+	ID             string  `json:"id"`
+	Title          string  `json:"title"`
+	Severity       string  `json:"severity"`
+	Target         string  `json:"target"`
+	Evidence       string  `json:"evidence"`
+	Recommendation string  `json:"recommendation"`
+	CVSS           string  `json:"cvss,omitempty"`        // CVSS 3.1 vector
+	CVSSScore      float64 `json:"cvss_score,omitempty"`  // computed base score
+	CVSSRating     string  `json:"cvss_rating,omitempty"` // rating derived from the vector
+	CWE            string  `json:"cwe,omitempty"`         // e.g. CWE-89
+	References     string  `json:"references,omitempty"`  // links / CVE ids
+	TS             string  `json:"ts"`
 }
 
 // severityRank orders findings for the report (most severe first).
@@ -71,22 +76,53 @@ func load() ([]Finding, error) {
 	return out, sc.Err()
 }
 
-// Report appends a structured finding and returns a confirmation. severity is
-// normalized to info/low/medium/high/critical; only title is required.
-func Report(title, severity, target, evidence, recommendation string) string {
+// Report appends a structured finding and returns a confirmation. Only title is
+// required.
+//
+// Severity precedence: the caller's explicit severity is authoritative (it's the
+// human-meaningful risk call). A CVSS 3.1 vector, if valid, is computed and kept
+// as supporting detail — it only *sets* severity when the caller omitted one. If
+// both are given and disagree, the caller's severity stands and the divergence is
+// flagged rather than silently overwritten (a model-guessed vector must not mask
+// the assigned risk).
+func Report(title, severity, target, evidence, recommendation, cvss, cwe, references string) string {
 	id := audit.LogStart("report_finding", target, []string{"report_finding", title})
 	out, err := func() (string, error) {
 		if strings.TrimSpace(title) == "" {
 			return "error: a finding needs a title", nil
 		}
+		var score float64
+		var cvssRating string
+		if v := strings.TrimSpace(cvss); v != "" {
+			if s, rated, valid := cvssBase(v); valid {
+				score, cvssRating = s, rated
+			}
+		}
+		explicit := strings.TrimSpace(severity) != ""
+		var sev string
+		switch {
+		case explicit:
+			sev = normalizeSeverity(severity)
+		case cvssRating != "":
+			sev = cvssRating // derive only when the caller omitted severity
+		default:
+			sev = "info"
+		}
+		mismatch := explicit && cvssRating != "" && cvssRating != sev
+
 		existing, _ := load()
 		f := Finding{
 			ID:             fmt.Sprintf("F-%03d", len(existing)+1),
 			Title:          strings.TrimSpace(title),
-			Severity:       normalizeSeverity(severity),
+			Severity:       sev,
 			Target:         target,
 			Evidence:       evidence,
 			Recommendation: recommendation,
+			CVSS:           strings.TrimSpace(cvss),
+			CVSSScore:      score,
+			CVSSRating:     cvssRating,
+			CWE:            strings.TrimSpace(cwe),
+			References:     strings.TrimSpace(references),
 			TS:             nowTS(),
 		}
 		if err := os.MkdirAll(config.C.WorkDir, 0o755); err != nil {
@@ -102,9 +138,14 @@ func Report(title, severity, target, evidence, recommendation string) string {
 			return "", err
 		}
 		_ = fh.Sync()
-		return fmt.Sprintf("recorded %s [%s] %q (target: %s). %d findings so far. "+
+		note := ""
+		if mismatch {
+			note = fmt.Sprintf(" (note: assigned severity %s, but the CVSS vector rates %s %.1f — kept your severity)",
+				f.Severity, f.CVSSRating, f.CVSSScore)
+		}
+		return fmt.Sprintf("recorded %s [%s] %q (target: %s)%s. %d findings so far. "+
 			"Call render_report to write the Markdown/CSV report.",
-			f.ID, f.Severity, f.Title, f.Target, len(existing)+1), nil
+			f.ID, f.Severity, f.Title, f.Target, note, len(existing)+1), nil
 	}()
 	endAudit(id, "report_finding", err)
 	if err != nil {
@@ -162,6 +203,19 @@ func renderMarkdown(all []Finding) string {
 	for _, f := range all {
 		fmt.Fprintf(&b, "## %s — %s (%s)\n\n", f.ID, f.Title, strings.ToUpper(f.Severity))
 		fmt.Fprintf(&b, "- **Target:** %s\n", f.Target)
+		if f.CVSS != "" {
+			fmt.Fprintf(&b, "- **CVSS:** %.1f %s (`%s`)", f.CVSSScore, f.CVSSRating, f.CVSS)
+			if f.CVSSRating != "" && f.CVSSRating != f.Severity {
+				fmt.Fprintf(&b, " — _CVSS rating differs from assigned severity (%s)_", f.Severity)
+			}
+			b.WriteString("\n")
+		}
+		if f.CWE != "" {
+			fmt.Fprintf(&b, "- **CWE:** %s\n", f.CWE)
+		}
+		if f.References != "" {
+			fmt.Fprintf(&b, "- **References:** %s\n", f.References)
+		}
 		fmt.Fprintf(&b, "- **Recorded:** %s\n\n", f.TS)
 		if f.Evidence != "" {
 			fmt.Fprintf(&b, "**Evidence**\n\n```\n%s\n```\n\n", f.Evidence)
@@ -181,9 +235,13 @@ func writeCSV(path string, all []Finding) error {
 	defer fh.Close()
 	w := csv.NewWriter(fh)
 	defer w.Flush()
-	_ = w.Write([]string{"id", "severity", "title", "target", "recommendation", "ts"})
+	_ = w.Write([]string{"id", "severity", "cvss_score", "cvss", "cwe", "title", "target", "recommendation", "ts"})
 	for _, f := range all {
-		_ = w.Write([]string{f.ID, f.Severity, f.Title, f.Target, f.Recommendation, f.TS})
+		cvssScore := ""
+		if f.CVSSScore > 0 {
+			cvssScore = fmt.Sprintf("%.1f", f.CVSSScore)
+		}
+		_ = w.Write([]string{f.ID, f.Severity, cvssScore, f.CVSS, f.CWE, f.Title, f.Target, f.Recommendation, f.TS})
 	}
 	return w.Error()
 }

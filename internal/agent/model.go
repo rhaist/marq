@@ -33,10 +33,16 @@ func NewModel() Model {
 	return Model{client: client, name: config.C.ModelName, tools: toolParams()}
 }
 
-// toolParams converts every registry tool into an OpenAI function-tool schema.
+// finishToolName is the agent-host-only lifecycle tool the model calls to end
+// the run with a final summary (deterministic termination instead of relying on
+// "no tool call"). It is not a registry tool, so MCP serve mode never sees it.
+const finishToolName = "finish"
+
+// toolParams converts every registry tool into an OpenAI function-tool schema,
+// plus the synthetic finish tool.
 func toolParams() []openai.ChatCompletionToolParam {
 	all := registry.All()
-	out := make([]openai.ChatCompletionToolParam, 0, len(all))
+	out := make([]openai.ChatCompletionToolParam, 0, len(all)+1)
 	for _, t := range all {
 		out = append(out, openai.ChatCompletionToolParam{
 			Function: shared.FunctionDefinitionParam{
@@ -46,6 +52,20 @@ func toolParams() []openai.ChatCompletionToolParam {
 			},
 		})
 	}
+	out = append(out, openai.ChatCompletionToolParam{
+		Function: shared.FunctionDefinitionParam{
+			Name: finishToolName,
+			Description: openai.String("Call this when the task is complete to end the session. " +
+				"Pass a concise `summary` of what you did and found. Render the report with render_report first."),
+			Parameters: shared.FunctionParameters(map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"summary": map[string]any{"type": "string", "description": "final summary of work and findings"},
+				},
+				"required": []string{"summary"},
+			}),
+		},
+	})
 	return out
 }
 
