@@ -6,6 +6,22 @@
 # The image is large (multi-GB) because it bundles the full tool suite
 # (metasploit, hashcat, sqlmap, etc.). See docs/SECURITY.md before running.
 
+# --- Stage 1: build the Go MCP server / agent-host binary ------------------
+# Built in an isolated golang stage and copied in as a static binary, so the
+# Kali image carries no Go build toolchain for the server itself. Runs on the
+# native BUILDPLATFORM and cross-compiles to TARGETARCH (CGO off) — fast on both
+# Apple Silicon (arm64) and amd64 hosts, no emulation for the Go build.
+FROM --platform=$BUILDPLATFORM golang:1.26.4 AS gobuild
+ARG TARGETOS TARGETARCH
+WORKDIR /build
+COPY go.mod go.sum ./
+RUN go mod download
+COPY cmd/ ./cmd/
+COPY internal/ ./internal/
+RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} \
+    go build -trimpath -ldflags="-s -w" -o /out/pentest ./cmd/pentest
+
+# --- Stage 2: the Kali pentest image ---------------------------------------
 FROM kalilinux/kali-rolling
 
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -52,7 +68,14 @@ RUN go install github.com/projectdiscovery/katana/cmd/katana@latest \
 
 # phoneinfoga can't be `go install`ed (its web client go:embeds built frontend
 # assets that aren't in the module), so use the pinned prebuilt release binary.
-RUN curl -sSL https://github.com/sundowndev/phoneinfoga/releases/download/v2.11.0/phoneinfoga_Linux_x86_64.tar.gz \
+# Arch-aware so the image builds on amd64 (Debian) and arm64 (Apple Silicon).
+ARG TARGETARCH
+RUN case "${TARGETARCH:-amd64}" in \
+        amd64) PA=x86_64 ;; \
+        arm64) PA=arm64 ;; \
+        *)     PA=x86_64 ;; \
+    esac \
+    && curl -sSL "https://github.com/sundowndev/phoneinfoga/releases/download/v2.11.0/phoneinfoga_Linux_${PA}.tar.gz" \
         | tar -xz -C /usr/local/bin phoneinfoga \
     && chmod +x /usr/local/bin/phoneinfoga
 
@@ -65,24 +88,21 @@ RUN setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip /usr/bin/nmap || t
 # hydra/wordlist tooling expect (/usr/share/wordlists/rockyou.txt) exists.
 RUN gunzip -f /usr/share/wordlists/rockyou.txt.gz 2>/dev/null || true
 
-# --- MCP server + venv-installed OSINT tools -------------------------------
-RUN python3 -m venv "$VIRTUAL_ENV"
-COPY requirements.txt /tmp/requirements.txt
-# Server SDK plus Python OSINT tools not in apt (deep username sweep,
-# email-account discovery) — into the venv, on PATH.
-RUN pip install -r /tmp/requirements.txt \
+# --- Python OSINT tools (no MCP SDK — the server is the Go binary) ----------
+# The venv still holds the pip-only OSINT tools used by the people wrappers
+# (maigret = deep username sweep, holehe = email-account discovery).
+RUN python3 -m venv "$VIRTUAL_ENV" \
     && pip install --no-cache-dir maigret holehe
 
-WORKDIR /app
-COPY server/ /app/server/
-COPY pyproject.toml /app/pyproject.toml
+# --- Go MCP server / agent-host binary -------------------------------------
+COPY --from=gobuild /out/pentest /usr/local/bin/pentest
 COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # --- Hardening: drop to a non-root user -----------------------------------
 RUN useradd --create-home --shell /bin/bash pentester \
     && mkdir -p /var/log/pentest-mcp /work \
-    && chown -R pentester:pentester /var/log/pentest-mcp /work /app
+    && chown -R pentester:pentester /var/log/pentest-mcp /work
 USER pentester
 WORKDIR /work
 
@@ -100,10 +120,7 @@ RUN (nuclei -update-templates -silent 2>/dev/null || nuclei -update-templates 2>
     && (wpscan --update 2>/dev/null || true) \
     && (msfconsole -q -x "version; exit" 2>/dev/null || true)
 
-# The server package lives in /app but the runtime workdir is /work; put /app on
-# the import path so `python3 -m server.main` resolves from any directory.
-ENV PYTHONPATH=/app \
-    PENTEST_MCP_AUDIT_LOG=/var/log/pentest-mcp/audit.jsonl \
+ENV PENTEST_MCP_AUDIT_LOG=/var/log/pentest-mcp/audit.jsonl \
     PENTEST_MCP_OPERATOR=unknown \
     PENTEST_MCP_ENGAGEMENT=unspecified
 

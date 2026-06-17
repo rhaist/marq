@@ -57,6 +57,37 @@ docker run --rm -i pentest-mcp        # prints the authorization banner to stder
 5. Ask the model to call `server_info` first — it returns the authorization
    banner and confirms scope before any scanning.
 
+## 4. Agent host (TUI) with a local model
+
+Instead of an external MCP client, the same binary can drive a **local** model
+itself, with its own tool-calling loop and a terminal UI. The model runs on the
+**host** (Docker on Apple Silicon has no GPU passthrough), reached over
+`host.docker.internal`.
+
+```bash
+# On the host: install a runtime + pull an uncensored, tool-calling model
+#   (Ollama shown; llama.cpp's llama-server works too — same OpenAI-compatible API)
+ollama pull huihui_ai/Qwen3.6-abliterated:27b      # ~17 GB, fits 24 GB; strong tool-calling
+#   lighter / cyber-specialist fallback: WhiteRabbitNeo-V3-7B (~5 GB)
+
+# Run the TUI agent host (model on host, tools in the container)
+docker run --rm -it \
+  -e PENTEST_MCP_MODEL_URL=http://host.docker.internal:11434/v1 \
+  -e PENTEST_MCP_MODEL=huihui_ai/Qwen3.6-abliterated:27b \
+  -e PENTEST_MCP_OPERATOR=your-name -e PENTEST_MCP_ENGAGEMENT=acme-2026 \
+  -e PENTEST_MCP_SCOPE="*.example.com — per SOW" \
+  -v "$PWD/work:/work" \
+  pentest-mcp tui
+
+# Headless equivalent (prints each step) — also the way to validate that the
+# chosen model does reliable multi-tool calling:
+docker run --rm -i ... pentest-mcp agent "footprint example.com, report findings"
+```
+
+The agent gets the authorization banner + methodology as its system prompt,
+calls `server_info` first, works the tools, records findings with
+`report_finding`, and writes the report with `render_report` into `/work`.
+
 ## Available tools
 
 ### Recon / network
@@ -137,12 +168,20 @@ anywhere else. They are what make the file-driven tools usable: the model can
 tool dropped on disk. Mount `/work` from the host (see `docker-compose.yml`) to
 exchange files with the operator.
 
+### Findings & background jobs
+| Tool             | Purpose                                                         |
+|------------------|-----------------------------------------------------------------|
+| `report_finding` | Record a validated issue (title, severity, target, evidence, recommendation) to `/work/findings.jsonl` |
+| `render_report`  | Write the severity-sorted `findings.md` + `findings.csv` deliverable |
+| `list_jobs`      | List background jobs and whether each is running or done        |
+| `job_status`     | A background job's state (running/done + exit code) + output tail |
+
 **Background scans.** Tools too slow for a synchronous call (currently
 `spiderfoot`) launch in the background and return a job directory under
 `/work/jobs/<tool>-<id>/`. Results stream to `stdout.log`, diagnostics to
 `stderr.log`, and a `status` file (containing `exit=<code>`) appears when the
-scan finishes. Poll progress with `read_file('<job>/stdout.log')` /
-`list_dir('<job>')` — the work survives individual tool-call timeouts.
+scan finishes. Check progress with `list_jobs` / `job_status` (or `read_file` /
+`list_dir`) — the work survives individual tool-call timeouts.
 
 † Needs an API key (see *API keys* below). ‡ GitHub org/repo scans need `GITHUB_TOKEN`.
 
@@ -176,6 +215,10 @@ an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.
 | `PENTEST_MCP_MAX_TIMEOUT`     | `3600`                               | Ceiling for a tool's per-call timeout override |
 | `PENTEST_MCP_MAX_OUTPUT`      | `60000`                              | Max output chars returned to the model    |
 | `PENTEST_MCP_ALLOW_RAW_SHELL` | `true`                               | Expose the arbitrary-shell tool (set `false` to disable) |
+| `PENTEST_MCP_WORK_DIR`        | `/work`                              | Working area (findings, job dirs)         |
+| `PENTEST_MCP_MODEL_URL`       | `http://host.docker.internal:11434/v1` | Agent/TUI: OpenAI-compatible model endpoint |
+| `PENTEST_MCP_MODEL`           | `huihui_ai/Qwen3.6-abliterated:27b`  | Agent/TUI: model name                     |
+| `PENTEST_MCP_MODEL_KEY`       | `ollama`                             | Agent/TUI: API key (Ollama ignores it)    |
 
 ## Reading the audit log
 
