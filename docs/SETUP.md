@@ -34,6 +34,8 @@ brew install go
 ```bash
 git clone <this-repo> pentest-mcp && cd pentest-mcp
 docker build -t pentest-mcp .     # builds natively for your arch (arm64 on M-series)
+# Smaller image (skips warm-up; nuclei templates / msf cache fetched on first use):
+docker build --build-arg WARMUP=0 -t pentest-mcp .
 ```
 
 ### 3. Run as an MCP server (external client brings the model)

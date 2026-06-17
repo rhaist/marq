@@ -1,10 +1,14 @@
 # Full pentesting suite on a Kali base, exposed as an MCP server over stdio.
 #
 # Build:  docker build -t pentest-mcp .
+#         docker build --build-arg WARMUP=0 -t pentest-mcp .   (smaller image,
+#         skips pre-fetching nuclei templates / msf cache; downloaded on first use)
 # Run  :  docker run --rm -i pentest-mcp            (stdio MCP server)
 #
 # The image is large (multi-GB) because it bundles the full tool suite
-# (metasploit, hashcat, sqlmap, etc.). See docs/SECURITY.md before running.
+# (metasploit, hashcat, sqlmap, etc.). The Go build toolchain is kept out of the
+# runtime image (built in a separate stage; golang-go purged in-layer).
+# See docs/SECURITY.md before running.
 
 # --- Stage 1: build the Go MCP server / agent-host binary ------------------
 # Built in an isolated golang stage and copied in as a static binary, so the
@@ -34,7 +38,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Grouped roughly by category. Kept explicit (rather than kali-linux-everything)
 # so the image is auditable and reproducible.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        ca-certificates curl wget git libcap2-bin golang-go \
+        ca-certificates curl wget git libcap2-bin \
         python3 python3-pip python3-venv \
         # recon / network
         nmap masscan bind9-dnsutils whois subfinder nuclei httpx-toolkit \
@@ -54,17 +58,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         john hashcat hashid mesa-opencl-icd ocl-icd-libopencl1 \
         # wordlists
         wordlists \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Go-built tools not packaged in Kali apt: active crawler + archive harvesters
-# + XSS scanner. Installed system-wide so the dropped-privilege user can run
-# them (GOBIN puts the binaries in /usr/local/bin).
+# + XSS scanner. Installed system-wide (GOBIN -> /usr/local/bin) so the
+# dropped-privilege user can run them. golang-go is a *build-time only* dep, so
+# it is installed, used, and purged within this single layer — it never persists
+# in the image (a separate layer can't shrink an earlier one).
 ENV GOBIN=/usr/local/bin GOPATH=/root/go
-RUN go install github.com/projectdiscovery/katana/cmd/katana@latest \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends golang-go \
+    && go install github.com/projectdiscovery/katana/cmd/katana@latest \
     && go install github.com/lc/gau/v2/cmd/gau@latest \
     && go install github.com/tomnomnom/waybackurls@latest \
     && go install github.com/hahwul/dalfox/v2@latest \
-    && rm -rf /root/go /root/.cache/go-build
+    && apt-get purge -y --auto-remove golang-go \
+    && apt-get clean \
+    && rm -rf /root/go /root/.cache/go-build /var/lib/apt/lists/*
 
 # phoneinfoga can't be `go install`ed (its web client go:embeds built frontend
 # assets that aren't in the module), so use the pinned prebuilt release binary.
@@ -116,9 +126,16 @@ WORKDIR /work
 #   3. metasploit  build the module cache (first msfconsole is otherwise slow)
 # Each is best-effort (|| true): a build-host network hiccup must not fail the
 # image — the tool falls back to its own first-run download.
-RUN (nuclei -update-templates -silent 2>/dev/null || nuclei -update-templates 2>/dev/null || true) \
-    && (wpscan --update 2>/dev/null || true) \
-    && (msfconsole -q -x "version; exit" 2>/dev/null || true)
+#
+# This warm-up (nuclei templates especially) is the largest variable bloat in the
+# image. Build with `--build-arg WARMUP=0` to skip it for a much smaller image, at
+# the cost of a slower first run that downloads these on demand (needs network).
+ARG WARMUP=1
+RUN if [ "$WARMUP" = "1" ]; then \
+        (nuclei -update-templates -silent 2>/dev/null || nuclei -update-templates 2>/dev/null || true) ; \
+        (wpscan --update 2>/dev/null || true) ; \
+        (msfconsole -q -x "version; exit" 2>/dev/null || true) ; \
+    fi
 
 ENV PENTEST_MCP_AUDIT_LOG=/var/log/pentest-mcp/audit.jsonl \
     PENTEST_MCP_OPERATOR=unknown \
