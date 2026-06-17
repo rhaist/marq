@@ -45,8 +45,8 @@ as a self-contained **TUI agent host** driving a local model runtime.
 # 1. Build (large image — pulls Kali + full tool suite)
 docker build -t pentest-mcp .
 
-# 2. Sanity check
-docker run --rm pentest-mcp nmap --version
+# 2. Sanity check (nmap/masscan/naabu need the cap-adds to exec; others run bare)
+docker run --rm --cap-add NET_RAW --cap-add NET_ADMIN pentest-mcp nmap --version
 
 # 3. Add to LM Studio's mcp.json (see mcp.json.example), set your scope/env,
 #    enable the server, then ask the model to call `server_info` first.

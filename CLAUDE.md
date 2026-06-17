@@ -18,8 +18,11 @@ A Kali-based penetration-testing + OSINT toolkit. A single **Go** binary (`pente
 # Kali stage installs the full tool suite + warm-up
 docker build -t pentest-mcp .
 
-# Smoke-test a wrapped binary without starting the server
-docker run --rm pentest-mcp nmap --version
+# Smoke-test a wrapped binary without starting the server.
+# nmap/masscan/naabu carry file capabilities (cap_net_admin), which a bare
+# container won't exec — add the caps, or smoke a non-capped tool (e.g. nuclei).
+docker run --rm --cap-add NET_RAW --cap-add NET_ADMIN pentest-mcp nmap --version
+docker run --rm pentest-mcp nuclei -version
 
 # Run the MCP server (waits for JSON-RPC on stdin; banner -> stderr)
 docker run --rm -i pentest-mcp

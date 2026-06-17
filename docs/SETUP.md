@@ -156,10 +156,13 @@ go run ./cmd/pentest run nmap '{"target":"scanme.nmap.org"}'   # invoke one tool
 ## Verify
 
 ```bash
-# Tool present in the built image
-docker run --rm pentest-mcp nmap --version
+# Tool present in the built image. nmap/masscan/naabu have file capabilities
+# (cap_net_admin) a bare container won't exec — pass the caps, or smoke a
+# non-capped tool:
+docker run --rm --cap-add NET_RAW --cap-add NET_ADMIN pentest-mcp nmap --version
+docker run --rm pentest-mcp nuclei -version
 
-# MCP server lists its tools (expects ~52)
+# MCP server lists its tools (expects ~53)
 printf '%s\n' \
  '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"c","version":"0"}}}' \
  '{"jsonrpc":"2.0","method":"notifications/initialized"}' \

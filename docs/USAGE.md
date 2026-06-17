@@ -29,7 +29,10 @@ running container later, re-run e.g. `nuclei -update-templates` or
 Run a one-off tool to confirm the image works:
 
 ```bash
-docker run --rm pentest-mcp nmap --version
+# nmap/masscan/naabu carry file capabilities (cap_net_admin) that a bare
+# container won't exec — pass the caps for those:
+docker run --rm --cap-add NET_RAW --cap-add NET_ADMIN pentest-mcp nmap --version
+# tools without special capabilities run with a plain docker run:
 docker run --rm pentest-mcp searchsploit --help
 ```
 
