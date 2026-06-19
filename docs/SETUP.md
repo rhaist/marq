@@ -77,6 +77,14 @@ docker run --rm -it \
 On Docker Desktop, `host.docker.internal` resolves to the host, so Ollama bound
 to its default `127.0.0.1:11434` is reachable from the container as-is.
 
+> **Prefer to configure in the TUI?** Drop the `-e MARQ_*` model/engagement
+> flags and just run `docker run --rm -it -v "$PWD/work:/work" marq tui`. On
+> first launch it opens a setup screen: pick **Ollama / LM Studio / Custom**
+> with ←/→, edit endpoint + model + operator/scope, and **Enter** runs a
+> `/v1/models` connection check. Choices persist to `work/.marq/tui.json` and
+> subsequent launches skip setup (press **Ctrl+S** in chat to re-edit). Env
+> vars still override the saved file when set.
+
 ---
 
 ## Debian Testing (rolling)
@@ -142,6 +150,11 @@ docker run --rm -it --add-host=host.docker.internal:host-gateway \
   -v "$PWD/work:/work" \
   marq tui
 ```
+
+> With `--network=host` the Base URL must be `http://localhost:11434/v1`
+> (or `:1234` for LM Studio) — there is no `host.docker.internal` in the host
+> namespace. You can set this via `-e MARQ_MODEL_URL=…` or just edit it in the
+> TUI setup screen (see the macOS section's "configure in the TUI" note).
 
 > **Bind-mount permissions (Linux).** The container runs as the non-root
 > `marq` user, so a bind-mounted `./work` must be writable by it —

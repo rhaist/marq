@@ -110,6 +110,32 @@ The agent gets the authorization banner + methodology as its system prompt,
 calls `server_info` first, works the tools, records findings with
 `report_finding`, and writes the report with `render_report` into `/work`.
 
+### In-TUI setup (interactive alternative to the env vars above)
+
+On first launch (no saved config), `marq tui` opens a **setup screen** instead
+of going straight to the chat:
+
+1. **Backend** — cycle with ←/→ between `Ollama`, `LM Studio`, and `Custom`.
+   Picking one fills in its default Base URL + API key (LM Studio uses
+   `http://host.docker.internal:1234/v1` and key `lm-studio`; Ollama uses
+   `:11434/v1` and key `ollama`).
+2. Edit **Base URL**, **Model**, **API key**, **Operator**, **Engagement**,
+   and **Scope** (Tab/↑↓ to move between fields).
+3. **Enter** probes the endpoint with `GET /v1/models` (using the same client
+   the agent loop uses) and shows `✓ connected — N models available` or the
+   error. **Ctrl+S** saves without probing.
+4. From the result line: **Enter** to proceed, **e** to edit, **r** to retry.
+
+Choices persist to `$MARQ_WORK_DIR/.marq/tui.json` (override with
+`MARQ_TUI_CONFIG`), so the next launch skips setup and goes straight to chat.
+**Ctrl+S from the chat view re-opens setup**, preloaded with the current
+config. Env vars (`MARQ_MODEL_URL`, `MARQ_MODEL`, …) always override the saved
+file when set, so automated runs stay reproducible.
+
+> **Linux note:** under `--network=host` change the Base URL to
+> `http://localhost:11434/v1` (or `:1234` for LM Studio) in the setup screen —
+> the container shares the host namespace so there's no `host.docker.internal`.
+
 ## Available tools
 
 ### Recon / network
@@ -248,6 +274,7 @@ an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.
 | `MARQ_MODEL_URL`       | `http://host.docker.internal:11434/v1` | Agent/TUI: OpenAI-compatible model endpoint |
 | `MARQ_MODEL`           | `huihui_ai/Qwen3.6-abliterated:27b`  | Agent/TUI: model name                     |
 | `MARQ_MODEL_KEY`       | `ollama`                             | Agent/TUI: API key (Ollama ignores it)    |
+| `MARQ_TUI_CONFIG`      | `<MARQ_WORK_DIR>/.marq/tui.json`     | Where the TUI setup form persists; set to skip/force re-setup |
 
 ## Reading the audit log
 
