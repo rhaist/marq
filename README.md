@@ -1,90 +1,101 @@
-# marq
+<div align="center">
 
-> ⚠️ **Authorized testing only.** This image bundles live offensive tooling.
-> Read [`docs/SECURITY.md`](docs/SECURITY.md) first and have written
+<img src="docs/logo.svg" alt="marq" width="320">
+
+A Kali-based penetration-testing & OSINT toolkit, driven by an LLM
+through a single, auditable Go binary.
+
+[![CI](https://github.com/rhaist/marq/actions/workflows/ci.yml/badge.svg)](https://github.com/rhaist/marq/actions/workflows/ci.yml)
+
+</div>
+
+> **Authorized testing only.** This image bundles live offensive tooling.
+> Read [`docs/SECURITY.md`](docs/SECURITY.md) first, and have written
 > authorization for every target you touch.
-
-A Kali-based **penetration-testing & OSINT toolkit**, driven by an LLM through a
-single, auditable **Go** binary. About 50 industry-standard tools — recon, OSINT,
-web testing, exploitation and hash cracking — are exposed as typed tools with
-**audit logging on every call**, **sandboxed file access**, and a **findings
-report** as the deliverable.
-
-**Two ways to run:**
-
-- 🔌 **MCP server** — plug into any MCP client (Claude Desktop, LM Studio); the
-  client brings the model. No network port is opened; it talks over stdio.
-- 🖥️ **TUI agent host** — a self-contained terminal UI with its own tool-calling
-  loop, driving a **local** model runtime (Ollama / llama.cpp).
 
 ---
 
-## Contents
+## Why
 
-- [Features](#features)
-- [Quick start](#quick-start)
-- [The two run modes](#the-two-run-modes)
-- [How it works](#how-it-works)
-- [Documentation](#documentation)
-- [Repository layout](#repository-layout)
-- [License](#license)
+50 industry-standard tools — recon, OSINT, web testing, exploitation and
+hash cracking — exposed as **typed tools** an LLM can call, with **audit
+logging on every invocation**, **sandboxed file access**, and a
+**findings report** as the engagement deliverable. One binary, two run
+modes, one tool registry.
 
-## Features
+| Mode | What it is | Who drives the model |
+| :--- | :--- | :--- |
+| **MCP server** (`marq serve`) | Stdio JSON-RPC server — plug into Claude Desktop, LM Studio, or any MCP client | The external client brings its own model |
+| **TUI agent host** (`marq tui`) | Self-contained terminal UI with its own tool-calling loop | A local model runtime on the host (Ollama / llama.cpp) |
 
-- **Full tool suite** on a Kali base, grouped by phase:
-  | Category | Tools |
-  |----------|-------|
-  | Recon / network | `nmap` `masscan` `naabu` `dnsx` `dnsrecon` `subfinder` `httpx` `whois` |
-  | OSINT — org/domain | `theHarvester` `spiderfoot` `shodan` `gitleaks` `trufflehog` `gau` `waybackurls` `exiftool` |
-  | OSINT — people | `sherlock` `maigret` `holehe` `h8mail` `phoneinfoga` |
-  | Web app | `nuclei` `nikto` `feroxbuster` `katana` `ffuf` `gobuster` `arjun` `whatweb` `wafw00f` `cmseek` `wpscan` `testssl.sh` `dalfox` `sqlmap` |
-  | Exploitation / creds | `metasploit` `hydra` `searchsploit` `john` `hashcat` `hashid` |
-- **Findings deliverable** — `report_finding` / `render_report` capture validated
-  issues (optional CVSS 3.1 vector → computed base score, plus CWE & references)
-  and write a severity-sorted `findings.md` + `findings.csv`.
-- **Skills library** — `load_skill` pulls technique / vuln-class playbooks (SQLi,
-  XSS, SSRF, IDOR, recon, …) tied to these tool names, so even a local model
-  chains the tools competently.
-- **Background-job visibility** — `list_jobs` / `job_status` for long scans
-  (e.g. spiderfoot) instead of polling files by hand.
-- **Sandboxed working files** (`/work`, `/tmp`) — the model stages inputs and
-  reads tool output back from disk, and nothing else.
-- **Audit logging on every invocation** — append-only JSON lines with operator,
-  engagement, target and the full argument vector.
-- **Hardened container** — non-root, dropped capabilities (only what SYN scans
-  need), `no-new-privileges`, and an opt-out raw-shell escape hatch.
+Both consume the **same tool registry**, so every tool, resource, and
+audit-record behaves identically in either mode.
+
+---
 
 ## Quick start
 
 ```bash
-# 1. Build (large image — Kali base + full tool suite; first build is slow)
+# 1. Build the image (large — Kali base + full tool suite; first build is slow)
 docker build -t marq .
 
-# 2. Sanity check
-#    nmap/masscan/naabu carry file capabilities, so add the caps for those;
-#    other tools run with a plain `docker run`.
+# 2. Smoke-test a tool (nmap/masscan/naabu need file-capability passthrough;
+#    other tools run with a plain `docker run`)
 docker run --rm --cap-add NET_RAW --cap-add NET_ADMIN marq nmap --version
 
-# 3a. As an MCP server — merge mcp.json.example into your client's config,
-#     set MARQ_SCOPE, then ask the model to call `server_info` first.
-#
-# 3b. As a local TUI agent — see docs/SETUP.md (needs Ollama on the host).
+# 3. Run the MCP server (waits for JSON-RPC on stdin; banner → stderr)
+docker run --rm -i marq
 ```
+
+**Next steps:**
+
+- **MCP server** — merge [`mcp.json.example`](mcp.json.example) into your
+  client's config, set `MARQ_SCOPE`, and ask the model to call `server_info`
+  first.
+- **TUI agent** — see [`docs/SETUP.md`](docs/SETUP.md) (needs Ollama on the
+  host).
 
 Full per-OS install (macOS + Debian Testing): **[`docs/SETUP.md`](docs/SETUP.md)**.
 Tool reference, env vars & API keys: **[`docs/USAGE.md`](docs/USAGE.md)**.
 
-## The two run modes
+---
 
-| | MCP server (`serve`) | TUI / agent host (`tui`, `agent`) |
-|---|---|---|
-| Who drives the model | An external MCP client | This binary's own loop |
-| Needs a local model | No | Yes — Ollama / llama.cpp on the host |
-| Transport | stdio JSON-RPC | OpenAI-compatible HTTP to the host |
-| Use it when | You already have an MCP client | You want a self-contained tool |
+## Features
 
-Both consume the **same tool registry**, so every tool, resource and the audit
-trail behave identically in either mode.
+### Full tool suite on a Kali base
+
+| Category | Tools |
+| :--- | :--- |
+| **Recon / network** | `nmap` · `masscan` · `naabu` · `dnsx` · `dnsrecon` · `subfinder` · `httpx_probe` · `dns_lookup` · `whois_lookup` |
+| **OSINT — org/domain** | `theharvester` · `spiderfoot` · `shodan_host` · `shodan_search` · `gitleaks` · `trufflehog` · `gau_urls` · `wayback_urls` · `exif_metadata` |
+| **OSINT — people** | `sherlock` · `maigret_username` · `holehe_email` · `h8mail_breach` · `phoneinfoga` |
+| **Web app** | `nuclei` · `nikto` · `feroxbuster` · `katana` · `ffuf` · `gobuster_dir` · `arjun` · `whatweb` · `wafw00f` · `cmseek` · `wpscan` · `testssl` · `dalfox` · `sqlmap` |
+| **Exploitation** | `msfconsole` · `hydra` · `searchsploit` |
+| **Credentials** | `john` · `hashcat` · `hash_identify` |
+| **Files** (sandboxed `/work`, `/tmp`) | `list_dir` · `read_file` · `write_file` |
+| **Findings & jobs** | `report_finding` · `render_report` · `list_jobs` · `job_status` |
+| **Knowledge** | `load_skill` |
+| **Escape hatch** (opt-in) | `run_shell` |
+
+### Built for engagements
+
+- **Findings deliverable** — `report_finding` / `render_report` capture
+  validated issues (optional CVSS 3.1 vector → computed base score, plus CWE
+  & references) and write a severity-sorted `findings.md` + `findings.csv`.
+- **Skills library** — `load_skill` pulls technique / vuln-class playbooks
+  (SQLi, XSS, SSRF, IDOR, recon, …) tied to these tool names, so even a local
+  model chains the tools competently.
+- **Background-job visibility** — `list_jobs` / `job_status` for long scans
+  (e.g. spiderfoot) instead of polling files by hand.
+- **Sandboxed working files** (`/work`, `/tmp`) — the model stages inputs and
+  reads tool output back from disk, and nothing else.
+- **Audit logging on every invocation** — append-only JSON lines with
+  operator, engagement, target, and the full argument vector. `fsync`'d per
+  write; survives a crash.
+- **Hardened container** — non-root, capabilities dropped (only what SYN
+  scans need), `no-new-privileges`, opt-out raw-shell escape hatch.
+
+---
 
 ## How it works
 
@@ -104,16 +115,20 @@ MCP client ──stdio JSON-RPC──▶ docker run -i marq   (marq serve)
 ```
 
 Every exec tool funnels through `internal/runner/runner.go::Run` — the single
-point where audit logging, timeouts and output truncation happen (and where
-you'd add hard scope-enforcement to move beyond logging-only guardrails).
+point where audit logging, timeouts, and output truncation happen (and where
+hard scope-enforcement would go to move beyond logging-only guardrails).
+
+---
 
 ## Documentation
 
 | Doc | What's in it |
-|-----|--------------|
+| :--- | :--- |
 | [`docs/SETUP.md`](docs/SETUP.md) | Per-OS install for macOS & Debian Testing, both run modes |
 | [`docs/USAGE.md`](docs/USAGE.md) | Every tool, env vars, API keys, reading the audit log |
 | [`docs/SECURITY.md`](docs/SECURITY.md) | Legal/ethical baseline, the guardrail model, hardening |
+
+---
 
 ## Repository layout
 
@@ -121,7 +136,7 @@ you'd add hard scope-enforcement to move beyond logging-only guardrails).
 Dockerfile            golang builder + Kali full-suite image, hardened, non-root
 docker-compose.yml    Build / interactive-shell convenience + hardening flags
 mcp.json.example      Drop-in MCP client config
-cmd/marq/          CLI entry: serve | tui | agent | run
+cmd/marq/             CLI entry: serve | tui | agent | run
 internal/
   config/             Env-driven configuration
   audit/              Append-only JSON-lines audit log
@@ -134,6 +149,8 @@ internal/
   skills/             Embedded technique / vuln-class playbooks
 docs/                 SETUP.md, USAGE.md, SECURITY.md
 ```
+
+---
 
 ## License
 

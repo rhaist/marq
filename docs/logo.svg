@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" width="320" height="120" role="img" aria-label="marq">
+  <title>marq</title>
+  <g fill="none" stroke="#E63946" stroke-linecap="round">
+    <!-- Seal: double ring -->
+    <circle cx="58" cy="60" r="54" stroke-width="3"/>
+    <circle cx="58" cy="60" r="44" stroke-width="2"/>
+    <!-- Cardinal compass ticks (cross both rings) -->
+    <line x1="58" y1="2"  x2="58" y2="20"  stroke-width="3"/>
+    <line x1="58" y1="100" x2="58" y2="118" stroke-width="3"/>
+    <line x1="2"  y1="60" x2="20" y2="60"  stroke-width="3"/>
+    <line x1="96" y1="60" x2="114" y2="60" stroke-width="3"/>
+    <!-- Intercardinal ticks (in the annular gap) -->
+    <line x1="94.8" y1="23.2" x2="90.5" y2="27.5" stroke-width="2"/>
+    <line x1="21.2" y1="23.2" x2="25.5" y2="27.5" stroke-width="2"/>
+    <line x1="94.8" y1="96.8" x2="90.5" y2="92.5" stroke-width="2"/>
+    <line x1="21.2" y1="96.8" x2="25.5" y2="92.5" stroke-width="2"/>
+    <!-- M monogram -->
+    <path d="M 38 78 L 38 42 L 58 62 L 78 42 L 78 78" stroke-width="8" stroke-linejoin="round"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="132" y="60" dominant-baseline="central"
+        font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+        font-size="62" font-weight="700" letter-spacing="-1" fill="#E63946">marq</text>
+</svg>
