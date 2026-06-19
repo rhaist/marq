@@ -1,6 +1,6 @@
 package registry
 
-import "pentest-mcp/internal/files"
+import "marq/internal/files"
 
 // fileTools returns the sandboxed file-access tools (in-process Handler tools,
 // confined to /work and /tmp by the files package).

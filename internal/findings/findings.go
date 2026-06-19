@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
-	"pentest-mcp/internal/audit"
-	"pentest-mcp/internal/config"
+	"marq/internal/audit"
+	"marq/internal/config"
 )
 
 func nowTS() string { return time.Now().UTC().Format(time.RFC3339) }

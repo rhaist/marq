@@ -12,7 +12,7 @@ inherently dual-use. Read this before you run anything.
   Unauthorized scanning, exploitation or credential attacks are illegal in most
   jurisdictions (e.g. the US CFAA, UK Computer Misuse Act).
 - Keep your rules of engagement / scope document handy and record it in
-  `PENTEST_MCP_SCOPE` so it lands in every audit record.
+  `MARQ_SCOPE` so it lands in every audit record.
 - Online brute force (hydra), exploitation (metasploit) and aggressive scanning
   (masscan at high rates) can disrupt or lock out production systems. Use the
   least aggressive technique that answers the question.
@@ -36,7 +36,7 @@ lines, before and after it runs, with:
 - a best-effort `target`
 
 The audit log is append-only and `fsync`'d per write. Default location:
-`/var/log/pentest-mcp/audit.jsonl` (mount it to the host to persist it — see
+`/var/log/marq/audit.jsonl` (mount it to the host to persist it — see
 `mcp.json.example` and `docker-compose.yml`).
 
 > If you later want hard controls, the natural place to add them is
@@ -46,7 +46,7 @@ The audit log is append-only and `fsync`'d per write. Default location:
 
 ## Container hardening applied
 
-- **Non-root**: the server runs as the unprivileged `pentester` user.
+- **Non-root**: the server runs as the unprivileged `marq` user.
 - **Capabilities dropped**: `cap_drop: ALL`, re-adding only `NET_RAW`,
   `NET_ADMIN`, `NET_BIND_SERVICE` (needed for SYN scans). `nmap`/`masscan`/`naabu`
   get exactly those file capabilities via `setcap`, so no root is required.
@@ -59,14 +59,14 @@ The audit log is append-only and `fsync`'d per write. Default location:
   offensive toolkit (hundreds of tools without dedicated wrappers), so the
   arbitrary-command tool ships on so the model can chain and stage them; every
   invocation is logged like any other. It is still the broadest capability the
-  server grants — set `PENTEST_MCP_ALLOW_RAW_SHELL=false` to remove it for a
+  server grants — set `MARQ_ALLOW_RAW_SHELL=false` to remove it for a
   more locked-down deployment.
 - **File access is sandboxed.** The `read_file`/`write_file`/`list_dir` tools
   resolve real paths and refuse anything outside `/work` and `/tmp`, so the
   model can exchange working files without reading or clobbering the rest of the
   container. These ops are audit-logged like every tool run.
 - Output is truncated to a token budget so a runaway scan can't flood the model.
-- A per-command timeout (`PENTEST_MCP_TIMEOUT`, default 900s) bounds runaway tools.
+- A per-command timeout (`MARQ_TIMEOUT`, default 900s) bounds runaway tools.
 
 ## Recommended operational practices
 

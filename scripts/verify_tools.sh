@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# verify_tools.sh — one-stop verification for the pentest-mcp toolkit.
+# verify_tools.sh — one-stop verification for the marq toolkit.
 #
 # Two phases, both against a throwaway container (never touches the LM Studio
 # instance):
@@ -17,11 +17,11 @@
 #   scripts/verify_tools.sh --help-only     # just the help/invocation dump
 #   scripts/verify_tools.sh --test-only     # just the smoke test
 #   scripts/verify_tools.sh --external --slow   # forwarded to test_tools.py
-#   IMAGE=pentest-mcp:dev scripts/verify_tools.sh
+#   IMAGE=marq:dev scripts/verify_tools.sh
 #
 set -uo pipefail
 
-IMAGE="${IMAGE:-pentest-mcp}"
+IMAGE="${IMAGE:-marq}"
 LINES="${LINES:-35}"
 HELP_ONLY=0 TEST_ONLY=0 BUILD=0
 PASSTHROUGH=()

@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"slices"
 
-	"pentest-mcp/internal/config"
-	"pentest-mcp/internal/runner"
+	"marq/internal/config"
+	"marq/internal/runner"
 )
 
 // ParamType is the JSON-schema scalar type of a tool parameter.

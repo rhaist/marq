@@ -1,9 +1,9 @@
 # Full pentesting suite on a Kali base, exposed as an MCP server over stdio.
 #
-# Build:  docker build -t pentest-mcp .
-#         docker build --build-arg WARMUP=0 -t pentest-mcp .   (smaller image,
+# Build:  docker build -t marq .
+#         docker build --build-arg WARMUP=0 -t marq .   (smaller image,
 #         skips pre-fetching nuclei templates / msf cache; downloaded on first use)
-# Run  :  docker run --rm -i pentest-mcp            (stdio MCP server)
+# Run  :  docker run --rm -i marq            (stdio MCP server)
 #
 # The image is large (multi-GB) because it bundles the full tool suite
 # (metasploit, hashcat, sqlmap, etc.). The Go build toolchain is kept out of the
@@ -23,9 +23,9 @@ RUN go mod download
 COPY cmd/ ./cmd/
 COPY internal/ ./internal/
 RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} \
-    go build -trimpath -ldflags="-s -w" -o /out/pentest ./cmd/pentest
+    go build -trimpath -ldflags="-s -w" -o /out/marq ./cmd/marq
 
-# --- Stage 2: the Kali pentest image ---------------------------------------
+# --- Stage 2: the Kali marq image ---------------------------------------
 FROM kalilinux/kali-rolling
 
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -34,7 +34,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     VIRTUAL_ENV=/opt/venv \
     PATH=/opt/venv/bin:$PATH
 
-# --- Pentest tooling -------------------------------------------------------
+# --- Marq tooling -------------------------------------------------------
 # Grouped roughly by category. Kept explicit (rather than kali-linux-everything)
 # so the image is auditable and reproducible.
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -105,20 +105,20 @@ RUN python3 -m venv "$VIRTUAL_ENV" \
     && pip install --no-cache-dir maigret holehe
 
 # --- Go MCP server / agent-host binary -------------------------------------
-COPY --from=gobuild /out/pentest /usr/local/bin/pentest
+COPY --from=gobuild /out/marq /usr/local/bin/marq
 COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # --- Hardening: drop to a non-root user -----------------------------------
-RUN useradd --create-home --shell /bin/bash pentester \
-    && mkdir -p /var/log/pentest-mcp /work \
-    && chown -R pentester:pentester /var/log/pentest-mcp /work
-USER pentester
+RUN useradd --create-home --shell /bin/bash marq \
+    && mkdir -p /var/log/marq /work \
+    && chown -R marq:marq /var/log/marq /work
+USER marq
 WORKDIR /work
 
-# --- Build-time tool warm-up (runs AS pentester) ---------------------------
+# --- Build-time tool warm-up (runs AS marq) ---------------------------
 # A few tools fetch data or build a cache on first use, stored in the user's
-# HOME. Doing it here (as the runtime user, so it lands in /home/pentester)
+# HOME. Doing it here (as the runtime user, so it lands in /home/marq)
 # moves that cost off the first live scan and removes a runtime network
 # dependency. Steps, in order below:
 #   1. nuclei      pre-fetch the template repository (~thousands of templates)
@@ -137,8 +137,8 @@ RUN if [ "$WARMUP" = "1" ]; then \
         (msfconsole -q -x "version; exit" 2>/dev/null || true) ; \
     fi
 
-ENV PENTEST_MCP_AUDIT_LOG=/var/log/pentest-mcp/audit.jsonl \
-    PENTEST_MCP_OPERATOR=unknown \
-    PENTEST_MCP_ENGAGEMENT=unspecified
+ENV MARQ_AUDIT_LOG=/var/log/marq/audit.jsonl \
+    MARQ_OPERATOR=unknown \
+    MARQ_ENGAGEMENT=unspecified
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

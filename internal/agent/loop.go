@@ -6,9 +6,9 @@ import (
 
 	"github.com/openai/openai-go"
 
-	"pentest-mcp/internal/config"
-	"pentest-mcp/internal/registry"
-	"pentest-mcp/internal/skills"
+	"marq/internal/config"
+	"marq/internal/registry"
+	"marq/internal/skills"
 )
 
 // EventKind tags an agent-loop event for the UI/headless consumer.

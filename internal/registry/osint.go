@@ -3,7 +3,7 @@ package registry
 import (
 	"strconv"
 
-	"pentest-mcp/internal/shellword"
+	"marq/internal/shellword"
 )
 
 // harvesterKeyless are theHarvester sources that work with zero configuration.

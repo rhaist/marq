@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"pentest-mcp/internal/config"
+	"marq/internal/config"
 )
 
 // TestSeverityPrecedence locks in: caller severity is authoritative; CVSS only

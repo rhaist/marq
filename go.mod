@@ -1,4 +1,4 @@
-module pentest-mcp
+module marq
 
 go 1.26.4
 

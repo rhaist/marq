@@ -11,9 +11,9 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"pentest-mcp/internal/config"
-	"pentest-mcp/internal/registry"
-	"pentest-mcp/internal/skills"
+	"marq/internal/config"
+	"marq/internal/registry"
+	"marq/internal/skills"
 )
 
 // Version is the server's reported implementation version.
@@ -22,7 +22,7 @@ const Version = "2.0.0"
 // New builds the MCP server with every registered tool, the authorization +
 // methodology resources, and the server_info tool.
 func New() *mcp.Server {
-	s := mcp.NewServer(&mcp.Implementation{Name: "pentest-mcp", Version: Version}, nil)
+	s := mcp.NewServer(&mcp.Implementation{Name: "marq", Version: Version}, nil)
 
 	for _, t := range registry.All() {
 		addTool(s, t)
@@ -72,46 +72,46 @@ func addServerInfo(s *mcp.Server) {
 func addResources(s *mcp.Server) {
 	s.AddResource(
 		&mcp.Resource{
-			URI:         "pentest://authorization",
+			URI:         "marq://authorization",
 			Name:        "authorization",
 			Description: "Rules-of-engagement / authorization notice for this session. Surface to the operator before running tools.",
 			MIMEType:    "text/plain",
 		},
 		func(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
-			return resourceText("pentest://authorization", config.C.Banner()), nil
+			return resourceText("marq://authorization", config.C.Banner()), nil
 		},
 	)
 	s.AddResource(
 		&mcp.Resource{
-			URI:         "pentest://methodology",
+			URI:         "marq://methodology",
 			Name:        "methodology",
 			Description: "Engagement workflow: recon -> enumerate -> test -> exploit -> report. Read before driving the tools.",
 			MIMEType:    "text/markdown",
 		},
 		func(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
-			return resourceText("pentest://methodology", registry.Methodology), nil
+			return resourceText("marq://methodology", registry.Methodology), nil
 		},
 	)
 	addSkillResources(s)
 }
 
 // addSkillResources exposes the skills library: an index plus one resource per
-// skill (pentest://skills and pentest://skills/<name>).
+// skill (marq://skills and marq://skills/<name>).
 func addSkillResources(s *mcp.Server) {
 	s.AddResource(
 		&mcp.Resource{
-			URI:         "pentest://skills",
+			URI:         "marq://skills",
 			Name:        "skills",
-			Description: "Index of technique/vuln-class playbooks. Load a body with the load_skill tool or read pentest://skills/<name>.",
+			Description: "Index of technique/vuln-class playbooks. Load a body with the load_skill tool or read marq://skills/<name>.",
 			MIMEType:    "text/markdown",
 		},
 		func(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
-			return resourceText("pentest://skills", "# Skills\n\n"+skills.IndexText()), nil
+			return resourceText("marq://skills", "# Skills\n\n"+skills.IndexText()), nil
 		},
 	)
 	for _, meta := range skills.List() {
 		name := meta.Name
-		uri := "pentest://skills/" + name
+		uri := "marq://skills/" + name
 		s.AddResource(
 			&mcp.Resource{URI: uri, Name: name, Description: meta.Description, MIMEType: "text/markdown"},
 			func(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {

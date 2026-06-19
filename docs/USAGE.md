@@ -19,7 +19,7 @@ How to build, smoke-test and drive the toolkit. For a guided per-OS install
 ## 1. Build the image
 
 ```bash
-docker build -t pentest-mcp .
+docker build -t marq .
 ```
 
 This pulls the Kali base and installs the full tool suite, so it is large
@@ -27,7 +27,7 @@ This pulls the Kali base and installs the full tool suite, so it is large
 
 **Setup baked in at build time.** A few tools fetch data or build a cache on
 first use; the Dockerfile does this during the build (as the runtime
-`pentester` user, so it lands in that user's home) to avoid a slow,
+`marq` user, so it lands in that user's home) to avoid a slow,
 network-dependent first scan:
 
 - `nuclei` — the template repository (`nuclei -update-templates`)
@@ -47,21 +47,21 @@ Run a one-off tool to confirm the image works:
 ```bash
 # nmap/masscan/naabu carry file capabilities (cap_net_admin) that a bare
 # container won't exec — pass the caps for those:
-docker run --rm --cap-add NET_RAW --cap-add NET_ADMIN pentest-mcp nmap --version
+docker run --rm --cap-add NET_RAW --cap-add NET_ADMIN marq nmap --version
 # tools without special capabilities run with a plain docker run:
-docker run --rm pentest-mcp searchsploit --help
+docker run --rm marq searchsploit --help
 ```
 
 Get an interactive shell:
 
 ```bash
-docker run --rm -it --entrypoint /bin/bash pentest-mcp
+docker run --rm -it --entrypoint /bin/bash marq
 ```
 
 Confirm the MCP server starts (it will wait for JSON-RPC on stdin; Ctrl-C to exit):
 
 ```bash
-docker run --rm -i pentest-mcp        # prints the authorization banner to stderr
+docker run --rm -i marq        # prints the authorization banner to stderr
 ```
 
 ## 3. Wire it into an MCP client
@@ -71,10 +71,10 @@ These steps use LM Studio; Claude Desktop and other MCP clients are equivalent
 
 1. In LM Studio open the MCP config (**Program → Edit `mcp.json`**, or the
    "Integrations" panel).
-2. Merge the `pentest-mcp` entry from [`mcp.json.example`](../mcp.json.example)
+2. Merge the `marq` entry from [`mcp.json.example`](../mcp.json.example)
    into your `mcpServers`.
-3. Edit the `env` block — set `PENTEST_MCP_OPERATOR`, `PENTEST_MCP_ENGAGEMENT`
-   and especially `PENTEST_MCP_SCOPE` to your authorized targets.
+3. Edit the `env` block — set `MARQ_OPERATOR`, `MARQ_ENGAGEMENT`
+   and especially `MARQ_SCOPE` to your authorized targets.
 4. Save and toggle the server on. Load a tool-use-capable model.
 5. Ask the model to call `server_info` first — it returns the authorization
    banner and confirms scope before any scanning.
@@ -94,16 +94,16 @@ ollama pull huihui_ai/Qwen3.6-abliterated:27b      # ~17 GB, fits 24 GB; strong 
 
 # Run the TUI agent host (model on host, tools in the container)
 docker run --rm -it \
-  -e PENTEST_MCP_MODEL_URL=http://host.docker.internal:11434/v1 \
-  -e PENTEST_MCP_MODEL=huihui_ai/Qwen3.6-abliterated:27b \
-  -e PENTEST_MCP_OPERATOR=your-name -e PENTEST_MCP_ENGAGEMENT=acme-2026 \
-  -e PENTEST_MCP_SCOPE="*.example.com — per SOW" \
+  -e MARQ_MODEL_URL=http://host.docker.internal:11434/v1 \
+  -e MARQ_MODEL=huihui_ai/Qwen3.6-abliterated:27b \
+  -e MARQ_OPERATOR=your-name -e MARQ_ENGAGEMENT=acme-2026 \
+  -e MARQ_SCOPE="*.example.com — per SOW" \
   -v "$PWD/work:/work" \
-  pentest-mcp tui
+  marq tui
 
 # Headless equivalent (prints each step) — also the way to validate that the
 # chosen model does reliable multi-tool calling:
-docker run --rm -i ... pentest-mcp agent "footprint example.com, report findings"
+docker run --rm -i ... marq agent "footprint example.com, report findings"
 ```
 
 The agent gets the authorization banner + methodology as its system prompt,
@@ -203,7 +203,7 @@ A `report_finding` with a `cvss` vector (e.g. `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/
 gets its base score computed. Your explicit `severity` stays authoritative; the
 vector only sets severity when you omit one, and a divergent vector is flagged in
 the report rather than overriding your call. The skills library is also exposed as
-MCP resources: `pentest://skills` (index) and `pentest://skills/<name>`.
+MCP resources: `marq://skills` (index) and `marq://skills/<name>`.
 
 **Background scans.** Tools too slow for a synchronous call (currently
 `spiderfoot`) launch in the background and return a job directory under
@@ -236,18 +236,18 @@ an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.
 
 | Variable                      | Default                              | Meaning                                   |
 |-------------------------------|--------------------------------------|-------------------------------------------|
-| `PENTEST_MCP_OPERATOR`        | `unknown`                            | Recorded in every audit record            |
-| `PENTEST_MCP_ENGAGEMENT`      | `unspecified`                        | Engagement / SOW identifier               |
-| `PENTEST_MCP_SCOPE`           | `""`                                 | Free-text authorized scope (banner + log) |
-| `PENTEST_MCP_AUDIT_LOG`       | `/var/log/pentest-mcp/audit.jsonl`   | Audit log path                            |
-| `PENTEST_MCP_TIMEOUT`         | `900`                                | Default per-command timeout (seconds)     |
-| `PENTEST_MCP_MAX_TIMEOUT`     | `3600`                               | Ceiling for a tool's per-call timeout override |
-| `PENTEST_MCP_MAX_OUTPUT`      | `60000`                              | Max output chars returned to the model    |
-| `PENTEST_MCP_ALLOW_RAW_SHELL` | `true`                               | Expose the arbitrary-shell tool (set `false` to disable) |
-| `PENTEST_MCP_WORK_DIR`        | `/work`                              | Working area (findings, job dirs)         |
-| `PENTEST_MCP_MODEL_URL`       | `http://host.docker.internal:11434/v1` | Agent/TUI: OpenAI-compatible model endpoint |
-| `PENTEST_MCP_MODEL`           | `huihui_ai/Qwen3.6-abliterated:27b`  | Agent/TUI: model name                     |
-| `PENTEST_MCP_MODEL_KEY`       | `ollama`                             | Agent/TUI: API key (Ollama ignores it)    |
+| `MARQ_OPERATOR`        | `unknown`                            | Recorded in every audit record            |
+| `MARQ_ENGAGEMENT`      | `unspecified`                        | Engagement / SOW identifier               |
+| `MARQ_SCOPE`           | `""`                                 | Free-text authorized scope (banner + log) |
+| `MARQ_AUDIT_LOG`       | `/var/log/marq/audit.jsonl`   | Audit log path                            |
+| `MARQ_TIMEOUT`         | `900`                                | Default per-command timeout (seconds)     |
+| `MARQ_MAX_TIMEOUT`     | `3600`                               | Ceiling for a tool's per-call timeout override |
+| `MARQ_MAX_OUTPUT`      | `60000`                              | Max output chars returned to the model    |
+| `MARQ_ALLOW_RAW_SHELL` | `true`                               | Expose the arbitrary-shell tool (set `false` to disable) |
+| `MARQ_WORK_DIR`        | `/work`                              | Working area (findings, job dirs)         |
+| `MARQ_MODEL_URL`       | `http://host.docker.internal:11434/v1` | Agent/TUI: OpenAI-compatible model endpoint |
+| `MARQ_MODEL`           | `huihui_ai/Qwen3.6-abliterated:27b`  | Agent/TUI: model name                     |
+| `MARQ_MODEL_KEY`       | `ollama`                             | Agent/TUI: API key (Ollama ignores it)    |
 
 ## Reading the audit log
 

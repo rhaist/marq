@@ -1,4 +1,4 @@
-# pentest-mcp
+# marq
 
 > ⚠️ **Authorized testing only.** This image bundles live offensive tooling.
 > Read [`docs/SECURITY.md`](docs/SECURITY.md) first and have written
@@ -58,15 +58,15 @@ report** as the deliverable.
 
 ```bash
 # 1. Build (large image — Kali base + full tool suite; first build is slow)
-docker build -t pentest-mcp .
+docker build -t marq .
 
 # 2. Sanity check
 #    nmap/masscan/naabu carry file capabilities, so add the caps for those;
 #    other tools run with a plain `docker run`.
-docker run --rm --cap-add NET_RAW --cap-add NET_ADMIN pentest-mcp nmap --version
+docker run --rm --cap-add NET_RAW --cap-add NET_ADMIN marq nmap --version
 
 # 3a. As an MCP server — merge mcp.json.example into your client's config,
-#     set PENTEST_MCP_SCOPE, then ask the model to call `server_info` first.
+#     set MARQ_SCOPE, then ask the model to call `server_info` first.
 #
 # 3b. As a local TUI agent — see docs/SETUP.md (needs Ollama on the host).
 ```
@@ -89,7 +89,7 @@ trail behave identically in either mode.
 ## How it works
 
 ```
-MCP client ──stdio JSON-RPC──▶ docker run -i pentest-mcp   (pentest serve)
+MCP client ──stdio JSON-RPC──▶ docker run -i marq   (marq serve)
                                  └─ internal/mcpserver (go-sdk)
                                       └─ registry.All() ─ one Tool list, shared by both front-ends
                                            ├─ recon    nmap, naabu, dnsx, masscan…
@@ -121,7 +121,7 @@ you'd add hard scope-enforcement to move beyond logging-only guardrails).
 Dockerfile            golang builder + Kali full-suite image, hardened, non-root
 docker-compose.yml    Build / interactive-shell convenience + hardening flags
 mcp.json.example      Drop-in MCP client config
-cmd/pentest/          CLI entry: serve | tui | agent | run
+cmd/marq/          CLI entry: serve | tui | agent | run
 internal/
   config/             Env-driven configuration
   audit/              Append-only JSON-lines audit log

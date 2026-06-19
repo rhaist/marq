@@ -12,8 +12,8 @@ import (
 	"slices"
 	"strings"
 
-	"pentest-mcp/internal/audit"
-	"pentest-mcp/internal/config"
+	"marq/internal/audit"
+	"marq/internal/config"
 )
 
 // allowedRoots are the only directories the model may touch.

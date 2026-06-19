@@ -1,6 +1,6 @@
 // Package config holds all server settings, read once from the environment at
 // startup. It mirrors the env-driven knobs of the original Python server
-// (PENTEST_MCP_*); adding a knob means adding a field plus an env read here.
+// (MARQ_*); adding a knob means adding a field plus an env read here.
 package config
 
 import (
@@ -70,18 +70,18 @@ func envBool(name string, def bool) bool {
 // Load reads configuration from the environment.
 func Load() Config {
 	return Config{
-		AuditLog:          env("PENTEST_MCP_AUDIT_LOG", "/var/log/pentest-mcp/audit.jsonl"),
-		CommandTimeout:    envInt("PENTEST_MCP_TIMEOUT", 900),
-		MaxCommandTimeout: envInt("PENTEST_MCP_MAX_TIMEOUT", 3600),
-		MaxOutputChars:    envInt("PENTEST_MCP_MAX_OUTPUT", 60000),
-		Operator:          env("PENTEST_MCP_OPERATOR", "unknown"),
-		Engagement:        env("PENTEST_MCP_ENGAGEMENT", "unspecified"),
-		ScopeNote:         env("PENTEST_MCP_SCOPE", ""),
-		AllowRawShell:     envBool("PENTEST_MCP_ALLOW_RAW_SHELL", true),
-		WorkDir:           env("PENTEST_MCP_WORK_DIR", "/work"),
-		ModelBaseURL:      env("PENTEST_MCP_MODEL_URL", "http://host.docker.internal:11434/v1"),
-		ModelName:         env("PENTEST_MCP_MODEL", "huihui_ai/Qwen3.6-abliterated:27b"),
-		ModelAPIKey:       env("PENTEST_MCP_MODEL_KEY", "ollama"),
+		AuditLog:          env("MARQ_AUDIT_LOG", "/var/log/marq/audit.jsonl"),
+		CommandTimeout:    envInt("MARQ_TIMEOUT", 900),
+		MaxCommandTimeout: envInt("MARQ_MAX_TIMEOUT", 3600),
+		MaxOutputChars:    envInt("MARQ_MAX_OUTPUT", 60000),
+		Operator:          env("MARQ_OPERATOR", "unknown"),
+		Engagement:        env("MARQ_ENGAGEMENT", "unspecified"),
+		ScopeNote:         env("MARQ_SCOPE", ""),
+		AllowRawShell:     envBool("MARQ_ALLOW_RAW_SHELL", true),
+		WorkDir:           env("MARQ_WORK_DIR", "/work"),
+		ModelBaseURL:      env("MARQ_MODEL_URL", "http://host.docker.internal:11434/v1"),
+		ModelName:         env("MARQ_MODEL", "huihui_ai/Qwen3.6-abliterated:27b"),
+		ModelAPIKey:       env("MARQ_MODEL_KEY", "ollama"),
 	}
 }
 
@@ -93,7 +93,7 @@ var C = Load()
 func (c Config) Banner() string {
 	scope := c.ScopeNote
 	if scope == "" {
-		scope = "(none provided — set PENTEST_MCP_SCOPE)"
+		scope = "(none provided — set MARQ_SCOPE)"
 	}
 	return fmt.Sprintf(
 		"AUTHORIZED USE ONLY. This server runs active security testing tools. "+

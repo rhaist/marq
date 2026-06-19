@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"pentest-mcp/internal/shellword"
+	"marq/internal/shellword"
 )
 
 // splitHosts turns a comma/newline-separated list into trimmed host entries.

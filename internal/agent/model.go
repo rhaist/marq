@@ -12,8 +12,8 @@ import (
 	"github.com/openai/openai-go/option"
 	"github.com/openai/openai-go/shared"
 
-	"pentest-mcp/internal/config"
-	"pentest-mcp/internal/registry"
+	"marq/internal/config"
+	"marq/internal/registry"
 )
 
 // Model wraps the OpenAI-compatible client plus the tool schemas built from the

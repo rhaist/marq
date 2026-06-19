@@ -2,18 +2,18 @@
 # interactive shell; LM Studio itself launches the container via mcp.json
 # (see mcp.json.example).
 services:
-  pentest-mcp:
+  marq:
     build: .
-    image: pentest-mcp
+    image: marq
     # stdio server needs an attached stdin; compose is mainly for build/shell.
     stdin_open: true
     tty: false
     environment:
-      PENTEST_MCP_OPERATOR: "${USER:-operator}"
-      PENTEST_MCP_ENGAGEMENT: "local-lab"
-      PENTEST_MCP_SCOPE: "ONLY systems you are authorized to test"
+      MARQ_OPERATOR: "${USER:-operator}"
+      MARQ_ENGAGEMENT: "local-lab"
+      MARQ_SCOPE: "ONLY systems you are authorized to test"
       # Arbitrary-shell tool. On by default; set "false" to disable.
-      PENTEST_MCP_ALLOW_RAW_SHELL: "true"
+      MARQ_ALLOW_RAW_SHELL: "true"
       # Optional OSINT API keys (inherited from the host shell; blank = keyless).
       SHODAN_API_KEY: "${SHODAN_API_KEY:-}"
       CENSYS_API_ID: "${CENSYS_API_ID:-}"
@@ -22,7 +22,7 @@ services:
       NUMVERIFY_API_KEY: "${NUMVERIFY_API_KEY:-}"
     volumes:
       # Persist the audit log on the host so it survives container removal.
-      - ./audit:/var/log/pentest-mcp
+      - ./audit:/var/log/marq
       # Optional working dir for wordlists, hash files, scan output.
       - ./work:/work
     # Hardening: no new privileges. Network is needed for scanning, so it is

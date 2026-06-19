@@ -3,7 +3,7 @@ package registry
 import (
 	"strconv"
 
-	"pentest-mcp/internal/shellword"
+	"marq/internal/shellword"
 )
 
 // people returns the people-footprint OSINT tools.

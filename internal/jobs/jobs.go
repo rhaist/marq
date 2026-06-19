@@ -12,7 +12,7 @@ import (
 	"sort"
 	"strings"
 
-	"pentest-mcp/internal/config"
+	"marq/internal/config"
 )
 
 func jobsRoot() string { return filepath.Join(config.C.WorkDir, "jobs") }

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Smoke-test every tool exposed by the pentest-mcp server.
+"""Smoke-test every tool exposed by the marq server.
 
 Spawns a *fresh* MCP server (`docker run --rm -i <image>`) — it does NOT touch a
 container already bound to LM Studio — speaks the MCP stdio protocol, lists the
@@ -17,7 +17,7 @@ By default every call targets only loopback (127.0.0.1), the reserved
 reach third-party services (subdomain/OSINT/people/archive lookups) are skipped
 unless you pass --external. Nothing scans a target you didn't authorise.
 
-The test container is launched with a short PENTEST_MCP_TIMEOUT so slow tools
+The test container is launched with a short MARQ_TIMEOUT so slow tools
 return a "[timed out]" envelope instead of hanging (which keeps the JSON-RPC
 stream in sync). API keys present in your environment are forwarded so key-gated
 tools (shodan, …) can be exercised too.
@@ -28,7 +28,7 @@ Usage
     python3 scripts/test_tools.py --external       # also hit internet OSINT
     python3 scripts/test_tools.py --slow           # also run the slow crackers
     python3 scripts/test_tools.py --only nmap,dnsx # a subset
-    python3 scripts/test_tools.py --image pentest-mcp --timeout 25
+    python3 scripts/test_tools.py --image marq --timeout 25
 
 Exit code is non-zero if any tool FAILs the binary check or a tool the server
 registered has no test defined (so new tools don't silently go untested).
@@ -170,7 +170,7 @@ class MCP:
         resp = self.call("initialize", {
             "protocolVersion": "2025-11-25",
             "capabilities": {},
-            "clientInfo": {"name": "pentest-mcp-smoke", "version": "1.0"},
+            "clientInfo": {"name": "marq-smoke", "version": "1.0"},
         }, timeout=30)
         self._send("notifications/initialized", {}, notify=True)
         return resp
@@ -226,8 +226,8 @@ def stage_files(mcp: MCP, timeout: float) -> None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Smoke-test every pentest-mcp tool.")
-    ap.add_argument("--image", default="pentest-mcp", help="docker image to test (default: pentest-mcp)")
+    ap = argparse.ArgumentParser(description="Smoke-test every marq tool.")
+    ap.add_argument("--image", default="marq", help="docker image to test (default: marq)")
     ap.add_argument("--timeout", type=int, default=25, help="server per-command timeout, seconds (default 25)")
     ap.add_argument("--external", action="store_true", help="also test tools that reach the internet")
     ap.add_argument("--slow", action="store_true", help="also test the slow crackers/brute tools")
@@ -242,11 +242,11 @@ def main() -> int:
         "docker", "run", "--rm", "-i",
         # nmap/masscan/naabu carry cap_net_admin file-caps and won't exec without it.
         "--cap-add", "NET_RAW", "--cap-add", "NET_ADMIN", "--cap-add", "NET_BIND_SERVICE",
-        "-e", f"PENTEST_MCP_TIMEOUT={args.timeout}",
-        "-e", "PENTEST_MCP_OPERATOR=smoke-test",
-        "-e", "PENTEST_MCP_ENGAGEMENT=tool-smoke-test",
-        "-e", "PENTEST_MCP_SCOPE=loopback + example.com + staged files (smoke test)",
-        "-e", "PENTEST_MCP_ALLOW_RAW_SHELL=true",
+        "-e", f"MARQ_TIMEOUT={args.timeout}",
+        "-e", "MARQ_OPERATOR=smoke-test",
+        "-e", "MARQ_ENGAGEMENT=tool-smoke-test",
+        "-e", "MARQ_SCOPE=loopback + example.com + staged files (smoke test)",
+        "-e", "MARQ_ALLOW_RAW_SHELL=true",
     ]
     for k in FORWARD_KEYS:
         if os.environ.get(k):

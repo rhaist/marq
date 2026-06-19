@@ -1,9 +1,9 @@
-// Command pentest is the single binary for the pentest toolkit. It exposes the
+// Command marq is the single binary for the marq toolkit. It exposes the
 // shared tool registry two ways:
 //
-//	pentest serve          run the MCP stdio server (external client brings the model)
-//	pentest tui            run the TUI agent host (local model runtime)  [phase 3/4]
-//	pentest run <tool> [json]   invoke one tool directly (smoke testing)
+//	marq serve          run the MCP stdio server (external client brings the model)
+//	marq tui            run the TUI agent host (local model runtime)  [phase 3/4]
+//	marq run <tool> [json]   invoke one tool directly (smoke testing)
 //
 // With no arguments it defaults to `serve` (so `docker run -i` starts the server).
 package main
@@ -17,11 +17,11 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"pentest-mcp/internal/agent"
-	"pentest-mcp/internal/config"
-	"pentest-mcp/internal/mcpserver"
-	"pentest-mcp/internal/registry"
-	"pentest-mcp/internal/tui"
+	"marq/internal/agent"
+	"marq/internal/config"
+	"marq/internal/mcpserver"
+	"marq/internal/registry"
+	"marq/internal/tui"
 )
 
 func runTUI() {
@@ -65,10 +65,10 @@ func serve() {
 }
 
 // runTool invokes a single tool by name with JSON arguments, for smoke testing
-// outside an MCP client. Example: pentest run nmap '{"target":"127.0.0.1"}'
+// outside an MCP client. Example: marq run nmap '{"target":"127.0.0.1"}'
 func runTool(argv []string) {
 	if len(argv) < 1 {
-		fmt.Fprintln(os.Stderr, "usage: pentest run <tool> ['<json-args>']")
+		fmt.Fprintln(os.Stderr, "usage: marq run <tool> ['<json-args>']")
 		os.Exit(1)
 	}
 	name := argv[0]
@@ -90,11 +90,11 @@ func runTool(argv []string) {
 }
 
 // runAgent runs the headless agent loop against the configured model runtime,
-// printing each step. Example: pentest agent "footprint example.com"
+// printing each step. Example: marq agent "footprint example.com"
 func runAgent(argv []string) {
 	task := strings.TrimSpace(strings.Join(argv, " "))
 	if task == "" {
-		fmt.Fprintln(os.Stderr, `usage: pentest agent "<task>"`)
+		fmt.Fprintln(os.Stderr, `usage: marq agent "<task>"`)
 		os.Exit(1)
 	}
 	fmt.Fprintf(os.Stderr, "model: %s @ %s\n\n", config.C.ModelName, config.C.ModelBaseURL)
@@ -124,15 +124,15 @@ func truncForLog(s string, n int) string {
 }
 
 func usage() {
-	fmt.Fprint(os.Stderr, `pentest — Kali pentest/OSINT toolkit (MCP server + TUI agent host)
+	fmt.Fprint(os.Stderr, `marq — Kali marq/OSINT toolkit (MCP server + TUI agent host)
 
 usage:
-  pentest serve              run the MCP stdio server (default)
-  pentest tui                run the TUI agent host (local model runtime)
-  pentest agent "<task>"     run the agent host headless (prints each step)
-  pentest run <tool> [json]  invoke one tool directly (smoke testing)
+  marq serve              run the MCP stdio server (default)
+  marq tui                run the TUI agent host (local model runtime)
+  marq agent "<task>"     run the agent host headless (prints each step)
+  marq run <tool> [json]  invoke one tool directly (smoke testing)
 
 The agent/tui modes need a local OpenAI-compatible model runtime (Ollama or
-llama.cpp). Configure it with PENTEST_MCP_MODEL_URL / PENTEST_MCP_MODEL.
+llama.cpp). Configure it with MARQ_MODEL_URL / MARQ_MODEL.
 `)
 }

@@ -14,8 +14,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"pentest-mcp/internal/agent"
-	"pentest-mcp/internal/config"
+	"marq/internal/agent"
+	"marq/internal/config"
 )
 
 var (
@@ -156,14 +156,14 @@ func (m model) View() string {
 	if m.running {
 		status = "running…"
 	}
-	header := headerStyle.Render(fmt.Sprintf("pentest-mcp · %s/%s · model %s · %s",
+	header := headerStyle.Render(fmt.Sprintf("marq · %s/%s · model %s · %s",
 		config.C.Operator, config.C.Engagement, config.C.ModelName, status))
 	help := helpStyle.Render("Enter: run · ↑/↓ or PgUp/PgDn: scroll · Ctrl+C: quit")
 	return strings.Join([]string{header, m.vp.View(), m.input.View(), help}, "\n")
 }
 
 func (m model) welcome() string {
-	return botStyle.Render("pentest-mcp agent host") + "\n\n" +
+	return botStyle.Render("marq agent host") + "\n\n" +
 		config.C.Banner() + "\n\n" +
 		helpStyle.Render("Type a task below and press Enter. The agent calls server_info first, "+
 			"works the methodology, records findings, then renders the report.")

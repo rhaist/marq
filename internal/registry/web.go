@@ -3,7 +3,7 @@ package registry
 import (
 	"strconv"
 
-	"pentest-mcp/internal/shellword"
+	"marq/internal/shellword"
 )
 
 const dirbCommon = "/usr/share/wordlists/dirb/common.txt"

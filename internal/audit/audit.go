@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"pentest-mcp/internal/config"
+	"marq/internal/config"
 )
 
 var mu sync.Mutex

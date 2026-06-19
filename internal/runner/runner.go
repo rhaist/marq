@@ -18,9 +18,9 @@ import (
 	"syscall"
 	"time"
 
-	"pentest-mcp/internal/audit"
-	"pentest-mcp/internal/config"
-	"pentest-mcp/internal/shellword"
+	"marq/internal/audit"
+	"marq/internal/config"
+	"marq/internal/shellword"
 )
 
 // Opts are per-call options for Run.

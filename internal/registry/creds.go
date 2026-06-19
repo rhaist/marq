@@ -3,7 +3,7 @@ package registry
 import (
 	"strconv"
 
-	"pentest-mcp/internal/shellword"
+	"marq/internal/shellword"
 )
 
 // creds returns the offline password/hash cracking tools.

@@ -1,7 +1,7 @@
 # Setup
 
 Full install + run steps for **macOS** (Apple Silicon or Intel) and **Debian
-Testing** (rolling). The container (Kali tools + the `pentest` Go binary) is
+Testing** (rolling). The container (Kali tools + the `marq` Go binary) is
 identical on both; the only OS-specific part is how the local model runtime is
 installed and how the container reaches it.
 
@@ -19,8 +19,8 @@ installed and how the container reaches it.
 
 | Mode | Command | Needs a local model? | Who drives the model |
 |------|---------|----------------------|----------------------|
-| **MCP server** | `pentest serve` (default) | No | An external MCP client (Claude Desktop, LM Studio) brings its own |
-| **Agent host / TUI** | `pentest tui` / `pentest agent "<task>"` | **Yes** (Ollama on the host) | The binary's own tool-calling loop |
+| **MCP server** | `marq serve` (default) | No | An external MCP client (Claude Desktop, LM Studio) brings its own |
+| **Agent host / TUI** | `marq tui` / `marq agent "<task>"` | **Yes** (Ollama on the host) | The binary's own tool-calling loop |
 
 The image is the same. Pick a section below for your OS; do the **common build**
 once, then the **MCP server** and/or **agent/TUI** subsections.
@@ -40,10 +40,10 @@ brew install go
 
 ### 2. Build the image
 ```bash
-git clone <this-repo> pentest-mcp && cd pentest-mcp
-docker build -t pentest-mcp .     # builds natively for your arch (arm64 on M-series)
+git clone <this-repo> marq && cd marq
+docker build -t marq .     # builds natively for your arch (arm64 on M-series)
 # Smaller image (skips warm-up; nuclei templates / msf cache fetched on first use):
-docker build --build-arg WARMUP=0 -t pentest-mcp .
+docker build --build-arg WARMUP=0 -t marq .
 ```
 
 ### 3. Run as an MCP server (external client brings the model)
@@ -51,10 +51,10 @@ docker build --build-arg WARMUP=0 -t pentest-mcp .
 docker run --rm -i \
   --security-opt no-new-privileges:true --cap-drop ALL \
   --cap-add NET_RAW --cap-add NET_ADMIN --cap-add NET_BIND_SERVICE \
-  -v pentest-mcp-audit:/var/log/pentest-mcp \
-  -e PENTEST_MCP_OPERATOR=your-name -e PENTEST_MCP_ENGAGEMENT=acme-2026 \
-  -e PENTEST_MCP_SCOPE="*.example.com — per SOW" \
-  pentest-mcp
+  -v marq-audit:/var/log/marq \
+  -e MARQ_OPERATOR=your-name -e MARQ_ENGAGEMENT=acme-2026 \
+  -e MARQ_SCOPE="*.example.com — per SOW" \
+  marq
 ```
 Or wire it into LM Studio / Claude Desktop with [`mcp.json.example`](../mcp.json.example).
 
@@ -67,12 +67,12 @@ ollama pull huihui_ai/Qwen3.6-abliterated:27b        # ~17 GB, fits 24 GB unifie
 
 mkdir -p work
 docker run --rm -it \
-  -e PENTEST_MCP_MODEL_URL=http://host.docker.internal:11434/v1 \
-  -e PENTEST_MCP_MODEL=huihui_ai/Qwen3.6-abliterated:27b \
-  -e PENTEST_MCP_OPERATOR=your-name -e PENTEST_MCP_ENGAGEMENT=acme-2026 \
-  -e PENTEST_MCP_SCOPE="*.example.com — per SOW" \
+  -e MARQ_MODEL_URL=http://host.docker.internal:11434/v1 \
+  -e MARQ_MODEL=huihui_ai/Qwen3.6-abliterated:27b \
+  -e MARQ_OPERATOR=your-name -e MARQ_ENGAGEMENT=acme-2026 \
+  -e MARQ_SCOPE="*.example.com — per SOW" \
   -v "$PWD/work:/work" \
-  pentest-mcp tui
+  marq tui
 ```
 On Docker Desktop, `host.docker.internal` resolves to the host, so Ollama bound
 to its default `127.0.0.1:11434` is reachable from the container as-is.
@@ -95,8 +95,8 @@ sudo apt install -y golang
 
 ### 2. Build the image
 ```bash
-git clone <this-repo> pentest-mcp && cd pentest-mcp
-docker build -t pentest-mcp .          # native amd64 (or arm64 on ARM boards)
+git clone <this-repo> marq && cd marq
+docker build -t marq .          # native amd64 (or arm64 on ARM boards)
 ```
 
 ### 3. Run as an MCP server (external client brings the model)
@@ -113,18 +113,18 @@ ollama pull huihui_ai/Qwen3.6-abliterated:27b
 get `host.docker.internal` for free and the host's `127.0.0.1` is not the
 container's. Two clean options:
 
-**Option A — `--network=host` (recommended for a pentest box).** The container
+**Option A — `--network=host` (recommended for a marq box).** The container
 shares the host network namespace, so Ollama on `127.0.0.1:11434` is reached
 directly *and* the scanning tools get unmediated network access to targets.
 ```bash
 mkdir -p work && chmod a+rwx work      # so the container's non-root user can write findings
 docker run --rm -it --network=host \
-  -e PENTEST_MCP_MODEL_URL=http://localhost:11434/v1 \
-  -e PENTEST_MCP_MODEL=huihui_ai/Qwen3.6-abliterated:27b \
-  -e PENTEST_MCP_OPERATOR=your-name -e PENTEST_MCP_ENGAGEMENT=acme-2026 \
-  -e PENTEST_MCP_SCOPE="*.example.com — per SOW" \
+  -e MARQ_MODEL_URL=http://localhost:11434/v1 \
+  -e MARQ_MODEL=huihui_ai/Qwen3.6-abliterated:27b \
+  -e MARQ_OPERATOR=your-name -e MARQ_ENGAGEMENT=acme-2026 \
+  -e MARQ_SCOPE="*.example.com — per SOW" \
   -v "$PWD/work:/work" \
-  pentest-mcp tui
+  marq tui
 ```
 
 **Option B — bridge networking with `host-gateway`.** Keep the container on its
@@ -137,16 +137,16 @@ sudo systemctl restart ollama
 
 mkdir -p work && chmod a+rwx work
 docker run --rm -it --add-host=host.docker.internal:host-gateway \
-  -e PENTEST_MCP_MODEL_URL=http://host.docker.internal:11434/v1 \
-  -e PENTEST_MCP_MODEL=huihui_ai/Qwen3.6-abliterated:27b \
+  -e MARQ_MODEL_URL=http://host.docker.internal:11434/v1 \
+  -e MARQ_MODEL=huihui_ai/Qwen3.6-abliterated:27b \
   -v "$PWD/work:/work" \
-  pentest-mcp tui
+  marq tui
 ```
 
 > **Bind-mount permissions (Linux).** The container runs as the non-root
-> `pentester` user, so a bind-mounted `./work` must be writable by it —
+> `marq` user, so a bind-mounted `./work` must be writable by it —
 > `chmod a+rwx work` (shown above) is the simplest. macOS Docker Desktop handles
-> this automatically. Alternatively use a named volume (`-v pentest-work:/work`)
+> this automatically. Alternatively use a named volume (`-v marq-work:/work`)
 > and copy results out with `docker cp`.
 
 ---
@@ -157,8 +157,8 @@ Iterate on the server/tool layer without a Docker build (tool *calls* still need
 the Kali binaries, so most only fully work in-container):
 ```bash
 go build ./... && go vet ./... && go test ./...   # build + sanity gate
-go run ./cmd/pentest serve                         # stdio MCP server locally
-go run ./cmd/pentest run nmap '{"target":"scanme.nmap.org"}'   # invoke one tool
+go run ./cmd/marq serve                         # stdio MCP server locally
+go run ./cmd/marq run nmap '{"target":"scanme.nmap.org"}'   # invoke one tool
 ```
 
 ## Verify
@@ -167,20 +167,20 @@ go run ./cmd/pentest run nmap '{"target":"scanme.nmap.org"}'   # invoke one tool
 # Tool present in the built image. nmap/masscan/naabu have file capabilities
 # (cap_net_admin) a bare container won't exec — pass the caps, or smoke a
 # non-capped tool:
-docker run --rm --cap-add NET_RAW --cap-add NET_ADMIN pentest-mcp nmap --version
-docker run --rm pentest-mcp nuclei -version
+docker run --rm --cap-add NET_RAW --cap-add NET_ADMIN marq nmap --version
+docker run --rm marq nuclei -version
 
 # MCP server lists its tools (expects ~53)
 printf '%s\n' \
  '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"c","version":"0"}}}' \
  '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
  '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
- | docker run --rm -i pentest-mcp | grep -o '"name":"[a-z_]*"' | wc -l
+ | docker run --rm -i marq | grep -o '"name":"[a-z_]*"' | wc -l
 
 # Validate the model does reliable multi-tool calling (needs Ollama running):
 docker run --rm -i <networking flags for your OS> \
-  -e PENTEST_MCP_MODEL_URL=... -e PENTEST_MCP_MODEL=... \
-  pentest-mcp agent "resolve and port-scan scanme.nmap.org, then summarize"
+  -e MARQ_MODEL_URL=... -e MARQ_MODEL=... \
+  marq agent "resolve and port-scan scanme.nmap.org, then summarize"
 ```
 The full end-to-end harness is `scripts/verify_tools.sh` (drives the built image
 over MCP).

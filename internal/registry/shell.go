@@ -7,7 +7,7 @@ func shell() []Tool {
 	return []Tool{
 		{
 			Name: "run_shell",
-			Desc: "Run an arbitrary shell command inside the pentest container. Use for tools without a " +
+			Desc: "Run an arbitrary shell command inside the marq container. Use for tools without a " +
 				"dedicated wrapper. `target` should name the host/URL under test for the audit record. " +
 				"Audit-logged; authorized use only.",
 			Params: []Param{

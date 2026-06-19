@@ -3,9 +3,9 @@ package registry
 import (
 	_ "embed"
 
-	"pentest-mcp/internal/findings"
-	"pentest-mcp/internal/jobs"
-	"pentest-mcp/internal/skills"
+	"marq/internal/findings"
+	"marq/internal/jobs"
+	"marq/internal/skills"
 )
 
 // knowledgeTools returns the on-demand skills library tool.
@@ -25,7 +25,7 @@ func knowledgeTools() []Tool {
 }
 
 // Methodology is the engagement workflow guidance (feature #3). It is exposed as
-// the pentest://methodology MCP resource (serve mode) and injected into the
+// the marq://methodology MCP resource (serve mode) and injected into the
 // agent system prompt (tui mode).
 //
 //go:embed methodology.md
