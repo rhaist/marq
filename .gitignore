@@ -9,7 +9,7 @@ build/
 # Never commit audit logs, scan output, loot or scope files.
 *.jsonl
 *.log
-audit/
-loot/
-scope.txt
-results/
+/audit/
+/loot/
+/scope.txt
+/results/

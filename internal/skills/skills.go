@@ -38,7 +38,7 @@ func parse(raw string) (name, desc, body string) {
 	if m == nil {
 		return "", "", strings.TrimSpace(raw)
 	}
-	for _, line := range strings.Split(m[1], "\n") {
+	for line := range strings.SplitSeq(m[1], "\n") {
 		k, v, ok := strings.Cut(line, ":")
 		if !ok {
 			continue
@@ -112,7 +112,7 @@ func Load(name string) (string, error) {
 // Unknown names are reported inline rather than failing the whole call.
 func LoadMany(names string) string {
 	var wanted []string
-	for _, n := range strings.Split(names, ",") {
+	for n := range strings.SplitSeq(names, ",") {
 		if n = strings.TrimSpace(n); n != "" {
 			wanted = append(wanted, n)
 		}

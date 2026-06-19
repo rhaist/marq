@@ -82,10 +82,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.w, m.h = msg.Width, msg.Height
-		bodyH := msg.Height - 4 // header + input + help + spacing
-		if bodyH < 3 {
-			bodyH = 3
-		}
+		bodyH := max(
+			// header + input + help + spacing
+			msg.Height-4, 3)
 		if !m.ready {
 			m.vp = viewport.New(msg.Width, bodyH)
 			m.vp.SetContent(m.welcome())

@@ -11,7 +11,7 @@ import (
 func splitHosts(s string) []string {
 	s = strings.ReplaceAll(s, ",", "\n")
 	var out []string
-	for _, line := range strings.Split(s, "\n") {
+	for line := range strings.SplitSeq(s, "\n") {
 		if h := strings.TrimSpace(line); h != "" {
 			out = append(out, h)
 		}
@@ -128,7 +128,7 @@ func recon() []Tool {
 			},
 			Build: func(a Args) Invocation {
 				argv := []string{"dnsx", "-silent", "-resp"}
-				for _, rec := range strings.Split(a.S("records"), ",") {
+				for rec := range strings.SplitSeq(a.S("records"), ",") {
 					rec = strings.ToLower(strings.TrimSpace(rec))
 					if rec != "" {
 						argv = append(argv, "-"+rec)

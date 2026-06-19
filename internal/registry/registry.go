@@ -7,6 +7,7 @@ package registry
 
 import (
 	"fmt"
+	"slices"
 
 	"pentest-mcp/internal/config"
 	"pentest-mcp/internal/runner"
@@ -178,16 +179,10 @@ func backgroundMsg(tool, target, jobDir string) string {
 // All returns every registered tool. shell is included only when raw shell is
 // enabled (mirrors the Python conditional registration).
 func All() []Tool {
-	tools := []Tool{}
-	tools = append(tools, recon()...)
-	tools = append(tools, osint()...)
-	tools = append(tools, people()...)
-	tools = append(tools, web()...)
-	tools = append(tools, exploit()...)
-	tools = append(tools, creds()...)
-	tools = append(tools, fileTools()...)
-	tools = append(tools, reportTools()...)
-	tools = append(tools, knowledgeTools()...)
+	tools := slices.Concat(
+		recon(), osint(), people(), web(),
+		exploit(), creds(), fileTools(), reportTools(), knowledgeTools(),
+	)
 	if config.C.AllowRawShell {
 		tools = append(tools, shell()...)
 	}

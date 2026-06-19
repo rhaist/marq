@@ -10,7 +10,7 @@ import (
 // the vector is missing required metrics. Pure arithmetic — no LLM, no network.
 func cvssBase(vector string) (score float64, severity string, ok bool) {
 	m := map[string]string{}
-	for _, part := range strings.Split(vector, "/") {
+	for part := range strings.SplitSeq(vector, "/") {
 		if k, v, found := strings.Cut(part, ":"); found {
 			m[strings.ToUpper(strings.TrimSpace(k))] = strings.ToUpper(strings.TrimSpace(v))
 		}

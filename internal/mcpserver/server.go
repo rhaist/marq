@@ -34,8 +34,7 @@ func New() *mcp.Server {
 }
 
 // addTool bridges one registry.Tool into the MCP server with a raw-args handler.
-func addTool(s *mcp.Server, t registry.Tool) {
-	tool := t // capture per iteration
+func addTool(s *mcp.Server, tool registry.Tool) {
 	mcpTool := &mcp.Tool{
 		Name:        tool.Name,
 		Description: tool.Desc,
@@ -111,7 +110,7 @@ func addSkillResources(s *mcp.Server) {
 		},
 	)
 	for _, meta := range skills.List() {
-		name := meta.Name // capture
+		name := meta.Name
 		uri := "pentest://skills/" + name
 		s.AddResource(
 			&mcp.Resource{URI: uri, Name: name, Description: meta.Description, MIMEType: "text/markdown"},

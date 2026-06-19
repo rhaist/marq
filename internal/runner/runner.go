@@ -69,6 +69,10 @@ func (r Result) Render() string {
 	return b.String()
 }
 
+// truncateTailBudget is reserved for the truncation marker so a truncated
+// stream still ends in a legible "…[truncated]…" tail rather than a bare cut.
+const truncateTailBudget = 200
+
 func truncate(text string, budget int) (string, bool) {
 	if budget < 1 {
 		budget = 1
@@ -76,10 +80,7 @@ func truncate(text string, budget int) (string, bool) {
 	if len(text) <= budget {
 		return text, false
 	}
-	head := budget - 200
-	if head < 0 {
-		head = 0
-	}
+	head := max(budget-truncateTailBudget, 0)
 	return text[:head] + "\n…[truncated]…", true
 }
 
@@ -87,10 +88,7 @@ func truncate(text string, budget int) (string, bool) {
 func Run(tool string, argv []string, opts Opts) Result {
 	limit := config.C.CommandTimeout
 	if opts.Timeout > 0 {
-		limit = opts.Timeout
-		if limit > config.C.MaxCommandTimeout {
-			limit = config.C.MaxCommandTimeout
-		}
+		limit = min(opts.Timeout, config.C.MaxCommandTimeout)
 		if limit < 1 {
 			limit = 1
 		}

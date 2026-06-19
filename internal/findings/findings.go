@@ -86,8 +86,7 @@ func load() ([]Finding, error) {
 // flagged rather than silently overwritten (a model-guessed vector must not mask
 // the assigned risk).
 func Report(title, severity, target, evidence, recommendation, cvss, cwe, references string) string {
-	id := audit.LogStart("report_finding", target, []string{"report_finding", title})
-	out, err := func() (string, error) {
+	return withAudit("report_finding", target, []string{"report_finding", title}, func() (string, error) {
 		if strings.TrimSpace(title) == "" {
 			return "error: a finding needs a title", nil
 		}
@@ -146,19 +145,13 @@ func Report(title, severity, target, evidence, recommendation, cvss, cwe, refere
 		return fmt.Sprintf("recorded %s [%s] %q (target: %s)%s. %d findings so far. "+
 			"Call render_report to write the Markdown/CSV report.",
 			f.ID, f.Severity, f.Title, f.Target, note, len(existing)+1), nil
-	}()
-	endAudit(id, "report_finding", err)
-	if err != nil {
-		return "error: " + err.Error()
-	}
-	return out
+	})
 }
 
 // RenderReport writes findings.md and findings.csv (severity-sorted) to the work
 // dir and returns a summary.
 func RenderReport() string {
-	id := audit.LogStart("render_report", "", []string{"render_report"})
-	out, err := func() (string, error) {
+	return withAudit("render_report", "", []string{"render_report"}, func() (string, error) {
 		all, err := load()
 		if err != nil {
 			return "", err
@@ -183,12 +176,7 @@ func RenderReport() string {
 		}
 		return fmt.Sprintf("wrote %s and %s — %d findings (%s).",
 			mdPath, csvPath, len(all), summarizeCounts(counts)), nil
-	}()
-	endAudit(id, "render_report", err)
-	if err != nil {
-		return "error: " + err.Error()
-	}
-	return out
+	})
 }
 
 func renderMarkdown(all []Finding) string {
@@ -269,4 +257,17 @@ func endAudit(id, op string, err error) {
 	}
 	c := code
 	audit.LogEnd(id, op, &c, 0, false, msg)
+}
+
+// withAudit wraps fn in the same start/end audit envelope used by Report and
+// RenderReport. A soft error (returned with a nil err) passes straight through
+// to the model; a hard error (non-nil err) is surfaced as "error: <msg>".
+func withAudit(op, target string, argv []string, fn func() (string, error)) string {
+	id := audit.LogStart(op, target, argv)
+	out, err := fn()
+	endAudit(id, op, err)
+	if err != nil {
+		return "error: " + err.Error()
+	}
+	return out
 }

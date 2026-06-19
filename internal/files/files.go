@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
+	"slices"
 	"strings"
 
 	"pentest-mcp/internal/audit"
@@ -83,22 +83,19 @@ func ListDir(path string) string {
 		if err != nil {
 			return "", err
 		}
-		names := make([]string, 0, len(entries))
-		for _, e := range entries {
-			names = append(names, e.Name())
-		}
-		sort.Strings(names)
+		slices.SortFunc(entries, func(a, b os.DirEntry) int {
+			return strings.Compare(a.Name(), b.Name())
+		})
 		var rows []string
-		for _, name := range names {
-			full := filepath.Join(real, name)
-			fi, err := os.Stat(full)
+		for _, e := range entries {
+			fi, err := e.Info()
 			if err != nil {
 				continue
 			}
 			if fi.IsDir() {
-				rows = append(rows, fmt.Sprintf("d        %s/", name))
+				rows = append(rows, fmt.Sprintf("d        %s/", e.Name()))
 			} else {
-				rows = append(rows, fmt.Sprintf("f %9d  %s", fi.Size(), name))
+				rows = append(rows, fmt.Sprintf("f %9d  %s", fi.Size(), e.Name()))
 			}
 		}
 		if len(rows) == 0 {
