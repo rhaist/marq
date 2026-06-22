@@ -98,24 +98,17 @@ func Load() Config {
 	// Overlay the persisted TUI file for fields not explicitly set by env.
 	// os.LookupEnv distinguishes "unset" from "set to empty".
 	if fc := loadTUIFile(c.TUIConfigPath); fc != nil {
-		if _, set := os.LookupEnv("MARQ_OPERATOR"); !set && fc.Operator != nil {
-			c.Operator = *fc.Operator
+		overlay := func(env string, dst, src *string) {
+			if _, set := os.LookupEnv(env); !set && src != nil {
+				*dst = *src
+			}
 		}
-		if _, set := os.LookupEnv("MARQ_ENGAGEMENT"); !set && fc.Engagement != nil {
-			c.Engagement = *fc.Engagement
-		}
-		if _, set := os.LookupEnv("MARQ_SCOPE"); !set && fc.ScopeNote != nil {
-			c.ScopeNote = *fc.ScopeNote
-		}
-		if _, set := os.LookupEnv("MARQ_MODEL_URL"); !set && fc.ModelBaseURL != nil {
-			c.ModelBaseURL = *fc.ModelBaseURL
-		}
-		if _, set := os.LookupEnv("MARQ_MODEL"); !set && fc.ModelName != nil {
-			c.ModelName = *fc.ModelName
-		}
-		if _, set := os.LookupEnv("MARQ_MODEL_KEY"); !set && fc.ModelAPIKey != nil {
-			c.ModelAPIKey = *fc.ModelAPIKey
-		}
+		overlay("MARQ_OPERATOR", &c.Operator, fc.Operator)
+		overlay("MARQ_ENGAGEMENT", &c.Engagement, fc.Engagement)
+		overlay("MARQ_SCOPE", &c.ScopeNote, fc.ScopeNote)
+		overlay("MARQ_MODEL_URL", &c.ModelBaseURL, fc.ModelBaseURL)
+		overlay("MARQ_MODEL", &c.ModelName, fc.ModelName)
+		overlay("MARQ_MODEL_KEY", &c.ModelAPIKey, fc.ModelAPIKey)
 	}
 	return c
 }
@@ -149,13 +142,8 @@ func loadTUIFile(path string) *tuiFile {
 // TUIConfigExists reports whether a persisted TUI config is present — used by
 // the TUI to decide whether to skip the setup screen on launch.
 func TUIConfigExists(path string) bool {
-	if path == "" {
-		return false
-	}
-	if _, err := os.Stat(path); err == nil {
-		return true
-	}
-	return false
+	_, err := os.Stat(path)
+	return path != "" && err == nil
 }
 
 // SaveTUIConfig persists the TUI-editable fields of c to c.TUIConfigPath

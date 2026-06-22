@@ -78,14 +78,13 @@ const (
 )
 
 type field struct {
-	label  string
-	kind   fieldKind
-	input  textinput.Model
-	opts   []string
-	idx    int
-	hint   string
-	width  int
-	isLong bool // scope field: give it more room
+	label string
+	kind  fieldKind
+	input textinput.Model
+	opts  []string
+	idx   int
+	hint  string
+	width int
 }
 
 // backend presets fill Base URL + API key when the backend selector changes.
@@ -183,7 +182,7 @@ func (m *model) buildSetupForm() {
 	m.fields[fiKey] = newTextField("API key", c.ModelAPIKey, "bearer token (Ollama ignores it)", 30)
 	m.fields[fiOperator] = newTextField("Operator", c.Operator, "your name", 20)
 	m.fields[fiEngagement] = newTextField("Engagement", c.Engagement, "engagement id", 20)
-	m.fields[fiScope] = newLongField("Scope", c.ScopeNote, "authorized targets — set this!", 60)
+	m.fields[fiScope] = newTextField("Scope", c.ScopeNote, "authorized targets — set this!", 60)
 	m.focus = 0
 	m.setupState = setupEditing
 }
@@ -202,12 +201,6 @@ func newTextField(label, value, hint string, width int) field {
 	ti.SetValue(value)
 	ti.Prompt = ""
 	return field{label: label, kind: fieldText, input: ti, hint: hint, width: width}
-}
-
-func newLongField(label, value, hint string, width int) field {
-	f := newTextField(label, value, hint, width)
-	f.isLong = true
-	return f
 }
 
 func newCycleField(label string, idx int, opts []string, hint string) field {
