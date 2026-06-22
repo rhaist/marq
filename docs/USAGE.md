@@ -94,11 +94,13 @@ itself, with its own tool-calling loop and a terminal UI. The model runs on the
 #   - Ollama:  ollama pull huihui_ai/Qwen3.6-abliterated:27b   # ~17 GB; strong tool-calling
 #   lighter / cyber-specialist option: WhiteRabbitNeo-V3-7B (~5 GB)
 
-# Run the TUI agent host (model on host, tools in the container). With no
-# MARQ_MODEL_* set, it defaults to LM Studio on host.docker.internal:1234 and
-# opens the setup screen to pick the model. To pin it explicitly:
+# Run the TUI agent host (model on host, tools in the container). No -e flags
+# needed — the setup screen collects model, operator, engagement and scope, and
+# persists them to ./work/.marq/tui.json (that's what the -v mount is for):
+docker run --rm -it -v "$PWD/work:/work" marq tui
+
+# For automation/CI, any MARQ_* env var overrides the saved file:
 docker run --rm -it \
-  -e MARQ_MODEL_URL=http://host.docker.internal:1234/v1 \
   -e MARQ_MODEL=<your-loaded-model-id> \
   -e MARQ_OPERATOR=your-name -e MARQ_ENGAGEMENT=acme-2026 \
   -e MARQ_SCOPE="*.example.com — per SOW" \

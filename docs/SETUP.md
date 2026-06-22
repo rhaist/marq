@@ -66,10 +66,30 @@ Or wire it into LM Studio / Claude Desktop with [`mcp.json.example`](../mcp.json
 
 marq defaults to **LM Studio** (port 1234). Download LM Studio, load an
 uncensored tool-calling model, and start its local server (**Developer →
-Start Server**). Then:
+Start Server**). Then just mount a working dir and launch — no `-e` flags
+needed, you fill everything in on the setup screen:
 
 ```bash
 mkdir -p work
+docker run --rm -it -v "$PWD/work:/work" marq tui
+```
+
+On first launch the **setup screen** opens: pick **LM Studio / Ollama /
+Custom** with ←/→, then edit **endpoint, model, operator, engagement, and
+scope**. **Enter** runs a `/v1/models` connection check. Choices persist to
+`work/.marq/tui.json` (that's what the `-v` mount is for), so later launches
+skip straight to chat — press **Ctrl+S** there to re-open setup.
+
+The endpoint defaults to `http://host.docker.internal:1234/v1`; on Docker
+Desktop that resolves to the host, so LM Studio on its default
+`127.0.0.1:1234` is reachable as-is.
+
+<details><summary><strong>Set it via env vars instead (automation / CI)</strong></summary>
+
+Any `MARQ_*` env var overrides the saved file, so scripted runs stay
+deterministic without touching the setup screen:
+
+```bash
 docker run --rm -it \
   -e MARQ_MODEL=<your-loaded-model-id> \
   -e MARQ_OPERATOR=your-name -e MARQ_ENGAGEMENT=acme-2026 \
@@ -78,9 +98,7 @@ docker run --rm -it \
   marq tui
 ```
 
-The endpoint defaults to `http://host.docker.internal:1234/v1`; on Docker
-Desktop that resolves to the host, so LM Studio on its default
-`127.0.0.1:1234` is reachable as-is.
+</details>
 
 <details><summary><strong>Prefer Ollama?</strong></summary>
 
@@ -88,26 +106,12 @@ Desktop that resolves to the host, so LM Studio on its default
 brew install ollama
 ollama serve >/dev/null 2>&1 &                       # or run the Ollama app
 ollama pull huihui_ai/Qwen3.6-abliterated:27b        # ~17 GB, fits 24 GB unified
-
-docker run --rm -it \
-  -e MARQ_MODEL_URL=http://host.docker.internal:11434/v1 \
-  -e MARQ_MODEL=huihui_ai/Qwen3.6-abliterated:27b \
-  -e MARQ_OPERATOR=your-name -e MARQ_SCOPE="*.example.com — per SOW" \
-  -v "$PWD/work:/work" \
-  marq tui
 ```
 
-Or just select **Ollama** in the TUI setup screen (see the note below).
+Then run `docker run --rm -it -v "$PWD/work:/work" marq tui` and select
+**Ollama** on the setup screen (or pass `-e MARQ_MODEL_URL=http://host.docker.internal:11434/v1`).
 
 </details>
-
-> **Prefer to configure in the TUI?** Drop the `-e MARQ_*` model/engagement
-> flags and just run `docker run --rm -it -v "$PWD/work:/work" marq tui`. On
-> first launch it opens a setup screen: pick **LM Studio / Ollama / Custom**
-> with ←/→, edit endpoint + model + operator/scope, and **Enter** runs a
-> `/v1/models` connection check. Choices persist to `work/.marq/tui.json` and
-> subsequent launches skip setup (press **Ctrl+S** in chat to re-edit). Env
-> vars still override the saved file when set.
 
 ---
 
@@ -161,13 +165,9 @@ directly _and_ the scanning tools get unmediated network access to targets.
 
 ```bash
 mkdir -p work && chmod a+rwx work      # so the container's non-root user can write findings
-docker run --rm -it --network=host \
-  -e MARQ_MODEL_URL=http://localhost:11434/v1 \
-  -e MARQ_MODEL=huihui_ai/Qwen3.6-abliterated:27b \
-  -e MARQ_OPERATOR=your-name -e MARQ_ENGAGEMENT=acme-2026 \
-  -e MARQ_SCOPE="*.example.com — per SOW" \
-  -v "$PWD/work:/work" \
-  marq tui
+docker run --rm -it --network=host -v "$PWD/work:/work" marq tui
+# In the setup screen: set Base URL to http://localhost:11434/v1 (Ollama),
+# pick the model, and fill operator / engagement / scope.
 ```
 
 **Option B — bridge networking with `host-gateway`.** Keep the container on its
@@ -180,17 +180,13 @@ sudo systemctl edit ollama     # add:  [Service]  Environment="OLLAMA_HOST=0.0.0
 sudo systemctl restart ollama
 
 mkdir -p work && chmod a+rwx work
-docker run --rm -it --add-host=host.docker.internal:host-gateway \
-  -e MARQ_MODEL_URL=http://host.docker.internal:11434/v1 \
-  -e MARQ_MODEL=huihui_ai/Qwen3.6-abliterated:27b \
-  -v "$PWD/work:/work" \
-  marq tui
+docker run --rm -it --add-host=host.docker.internal:host-gateway -v "$PWD/work:/work" marq tui
+# Setup screen: Base URL http://host.docker.internal:11434/v1, then model + operator/scope.
 ```
 
 > With `--network=host` the Base URL must be `http://localhost:11434/v1`
 > (or `:1234` for LM Studio) — there is no `host.docker.internal` in the host
-> namespace. You can set this via `-e MARQ_MODEL_URL=…` or just edit it in the
-> TUI setup screen (see the macOS section's "configure in the TUI" note).
+> namespace. Set it in the TUI setup screen, or pass `-e MARQ_MODEL_URL=…`.
 
 > **Bind-mount permissions (Linux).** The container runs as the non-root
 > `marq` user, so a bind-mounted `./work` must be writable by it —
