@@ -40,7 +40,11 @@ func systemPrompt() string {
 		"technique or vulnerability class, call load_skill to pull its playbook first. Record each " +
 		"validated issue with report_finding, then call render_report to produce the deliverable. " +
 		"When the task is complete, call the finish tool with a concise summary.\n\n" +
-		"Available skills (load_skill):\n" + skills.IndexText()
+		"Available skills (load_skill):\n" + skills.IndexText() +
+		// ponytail: Qwen3 hybrid-thinking switch. Reasoning traces make these
+		// local models drop tool calls silently; /no_think disables them. Harmless
+		// (ignored) on non-Qwen models. Remove if a model needs visible reasoning.
+		"\n\n/no_think"
 }
 
 // Loop holds the conversation state for one agent session.

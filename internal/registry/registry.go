@@ -176,10 +176,30 @@ func backgroundMsg(tool, target, jobDir string) string {
 	)
 }
 
+// serverInfoTool reports the authorization banner + configured scope. Lives in
+// the registry so both front-ends expose it (the model is told to call it first
+// to confirm scope); previously it was an MCP-only tool, so the agent/TUI loop
+// errored on it.
+func serverInfoTool() Tool {
+	return Tool{
+		Name: "server_info",
+		Desc: "Return the authorization banner, configured scope and operator metadata. " +
+			"Call this first to confirm you are authorized to test the intended targets.",
+		Handler: func(a Args) string {
+			raw := "disabled"
+			if config.C.AllowRawShell {
+				raw = "enabled"
+			}
+			return config.C.Banner() + "\n  raw shell  : " + raw
+		},
+	}
+}
+
 // All returns every registered tool. shell is included only when raw shell is
 // enabled (mirrors the Python conditional registration).
 func All() []Tool {
 	tools := slices.Concat(
+		[]Tool{serverInfoTool()},
 		recon(), osint(), people(), web(),
 		exploit(), creds(), fileTools(), reportTools(), knowledgeTools(),
 	)

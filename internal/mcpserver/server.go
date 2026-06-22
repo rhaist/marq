@@ -28,7 +28,6 @@ func New() *mcp.Server {
 		addTool(s, t)
 	}
 
-	addServerInfo(s)
 	addResources(s)
 	return s
 }
@@ -51,22 +50,6 @@ func addTool(s *mcp.Server, tool registry.Tool) {
 		return textResult(out), nil
 	}
 	s.AddTool(mcpTool, handler)
-}
-
-func addServerInfo(s *mcp.Server) {
-	tool := &mcp.Tool{
-		Name: "server_info",
-		Description: "Return the authorization banner, configured scope and operator metadata. " +
-			"Call this first to confirm you are authorized to test the intended targets.",
-		InputSchema: map[string]any{"type": "object"},
-	}
-	s.AddTool(tool, func(ctx context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		raw := "disabled"
-		if config.C.AllowRawShell {
-			raw = "enabled"
-		}
-		return textResult(config.C.Banner() + "\n  raw shell  : " + raw), nil
-	})
 }
 
 func addResources(s *mcp.Server) {
