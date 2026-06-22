@@ -1,0 +1,3 @@
+# Hand-formatted: docker-run args are grouped as flag/value pairs per line,
+# which prettier would explode one-token-per-line.
+mcp.json.example
