@@ -506,8 +506,17 @@ func (m *model) handleChatKey(msg tea.KeyMsg) tea.Cmd {
 				return m.start(task)
 			}
 		}
+		return nil
+	case "pgup", "pgdown", "up", "down", "ctrl+u", "ctrl+d":
+		// Scroll the transcript; the single-line prompt ignores these.
+		var cmd tea.Cmd
+		m.vp, cmd = m.vp.Update(msg)
+		return cmd
 	}
-	return nil
+	// Everything else (typed characters, backspace, etc.) goes to the prompt.
+	var cmd tea.Cmd
+	m.input, cmd = m.input.Update(msg)
+	return cmd
 }
 
 // waitForEvent reads the next agent event from the channel as a tea.Msg.

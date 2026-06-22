@@ -85,6 +85,21 @@ func TestSetupProceedCommits(t *testing.T) {
 	}
 }
 
+// TestChatPromptAcceptsTyping guards against the key-routing regression where
+// chat-view keystrokes never reached the prompt input (only esc/enter/ctrl+s
+// were handled), leaving the prompt line untypeable.
+func TestChatPromptAcceptsTyping(t *testing.T) {
+	withTempTUIConfig(t)
+	m := newModel()
+	m.view = viewChat
+	for _, r := range "nmap" {
+		m.handleChatKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{r}})
+	}
+	if got := m.input.Value(); got != "nmap" {
+		t.Fatalf("prompt input = %q, want %q", got, "nmap")
+	}
+}
+
 // TestChatReopenSetup verifies Ctrl+S from the chat view re-opens setup
 // preloaded with the current config.
 func TestChatReopenSetup(t *testing.T) {
