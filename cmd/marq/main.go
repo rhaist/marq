@@ -132,7 +132,7 @@ usage:
   marq agent "<task>"     run the agent host headless (prints each step)
   marq run <tool> [json]  invoke one tool directly (smoke testing)
 
-The agent/tui modes need a local OpenAI-compatible model runtime (Ollama or
-llama.cpp). Configure it with MARQ_MODEL_URL / MARQ_MODEL.
+The agent/tui modes need a local OpenAI-compatible model runtime (LM Studio by
+default, or Ollama / llama.cpp). Configure it with MARQ_MODEL_URL / MARQ_MODEL.
 `)
 }

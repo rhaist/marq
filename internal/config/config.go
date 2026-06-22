@@ -34,7 +34,10 @@ type Config struct {
 	WorkDir string
 
 	// Model runtime — used by the TUI agent host; ignored in MCP serve mode
-	// (there the external client brings its own model).
+	// (there the external client brings its own model). Defaults target LM
+	// Studio (host.docker.internal:1234); select Ollama in the TUI setup screen
+	// or set MARQ_MODEL_URL. ModelName has no default — LM Studio's model id is
+	// whatever you loaded; pick it in the TUI or set MARQ_MODEL for headless use.
 	ModelBaseURL string
 	ModelName    string
 	ModelAPIKey  string
@@ -86,9 +89,9 @@ func Load() Config {
 		MaxOutputChars:    envInt("MARQ_MAX_OUTPUT", 60000),
 		AllowRawShell:     envBool("MARQ_ALLOW_RAW_SHELL", true),
 		WorkDir:           env("MARQ_WORK_DIR", "/work"),
-		ModelBaseURL:      env("MARQ_MODEL_URL", "http://host.docker.internal:11434/v1"),
-		ModelName:         env("MARQ_MODEL", "huihui_ai/Qwen3.6-abliterated:27b"),
-		ModelAPIKey:       env("MARQ_MODEL_KEY", "ollama"),
+		ModelBaseURL:      env("MARQ_MODEL_URL", "http://host.docker.internal:1234/v1"),
+		ModelName:         env("MARQ_MODEL", ""),
+		ModelAPIKey:       env("MARQ_MODEL_KEY", "lm-studio"),
 		Operator:          env("MARQ_OPERATOR", "unknown"),
 		Engagement:        env("MARQ_ENGAGEMENT", "unspecified"),
 		ScopeNote:         env("MARQ_SCOPE", ""),

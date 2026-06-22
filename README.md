@@ -23,10 +23,10 @@ logging on every invocation**, **sandboxed file access**, and a
 **findings report** as the engagement deliverable. One binary, two run
 modes, one tool registry.
 
-| Mode | What it is | Who drives the model |
-| :--- | :--- | :--- |
-| **MCP server** (`marq serve`) | Stdio JSON-RPC server — plug into Claude Desktop, LM Studio, or any MCP client | The external client brings its own model |
-| **TUI agent host** (`marq tui`) | Self-contained terminal UI with its own tool-calling loop | A local model runtime on the host (Ollama / llama.cpp) |
+| Mode                            | What it is                                                                     | Who drives the model                                                                   |
+| :------------------------------ | :----------------------------------------------------------------------------- | :------------------------------------------------------------------------------------- |
+| **MCP server** (`marq serve`)   | Stdio JSON-RPC server — plug into Claude Desktop, LM Studio, or any MCP client | The external client brings its own model                                               |
+| **TUI agent host** (`marq tui`) | Self-contained terminal UI with its own tool-calling loop                      | A local model runtime on the host (LM Studio by default; Ollama / llama.cpp also work) |
 
 Both consume the **same tool registry**, so every tool, resource, and
 audit-record behaves identically in either mode.
@@ -52,8 +52,8 @@ docker run --rm -i marq
 - **MCP server** — merge [`mcp.json.example`](mcp.json.example) into your
   client's config, set `MARQ_SCOPE`, and ask the model to call `server_info`
   first.
-- **TUI agent** — see [`docs/SETUP.md`](docs/SETUP.md) (needs Ollama on the
-  host).
+- **TUI agent** — see [`docs/SETUP.md`](docs/SETUP.md) (needs a local model
+  runtime on the host — LM Studio by default, Ollama also supported).
 
 Full per-OS install (macOS + Debian Testing): **[`docs/SETUP.md`](docs/SETUP.md)**.
 Tool reference, env vars & API keys: **[`docs/USAGE.md`](docs/USAGE.md)**.
@@ -64,18 +64,18 @@ Tool reference, env vars & API keys: **[`docs/USAGE.md`](docs/USAGE.md)**.
 
 ### Full tool suite on a Kali base
 
-| Category | Tools |
-| :--- | :--- |
-| **Recon / network** | `nmap` · `masscan` · `naabu` · `dnsx` · `dnsrecon` · `subfinder` · `httpx_probe` · `dns_lookup` · `whois_lookup` |
-| **OSINT — org/domain** | `theharvester` · `spiderfoot` · `shodan_host` · `shodan_search` · `gitleaks` · `trufflehog` · `gau_urls` · `wayback_urls` · `exif_metadata` |
-| **OSINT — people** | `sherlock` · `maigret_username` · `holehe_email` · `h8mail_breach` · `phoneinfoga` |
-| **Web app** | `nuclei` · `nikto` · `feroxbuster` · `katana` · `ffuf` · `gobuster_dir` · `arjun` · `whatweb` · `wafw00f` · `cmseek` · `wpscan` · `testssl` · `dalfox` · `sqlmap` |
-| **Exploitation** | `msfconsole` · `hydra` · `searchsploit` |
-| **Credentials** | `john` · `hashcat` · `hash_identify` |
-| **Files** (sandboxed `/work`, `/tmp`) | `list_dir` · `read_file` · `write_file` |
-| **Findings & jobs** | `report_finding` · `render_report` · `list_jobs` · `job_status` |
-| **Knowledge** | `load_skill` |
-| **Escape hatch** (opt-in) | `run_shell` |
+| Category                              | Tools                                                                                                                                                             |
+| :------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Recon / network**                   | `nmap` · `masscan` · `naabu` · `dnsx` · `dnsrecon` · `subfinder` · `httpx_probe` · `dns_lookup` · `whois_lookup`                                                  |
+| **OSINT — org/domain**                | `theharvester` · `spiderfoot` · `shodan_host` · `shodan_search` · `gitleaks` · `trufflehog` · `gau_urls` · `wayback_urls` · `exif_metadata`                       |
+| **OSINT — people**                    | `sherlock` · `maigret_username` · `holehe_email` · `h8mail_breach` · `phoneinfoga`                                                                                |
+| **Web app**                           | `nuclei` · `nikto` · `feroxbuster` · `katana` · `ffuf` · `gobuster_dir` · `arjun` · `whatweb` · `wafw00f` · `cmseek` · `wpscan` · `testssl` · `dalfox` · `sqlmap` |
+| **Exploitation**                      | `msfconsole` · `hydra` · `searchsploit`                                                                                                                           |
+| **Credentials**                       | `john` · `hashcat` · `hash_identify`                                                                                                                              |
+| **Files** (sandboxed `/work`, `/tmp`) | `list_dir` · `read_file` · `write_file`                                                                                                                           |
+| **Findings & jobs**                   | `report_finding` · `render_report` · `list_jobs` · `job_status`                                                                                                   |
+| **Knowledge**                         | `load_skill`                                                                                                                                                      |
+| **Escape hatch** (opt-in)             | `run_shell`                                                                                                                                                       |
 
 ### Built for engagements
 
@@ -122,11 +122,11 @@ hard scope-enforcement would go to move beyond logging-only guardrails).
 
 ## Documentation
 
-| Doc | What's in it |
-| :--- | :--- |
-| [`docs/SETUP.md`](docs/SETUP.md) | Per-OS install for macOS & Debian Testing, both run modes |
-| [`docs/USAGE.md`](docs/USAGE.md) | Every tool, env vars, API keys, reading the audit log |
-| [`docs/SECURITY.md`](docs/SECURITY.md) | Legal/ethical baseline, the guardrail model, hardening |
+| Doc                                    | What's in it                                              |
+| :------------------------------------- | :-------------------------------------------------------- |
+| [`docs/SETUP.md`](docs/SETUP.md)       | Per-OS install for macOS & Debian Testing, both run modes |
+| [`docs/USAGE.md`](docs/USAGE.md)       | Every tool, env vars, API keys, reading the audit log     |
+| [`docs/SECURITY.md`](docs/SECURITY.md) | Legal/ethical baseline, the guardrail model, hardening    |
 
 ---
 

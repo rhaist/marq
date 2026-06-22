@@ -17,10 +17,10 @@ installed and how the container reaches it.
 
 ## Two ways to run
 
-| Mode | Command | Needs a local model? | Who drives the model |
-|------|---------|----------------------|----------------------|
-| **MCP server** | `marq serve` (default) | No | An external MCP client (Claude Desktop, LM Studio) brings its own |
-| **Agent host / TUI** | `marq tui` / `marq agent "<task>"` | **Yes** (Ollama on the host) | The binary's own tool-calling loop |
+| Mode                 | Command                            | Needs a local model?                      | Who drives the model                                              |
+| -------------------- | ---------------------------------- | ----------------------------------------- | ----------------------------------------------------------------- |
+| **MCP server**       | `marq serve` (default)             | No                                        | An external MCP client (Claude Desktop, LM Studio) brings its own |
+| **Agent host / TUI** | `marq tui` / `marq agent "<task>"` | **Yes** (LM Studio or Ollama on the host) | The binary's own tool-calling loop                                |
 
 The image is the same. Pick a section below for your OS; do the **common build**
 once, then the **MCP server** and/or **agent/TUI** subsections.
@@ -30,6 +30,7 @@ once, then the **MCP server** and/or **agent/TUI** subsections.
 ## macOS
 
 ### 1. Prerequisites
+
 ```bash
 # Docker Desktop (provides `host.docker.internal` automatically)
 brew install --cask docker        # then launch Docker.app once and let it start
@@ -39,6 +40,7 @@ brew install go
 ```
 
 ### 2. Build the image
+
 ```bash
 git clone <this-repo> marq && cd marq
 docker build -t marq .     # builds natively for your arch (arm64 on M-series)
@@ -47,6 +49,7 @@ docker build --build-arg WARMUP=0 -t marq .
 ```
 
 ### 3. Run as an MCP server (external client brings the model)
+
 ```bash
 docker run --rm -i \
   --security-opt no-new-privileges:true --cap-drop ALL \
@@ -56,30 +59,51 @@ docker run --rm -i \
   -e MARQ_SCOPE="*.example.com — per SOW" \
   marq
 ```
+
 Or wire it into LM Studio / Claude Desktop with [`mcp.json.example`](../mcp.json.example).
 
 ### 4. Run the agent host / TUI (local model)
-```bash
-# Install + start Ollama, pull an uncensored tool-calling model
-brew install ollama
-ollama serve >/dev/null 2>&1 &                       # or run the Ollama app
-ollama pull huihui_ai/Qwen3.6-abliterated:27b        # ~17 GB, fits 24 GB unified
 
+marq defaults to **LM Studio** (port 1234). Download LM Studio, load an
+uncensored tool-calling model, and start its local server (**Developer →
+Start Server**). Then:
+
+```bash
 mkdir -p work
 docker run --rm -it \
-  -e MARQ_MODEL_URL=http://host.docker.internal:11434/v1 \
-  -e MARQ_MODEL=huihui_ai/Qwen3.6-abliterated:27b \
+  -e MARQ_MODEL=<your-loaded-model-id> \
   -e MARQ_OPERATOR=your-name -e MARQ_ENGAGEMENT=acme-2026 \
   -e MARQ_SCOPE="*.example.com — per SOW" \
   -v "$PWD/work:/work" \
   marq tui
 ```
-On Docker Desktop, `host.docker.internal` resolves to the host, so Ollama bound
-to its default `127.0.0.1:11434` is reachable from the container as-is.
+
+The endpoint defaults to `http://host.docker.internal:1234/v1`; on Docker
+Desktop that resolves to the host, so LM Studio on its default
+`127.0.0.1:1234` is reachable as-is.
+
+<details><summary><strong>Prefer Ollama?</strong></summary>
+
+```bash
+brew install ollama
+ollama serve >/dev/null 2>&1 &                       # or run the Ollama app
+ollama pull huihui_ai/Qwen3.6-abliterated:27b        # ~17 GB, fits 24 GB unified
+
+docker run --rm -it \
+  -e MARQ_MODEL_URL=http://host.docker.internal:11434/v1 \
+  -e MARQ_MODEL=huihui_ai/Qwen3.6-abliterated:27b \
+  -e MARQ_OPERATOR=your-name -e MARQ_SCOPE="*.example.com — per SOW" \
+  -v "$PWD/work:/work" \
+  marq tui
+```
+
+Or just select **Ollama** in the TUI setup screen (see the note below).
+
+</details>
 
 > **Prefer to configure in the TUI?** Drop the `-e MARQ_*` model/engagement
 > flags and just run `docker run --rm -it -v "$PWD/work:/work" marq tui`. On
-> first launch it opens a setup screen: pick **Ollama / LM Studio / Custom**
+> first launch it opens a setup screen: pick **LM Studio / Ollama / Custom**
 > with ←/→, edit endpoint + model + operator/scope, and **Enter** runs a
 > `/v1/models` connection check. Choices persist to `work/.marq/tui.json` and
 > subsequent launches skip setup (press **Ctrl+S** in chat to re-edit). Env
@@ -90,6 +114,7 @@ to its default `127.0.0.1:11434` is reachable from the container as-is.
 ## Debian Testing (rolling)
 
 ### 1. Prerequisites
+
 ```bash
 # Docker engine + buildx (Testing ships a recent docker.io with BuildKit)
 sudo apt update && sudo apt install -y docker.io docker-buildx git curl
@@ -99,31 +124,41 @@ sudo systemctl enable --now docker
 # Optional, only for local Go dev
 sudo apt install -y golang
 ```
+
 (Alternatively use Docker's official CE repo; `docker.io` from Testing is fine.)
 
 ### 2. Build the image
+
 ```bash
 git clone <this-repo> marq && cd marq
 docker build -t marq .          # native amd64 (or arm64 on ARM boards)
 ```
 
 ### 3. Run as an MCP server (external client brings the model)
+
 Same as macOS step 3 above — identical command.
 
 ### 4. Run the agent host / TUI (local model)
+
+marq's baked default is LM Studio, but on a headless Debian box **Ollama** is
+the practical runtime (LM Studio is a desktop GUI app). The commands below set
+`MARQ_MODEL_URL` to the Ollama endpoint explicitly — overriding the default —
+or you can select Ollama in the TUI setup screen.
+
 ```bash
 # Install Ollama (installs a systemd service listening on 127.0.0.1:11434)
 curl -fsSL https://ollama.com/install.sh | sh
 ollama pull huihui_ai/Qwen3.6-abliterated:27b
 ```
 
-**Networking — the one real difference from macOS.** Linux containers do *not*
+**Networking — the one real difference from macOS.** Linux containers do _not_
 get `host.docker.internal` for free and the host's `127.0.0.1` is not the
 container's. Two clean options:
 
 **Option A — `--network=host` (recommended for a marq box).** The container
 shares the host network namespace, so Ollama on `127.0.0.1:11434` is reached
-directly *and* the scanning tools get unmediated network access to targets.
+directly _and_ the scanning tools get unmediated network access to targets.
+
 ```bash
 mkdir -p work && chmod a+rwx work      # so the container's non-root user can write findings
 docker run --rm -it --network=host \
@@ -139,6 +174,7 @@ docker run --rm -it --network=host \
 own network and add a host alias. Ollama must then listen on an interface the
 bridge can reach, so set `OLLAMA_HOST=0.0.0.0` (⚠️ this exposes Ollama on all
 host interfaces — restrict with a firewall):
+
 ```bash
 sudo systemctl edit ollama     # add:  [Service]  Environment="OLLAMA_HOST=0.0.0.0:11434"
 sudo systemctl restart ollama
@@ -166,8 +202,9 @@ docker run --rm -it --add-host=host.docker.internal:host-gateway \
 
 ## Local Go development (both OSes)
 
-Iterate on the server/tool layer without a Docker build (tool *calls* still need
+Iterate on the server/tool layer without a Docker build (tool _calls_ still need
 the Kali binaries, so most only fully work in-container):
+
 ```bash
 go build ./... && go vet ./... && go test ./...   # build + sanity gate
 go run ./cmd/marq serve                         # stdio MCP server locally
@@ -190,10 +227,11 @@ printf '%s\n' \
  '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
  | docker run --rm -i marq | grep -o '"name":"[a-z_]*"' | wc -l
 
-# Validate the model does reliable multi-tool calling (needs Ollama running):
+# Validate the model does reliable multi-tool calling (needs a model runtime running):
 docker run --rm -i <networking flags for your OS> \
   -e MARQ_MODEL_URL=... -e MARQ_MODEL=... \
   marq agent "resolve and port-scan scanme.nmap.org, then summarize"
 ```
+
 The full end-to-end harness is `scripts/verify_tools.sh` (drives the built image
 over MCP).

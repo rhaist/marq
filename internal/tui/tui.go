@@ -4,7 +4,7 @@
 // events stream in over a channel consumed by a re-subscribing tea.Cmd.
 //
 // On launch it first shows a setup screen where the operator picks the model
-// backend (Ollama / LM Studio / custom), edits the endpoint + model +
+// backend (LM Studio / Ollama / custom), edits the endpoint + model +
 // engagement fields, and verifies the endpoint with a /v1/models probe. The
 // choices persist to config.C.TUIConfigPath so subsequent launches skip setup
 // (Ctrl+S re-opens it).
@@ -92,13 +92,13 @@ type backend struct {
 	name    string
 	baseURL string
 	apiKey  string
-	model   string // suggested model (only a placeholder hint)
 }
 
+// LM Studio is the default (index 0); Ollama is the configurable alternative.
 var backends = []backend{
-	{name: "Ollama", baseURL: "http://host.docker.internal:11434/v1", apiKey: "ollama", model: "huihui_ai/Qwen3.6-abliterated:27b"},
-	{name: "LM Studio", baseURL: "http://host.docker.internal:1234/v1", apiKey: "lm-studio", model: ""},
-	{name: "Custom", baseURL: "", apiKey: "", model: ""},
+	{name: "LM Studio", baseURL: "http://host.docker.internal:1234/v1", apiKey: "lm-studio"},
+	{name: "Ollama", baseURL: "http://host.docker.internal:11434/v1", apiKey: "ollama"},
+	{name: "Custom", baseURL: "", apiKey: ""},
 }
 
 const (
@@ -179,7 +179,7 @@ func (m *model) buildSetupForm() {
 	m.fields[fiBackend] = newCycleField("Backend", bIdx, backendNames(), "←/→ to change")
 	m.fields[fiBaseURL] = newTextField("Base URL", c.ModelBaseURL, "OpenAI-compatible /v1 endpoint", 50)
 	m.fields[fiModel] = newTextField("Model", c.ModelName, "model id (from /v1/models)", 40)
-	m.fields[fiKey] = newTextField("API key", c.ModelAPIKey, "bearer token (Ollama ignores it)", 30)
+	m.fields[fiKey] = newTextField("API key", c.ModelAPIKey, "bearer token (local runtimes ignore it)", 30)
 	m.fields[fiOperator] = newTextField("Operator", c.Operator, "your name", 20)
 	m.fields[fiEngagement] = newTextField("Engagement", c.Engagement, "engagement id", 20)
 	m.fields[fiScope] = newTextField("Scope", c.ScopeNote, "authorized targets — set this!", 60)

@@ -11,7 +11,7 @@ import (
 )
 
 // TestSetupViewRendering checks the setup screen renders and starts on the
-// Ollama preset when no persisted config exists.
+// LM Studio preset (the default) when no persisted config exists.
 func TestSetupViewRendering(t *testing.T) {
 	withTempTUIConfig(t)
 	m := newModel()
@@ -22,13 +22,13 @@ func TestSetupViewRendering(t *testing.T) {
 	if !strings.Contains(out, "marq · setup") || !strings.Contains(out, "Backend") {
 		t.Fatalf("setup view missing expected content:\n%s", out)
 	}
-	if !strings.Contains(out, "[ Ollama ]") {
-		t.Fatalf("expected Ollama preset selected:\n%s", out)
+	if !strings.Contains(out, "[ LM Studio ]") {
+		t.Fatalf("expected LM Studio preset selected:\n%s", out)
 	}
 }
 
 // TestSetupBackendCycle verifies cycling the backend selector applies the
-// LM Studio preset to Base URL + API key.
+// next preset (Ollama) to Base URL + API key.
 func TestSetupBackendCycle(t *testing.T) {
 	withTempTUIConfig(t)
 	m := newModel()
@@ -37,7 +37,7 @@ func TestSetupBackendCycle(t *testing.T) {
 
 	m.handleSetupKey(tea.KeyMsg{Type: tea.KeyRight})
 	if m.fields[fiBackend].idx != 1 {
-		t.Fatalf("backend idx = %d, want 1 (LM Studio)", m.fields[fiBackend].idx)
+		t.Fatalf("backend idx = %d, want 1 (Ollama)", m.fields[fiBackend].idx)
 	}
 	if got := m.fields[fiBaseURL].input.Value(); got != backends[1].baseURL {
 		t.Fatalf("base URL preset = %q, want %q", got, backends[1].baseURL)
@@ -46,7 +46,7 @@ func TestSetupBackendCycle(t *testing.T) {
 		t.Fatalf("api key preset = %q, want %q", got, backends[1].apiKey)
 	}
 
-	// Left cycles back to Ollama and restores its preset.
+	// Left cycles back to LM Studio and restores its preset.
 	m.handleSetupKey(tea.KeyMsg{Type: tea.KeyLeft})
 	if m.fields[fiBackend].idx != 0 {
 		t.Fatalf("backend idx = %d, want 0", m.fields[fiBackend].idx)
@@ -64,7 +64,7 @@ func TestSetupProceedCommits(t *testing.T) {
 	m.w, m.h = 80, 24
 	m.focus = fiBackend
 
-	// Switch to LM Studio and edit a couple of fields.
+	// Switch to the next backend (Ollama) and edit a couple of fields.
 	m.handleSetupKey(tea.KeyMsg{Type: tea.KeyRight})
 	m.fields[fiOperator].input.SetValue("alice")
 	m.fields[fiScope].input.SetValue("*.example.com")
