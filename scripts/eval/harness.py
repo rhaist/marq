@@ -83,7 +83,7 @@ class MCP:
     def list_tools(self):
         return self.call("tools/list", {}, timeout=60).get("result", {}).get("tools", [])
 
-    def call_tool(self, name, args, timeout=300):
+    def call_tool(self, name, args, timeout=60):
         resp = self.call("tools/call", {"name": name, "arguments": args}, timeout)
         result = resp.get("result", {})
         parts = [c.get("text", "") for c in result.get("content", []) if c.get("type") == "text"]
@@ -213,6 +213,7 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
             else:  # text-form calls: record the turn as plain assistant text
                 messages.append({"role": "assistant", "content": (msg.get("content") or msg.get("reasoning_content") or "")[:4000]})
             text_results = []
+            aborted = False
             for tc in (structured or text_calls):
                 if structured:
                     fn = tc.get("function", {})
@@ -222,13 +223,23 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
                     name, a = tc.get("name", ""), tc.get("arguments") or {}
                     if isinstance(a, str):
                         a = _loads(a)
-                out, is_err = mcp.call_tool(name, a)
+                via = "structured" if structured else "text"
+                try:  # a hung/dead tool fails THIS run, never the whole sweep
+                    out, is_err = mcp.call_tool(name, a)
+                except Exception as e:
+                    trace.append({"step": step, "name": name, "args": a, "is_error": True,
+                                  "result_head": f"[tool call failed: {e}]"[:600], "via": via})
+                    final = final or f"[aborted: {name} {e}]"
+                    aborted = True
+                    break
                 trace.append({"step": step, "name": name, "args": a, "is_error": is_err,
-                              "result_head": out[:600], "via": "structured" if structured else "text"})
+                              "result_head": out[:600], "via": via})
                 if structured:
                     messages.append({"role": "tool", "tool_call_id": tc.get("id", ""), "content": out})
                 else:
                     text_results.append(f"{name} -> {out}")
+            if aborted:  # marq server likely wedged; end this run, next spawns fresh
+                break
             if text_results:  # feed text-call results back as a user turn (no tool_call_id to bind to)
                 messages.append({"role": "user", "content": "[tool results]\n" + "\n".join(text_results)})
 
