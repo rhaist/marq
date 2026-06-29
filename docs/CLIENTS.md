@@ -35,20 +35,27 @@ identical.
 
 ## Claude Code (frontier expert)
 
-Quickest path — register the server (use the hardened docker args from
-[`../mcp.json.example`](../mcp.json.example)):
+Quickest path — register the server (`--scope user` makes it available in every
+project; drop it for project-local). Uses the hardened docker args from
+[`../mcp.json.example`](../mcp.json.example):
 
 ```bash
-claude mcp add marq -- docker run --rm -i \
+claude mcp add marq --scope user -- docker run --rm -i \
   --security-opt no-new-privileges:true --cap-drop ALL \
   --cap-add NET_RAW --cap-add NET_ADMIN --cap-add NET_BIND_SERVICE \
-  -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR marq
+  -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR=marq marq
+
+claude mcp list                    # confirm "marq … ✔ Connected"
 ```
 
-Or commit a project [`.mcp.json`](https://docs.anthropic.com/en/docs/claude-code/mcp)
-with the `mcpServers` block from `mcp.json.example` (same schema). Then in the
-session: ask it to call `server_info`, record scope with `set_engagement`, then
-`load_skill` the domain you're in.
+The named volumes (`marq-audit`, `marq-work`) persist the audit log and
+findings/reports across sessions. **MCP servers load at session start, so
+restart Claude Code** before marq's tools/skills appear. Or commit a project
+[`.mcp.json`](https://docs.anthropic.com/en/docs/claude-code/mcp) with the
+`mcpServers` block from `mcp.json.example` (same schema). Then ask it to call
+`server_info` first; `load_skill` the domain you're in; for active testing,
+record authorization with `set_engagement`. Remove with `claude mcp remove marq
+-s user`.
 
 **Best for:** "review this architecture against zero-trust", "map our findings
 to ISO 27001 and SOC 2", "build me an incident runbook", "threat-model this
