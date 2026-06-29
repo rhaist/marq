@@ -174,5 +174,8 @@ hard scope-enforcement would go to move beyond logging-only guardrails).
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE). Provided for authorized security testing and
-education. No warranty; use responsibly and legally.
+**GNU AGPLv3** — see [`LICENSE`](LICENSE). Copyright © 2026 marq contributors.
+marq is free software: you may use, study, modify and share it under the AGPLv3;
+if you run a modified version as a network service, you must offer your users its
+source. Provided for authorized security testing and education, **with no
+warranty** — use responsibly and legally.

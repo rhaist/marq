@@ -1,3 +1,12 @@
+// marq — a universal cyber assistant.
+// Copyright (C) 2026 marq contributors
+//
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU Affero General Public License as published by the Free
+// Software Foundation, either version 3 of the License, or (at your option) any
+// later version. It is distributed WITHOUT ANY WARRANTY. See the LICENSE file or
+// <https://www.gnu.org/licenses/> for details.
+
 // Command marq is the single binary for the marq toolkit. It exposes the
 // shared tool registry two ways:
 //
