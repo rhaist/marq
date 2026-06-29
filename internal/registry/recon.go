@@ -274,8 +274,13 @@ func recon() []Tool {
 				{Name: "options", Type: StringParam, Desc: "extra censys flags", Default: ""},
 			},
 			Build: func(a Args) Invocation {
-				cmd := "if [ -n \"$CENSYS_API_ID\" ]; then export CENSYS_API_ID; fi; if [ -n \"$CENSYS_API_SECRET\" ]; then export CENSYS_API_SECRET; fi; censys search " + shellword.Quote(a.S("query")) + " --type " + a.S("index") + " " + a.S("options")
-				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("query")}
+				// Direct argv — no shell. The CENSYS_API_* env vars are inherited by
+				// the child process (runner doesn't override cmd.Env), so the old
+				// `/bin/bash -c` export dance was redundant and let `index`/`options`
+				// inject shell commands. query/index are discrete args now.
+				argv := []string{"censys", "search", a.S("query"), "--type", a.S("index")}
+				argv = append(argv, shellword.Split(a.S("options"))...)
+				return Invocation{Argv: argv, Target: a.S("query")}
 			},
 		},
 	}
