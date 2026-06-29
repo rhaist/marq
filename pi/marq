@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # marq host shim — the "binary outside Docker".
 #
-# marq's tools (nmap, nuclei, impacket, …) live inside the Kali image, but Pi and
-# the local model run on the host. This shim forwards tool calls into a long-lived
-# marq container so the model can just call `marq run <tool> '<json>'` from bash.
+# marq's tools live inside the image, but Pi and the local model run on the host.
+# This shim forwards tool calls into a long-lived marq container so the model can
+# just call `marq run <tool> '<json>'` from bash — across any domain (recon, malware
+# triage, threat-intel, GRC, standards, CISO advice; testing is one of them).
 #
-# Install:  cp pi/marq /usr/local/bin/marq && chmod +x /usr/local/bin/marq
-# Session:  marq up ~/engagements/acme      # start the container, bind /work
-#           marq run server_info '{}'        # the model uses this form
-#           marq down                        # tear down
+# Install:  install -m 0755 pi/marq ~/.local/bin/marq
+# Session:  marq up ~/marq/work        # start the container, bind /work to a workspace
+#           marq run server_info '{}'   # the model uses this form
+#           marq down                   # tear down
 #
 # A long-lived container (not `docker run` per call) is required: background tools
 # (spiderfoot, responder, ntlmrelayx) detach inside it and are polled later with
@@ -19,7 +20,7 @@ IMG="${MARQ_IMAGE:-marq:latest}"
 
 case "${1:-}" in
   up)
-    work="${2:?usage: marq up <engagement-dir>}"
+    work="${2:?usage: marq up <workspace-dir>}"
     mkdir -p "$work"
     docker rm -f "$C" >/dev/null 2>&1 || true
     # caps: nmap/masscan/naabu SYN scans. env-file (optional, see .env.example): API keys.

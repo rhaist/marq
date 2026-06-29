@@ -85,8 +85,10 @@ steps (Claude Code, Codex, LM Studio) are in [`CLIENTS.md`](CLIENTS.md).
 
 [Pi](https://pi.dev/) is a minimal terminal agent that runs a local/abliterated
 model over an OpenAI-compatible endpoint (LM Studio / Ollama / llama-server) and
-gives the model bash. The model reaches marq's tools through the `pi/marq` host
-shim, which forwards each call into a long-lived container over `docker exec`.
+gives the model bash. This is the fully-local way to drive marq as an all-round
+cyber agent — research, malware triage, threat-intel, GRC and standards work, and
+authorized testing — through the `pi/marq` host shim, which forwards each call
+into a long-lived container over `docker exec`.
 
 ```bash
 # Put the shim on your PATH in a user-owned dir (don't pollute Homebrew's prefix
@@ -95,10 +97,11 @@ mkdir -p ~/.local/bin
 install -m 0755 pi/marq ~/.local/bin/marq     # copy; or, to track the repo:
 # ln -sf "$PWD/pi/marq" ~/.local/bin/marq      # symlink — updates with the repo
 
-# Start ONE long-lived container, bound to your engagement dir
-marq up ~/engagements/acme        # docker run -d … sleep infinity
+# Start ONE long-lived container, bound to a workspace dir (whatever you're
+# working on — a research folder, a sample dir, a compliance project, a test):
+marq up ~/marq/work               # docker run -d … sleep infinity
 marq tools                        # list every tool (sanity check)
-marq run server_info '{}'         # confirm scope
+marq run server_info '{}'         # what marq covers + current authorization state
 marq down                         # tear down when finished
 ```
 

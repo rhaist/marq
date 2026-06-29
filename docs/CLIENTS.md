@@ -94,14 +94,14 @@ The fully-local path — no cloud, no refusals, on-box execution. See
 
 ```bash
 install -m 0755 pi/marq ~/.local/bin/marq         # user-owned dir on PATH
-marq up ~/engagements/acme                        # long-lived container
+marq up ~/marq/work                               # long-lived container, any workspace
 # add an LM Studio provider extension + register the marq skill in
 # ~/.pi/agent/settings.json, then run `pi` — full steps in SETUP.md
 ```
 
-**Best for:** hands-on offensive engagements with an abliterated model — recon,
-exploitation, AD, malware triage — where you want everything local and nothing
-filtered.
+**Best for:** any cyber work you want fully local on an uncensored model —
+malware triage, threat-intel pivoting, research, and hands-on offensive testing —
+where nothing leaves the box and nothing is filtered.
 
 ---
 
