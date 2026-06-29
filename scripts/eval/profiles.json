@@ -1,5 +1,5 @@
 {
-  "_comment": "Per-model harness config — merged over the CLI defaults so each model competes under its own recorded settings (and that config is stamped into every measurement). Keys: temperature, top_p, no_think, max_steps. 'default' applies to any model without its own entry.",
+  "_comment": "Per-model harness config — merged over the CLI defaults so each model competes under its own recorded settings (stamped into every measurement). Harness-control keys: no_think, max_steps. Everything else is passed as sampling: temperature, top_p, and LM Studio extras top_k, min_p, repeat_penalty. 'default' applies to any model without its own entry.",
   "default": {},
   "qwen3-14b-uncensored-i1": { "no_think": true, "max_steps": 5 }
 }

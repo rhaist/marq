@@ -192,7 +192,10 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
         messages = [{"role": "system", "content": system},
                     {"role": "user", "content": task["prompt"]}]
         tool_schemas = openai_tools(tools)
-        sampling = {"temperature": cfg["temperature"], "top_p": cfg["top_p"]}
+        # Everything in cfg except the harness-control keys is sampling, so a
+        # profile can carry a model's full recommended set (top_k/min_p/
+        # repeat_penalty etc.) — LM Studio's OpenAI endpoint accepts the extras.
+        sampling = {k: v for k, v in cfg.items() if k not in ("no_think", "max_steps")}
         trace = []      # tool calls (scored)
         responses = []  # raw model turns incl. reasoning (for later semantic analysis)
         final = ""
