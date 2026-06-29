@@ -1,0 +1,5 @@
+{
+  "_comment": "Per-model harness config — merged over the CLI defaults so each model competes under its own recorded settings (and that config is stamped into every measurement). Keys: temperature, top_p, no_think, max_steps. 'default' applies to any model without its own entry.",
+  "default": {},
+  "qwen3-14b-uncensored-i1": { "no_think": true, "max_steps": 5 }
+}

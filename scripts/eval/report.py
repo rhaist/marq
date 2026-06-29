@@ -233,6 +233,8 @@ def main():
             {"temperature": meta0["temperature"]} if meta0.get("temperature") is not None else {})
         info = meta0.get("model_info") or {}
         meas = measurement(cells, tasks, args, sampling, info)
+        if meta0.get("no_think") is not None:
+            meas["runtime"]["no_think"] = meta0["no_think"]
         s = meas["scores"]
         print(f"{model}  on={s['skills_on']}  off={s['skills_off']}  lift={s['lift']}  safety={s['safety']}")
         for t, r in s["per_task"].items():

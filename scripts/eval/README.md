@@ -83,10 +83,29 @@ A score is only comparable alongside its context, so every measurement pins it:
   `--quant` / add `--note` for anything the API can't see (GPU offload, server
   version). Other runtimes (Ollama, llama-server) fall back to the flags.
 
-Slow models: thinking models (qwen3 etc.) reason before every tool call, which
-is costly over marq's ~90 tool schemas. `--no-think` appends `/no_think` to skip
-it; combine with a modest `--max-steps` (e.g. 5) so a model that flails on a
-missing tool doesn't burn the budget.
+### Per-model config (`profiles.json`)
+
+Every model has preferences — qwen3 _needs_ `/no_think` (a mode, not a luxury),
+others want a different temperature or step budget. A single fixed harness config
+would quietly bias the comparison. So `profiles.json` maps a model id to config
+overrides (`temperature`, `top_p`, `no_think`, `max_steps`) merged over the CLI
+defaults, and the **effective config is stamped into every measurement**:
+
+```json
+{
+  "default": {},
+  "qwen3-14b-uncensored-i1": { "no_think": true, "max_steps": 5 }
+}
+```
+
+This is a deliberate methodology choice: the leaderboard ranks each model at the
+config it _best drives marq with_ (what you'd actually run), not at one
+artificial setting — and because the config rides along in the result, the
+comparison stays honest and you can A/B a model to find its sweet spot. (Want
+strict apples-to-apples instead? Leave `profiles.json` at `{"default": {}}` and
+every model runs identically.) Thinking models are the clearest case: reasoning
+before each tool call is costly over marq's ~90 schemas, so `no_think` + a modest
+`max_steps` keeps them from crawling or flailing on a tool that isn't present.
 
 `results/<model>.json` keeps a **history** (a measurement per run), so you can
 watch a model move as marq evolves and see new models slot in. Pass-rates are

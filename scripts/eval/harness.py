@@ -144,7 +144,7 @@ def spawn_marq(marq_cmd, work):
     )
 
 
-def run_task(args, model, skills_on, task, repeat, model_info):
+def run_task(args, model, skills_on, task, repeat, model_info, cfg):
     slug = model.replace("/", "_").replace(":", "_")
     rundir = (pathlib.Path(args.out)
               / f"{slug}__skills-{'on' if skills_on else 'off'}__{task['id']}__r{repeat}")
@@ -162,17 +162,18 @@ def run_task(args, model, skills_on, task, repeat, model_info):
                       "complete the task. Only act within authorized scope.")
         else:
             system = init.get("instructions") or "You are marq, a security assistant."
-        if args.no_think:
+        if cfg["no_think"]:
             system += "\n\n/no_think"  # qwen3 et al.: skip the reasoning block (much faster)
 
         messages = [{"role": "system", "content": system},
                     {"role": "user", "content": task["prompt"]}]
         tool_schemas = openai_tools(tools)
+        sampling = {"temperature": cfg["temperature"], "top_p": cfg["top_p"]}
         trace = []
         final = ""
-        for step in range(args.max_steps):
+        for step in range(cfg["max_steps"]):
             try:
-                msg = chat(args.base_url, args.api_key, model, messages, tool_schemas, args.timeout, args.sampling)
+                msg = chat(args.base_url, args.api_key, model, messages, tool_schemas, args.timeout, sampling)
             except Exception as e:  # endpoint down / model missing — record and stop
                 final = f"[harness error: {e}]"
                 break
@@ -194,7 +195,8 @@ def run_task(args, model, skills_on, task, repeat, model_info):
         (rundir / "messages.json").write_text(json.dumps(messages, indent=2))
         (rundir / "meta.json").write_text(json.dumps({
             "model": model, "skills_on": skills_on, "task": task["id"], "repeat": repeat,
-            "sampling": args.sampling, "base_url": args.base_url, "model_info": model_info,
+            "sampling": sampling, "no_think": cfg["no_think"], "max_steps": cfg["max_steps"],
+            "base_url": args.base_url, "model_info": model_info,
             "steps": len(trace), "final": final,
         }, indent=2))
         print(f"  {rundir.name}: {len(trace)} tool calls")
@@ -227,7 +229,8 @@ def main():
     p.add_argument("--repeats", type=int, default=1, help="runs per task (use 3+ for published numbers; LLMs are stochastic)")
     p.add_argument("--temperature", type=float, default=0.2, help="pinned + recorded for reproducibility")
     p.add_argument("--top-p", type=float, default=1.0, help="pinned + recorded for reproducibility")
-    p.add_argument("--no-think", action="store_true", help="append /no_think to the system prompt (qwen3 et al.: skip reasoning, much faster)")
+    p.add_argument("--no-think", action="store_true", help="default; append /no_think to skip reasoning (qwen3 et al.) — override per model in profiles.json")
+    p.add_argument("--profiles", default=str(pathlib.Path(__file__).with_name("profiles.json")), help="per-model config overrides (temperature/top_p/no_think/max_steps)")
     p.add_argument("--timeout", type=int, default=300, help="per model call (s)")
     p.add_argument("--list-tools", action="store_true", help="smoke the marq MCP leg and exit")
     args = p.parse_args()
@@ -247,7 +250,7 @@ def main():
             proc.terminate()
         return 0
 
-    args.sampling = {"temperature": args.temperature, "top_p": args.top_p}
+    profiles = json.loads(pathlib.Path(args.profiles).read_text()) if pathlib.Path(args.profiles).is_file() else {}
     models = [m.strip() for m in args.models.split(",") if m.strip()]
     if not models:
         p.error("pass --models (comma-separated) or --list-tools")
@@ -255,14 +258,19 @@ def main():
     tasks = [json.loads(l) for l in open(args.tasks) if l.strip()]
 
     for model in models:
+        # CLI flags are the defaults; the model's profile (else "default") overrides
+        # them, so each model competes under its own recorded config.
+        cfg = {"temperature": args.temperature, "top_p": args.top_p,
+               "no_think": args.no_think, "max_steps": args.max_steps}
+        cfg.update(profiles.get(model) or profiles.get("default") or {})
         info = native_model_info(args.base_url, model)
-        if info:
-            print(f"# {model}: quant={info.get('quantization','?')} ctx={info.get('loaded_context_length','?')} arch={info.get('arch','?')}")
+        print(f"# {model}: quant={info.get('quantization','?')} ctx={info.get('loaded_context_length','?')} "
+              f"| temp={cfg['temperature']} top_p={cfg['top_p']} no_think={cfg['no_think']} max_steps={cfg['max_steps']}")
         for on in skills:
             print(f"# model={model} skills={'on' if on else 'off'}")
             for task in tasks:
                 for r in range(args.repeats):
-                    run_task(args, model, on, task, r, info)
+                    run_task(args, model, on, task, r, info, cfg)
     print(f"\nruns in {args.out}")
     print(f"look:    python3 scripts/eval/report.py {args.out} --no-publish")
     print(f"publish: python3 scripts/eval/report.py {args.out} --quant <Q> --runtime lm-studio")
