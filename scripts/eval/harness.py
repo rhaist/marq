@@ -169,7 +169,8 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
                     {"role": "user", "content": task["prompt"]}]
         tool_schemas = openai_tools(tools)
         sampling = {"temperature": cfg["temperature"], "top_p": cfg["top_p"]}
-        trace = []
+        trace = []      # tool calls (scored)
+        responses = []  # raw model turns incl. reasoning (for later semantic analysis)
         final = ""
         for step in range(cfg["max_steps"]):
             try:
@@ -177,6 +178,9 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
             except Exception as e:  # endpoint down / model missing — record and stop
                 final = f"[harness error: {e}]"
                 break
+            responses.append({"step": step, "message": msg})  # full raw response, untrimmed
+            # Send back only the API-relevant fields, so a separate reasoning_content
+            # field can't corrupt the next turn's context.
             messages.append({k: msg[k] for k in ("role", "content", "tool_calls") if msg.get(k) is not None})
             tcs = msg.get("tool_calls") or []
             if not tcs:
@@ -192,6 +196,7 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
                 messages.append({"role": "tool", "tool_call_id": tc.get("id", ""), "content": out})
 
         (rundir / "trace.jsonl").write_text("".join(json.dumps(t) + "\n" for t in trace))
+        (rundir / "responses.jsonl").write_text("".join(json.dumps(r) + "\n" for r in responses))
         (rundir / "messages.json").write_text(json.dumps(messages, indent=2))
         (rundir / "meta.json").write_text(json.dumps({
             "model": model, "skills_on": skills_on, "task": task["id"], "repeat": repeat,

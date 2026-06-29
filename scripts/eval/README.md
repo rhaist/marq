@@ -52,8 +52,18 @@ python3 scripts/eval/report.py scripts/eval/runs --no-publish
 ```
 
 Each run lands in `scripts/eval/runs/<model>__skills-<on|off>__<task>__r<n>/`
-with `trace.jsonl` (the tool-call trajectory), `messages.json` (full transcript),
-`work/` (artifacts like `findings.md`), and `meta.json`. `runs/` is gitignored.
+with `trace.jsonl` (the tool-call trajectory, scored), `responses.jsonl` (every
+raw model turn incl. reasoning — the substrate for later semantic analysis),
+`messages.json` (full conversation), `work/` (artifacts like `findings.md`), and
+`meta.json`. `runs/` is gitignored.
+
+The deterministic scorer can't judge _quality_ — whether the GRC mapping was
+right, whether the reasoning was sound. That's a later semantic pass (an LLM
+judge or human) over `responses.jsonl` + `meta.final`, which is why the raw
+responses are recorded in full. **Retention:** `runs/` is ephemeral (gitignored,
+overwritten each sweep) — if you want to analyse a published measurement later,
+archive its `runs/` dir somewhere durable before re-running, since only the
+distilled scores are committed.
 
 ## Leaderboard — finding the best open-weight model over time
 
