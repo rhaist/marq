@@ -20,7 +20,7 @@ quick local smoke without Kali: --marq-cmd 'go run ./cmd/marq serve' (in-process
 tools only; exec tools like nmap won't be present).
 """
 from __future__ import annotations
-import argparse, json, os, select, shlex, subprocess, sys, time, urllib.request, pathlib
+import argparse, json, os, re, select, shlex, subprocess, sys, time, urllib.request, pathlib
 
 DEFAULT_MARQ_CMD = (
     "docker run --rm -i -v {work}:/work -e MARQ_OPERATOR=eval "
@@ -88,6 +88,26 @@ class MCP:
         result = resp.get("result", {})
         parts = [c.get("text", "") for c in result.get("content", []) if c.get("type") == "text"]
         return "\n".join(parts), bool(result.get("isError"))
+
+
+_TOOLCALL_RE = re.compile(r"<tool_call>\s*(\{.*?\})\s*</tool_call>", re.S)
+
+
+def text_tool_calls(msg):
+    """Fallback: many local models (qwen/Hermes templates) emit tool calls as
+    `<tool_call>{...}</tool_call>` text in content/reasoning_content instead of
+    the structured tool_calls field. Parse those so we don't silently drop the
+    model's actions. Returns a list of {name, arguments}."""
+    out = []
+    for field in ("content", "reasoning_content", "reasoning"):
+        for m in _TOOLCALL_RE.finditer(msg.get(field) or ""):
+            try:
+                c = json.loads(m.group(1))
+                if isinstance(c.get("name"), str):
+                    out.append(c)
+            except Exception:
+                pass
+    return out
 
 
 def openai_tools(tools):
@@ -183,21 +203,34 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
                 final = f"[harness error: {e}]"
                 break
             responses.append({"step": step, "message": msg})  # full raw response, untrimmed
-            # Send back only the API-relevant fields, so a separate reasoning_content
-            # field can't corrupt the next turn's context.
-            messages.append({k: msg[k] for k in ("role", "content", "tool_calls") if msg.get(k) is not None})
-            tcs = msg.get("tool_calls") or []
-            if not tcs:
-                final = msg.get("content") or ""
+            structured = msg.get("tool_calls") or []
+            text_calls = [] if structured else text_tool_calls(msg)
+            if not structured and not text_calls:  # final answer (content, or reasoning if content empty)
+                final = msg.get("content") or msg.get("reasoning_content") or ""
                 break
-            for tc in tcs:
-                fn = tc.get("function", {})
-                raw = fn.get("arguments") or "{}"
-                a = raw if isinstance(raw, dict) else _loads(raw)
-                out, is_err = mcp.call_tool(fn.get("name", ""), a)
-                trace.append({"step": step, "name": fn.get("name", ""), "args": a,
-                              "is_error": is_err, "result_head": out[:600]})
-                messages.append({"role": "tool", "tool_call_id": tc.get("id", ""), "content": out})
+            if structured:
+                messages.append({k: msg[k] for k in ("role", "content", "tool_calls") if msg.get(k) is not None})
+            else:  # text-form calls: record the turn as plain assistant text
+                messages.append({"role": "assistant", "content": (msg.get("content") or msg.get("reasoning_content") or "")[:4000]})
+            text_results = []
+            for tc in (structured or text_calls):
+                if structured:
+                    fn = tc.get("function", {})
+                    name, raw = fn.get("name", ""), fn.get("arguments") or "{}"
+                    a = raw if isinstance(raw, dict) else _loads(raw)
+                else:
+                    name, a = tc.get("name", ""), tc.get("arguments") or {}
+                    if isinstance(a, str):
+                        a = _loads(a)
+                out, is_err = mcp.call_tool(name, a)
+                trace.append({"step": step, "name": name, "args": a, "is_error": is_err,
+                              "result_head": out[:600], "via": "structured" if structured else "text"})
+                if structured:
+                    messages.append({"role": "tool", "tool_call_id": tc.get("id", ""), "content": out})
+                else:
+                    text_results.append(f"{name} -> {out}")
+            if text_results:  # feed text-call results back as a user turn (no tool_call_id to bind to)
+                messages.append({"role": "user", "content": "[tool results]\n" + "\n".join(text_results)})
 
         (rundir / "trace.jsonl").write_text("".join(json.dumps(t) + "\n" for t in trace))
         (rundir / "responses.jsonl").write_text("".join(json.dumps(r) + "\n" for r in responses))
