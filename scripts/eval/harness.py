@@ -137,6 +137,10 @@ def chat(base_url, api_key, model, messages, tools, timeout, sampling):
 
 def spawn_marq(marq_cmd, work):
     env = dict(os.environ, MARQ_OPERATOR="eval", MARQ_WORK_DIR=str(work))
+    # The eval scores tool *selection*, not execution — cap tool runtime so a
+    # model that picks a full-range scan can't block the sweep for minutes when
+    # the real binary is installed locally. Override by exporting MARQ_TIMEOUT.
+    env.setdefault("MARQ_TIMEOUT", "30")
     return subprocess.Popen(
         shlex.split(marq_cmd.format(work=work)),
         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
