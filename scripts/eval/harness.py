@@ -101,8 +101,8 @@ def openai_tools(tools):
     } for t in tools]
 
 
-def chat(base_url, api_key, model, messages, tools, timeout):
-    body = {"model": model, "messages": messages, "temperature": 0.2, "stream": False}
+def chat(base_url, api_key, model, messages, tools, timeout, sampling):
+    body = {"model": model, "messages": messages, "stream": False, **sampling}
     if tools:
         body["tools"] = tools
         body["tool_choice"] = "auto"
@@ -150,7 +150,7 @@ def run_task(args, model, skills_on, task, repeat):
         final = ""
         for step in range(args.max_steps):
             try:
-                msg = chat(args.base_url, args.api_key, model, messages, tool_schemas, args.timeout)
+                msg = chat(args.base_url, args.api_key, model, messages, tool_schemas, args.timeout, args.sampling)
             except Exception as e:  # endpoint down / model missing — record and stop
                 final = f"[harness error: {e}]"
                 break
@@ -172,7 +172,7 @@ def run_task(args, model, skills_on, task, repeat):
         (rundir / "messages.json").write_text(json.dumps(messages, indent=2))
         (rundir / "meta.json").write_text(json.dumps({
             "model": model, "skills_on": skills_on, "task": task["id"], "repeat": repeat,
-            "temperature": 0.2, "base_url": args.base_url,
+            "sampling": args.sampling, "base_url": args.base_url,
             "steps": len(trace), "final": final,
         }, indent=2))
         print(f"  {rundir.name}: {len(trace)} tool calls")
@@ -203,6 +203,8 @@ def main():
     p.add_argument("--marq-cmd", default=DEFAULT_MARQ_CMD, help="command to start `marq serve`; {work} is substituted")
     p.add_argument("--max-steps", type=int, default=12)
     p.add_argument("--repeats", type=int, default=1, help="runs per task (use 3+ for published numbers; LLMs are stochastic)")
+    p.add_argument("--temperature", type=float, default=0.2, help="pinned + recorded for reproducibility")
+    p.add_argument("--top-p", type=float, default=1.0, help="pinned + recorded for reproducibility")
     p.add_argument("--timeout", type=int, default=300, help="per model call (s)")
     p.add_argument("--list-tools", action="store_true", help="smoke the marq MCP leg and exit")
     args = p.parse_args()
@@ -222,6 +224,7 @@ def main():
             proc.terminate()
         return 0
 
+    args.sampling = {"temperature": args.temperature, "top_p": args.top_p}
     models = [m.strip() for m in args.models.split(",") if m.strip()]
     if not models:
         p.error("pass --models (comma-separated) or --list-tools")

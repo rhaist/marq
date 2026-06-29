@@ -63,8 +63,9 @@ regenerating [`LEADERBOARD.md`](LEADERBOARD.md):
 
 ```bash
 # Use repeats for credible numbers — a single LLM run is noise:
-python3 scripts/eval/harness.py --models qwen2.5-7b-instruct --skills both --repeats 5
-python3 scripts/eval/report.py scripts/eval/runs --quant Q4_K_M --params 7B --runtime lm-studio --repeats 5
+python3 scripts/eval/harness.py --models qwen2.5-7b-instruct --skills both --repeats 5 --temperature 0.2
+python3 scripts/eval/report.py scripts/eval/runs --quant Q4_K_M --params 7B --runtime lm-studio \
+    --repeats 5 --note "ctx=8192, full GPU offload, LM Studio 0.3.x"
 git add scripts/eval/results scripts/eval/LEADERBOARD.md && git commit -m "eval: qwen2.5-7b"
 ```
 
@@ -74,8 +75,10 @@ A score is only comparable alongside its context, so every measurement pins it:
 - **`taskset.version` + `hash`** — the leaderboard ranks only within one task-set
   version (`tasks.version`); bump it when you change tasks materially, and old
   results stay valid under their version.
-- **`quant`, `runtime`, `temperature`, `repeats`** — a Q3 vs Q6 of the same model
-  tool-calls very differently; reproducibility needs all of it.
+- **sampling** — the harness pins and records `temperature` + `top_p` (`--temperature`
+  / `--top-p`); don't rely on the server's hidden defaults. A Q3 vs Q6 of the same
+  model also tool-calls very differently, so **`quant`** is required and the rest of
+  the load config (context length, GPU offload, server version) goes in **`--note`**.
 
 `results/<model>.json` keeps a **history** (a measurement per run), so you can
 watch a model move as marq evolves and see new models slot in. Pass-rates are

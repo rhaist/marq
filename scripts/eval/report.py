@@ -109,7 +109,18 @@ def rate(bools):
     return round(sum(bools) / len(bools), 3) if bools else 0.0
 
 
-def measurement(model_cells, tasks, args):
+def sampling_used(runs):
+    """The sampling config the harness actually sent (read from a run's meta),
+    so the recorded provenance reflects reality rather than a hardcoded guess."""
+    for p in sorted(runs.iterdir()):
+        meta = p / "meta.json"
+        if meta.is_file():
+            m = json.loads(meta.read_text())
+            return m.get("sampling") or {"temperature": m.get("temperature")}
+    return {}
+
+
+def measurement(model_cells, tasks, args, sampling):
     task_ids = sorted({t for (_on, t) in model_cells})
     on = {t: rate(model_cells.get((True, t), [])) for t in task_ids}
     off = {t: rate(model_cells.get((False, t), [])) for t in task_ids}
@@ -122,7 +133,8 @@ def measurement(model_cells, tasks, args):
         "date": datetime.date.today().isoformat(),
         "marq_commit": marq_commit(),
         "taskset": taskset_meta(args.tasks),
-        "runtime": {"server": args.runtime, "temperature": 0.2, "repeats": args.repeats},
+        "runtime": dict({"server": args.runtime, "repeats": args.repeats}, **sampling,
+                        **({"note": args.note} if args.note else {})),
         "scores": {
             "skills_on": on_rate,
             "skills_off": off_rate if scored_off else None,
@@ -194,6 +206,7 @@ def main():
     ap.add_argument("--quant", default="?", help="model quantization, e.g. Q4_K_M (records provenance)")
     ap.add_argument("--params", default="", help="param count, e.g. 7B (optional)")
     ap.add_argument("--runtime", default="lm-studio", help="server name, e.g. lm-studio / ollama")
+    ap.add_argument("--note", default="", help="load-config provenance the harness can't see, e.g. 'ctx=8192, full GPU offload, LM Studio 0.3.x'")
     ap.add_argument("--repeats", type=int, default=1, help="repeats used in the sweep (for provenance)")
     ap.add_argument("--tasks", default=str(HERE / "tasks.jsonl"))
     ap.add_argument("--results", type=pathlib.Path, default=HERE / "results")
@@ -202,13 +215,15 @@ def main():
     args.results = pathlib.Path(args.results)
 
     tasks = {t["id"]: t for t in (json.loads(l) for l in open(args.tasks) if l.strip())}
-    by_model = aggregate(pathlib.Path(args.runs), tasks)
+    runs = pathlib.Path(args.runs)
+    by_model = aggregate(runs, tasks)
     if not by_model:
         print("no runs found in", args.runs)
         return 1
+    sampling = sampling_used(runs)
 
     for model, cells in sorted(by_model.items()):
-        meas = measurement(cells, tasks, args)
+        meas = measurement(cells, tasks, args, sampling)
         s = meas["scores"]
         print(f"{model}  on={s['skills_on']}  off={s['skills_off']}  lift={s['lift']}  safety={s['safety']}")
         for t, r in s["per_task"].items():
