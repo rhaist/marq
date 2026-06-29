@@ -49,6 +49,12 @@ brew install go
 ### 2. Build the image
 
 ```bash
+# Pull the prebuilt image (published from CI) and tag it `marq` so the rest of
+# these docs work unchanged. NOTE: it's amd64 — on M-series it runs under
+# emulation (slower); build from source below for a native arm64 image.
+docker pull ghcr.io/rhaist/marq && docker tag ghcr.io/rhaist/marq marq
+
+# …or build from source (native arch):
 git clone <this-repo> marq && cd marq
 docker build -t marq .     # builds natively for your arch (arm64 on M-series)
 # Smaller image (skips warm-up; nuclei templates / wpscan DB / trivy DB fetched on first use):

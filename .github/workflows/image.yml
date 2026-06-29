@@ -1,8 +1,9 @@
-# Builds the multi-GB Kali image and runs scripts/e2e-image.sh (the promises
-# that only hold for the running image: /work bind-mount persistence and
-# per-container jwt keys). Expensive, so it only triggers when the image
-# definition or its e2e scripts change — Go-only changes are covered by ci.yml.
-# Run it on demand from the Actions tab via workflow_dispatch.
+# Builds the multi-GB Kali image, runs scripts/e2e-image.sh (the promises that
+# only hold for the running image: /work bind-mount persistence and per-container
+# jwt keys), and — on main — publishes it to GHCR so users can pull instead of
+# building. Expensive, so it only triggers when the image definition or its e2e
+# scripts change; Go-only changes are covered by ci.yml. Run on demand via the
+# Actions tab (workflow_dispatch).
 name: image
 
 on:
@@ -19,6 +20,7 @@ on:
 
 permissions:
   contents: read
+  packages: write   # push to GHCR with the built-in GITHUB_TOKEN (publish step only)
 
 # Cancel an in-progress image build when a newer commit supersedes it — the
 # ~35-min rebuild is the expensive one to leave running.
@@ -40,3 +42,19 @@ jobs:
         run: docker build -t marq .
       - name: e2e (image)
         run: bash scripts/e2e-image.sh --image marq
+      # Publish only after e2e passes, and only from main (a dispatch on main
+      # publishes too; PRs and other branches never do). Reuses the tested image.
+      - name: publish to GHCR
+        if: github.ref == 'refs/heads/main'
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTOR: ${{ github.actor }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          echo "$TOKEN" | docker login ghcr.io -u "$ACTOR" --password-stdin
+          img="ghcr.io/${REPO,,}"
+          docker tag marq "$img:latest"
+          docker tag marq "$img:sha-${SHA::7}"
+          docker push "$img:latest"
+          docker push "$img:sha-${SHA::7}"

@@ -60,7 +60,9 @@ every tool, resource, and audit record behaves the same either way.
 ## Quick start
 
 ```bash
-# 1. Build the image (large — Kali base + full tool suite; first build is slow)
+# 1. Get the image — pull the prebuilt one (skips the slow Kali build; amd64):
+docker pull ghcr.io/rhaist/marq && docker tag ghcr.io/rhaist/marq marq
+#    …or build it yourself (large — Kali base + full tool suite; first build is slow):
 docker build -t marq .
 
 # 2. Smoke-test a tool (nmap/masscan/naabu need file-capability passthrough;
