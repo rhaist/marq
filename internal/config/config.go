@@ -4,8 +4,10 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -61,21 +63,67 @@ func envBool(name string, def bool) bool {
 	}
 }
 
-// Load reads configuration from the environment (MARQ_*). Operator, engagement,
-// and scope are set per-engagement via env — the host shim passes them through
-// with --env-file.
+// Load reads configuration from the environment (MARQ_*). Operator is the
+// human/env-set audit attribution anchor; engagement and scope default from env
+// but can be set at runtime via SetEngagement (the set_engagement tool), which
+// persists them under WorkDir so they survive across `marq run` processes that
+// each re-Load.
 func Load() Config {
-	return Config{
+	cfg := Config{
 		AuditLog:          env("MARQ_AUDIT_LOG", "/var/log/marq/audit.jsonl"),
 		CommandTimeout:    envInt("MARQ_TIMEOUT", 900),
 		MaxCommandTimeout: envInt("MARQ_MAX_TIMEOUT", 3600),
 		MaxOutputChars:    envInt("MARQ_MAX_OUTPUT", 60000),
 		AllowRawShell:     envBool("MARQ_ALLOW_RAW_SHELL", true),
 		WorkDir:           env("MARQ_WORK_DIR", "/work"),
-		Operator:          env("MARQ_OPERATOR", "unknown"),
+		Operator:          env("MARQ_OPERATOR", "marq"),
 		Engagement:        env("MARQ_ENGAGEMENT", "unspecified"),
 		ScopeNote:         env("MARQ_SCOPE", ""),
 	}
+	if e, s, ok := readContext(cfg.WorkDir); ok {
+		if e != "" {
+			cfg.Engagement = e
+		}
+		if s != "" {
+			cfg.ScopeNote = s
+		}
+	}
+	return cfg
+}
+
+// engagementContext is the on-disk form of the runtime-set engagement metadata.
+type engagementContext struct {
+	Engagement string `json:"engagement"`
+	Scope      string `json:"scope"`
+}
+
+func contextPath(workDir string) string { return filepath.Join(workDir, ".marq-context") }
+
+func readContext(workDir string) (engagement, scope string, ok bool) {
+	b, err := os.ReadFile(contextPath(workDir))
+	if err != nil {
+		return "", "", false
+	}
+	var c engagementContext
+	if json.Unmarshal(b, &c) != nil {
+		return "", "", false
+	}
+	return c.Engagement, c.Scope, true
+}
+
+// SetEngagement records the engagement label and authorized scope, updating the
+// live config and persisting them under WorkDir so subsequent `marq run`
+// processes inherit them. Operator is deliberately not settable here — it stays
+// the human/env-set attribution anchor.
+func SetEngagement(engagement, scope string) error {
+	if engagement != "" {
+		C.Engagement = engagement
+	}
+	if scope != "" {
+		C.ScopeNote = scope
+	}
+	b, _ := json.Marshal(engagementContext{C.Engagement, C.ScopeNote})
+	return os.WriteFile(contextPath(C.WorkDir), b, 0o644)
 }
 
 // C is the process-wide configuration, resolved once at startup (mirrors the

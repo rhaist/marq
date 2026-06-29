@@ -11,8 +11,8 @@ inherently dual-use. Read this before you run anything.
 - **Only test systems you own or have explicit, written authorization to test.**
   Unauthorized scanning, exploitation or credential attacks are illegal in most
   jurisdictions (e.g. the US CFAA, UK Computer Misuse Act).
-- Keep your rules of engagement / scope document handy and record it in
-  `MARQ_SCOPE` so it lands in every audit record.
+- Keep your rules of engagement / scope document handy and record it with the
+  `set_engagement` tool so it lands in every audit record.
 - Online brute force (hydra), exploitation (impacket, evil-winrm) and aggressive scanning
   (masscan at high rates) can disrupt or lock out production systems. Use the
   least aggressive technique that answers the question.
@@ -37,7 +37,7 @@ lines, before and after it runs, with:
 
 The audit log is append-only and `fsync`'d per write. Default location:
 `/var/log/marq/audit.jsonl` (mount it to the host to persist it — see
-`mcp.json.example` and `docker-compose.yml`).
+`mcp.json.example`).
 
 > If you later want hard controls, the natural place to add them is
 > `internal/runner/runner.go::Run` (e.g. a scope allowlist check before the

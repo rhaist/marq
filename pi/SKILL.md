@@ -26,6 +26,13 @@ knowledge work is unrestricted.** **Active testing** (scanning, exploitation,
 credential attacks) is authorized-only: if the target isn't clearly in scope,
 stop and ask — never broaden scope on your own.
 
+If `server_info` shows no scope, record the operator's written authorization
+once — it persists for the session and tags every audit record:
+
+```
+marq run set_engagement '{"engagement":"acme-2026","scope":"*.acme.com, 203.0.113.0/24 — per SOW"}'
+```
+
 Then load the playbook for the job:
 
 ```

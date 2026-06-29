@@ -62,10 +62,15 @@ docker run --rm -i \
   --security-opt no-new-privileges:true --cap-drop ALL \
   --cap-add NET_RAW --cap-add NET_ADMIN --cap-add NET_BIND_SERVICE \
   -v marq-audit:/var/log/marq \
-  -e MARQ_OPERATOR=your-name -e MARQ_ENGAGEMENT=acme-2026 \
-  -e MARQ_SCOPE="*.example.com — per SOW" \
+  -v marq-work:/work \
+  -e MARQ_OPERATOR=marq \
   marq
 ```
+
+Engagement and scope aren't passed here — the model records them at runtime with
+the `set_engagement` tool (from the operator's written authorization). The
+`marq-work` volume persists findings/reports across restarts; swap it for a bind
+mount (`-v ~/engagements/acme:/work`) to read them straight off the host.
 
 Wire it into a client with [`mcp.json.example`](../mcp.json.example) — per-client
 steps (Claude Code, Codex, LM Studio) are in [`CLIENTS.md`](CLIENTS.md).
@@ -99,8 +104,9 @@ ntlmrelayx) detach inside it and are polled later, so a per-call `docker run`
 would kill them.
 
 Shim env vars: `MARQ_CONTAINER` (default `marq`), `MARQ_IMAGE` (default
-`marq:latest`), `MARQ_ENV_FILE` (optional env-file for API keys plus
-`MARQ_OPERATOR` / `MARQ_ENGAGEMENT` / `MARQ_SCOPE`, passed as `--env-file`).
+`marq:latest`), `MARQ_ENV_FILE` (optional env-file for `MARQ_OPERATOR` plus API
+keys, passed as `--env-file` — copy `.env.example` to `.env` for a template;
+engagement + scope are set at runtime via `set_engagement`).
 
 ---
 

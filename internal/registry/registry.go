@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"slices"
 
+	"marq/internal/audit"
 	"marq/internal/config"
 	"marq/internal/runner"
 )
@@ -185,7 +186,8 @@ func serverInfoTool() Tool {
 		Name: "server_info",
 		Desc: "Return the scope/operator metadata and the domains marq covers (offensive, " +
 			"malware, threat-intel, governance). Call this first; before any active testing " +
-			"(scanning/exploitation) confirm the targets are in the authorized scope it reports.",
+			"(scanning/exploitation) confirm the targets are in the authorized scope it reports. " +
+			"If no scope is set, record it with set_engagement.",
 		Handler: func(a Args) string {
 			raw := "disabled"
 			if config.C.AllowRawShell {
@@ -196,11 +198,42 @@ func serverInfoTool() Tool {
 	}
 }
 
+// setEngagementTool records the engagement label and authorized scope for the
+// session. Operator stays the host/env-set audit anchor and is not settable here.
+func setEngagementTool() Tool {
+	return Tool{
+		Name: "set_engagement",
+		Desc: "Record the engagement label and the authorized testing scope for this session, from the " +
+			"operator's written authorization. Persists under the working dir so every subsequent tool " +
+			"call — across processes — is audit-logged under it; set it before any active testing. " +
+			"Operator identity is fixed by the host (MARQ_OPERATOR) and is not settable here. `scope` " +
+			"should name the exact in-scope targets, e.g. '*.acme.com, 203.0.113.0/24 — per SOW'.",
+		Params: []Param{
+			{Name: "scope", Type: StringParam, Desc: "authorized in-scope targets per the SOW", Required: true},
+			{Name: "engagement", Type: StringParam, Desc: "engagement label, e.g. acme-webapp-2026-06", Default: ""},
+		},
+		Handler: func(a Args) string {
+			id := audit.LogStart("set_engagement", a.S("scope"),
+				[]string{"engagement=" + a.S("engagement"), "scope=" + a.S("scope")})
+			err := config.SetEngagement(a.S("engagement"), a.S("scope"))
+			ec, msg := 0, ""
+			if err != nil {
+				ec, msg = 1, err.Error()
+			}
+			audit.LogEnd(id, "set_engagement", &ec, 0, false, msg)
+			if err != nil {
+				return "failed to persist engagement context: " + msg
+			}
+			return "engagement context set.\n\n" + config.C.Banner()
+		},
+	}
+}
+
 // All returns every registered tool. shell is included only when raw shell is
 // enabled (mirrors the Python conditional registration).
 func All() []Tool {
 	tools := slices.Concat(
-		[]Tool{serverInfoTool()},
+		[]Tool{serverInfoTool(), setEngagementTool()},
 		recon(), osint(), people(), web(),
 		exploit(), creds(), internal(), malware(), fileTools(), reportTools(), knowledgeTools(),
 	)

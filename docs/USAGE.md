@@ -77,10 +77,11 @@ shared shape:
    `mcpServers` block into Claude Code's `.mcp.json`, LM Studio's `mcp.json`
    (**Program → Edit mcp.json**), or Claude Desktop's config. Codex uses TOML
    (`codex mcp add marq -- …`, see CLIENTS.md).
-2. Set `MARQ_OPERATOR` / `MARQ_ENGAGEMENT`, and `MARQ_SCOPE` before any active
-   testing (advisory/knowledge use needs no scope).
-3. Use a tool-capable model. Have it call `server_info` first, then `load_skill`
-   the domain it's working in.
+2. Set `MARQ_OPERATOR` (the audit anchor). Engagement and scope are set at
+   runtime — have the model call `set_engagement` before any active testing
+   (advisory/knowledge use needs no scope).
+3. Use a tool-capable model. Have it call `server_info` first, record scope with
+   `set_engagement`, then `load_skill` the domain it's working in.
 
 ## 4. Run with a local model (Pi)
 
@@ -112,8 +113,9 @@ ntlmrelayx) detach inside it and are polled later, so a per-call `docker run`
 would kill them.
 
 Shim env vars: `MARQ_CONTAINER` (default `marq`), `MARQ_IMAGE` (default
-`marq:latest`), `MARQ_ENV_FILE` (optional env-file for API keys plus
-`MARQ_OPERATOR` / `MARQ_ENGAGEMENT` / `MARQ_SCOPE`, passed as `--env-file`).
+`marq:latest`), `MARQ_ENV_FILE` (optional env-file for `MARQ_OPERATOR` plus API
+keys, passed as `--env-file` — copy `.env.example` to `.env` for a template;
+engagement + scope are set at runtime via `set_engagement`).
 
 ## Available tools
 
@@ -234,8 +236,8 @@ Shim env vars: `MARQ_CONTAINER` (default `marq`), `MARQ_IMAGE` (default
 These are sandboxed to `/work` and `/tmp` — the model cannot read or write
 anywhere else. They are what make the file-driven tools usable: the model can
 `write_file` a captured hash then `john` it, or `read_file` a result another
-tool dropped on disk. Mount `/work` from the host (see `docker-compose.yml`) to
-exchange files with the operator.
+tool dropped on disk. Mount `/work` from the host (`-v ./work:/work`, as the
+`pi/marq` shim does) to exchange files with the operator.
 
 ### Findings, jobs & knowledge
 
@@ -282,22 +284,29 @@ an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.
 
 ## Environment variables
 
-| Variable               | Default                     | Meaning                                                  |
-| ---------------------- | --------------------------- | -------------------------------------------------------- |
-| `MARQ_OPERATOR`        | `unknown`                   | Recorded in every audit record                           |
-| `MARQ_ENGAGEMENT`      | `unspecified`               | Engagement / SOW identifier                              |
-| `MARQ_SCOPE`           | `""`                        | Free-text authorized scope (banner + log)                |
-| `MARQ_AUDIT_LOG`       | `/var/log/marq/audit.jsonl` | Audit log path                                           |
-| `MARQ_TIMEOUT`         | `900`                       | Default per-command timeout (seconds)                    |
-| `MARQ_MAX_TIMEOUT`     | `3600`                      | Ceiling for a tool's per-call timeout override           |
-| `MARQ_MAX_OUTPUT`      | `60000`                     | Max output chars returned to the model                   |
-| `MARQ_ALLOW_RAW_SHELL` | `true`                      | Expose the arbitrary-shell tool (set `false` to disable) |
-| `MARQ_WORK_DIR`        | `/work`                     | Working area (findings, job dirs)                        |
+| Variable               | Default                     | Meaning                                                                        |
+| ---------------------- | --------------------------- | ------------------------------------------------------------------------------ |
+| `MARQ_OPERATOR`        | `marq`                      | Recorded in every audit record — the accountability anchor; env-set only       |
+| `MARQ_ENGAGEMENT`      | `unspecified`               | Engagement / SOW identifier (initial default; overridable by `set_engagement`) |
+| `MARQ_SCOPE`           | `""`                        | Free-text authorized scope (initial default; overridable by `set_engagement`)  |
+| `MARQ_AUDIT_LOG`       | `/var/log/marq/audit.jsonl` | Audit log path                                                                 |
+| `MARQ_TIMEOUT`         | `900`                       | Default per-command timeout (seconds)                                          |
+| `MARQ_MAX_TIMEOUT`     | `3600`                      | Ceiling for a tool's per-call timeout override                                 |
+| `MARQ_MAX_OUTPUT`      | `60000`                     | Max output chars returned to the model                                         |
+| `MARQ_ALLOW_RAW_SHELL` | `true`                      | Expose the arbitrary-shell tool (set `false` to disable)                       |
+| `MARQ_WORK_DIR`        | `/work`                     | Working area (findings, job dirs)                                              |
+
+Engagement and scope are per-task, so the model sets them at session start with
+the **`set_engagement`** tool (from the operator's written authorization). It
+persists them to `$MARQ_WORK_DIR/.marq-context`, so they survive across the
+process-per-call `marq run` path and show up in `server_info` and every audit
+record. Operator stays env-set — it's the accountability anchor, not something
+the model should assert.
 
 ## Reading the audit log
 
 ```bash
-# Persisted to ./audit/ via the compose/volume mount.
+# Persisted to ./audit/ when you bind-mount it (-v ./audit:/var/log/marq).
 cat audit/audit.jsonl | jq 'select(.event=="invocation.start") | {ts, tool, target, argv}'
 ```
 

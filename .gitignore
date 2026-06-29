@@ -9,6 +9,9 @@ build/
 # Engagement working area — runtime mount, never committed.
 /work/
 
+# Real secrets — only the .env.example template is committed.
+.env
+
 # Never commit audit logs, scan output, loot or scope files.
 *.jsonl
 *.log

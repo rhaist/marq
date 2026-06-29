@@ -42,12 +42,13 @@ Quickest path — register the server (use the hardened docker args from
 claude mcp add marq -- docker run --rm -i \
   --security-opt no-new-privileges:true --cap-drop ALL \
   --cap-add NET_RAW --cap-add NET_ADMIN --cap-add NET_BIND_SERVICE \
-  -v marq-audit:/var/log/marq -e MARQ_SCOPE marq
+  -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR marq
 ```
 
 Or commit a project [`.mcp.json`](https://docs.anthropic.com/en/docs/claude-code/mcp)
 with the `mcpServers` block from `mcp.json.example` (same schema). Then in the
-session: ask it to call `server_info`, then `load_skill` the domain you're in.
+session: ask it to call `server_info`, record scope with `set_engagement`, then
+`load_skill` the domain you're in.
 
 **Best for:** "review this architecture against zero-trust", "map our findings
 to ISO 27001 and SOC 2", "build me an incident runbook", "threat-model this
@@ -59,7 +60,7 @@ thinking; marq supplies current frameworks and the evidence tools.
 ```bash
 codex mcp add marq -- docker run --rm -i \
   --cap-drop ALL --cap-add NET_RAW --cap-add NET_ADMIN \
-  -v marq-audit:/var/log/marq -e MARQ_SCOPE marq
+  -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR marq
 ```
 
 Or add it to `~/.codex/config.toml` (TOML, not JSON):
@@ -69,8 +70,9 @@ Or add it to `~/.codex/config.toml` (TOML, not JSON):
 command = "docker"
 args = ["run", "--rm", "-i", "--cap-drop", "ALL",
         "--cap-add", "NET_RAW", "--cap-add", "NET_ADMIN",
-        "-v", "marq-audit:/var/log/marq", "-e", "MARQ_SCOPE", "marq"]
-env_vars = { MARQ_SCOPE = "*.example.com — per SOW" }
+        "-v", "marq-audit:/var/log/marq", "-v", "marq-work:/work",
+        "-e", "MARQ_OPERATOR", "marq"]
+env_vars = { MARQ_OPERATOR = "marq" }
 ```
 
 Same uses as Claude Code. Docs: [Codex MCP](https://developers.openai.com/codex/mcp).
@@ -113,7 +115,7 @@ filtered.
   tool) lists the index.
 - **Scope gates active testing, not advice.** GRC/architecture/standards
   conversations are unrestricted; scanning and exploitation are authorized-only
-  and audit-logged. Set `MARQ_SCOPE` before any active testing.
+  and audit-logged. Record scope with `set_engagement` before any active testing.
 - **Pick the model to the job.** A big reasoning model for analysis and writing;
   a fast tool-capable local model for chaining scans; an abliterated local model
   for offensive work that a hosted model would refuse.

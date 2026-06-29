@@ -22,7 +22,7 @@ case "${1:-}" in
     work="${2:?usage: marq up <engagement-dir>}"
     mkdir -p "$work"
     docker rm -f "$C" >/dev/null 2>&1 || true
-    # caps: nmap/masscan/naabu SYN scans. env-file (optional): API keys.
+    # caps: nmap/masscan/naabu SYN scans. env-file (optional, see .env.example): API keys.
     docker run -d --name "$C" \
       --cap-add NET_ADMIN --cap-add NET_RAW \
       -v "$(cd "$work" && pwd):/work" \

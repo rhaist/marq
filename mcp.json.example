@@ -2,7 +2,9 @@
   "//": "MCP server config for marq — works as-is in Claude Code (.mcp.json),",
   "//2": "Claude Desktop, and LM Studio (Program > Edit mcp.json). Codex uses TOML;",
   "//3": "see docs/CLIENTS.md. Paste the 'marq' entry into your mcpServers and adjust",
-  "//4": "env. stdio (-i keeps it open). MARQ_SCOPE only gates active testing.",
+  "//4": "env. stdio (-i keeps it open). Engagement + scope are set at runtime by",
+  "//5": "the model via the set_engagement tool, not here; operator stays env-set.",
+  "//6": "marq-work persists findings/reports; swap for a bind mount (-v /host/dir:/work) to read them on the host.",
   "mcpServers": {
     "marq": {
       "command": "docker",
@@ -14,9 +16,8 @@
         "--cap-add", "NET_ADMIN",
         "--cap-add", "NET_BIND_SERVICE",
         "-v", "marq-audit:/var/log/marq",
+        "-v", "marq-work:/work",
         "-e", "MARQ_OPERATOR",
-        "-e", "MARQ_ENGAGEMENT",
-        "-e", "MARQ_SCOPE",
         "-e", "MARQ_ALLOW_RAW_SHELL",
         "-e", "SHODAN_API_KEY",
         "-e", "CENSYS_API_ID",
@@ -26,9 +27,7 @@
         "marq"
       ],
       "env": {
-        "MARQ_OPERATOR": "your-name",
-        "MARQ_ENGAGEMENT": "acme-webapp-2026-06",
-        "MARQ_SCOPE": "*.example.com, 203.0.113.0/24 — per signed SOW",
+        "MARQ_OPERATOR": "marq",
         "MARQ_ALLOW_RAW_SHELL": "true",
         "//keys": "Optional — enrich OSINT tools. Leave blank to use keyless sources.",
         "SHODAN_API_KEY": "",
