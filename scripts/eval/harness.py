@@ -235,7 +235,7 @@ def main():
                 for r in range(args.repeats):
                     run_task(args, model, on, task, r)
     print(f"\nruns in {args.out}")
-    print(f"score:   python3 scripts/eval/score.py {args.out}")
+    print(f"look:    python3 scripts/eval/report.py {args.out} --no-publish")
     print(f"publish: python3 scripts/eval/report.py {args.out} --quant <Q> --runtime lm-studio")
     return 0
 

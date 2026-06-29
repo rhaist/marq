@@ -47,8 +47,8 @@ python3 scripts/eval/harness.py \
     --models qwen2.5-7b-instruct,llama-3.1-8b-instruct,mistral-nemo \
     --skills both
 
-# Score the runs — prints a model x skills matrix and the knowledge-layer lift:
-python3 scripts/eval/score.py scripts/eval/runs
+# Quick look — aggregate + per-task pass-rates, writes nothing:
+python3 scripts/eval/report.py scripts/eval/runs --no-publish
 ```
 
 Each run lands in `scripts/eval/runs/<model>__skills-<on|off>__<task>__r<n>/`
@@ -57,9 +57,9 @@ with `trace.jsonl` (the tool-call trajectory), `messages.json` (full transcript)
 
 ## Leaderboard — finding the best open-weight model over time
 
-`score.py` is the transient view; `report.py` produces the **committed** record.
-It distills a sweep into one small JSON per model and regenerates
-[`LEADERBOARD.md`](LEADERBOARD.md):
+`report.py --no-publish` is the transient view; without it, `report.py` produces
+the **committed** record — distilling a sweep into one small JSON per model and
+regenerating [`LEADERBOARD.md`](LEADERBOARD.md):
 
 ```bash
 # Use repeats for credible numbers — a single LLM run is noise:
@@ -110,7 +110,7 @@ without one.
 
 The harness automates the OpenAI-endpoint path (LM Studio/Ollama/llama-server).
 **Pi** and **Claude Code** run their own loops, so run the same task prompts by
-hand in those clients against the marq MCP server, then point `score.py` at the
-container's `/work` audit trail / findings — the scoring is client-agnostic; only
+hand in those clients against the marq MCP server, then judge against the
+container's `/work` artifacts + audit trail — the rubric is client-agnostic; only
 the trajectory source differs (Pi/Claude don't write `trace.jsonl`, so for those
-score artifacts + the audit log rather than the trace).
+the audit log + findings are the evidence rather than the trace).
