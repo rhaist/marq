@@ -6,8 +6,8 @@ func TestParseImpacketTarget(t *testing.T) {
 	cases := []struct{ in, d, u, p, h string }{
 		{"corp/alice:s3cr3t@dc01", "corp", "alice", "s3cr3t", "dc01"},
 		{"alice:s3cr3t@dc01", "", "alice", "s3cr3t", "dc01"},
-		{"corp/alice@dc01", "corp", "alice", "", "dc01"}, // no password — must not panic
-		{"alice", "", "alice", "", ""},                   // bare user — the old certipy parse panicked here
+		{"corp/alice@dc01", "corp", "alice", "", "dc01"},          // no password — must not panic
+		{"alice", "", "alice", "", ""},                            // bare user — the old certipy parse panicked here
 		{"corp/alice:p@ss@dc01", "corp", "alice", "p@ss", "dc01"}, // @ in password, host is last segment
 	}
 	for _, c := range cases {

@@ -13,7 +13,8 @@ import (
 func internal() []Tool {
 	return []Tool{
 		{
-			Name: "impacket_secretsdump",
+			Name:   "impacket_secretsdump",
+			Active: true,
 			Desc: "Dump password hashes from NTDS.dit / SAM / LSASS remotely or from a " +
 				"local file with impacket-secretsdump. Provide `target` as either a local " +
 				"file path or 'domain/user:password@host' for remote DRSUAPI dump. " +
@@ -30,7 +31,8 @@ func internal() []Tool {
 			},
 		},
 		{
-			Name: "impacket_kerberoast",
+			Name:   "impacket_kerberoast",
+			Active: true,
 			Desc: "Kerberoasting with impacket-GetUserSPNs: request TGS tickets for SPN " +
 				"accounts in a domain and extract hashcat/john-crackable hashes. " +
 				"Provide `target` as 'domain/user:password@host'. High impact — " +
@@ -47,7 +49,8 @@ func internal() []Tool {
 			},
 		},
 		{
-			Name: "impacket_asreproast",
+			Name:   "impacket_asreproast",
+			Active: true,
 			Desc: "AS-REP roasting with impacket-GetNPUsers: request AS-REP hashes for " +
 				"accounts with 'Do not require Kerberos preauthentication' set. " +
 				"Provide `target` as 'domain/user:password@host'. Pass a user list via " +
@@ -64,7 +67,8 @@ func internal() []Tool {
 			},
 		},
 		{
-			Name: "impacket_psexec",
+			Name:   "impacket_psexec",
+			Active: true,
 			Desc: "Execute a command on a remote Windows host via PsExec-style SMB named " +
 				"pipe (impacket-psexec). `target` is 'domain/user:password@host' (or " +
 				"'user:hash@host' with -hashes). `command` is the shell command to run. " +
@@ -82,7 +86,8 @@ func internal() []Tool {
 			},
 		},
 		{
-			Name: "impacket_wmiexec",
+			Name:   "impacket_wmiexec",
+			Active: true,
 			Desc: "Execute a command on a remote Windows host via WMI (impacket-wmiexec). " +
 				"Stealthier than psexec (no service dropped). `target` is " +
 				"'domain/user:password@host' (or pass -hashes for pass-the-hash). " +
@@ -100,7 +105,8 @@ func internal() []Tool {
 			},
 		},
 		{
-			Name: "impacket_ntlmrelayx",
+			Name:   "impacket_ntlmrelayx",
+			Active: true,
 			Desc: "NTLM relay attack with impacket-ntlmrelayx: relay captured NTLM auth " +
 				"to targets in a file. Stage a target list with write_file then pass " +
 				"the path via `options` (-tf /work/targets.txt). Runs in the BACKGROUND " +
@@ -115,7 +121,8 @@ func internal() []Tool {
 			},
 		},
 		{
-			Name: "netexec",
+			Name:   "netexec",
+			Active: true,
 			Desc: "NetExec (nxc, CrackMapExec successor) — enumerate and attack SMB/WinRM/" +
 				"SSH/LDAP/MSSQL/WMI/FTP. `target` is a host or comma-separated list. " +
 				"`protocol` selects the module (smb/winrm/ssh/ldap/mssql/wmi/ftp). Pass " +
@@ -133,7 +140,8 @@ func internal() []Tool {
 			},
 		},
 		{
-			Name: "certipy_find",
+			Name:   "certipy_find",
+			Active: true,
 			Desc: "Enumerate Active Directory Certificate Services (AD CS) with certipy. " +
 				"Discovers vulnerable certificate templates (ESC1-ESC17), CAs, and " +
 				"enrollment endpoints. `target` is 'domain/user:password@DC'. " +
@@ -157,7 +165,8 @@ func internal() []Tool {
 			},
 		},
 		{
-			Name: "bloodhound_collect",
+			Name:   "bloodhound_collect",
+			Active: true,
 			Desc: "Collect Active Directory attack-path data with bloodhound-python. " +
 				"Outputs JSON files for ingestion by BloodHound. `target` is " +
 				"'domain/user:password@DC'. `collection` selects the data to gather " +
@@ -179,7 +188,8 @@ func internal() []Tool {
 			},
 		},
 		{
-			Name: "evil_winrm",
+			Name:   "evil_winrm",
+			Active: true,
 			Desc: "Connect to a Windows host via WinRM and execute a command (evil-winrm). " +
 				"`target` is the host:port. Pass credentials via `options` " +
 				"(-u user -p pass, or -u user -H NTLM-hash, or -S for SSL). " +
@@ -195,7 +205,8 @@ func internal() []Tool {
 			},
 		},
 		{
-			Name: "enum4linux",
+			Name:   "enum4linux",
+			Active: true,
 			Desc: "Enumerate Windows/Samba hosts via SMB/RPC/SAMR with enum4linux-ng " +
 				"(modern Python rewrite). Discovers shares, users, groups, password " +
 				"policy, null-session access. `target` is a host IP. The single best " +
@@ -212,7 +223,8 @@ func internal() []Tool {
 			},
 		},
 		{
-			Name: "smb_enum",
+			Name:   "smb_enum",
+			Active: true,
 			Desc: "Enumerate SMB shares and access permissions with smbmap. `target` is a " +
 				"host IP. Defaults to anonymous (null-session) enumeration; pass creds " +
 				"via `options` (-u user -p pass -d domain). Lists share names, access " +
@@ -228,7 +240,8 @@ func internal() []Tool {
 			},
 		},
 		{
-			Name: "ldap_search",
+			Name:   "ldap_search",
+			Active: true,
 			Desc: "Query an LDAP directory (e.g. Active Directory) with ldapsearch. " +
 				"`target` is the LDAP server (host or ldap://host). `filter` is the LDAP " +
 				"filter (e.g. '(objectclass=user)'). `options` carries bind DN, password, " +
@@ -246,7 +259,8 @@ func internal() []Tool {
 			},
 		},
 		{
-			Name: "responder",
+			Name:   "responder",
+			Active: true,
 			Desc: "Start Responder for LLMNR/NBT-NS/mDNS poisoning to capture NTLMv2 " +
 				"challenge/response hashes on the local network segment. Runs in the " +
 				"BACKGROUND and returns a job dir — poll with job_status for captured " +
@@ -261,7 +275,8 @@ func internal() []Tool {
 			},
 		},
 		{
-			Name: "nbtscan",
+			Name:   "nbtscan",
+			Active: true,
 			Desc: "Scan a network for NetBIOS name information with nbtscan. `target` is a " +
 				"CIDR or comma-separated host list. Returns NetBIOS names, workgroups, " +
 				"and MAC addresses — fast recon for Windows networks.",

@@ -44,7 +44,7 @@ func main() {
 	case "run":
 		runTool(os.Args[2:])
 	case "tools":
-		listTools()
+		listTools(os.Args[2:])
 	case "-h", "--help", "help":
 		usage()
 	default:
@@ -72,6 +72,27 @@ func runTool(argv []string) {
 		os.Exit(1)
 	}
 	name := argv[0]
+	var tool *registry.Tool
+	for _, t := range registry.All() {
+		if t.Name == name {
+			tt := t
+			tool = &tt
+			break
+		}
+	}
+	if tool == nil {
+		fmt.Fprintf(os.Stderr, "unknown tool %q\n", name)
+		os.Exit(1)
+	}
+	// No JSON args given: if the tool needs required params, print its schema
+	// instead of running with empty args (which silently produces garbage). This
+	// is how a local model discovers a tool's arguments on the `marq run` path.
+	if len(argv) < 2 || strings.TrimSpace(argv[1]) == "" {
+		if tool.HasRequired() {
+			fmt.Println(tool.Usage())
+			return
+		}
+	}
 	args := map[string]any{}
 	if len(argv) > 1 && argv[1] != "" {
 		if err := json.Unmarshal([]byte(argv[1]), &args); err != nil {
@@ -79,22 +100,30 @@ func runTool(argv []string) {
 			os.Exit(1)
 		}
 	}
-	for _, t := range registry.All() {
-		if t.Name == name {
-			fmt.Println(t.Call(args))
-			return
-		}
-	}
-	fmt.Fprintf(os.Stderr, "unknown tool %q\n", name)
-	os.Exit(1)
+	fmt.Println(tool.Call(args))
 }
 
 // listTools prints every registered tool with the first line of its
 // description, so a terminal agent (or the operator) can browse the catalog on
-// demand instead of carrying 70+ tool specs in the system prompt.
-func listTools() {
+// demand instead of carrying 70+ tool specs in the system prompt. With a tool
+// name, it prints that tool's full parameter schema (Usage) for arg discovery.
+func listTools(argv []string) {
+	if len(argv) > 0 {
+		name := argv[0]
+		for _, t := range registry.All() {
+			if t.Name == name {
+				fmt.Println(t.Usage())
+				return
+			}
+		}
+		fmt.Fprintf(os.Stderr, "unknown tool %q\n", name)
+		os.Exit(1)
+	}
 	for _, t := range registry.All() {
 		desc, _, _ := strings.Cut(t.Desc, "\n")
+		if t.Active {
+			desc += "  [active: in-scope only]"
+		}
 		fmt.Printf("%-24s %s\n", t.Name, desc)
 	}
 }
@@ -104,8 +133,8 @@ func usage() {
 
 usage:
   marq serve              run the MCP stdio server (default)
-  marq run <tool> [json]  invoke one tool directly
-  marq tools              list every tool with a one-line description
+  marq run <tool> [json]  invoke one tool directly (omit json to see its parameters)
+  marq tools [name]       list every tool, or show one tool's parameter schema
 
 Interactive local-model use: drive `+"`marq run`"+` from a terminal agent such as
 Pi (see pi/SKILL.md), or point any MCP client at `+"`marq serve`"+`.

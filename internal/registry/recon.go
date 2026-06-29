@@ -23,7 +23,8 @@ func splitHosts(s string) []string {
 func recon() []Tool {
 	return []Tool{
 		{
-			Name: "nmap",
+			Name:   "nmap",
+			Active: true,
 			Desc: "Run an nmap scan. `target` is a host, CIDR or hostname; `options` are raw nmap " +
 				"flags (default a service/version scan). Use only against authorized targets — " +
 				"every scan is audit-logged.",
@@ -38,7 +39,8 @@ func recon() []Tool {
 			},
 		},
 		{
-			Name: "masscan",
+			Name:   "masscan",
+			Active: true,
 			Desc: "Fast port sweep with masscan across `target` (CIDR/host). `rate` is packets/sec — " +
 				"keep it conservative on shared networks.",
 			Params: []Param{
@@ -84,7 +86,8 @@ func recon() []Tool {
 			},
 		},
 		{
-			Name: "httpx_probe",
+			Name:   "httpx_probe",
+			Active: true,
 			Desc: "Probe one or more hosts (comma- or newline-separated) for live HTTP services, " +
 				"returning status, title and tech. Wraps projectdiscovery httpx.",
 			Params: []Param{
@@ -98,7 +101,8 @@ func recon() []Tool {
 			},
 		},
 		{
-			Name: "naabu",
+			Name:   "naabu",
+			Active: true,
 			Desc: "Fast modern port scan with naabu (projectdiscovery). Give explicit `ports` " +
 				"(e.g. \"80,443,8000-9000\") or rely on `top_ports`. SYN-scans with NET_RAW, else " +
 				"falls back to a connect scan. Pairs well with nmap -sV on the discovered ports.",
@@ -152,8 +156,9 @@ func recon() []Tool {
 			},
 		},
 		{
-			Name: "ssh_audit",
-			Desc: "Audit an SSH server's algorithms and configuration with ssh-audit.",
+			Name:   "ssh_audit",
+			Active: true,
+			Desc:   "Audit an SSH server's algorithms and configuration with ssh-audit.",
 			Params: []Param{
 				{Name: "host", Type: StringParam, Desc: "SSH host", Required: true},
 				{Name: "port", Type: IntParam, Desc: "SSH port", Default: 22},
@@ -164,8 +169,9 @@ func recon() []Tool {
 			},
 		},
 		{
-			Name: "fping_sweep",
-			Desc: "Ping sweep a CIDR or host list with fping (-a -q -g).",
+			Name:   "fping_sweep",
+			Active: true,
+			Desc:   "Ping sweep a CIDR or host list with fping (-a -q -g).",
 			Params: []Param{
 				{Name: "target", Type: StringParam, Desc: "CIDR or host list", Required: true},
 			},
@@ -174,8 +180,9 @@ func recon() []Tool {
 			},
 		},
 		{
-			Name: "snmp_walk",
-			Desc: "Walk an SNMP MIB tree with snmpwalk (v2c).",
+			Name:   "snmp_walk",
+			Active: true,
+			Desc:   "Walk an SNMP MIB tree with snmpwalk (v2c).",
 			Params: []Param{
 				{Name: "host", Type: StringParam, Desc: "SNMP host", Required: true},
 				{Name: "community", Type: StringParam, Desc: "community string", Default: "public"},
@@ -189,8 +196,9 @@ func recon() []Tool {
 			},
 		},
 		{
-			Name: "snmp_check",
-			Desc: "Quick SNMP enumeration with snmpcheck.",
+			Name:   "snmp_check",
+			Active: true,
+			Desc:   "Quick SNMP enumeration with snmpcheck.",
 			Params: []Param{
 				{Name: "host", Type: StringParam, Desc: "SNMP host", Required: true},
 				{Name: "community", Type: StringParam, Desc: "community string", Default: "public"},
@@ -200,8 +208,9 @@ func recon() []Tool {
 			},
 		},
 		{
-			Name: "snmp_brute",
-			Desc: "Brute-force SNMP community strings with onesixtyone.",
+			Name:   "snmp_brute",
+			Active: true,
+			Desc:   "Brute-force SNMP community strings with onesixtyone.",
 			Params: []Param{
 				{Name: "host", Type: StringParam, Desc: "SNMP host", Required: true},
 				{Name: "wordlist", Type: StringParam, Desc: "community string wordlist path", Required: true},
@@ -211,8 +220,9 @@ func recon() []Tool {
 			},
 		},
 		{
-			Name: "smtp_user_enum",
-			Desc: "Enumerate SMTP users with smtp-user-enum.",
+			Name:   "smtp_user_enum",
+			Active: true,
+			Desc:   "Enumerate SMTP users with smtp-user-enum.",
 			Params: []Param{
 				{Name: "host", Type: StringParam, Desc: "SMTP host", Required: true},
 				{Name: "method", Type: StringParam, Desc: "VRFY/EXPN/RCPT", Default: "VRFY"},
@@ -226,8 +236,9 @@ func recon() []Tool {
 			},
 		},
 		{
-			Name: "smtp_test",
-			Desc: "SMTP testing with swaks — test relay, injection, auth. Flexible Swiss-army knife for SMTP.",
+			Name:   "smtp_test",
+			Active: true,
+			Desc:   "SMTP testing with swaks — test relay, injection, auth. Flexible Swiss-army knife for SMTP.",
 			Params: []Param{
 				{Name: "target", Type: StringParam, Desc: "target host", Required: true},
 				{Name: "options", Type: StringParam, Desc: "raw swaks flags (--to --from --body ...)", Default: ""},

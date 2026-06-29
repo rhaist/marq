@@ -8,6 +8,7 @@ package registry
 import (
 	"fmt"
 	"slices"
+	"strings"
 
 	"marq/internal/audit"
 	"marq/internal/config"
@@ -49,6 +50,12 @@ type Tool struct {
 	Params  []Param
 	Build   func(a Args) Invocation
 	Handler func(a Args) string
+	// Active marks an active-testing tool (scanning, exploitation, credential
+	// attacks, on-target probing) that must run only against authorized in-scope
+	// targets. Surfaced at the point of action (catalog + Usage) so the scope
+	// rule is reinforced where the model decides — not just at server_info.
+	// Passive OSINT, offline cracking, and static analysis stay false.
+	Active bool
 }
 
 // Args holds resolved argument values, already defaulted and coerced to Go types.
@@ -143,9 +150,82 @@ func (t Tool) InputSchema() map[string]any {
 	return schema
 }
 
+// HasRequired reports whether the tool has at least one required parameter.
+func (t Tool) HasRequired() bool {
+	for _, p := range t.Params {
+		if p.Required {
+			return true
+		}
+	}
+	return false
+}
+
+// missingRequired returns the names of required params absent (or blank) in the
+// raw arguments. A required string left empty counts as missing, so a fumbled
+// call surfaces a clear error instead of silently running with an empty value.
+func (t Tool) missingRequired(raw map[string]any) []string {
+	var missing []string
+	for _, p := range t.Params {
+		if !p.Required {
+			continue
+		}
+		v, ok := raw[p.Name]
+		if !ok || v == nil {
+			missing = append(missing, p.Name)
+			continue
+		}
+		if s, isStr := v.(string); isStr && strings.TrimSpace(s) == "" {
+			missing = append(missing, p.Name)
+		}
+	}
+	return missing
+}
+
+// Usage renders a compact, model-readable parameter schema — the `marq run`
+// path's equivalent of the typed InputSchema an MCP client receives. Surfacing
+// it is what lets a local model construct correct JSON args instead of guessing.
+func (t Tool) Usage() string {
+	var b strings.Builder
+	desc, _, _ := strings.Cut(t.Desc, "\n")
+	fmt.Fprintf(&b, "%s — %s\n", t.Name, desc)
+	if len(t.Params) == 0 {
+		fmt.Fprintf(&b, "parameters: none\ncall: marq run %s '{}'", t.Name)
+		return b.String()
+	}
+	b.WriteString("parameters:\n")
+	var reqExample []string
+	for _, p := range t.Params {
+		req := "optional"
+		if p.Required {
+			req = "required"
+		}
+		def := ""
+		if p.Default != nil && p.Default != "" {
+			def = fmt.Sprintf(", default %v", p.Default)
+		}
+		fmt.Fprintf(&b, "  %-14s %s, %s%s — %s\n", p.Name, p.Type, req, def, p.Desc)
+		if p.Required {
+			reqExample = append(reqExample, fmt.Sprintf("%q:%q", p.Name, "..."))
+		}
+	}
+	ex := "{}"
+	if len(reqExample) > 0 {
+		ex = "{" + strings.Join(reqExample, ",") + "}"
+	}
+	fmt.Fprintf(&b, "call: marq run %s '%s'", t.Name, ex)
+	if t.Active {
+		b.WriteString("\n[active testing] run only against authorized, in-scope targets — confirm scope with server_info first; every call is audit-logged.")
+	}
+	return b.String()
+}
+
 // Call executes the tool with raw JSON arguments and returns the text envelope
 // the model reads. This is the single execution entry shared by both adapters.
 func (t Tool) Call(raw map[string]any) string {
+	if missing := t.missingRequired(raw); len(missing) > 0 {
+		return fmt.Sprintf("error: missing required parameter(s): %s\n\n%s",
+			strings.Join(missing, ", "), t.Usage())
+	}
 	args := Resolve(t.Params, raw)
 	if t.Handler != nil {
 		return t.Handler(args)

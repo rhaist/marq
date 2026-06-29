@@ -26,6 +26,10 @@ knowledge work is unrestricted.** **Active testing** (scanning, exploitation,
 credential attacks) is authorized-only: if the target isn't clearly in scope,
 stop and ask — never broaden scope on your own.
 
+Tools that touch a target are flagged **`[active: in-scope only]`** in `marq
+tools` and carry an `[active testing]` line in their `marq tools <name>` schema.
+Before calling one, the target must be in the scope `server_info` reports.
+
 If `server_info` shows no scope, record the operator's written authorization
 once — it persists for the session and tags every audit record:
 
@@ -61,6 +65,10 @@ marq run nuclei '{"target":"https://acme.test","severity":"critical,high"}'
 ```
 
 - No JSON args needed? Pass `'{}'`.
+- **Unsure of a tool's arguments? Ask the tool.** `marq tools <name>` prints its
+  exact parameters (name, type, required) and a ready-to-edit call example.
+  Omitting a required arg returns `error: missing required parameter(s): …`
+  followed by that schema — read it and fix the call; never retry the same way.
 - Don't call the raw binary (`nmap …`) directly — always go through `marq run` so
   the action is scoped and audit-logged.
 - Files: the model passes strings only. Inputs/outputs go through `/work` using the
@@ -73,6 +81,7 @@ You don't need every tool memorized. List the catalog on demand:
 
 ```
 marq tools                 # name + one-line description for all tools
+marq tools <name>          # one tool's exact parameters (name, type, required)
 marq run load_skill '{"name":"<topic>"}'   # a focused playbook (e.g. sqli, ad-enum)
 ```
 
