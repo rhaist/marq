@@ -20,6 +20,12 @@ on:
 permissions:
   contents: read
 
+# Cancel an in-progress image build when a newer commit supersedes it — the
+# ~35-min rebuild is the expensive one to leave running.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   image:
     runs-on: ubuntu-latest

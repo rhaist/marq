@@ -12,6 +12,11 @@ on:
 permissions:
   contents: read
 
+# Cancel a running gate when a newer commit lands on the same branch/PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   gate:
     runs-on: ubuntu-latest
