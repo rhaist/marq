@@ -55,7 +55,7 @@ brew install go
 docker pull ghcr.io/rhaist/marq && docker tag ghcr.io/rhaist/marq marq
 
 # …or build from source (native arch):
-git clone <this-repo> marq && cd marq
+git clone https://github.com/rhaist/marq.git && cd marq
 docker build -t marq .     # builds natively for your arch (arm64 on M-series)
 # Smaller image (skips warm-up; nuclei templates / wpscan DB / trivy DB fetched on first use):
 docker build --build-arg WARMUP=0 -t marq .
@@ -205,7 +205,7 @@ sudo apt install -y golang
 ### 2. Build the image
 
 ```bash
-git clone <this-repo> marq && cd marq
+git clone https://github.com/rhaist/marq.git && cd marq
 docker build -t marq .          # native amd64 (or arm64 on ARM boards)
 ```
 
