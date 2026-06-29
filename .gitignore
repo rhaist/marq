@@ -17,6 +17,8 @@ build/
 
 # Never commit audit logs, scan output, loot or scope files.
 *.jsonl
+# …but the eval's task set IS source, not output — un-ignore it:
+!scripts/eval/tasks.jsonl
 *.log
 /audit/
 /loot/
