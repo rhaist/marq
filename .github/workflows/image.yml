@@ -1,0 +1,36 @@
+# Builds the multi-GB Kali image and runs scripts/e2e-image.sh (the promises
+# that only hold for the running image: /work bind-mount persistence and
+# per-container jwt keys). Expensive, so it only triggers when the image
+# definition or its e2e scripts change — Go-only changes are covered by ci.yml.
+# Run it on demand from the Actions tab via workflow_dispatch.
+name: image
+
+on:
+  push:
+    branches: [main]
+    paths: &image-paths
+      - Dockerfile
+      - scripts/entrypoint.sh
+      - scripts/e2e-image.sh
+  pull_request:
+    branches: [main]
+    paths: *image-paths
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache/CodeQL
+          sudo docker image prune -af || true
+          df -h /
+      - name: build image
+        run: docker build -t marq .
+      - name: e2e (image)
+        run: bash scripts/e2e-image.sh --image marq

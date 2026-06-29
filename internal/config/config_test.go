@@ -33,8 +33,8 @@ func TestSetEngagementRoundTrip(t *testing.T) {
 	if C.Engagement != "acme-2026" || C.ScopeNote != "*.acme.com" {
 		t.Fatalf("live config not updated: %+v", C)
 	}
-	if e, s, ok := readContext(dir); !ok || e != "acme-2026" || s != "*.acme.com" {
-		t.Fatalf("readContext = %q,%q,%v; want acme-2026,*.acme.com,true", e, s, ok)
+	if e, s := readContext(dir); e != "acme-2026" || s != "*.acme.com" {
+		t.Fatalf("readContext = %q,%q; want acme-2026,*.acme.com", e, s)
 	}
 
 	// Empty engagement keeps the prior label; scope still updates.

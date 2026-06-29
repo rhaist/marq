@@ -80,13 +80,12 @@ func Load() Config {
 		Engagement:        env("MARQ_ENGAGEMENT", "unspecified"),
 		ScopeNote:         env("MARQ_SCOPE", ""),
 	}
-	if e, s, ok := readContext(cfg.WorkDir); ok {
-		if e != "" {
-			cfg.Engagement = e
-		}
-		if s != "" {
-			cfg.ScopeNote = s
-		}
+	e, s := readContext(cfg.WorkDir)
+	if e != "" {
+		cfg.Engagement = e
+	}
+	if s != "" {
+		cfg.ScopeNote = s
 	}
 	return cfg
 }
@@ -99,16 +98,16 @@ type engagementContext struct {
 
 func contextPath(workDir string) string { return filepath.Join(workDir, ".marq-context") }
 
-func readContext(workDir string) (engagement, scope string, ok bool) {
+// readContext returns the persisted engagement/scope, or empty strings if the
+// file is absent or unreadable (env defaults then stand).
+func readContext(workDir string) (engagement, scope string) {
 	b, err := os.ReadFile(contextPath(workDir))
 	if err != nil {
-		return "", "", false
+		return "", ""
 	}
 	var c engagementContext
-	if json.Unmarshal(b, &c) != nil {
-		return "", "", false
-	}
-	return c.Engagement, c.Scope, true
+	json.Unmarshal(b, &c)
+	return c.Engagement, c.Scope
 }
 
 // SetEngagement records the engagement label and authorized scope, updating the
