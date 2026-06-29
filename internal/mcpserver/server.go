@@ -45,12 +45,20 @@ func instructions() string {
 		"resilience, human factors, DevSecOps/privacy).\n\n" +
 		"How to work:\n" +
 		"1. Call the `server_info` tool first — it reports scope and the domains.\n" +
-		"2. Load the playbook for the task with the `load_skill` tool (call it with " +
-		"no arguments to list every skill, then load the relevant one by name). The " +
-		"skills carry current-standards detail and the right tool order.\n" +
+		"2. Load the playbook for the task with the `load_skill` tool — including " +
+		"advisory, standards and regulation questions: load the skill first, don't " +
+		"answer those from memory. (Call it with no arguments to list every skill, " +
+		"then load the relevant one by name.) The skills carry current-standards " +
+		"detail and the right tool order.\n" +
 		"3. Record results with `report_finding`; render the deliverable with " +
 		"`render_report`. Long scans run in the background — poll with `list_jobs` / " +
 		"`job_status`.\n\n" +
+		"Work efficiently (matters most for smaller models):\n" +
+		"- Prefer the dedicated tool over `run_shell` — check `marq tools` and use " +
+		"the wrapper if one exists (it's scoped, structured and audited). Use " +
+		"`run_shell` only for actions with no dedicated tool.\n" +
+		"- When you have what you need, stop calling tools and give a concise final " +
+		"answer — lead with the key facts/numbers, then the supporting detail.\n\n" +
 		"Advisory and knowledge work is unrestricted. Active testing (scanning, " +
 		"exploitation, credential attacks) is authorized-only — confirm targets are " +
 		"in the scope server_info reports before touching anything; every call is " +

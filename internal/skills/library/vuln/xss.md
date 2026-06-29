@@ -5,6 +5,10 @@ description: Find reflected/stored/DOM XSS and confirm execution.
 
 # Cross-site scripting (XSS)
 
+**Fast path:** if you already have a URL with a parameter, run `dalfox` on it
+directly — it tests and verifies execution. Only crawl first (below) when you
+still need to discover endpoints/params.
+
 ## Find candidates
 
 - `katana` to crawl endpoints and pull parameters; `arjun` to find hidden params.

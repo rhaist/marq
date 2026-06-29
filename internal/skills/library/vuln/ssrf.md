@@ -13,10 +13,12 @@ description: Find server-side request forgery and prove out-of-band reach.
 
 ## Confirm (out-of-band is the proof)
 
+- Fastest automated check: run `nuclei` (SSRF/OOB templates) against the
+  endpoint — it pairs with an OOB collaborator and flags callbacks for you.
 - Stand up a listener you control and point the parameter at it; a callback
-  proves the server made the request. Use `run_shell` to start a quick listener
-  (e.g. `python3 -m http.server` on an authorized host) or an interactsh-style
-  collaborator, then watch for the hit.
+  proves the server made the request. Use `interactsh` for the collaborator, or
+  `run_shell` to start a quick listener (e.g. `python3 -m http.server` on an
+  authorized host), then watch for the hit.
 - Probe internal targets: `http://127.0.0.1:<port>`, `http://169.254.169.254/`
   (cloud metadata), internal hostnames. Compare responses/latency for blind SSRF.
 

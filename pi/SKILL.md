@@ -123,9 +123,15 @@ marq run render_report '{}'      # writes /work/findings.md + findings.csv
 - One `marq run` call per step. Wait for the result before the next call.
 - Emit the JSON object exactly — double quotes, no trailing commas, no comments.
 - If a call errors, read the message and fix the args; don't repeat the same call.
+- **Prefer the dedicated tool over `run_shell`.** Check `marq tools` first — if a
+  wrapper exists (e.g. `dalfox`, `john`, `nuclei`), use it; it's scoped and
+  structured. `run_shell` is only for actions with no dedicated tool.
 - Prefer a narrow scan first (`-p 1-1000`, `--severity critical,high`) then widen.
 - Keep notes terse. Save anything important with `report_finding` immediately.
-- When the objective is met, summarize what you found and stop.
+- **Knowledge/standards/regulation questions still start with `load_skill`** —
+  the skill carries the current facts; don't answer those from memory.
+- **Converge.** When you have what you need, stop calling tools and give a
+  concise final answer — lead with the key facts/numbers, then the detail.
 
 ## Worked example
 
