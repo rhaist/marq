@@ -161,6 +161,34 @@ call against it. The `malware-triage` task is most meaningful with a real sample
 staged at `/work/sample.bin`, but still scores the model's tool/skill choice
 without one.
 
+## Running against local models — lessons the hard way
+
+Real sweeps surfaced these; a model scoring oddly low is usually one of them, not
+the model. **Always check `responses.jsonl` before trusting a low score** — it
+records every raw model turn precisely so you can tell a harness artifact from a
+genuine model failure.
+
+- **Tool calls emitted as _text_.** Many local models (qwen3, Hermes-template
+  models) emit `<tool_call>{...}</tool_call>` inside `content`/`reasoning_content`
+  instead of the structured `tool_calls` field, and the runtime doesn't always
+  parse them. The harness falls back to parsing that text — but it's why one early
+  qwen3 sweep scored ~half its real performance until the fallback existed. Symptom:
+  `trace.jsonl` shows few/no calls while `responses.jsonl` is full of `<tool_call>`.
+- **Thinking models are slow and leak.** Reasoning before every call is costly over
+  marq's ~90 schemas; `/no_think` (set per model in `profiles.json`) speeds it but
+  can route the answer into `reasoning_content` (the harness falls back to it for
+  the final answer). It's a real behaviour change — recorded in the measurement, so
+  you can A/B `no_think` on/off.
+- **Cap tool execution.** If the Kali tools are installed on the eval host (running
+  marq as the bare binary, not the image), a model that picks `masscan -p1-65535`
+  actually runs it and blocks for minutes. The harness defaults `MARQ_TIMEOUT=30`;
+  export it lower (`MARQ_TIMEOUT=10`) for faster sweeps — we score tool _selection_,
+  not execution.
+- **One hung tool won't kill the sweep.** A tool-call timeout/error fails just that
+  run (recorded as aborted) and the next run spawns a fresh marq server. The
+  per-model-call `--timeout` (default 300s) is the other stall point — a single
+  runaway generation blocks that long before recovering; lower it for local models.
+
 ## Driving the GUI clients (Pi, Claude Code)
 
 The harness automates the OpenAI-endpoint path (LM Studio/Ollama/llama-server).

@@ -37,7 +37,13 @@ go run ./cmd/marq serve                            # stdio MCP server locally
 go run ./cmd/marq run <tool> '<json-args>'        # invoke one tool directly
 ```
 
-The sanity gate is **`go test ./...`** — `internal/registry/registry_test.go` asserts no duplicate tool names, that every tool has exactly one of Build/Handler, and that the generated input schemas are well-formed. `go vet ./...` + `go build ./...` are the quick syntax/type gate. There is no separate linter or CI. `scripts/test_tools.py` / `scripts/verify_tools.sh` drive the built **image** over MCP (`docker run -i`) for end-to-end coverage.
+The sanity gate is **`go test ./...`** — `internal/registry/registry_test.go` asserts no duplicate tool names, that every tool has exactly one of Build/Handler, and that the generated input schemas are well-formed. `go vet ./...` + `go build ./...` are the quick syntax/type gate. Test surface beyond the unit gate:
+
+- **`scripts/e2e.sh`** — end-to-end of the user-facing promises through the real `marq run` CLI (scope/`set_engagement` persistence, all skills load, findings + CVSS, audit, file sandbox, catalog). No image, runs in seconds.
+- **`scripts/e2e-image.sh`** — the promises that only hold for the running image (`/work` bind-mount persistence across containers, per-container-unique jwt keys). Needs a built image.
+- **`scripts/test_tools.py`** / **`scripts/verify_tools.sh`** — drive the built **image** over MCP (`docker run -i`) for wrapped-binary plumbing coverage.
+- **`scripts/eval/`** — measures how well a model drives marq's skills+tools (and the skills-on/off lift), producing a committed, comparable-over-time leaderboard. Its README captures the local-model gotchas (text-form tool calls, thinking models, tool-exec capping).
+- **CI:** `.github/workflows/ci.yml` (fast gate + `e2e.sh` on every push/PR) and `image.yml` (path-gated image build + `e2e-image.sh`, publishes to GHCR on main).
 
 `entrypoint.sh`: bare `docker run` (or `... mcp` / `... serve`) starts `marq serve` (after regenerating jwt_tool's per-container keypair); any other args are exec'd directly (the `pi/marq` shim runs the container as `... sleep infinity` and `docker exec`s `marq run`/`marq tools` into it).
 
