@@ -1,7 +1,8 @@
 {
-  "//": "LM Studio MCP config. In LM Studio: Program > Edit mcp.json, paste the",
-  "//2": "'marq' entry below into your mcpServers, then adjust env values.",
-  "//3": "The container talks to LM Studio over stdio (-i keeps stdin open).",
+  "//": "MCP server config for marq — works as-is in Claude Code (.mcp.json),",
+  "//2": "Claude Desktop, and LM Studio (Program > Edit mcp.json). Codex uses TOML;",
+  "//3": "see docs/CLIENTS.md. Paste the 'marq' entry into your mcpServers and adjust",
+  "//4": "env. stdio (-i keeps it open). MARQ_SCOPE only gates active testing.",
   "mcpServers": {
     "marq": {
       "command": "docker",

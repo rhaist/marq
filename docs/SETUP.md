@@ -1,29 +1,36 @@
 # Setup
 
-Full install + run steps for **macOS** (Apple Silicon or Intel) and **Debian
-Testing** (rolling). The container (Kali tools + the `marq` Go binary) is
-identical on both; the only OS-specific part is how the local model runtime is
-installed and how the container reaches it.
+Install + run steps for **macOS** (Apple Silicon or Intel) and **Debian Testing**
+(rolling). The container (Kali tools + the `marq` Go binary) is identical on both;
+the only OS-specific part is installing Docker.
 
-> Authorized testing only. Read [`SECURITY.md`](SECURITY.md) first.
+marq is your **universal cyber assistant** — it brings the tools and the
+knowledge; your client brings the model. After building the image, see
+[`CLIENTS.md`](CLIENTS.md) to pick a client (Claude Code / Codex as the expert
+brain, Pi for fully-local uncensored work, LM Studio for testing). This page is
+just install + the two connection methods.
+
+> Advisory and knowledge work is open; **active testing is authorized-only** —
+> read [`SECURITY.md`](SECURITY.md) first.
 
 **Contents**
 
-- [Two ways to run](#two-ways-to-run)
+- [Two ways to connect](#two-ways-to-connect)
 - [macOS](#macos)
 - [Debian Testing (rolling)](#debian-testing-rolling)
 - [Local Go development](#local-go-development-both-oses)
 - [Verify](#verify)
 
-## Two ways to run
+## Two ways to connect
 
-| Mode                 | Command                            | Needs a local model?                      | Who drives the model                                              |
-| -------------------- | ---------------------------------- | ----------------------------------------- | ----------------------------------------------------------------- |
-| **MCP server**       | `marq serve` (default)             | No                                        | An external MCP client (Claude Desktop, LM Studio) brings its own |
-| **Agent host / TUI** | `marq tui` / `marq agent "<task>"` | **Yes** (LM Studio or Ollama on the host) | The binary's own tool-calling loop                                |
+| Method              | Command                       | Clients                                         | Who drives the model                               |
+| ------------------- | ----------------------------- | ----------------------------------------------- | -------------------------------------------------- |
+| **MCP server**      | `marq serve` (default)        | Claude Code, Codex, LM Studio, Claude Desktop   | The client brings its own model                    |
+| **Direct run (Pi)** | `pi/marq` shim + `marq run …` | [Pi](https://pi.dev/) (local/abliterated model) | Pi drives the model; it calls `marq run` from bash |
 
-The image is the same. Pick a section below for your OS; do the **common build**
-once, then the **MCP server** and/or **agent/TUI** subsections.
+The image is the same for both. Do the **build** once, then use the **MCP server**
+command below with any client (per-client setup is in [`CLIENTS.md`](CLIENTS.md)),
+and/or the **local model (Pi)** subsection.
 
 ---
 
@@ -32,7 +39,7 @@ once, then the **MCP server** and/or **agent/TUI** subsections.
 ### 1. Prerequisites
 
 ```bash
-# Docker Desktop (provides `host.docker.internal` automatically)
+# Docker Desktop
 brew install --cask docker        # then launch Docker.app once and let it start
 
 # Optional, only for local Go dev (not needed to run the image)
@@ -44,7 +51,7 @@ brew install go
 ```bash
 git clone <this-repo> marq && cd marq
 docker build -t marq .     # builds natively for your arch (arm64 on M-series)
-# Smaller image (skips warm-up; nuclei templates / msf cache fetched on first use):
+# Smaller image (skips warm-up; nuclei templates / wpscan DB / trivy DB fetched on first use):
 docker build --build-arg WARMUP=0 -t marq .
 ```
 
@@ -60,58 +67,40 @@ docker run --rm -i \
   marq
 ```
 
-Or wire it into LM Studio / Claude Desktop with [`mcp.json.example`](../mcp.json.example).
+Wire it into a client with [`mcp.json.example`](../mcp.json.example) — per-client
+steps (Claude Code, Codex, LM Studio) are in [`CLIENTS.md`](CLIENTS.md).
 
-### 4. Run the agent host / TUI (local model)
+### 4. Run with a local model (Pi + the marq skill)
 
-marq defaults to **LM Studio** (port 1234). Download LM Studio, load an
-uncensored tool-calling model, and start its local server (**Developer →
-Start Server**). Then just mount a working dir and launch — no `-e` flags
-needed, you fill everything in on the setup screen:
-
-```bash
-mkdir -p work
-docker run --rm -it -v "$PWD/work:/work" marq tui
-```
-
-On first launch the **setup screen** opens: pick **LM Studio / Ollama /
-Custom** with ←/→, then edit **endpoint, model, operator, engagement, and
-scope**. **Enter** runs a `/v1/models` connection check. Choices persist to
-`work/.marq/tui.json` (that's what the `-v` mount is for), so later launches
-skip straight to chat — press **Ctrl+S** there to re-open setup.
-
-The endpoint defaults to `http://host.docker.internal:1234/v1`; on Docker
-Desktop that resolves to the host, so LM Studio on its default
-`127.0.0.1:1234` is reachable as-is.
-
-<details><summary><strong>Set it via env vars instead (automation / CI)</strong></summary>
-
-Any `MARQ_*` env var overrides the saved file, so scripted runs stay
-deterministic without touching the setup screen:
+[Pi](https://pi.dev/) is a minimal terminal agent that runs a local/abliterated
+model over an OpenAI-compatible endpoint (LM Studio / Ollama / llama-server) and
+gives the model bash. The model reaches marq's tools through the `pi/marq` host
+shim, which forwards each call into a long-lived container over `docker exec`.
 
 ```bash
-docker run --rm -it \
-  -e MARQ_MODEL=<your-loaded-model-id> \
-  -e MARQ_OPERATOR=your-name -e MARQ_ENGAGEMENT=acme-2026 \
-  -e MARQ_SCOPE="*.example.com — per SOW" \
-  -v "$PWD/work:/work" \
-  marq tui
+# Install the shim
+cp pi/marq /usr/local/bin/marq && chmod +x /usr/local/bin/marq
+
+# Start ONE long-lived container, bound to your engagement dir
+marq up ~/engagements/acme        # docker run -d … sleep infinity
+marq tools                        # list every tool (sanity check)
+marq run server_info '{}'         # confirm scope
+marq down                         # tear down when finished
 ```
 
-</details>
+Then **configure your model runtime in Pi** (LM Studio / Ollama / llama-server —
+Pi owns the endpoint, that's no longer marq's concern) and load
+[`pi/SKILL.md`](../pi/SKILL.md) into Pi as a skill so the model knows the calling
+convention and scope rules. The model then calls `marq run <tool> '<json>'` from
+bash and the shim runs it inside the container.
 
-<details><summary><strong>Prefer Ollama?</strong></summary>
+A long-lived container is **required**: background tools (spiderfoot, responder,
+ntlmrelayx) detach inside it and are polled later, so a per-call `docker run`
+would kill them.
 
-```bash
-brew install ollama
-ollama serve >/dev/null 2>&1 &                       # or run the Ollama app
-ollama pull huihui_ai/Qwen3.6-abliterated:27b        # ~17 GB, fits 24 GB unified
-```
-
-Then run `docker run --rm -it -v "$PWD/work:/work" marq tui` and select
-**Ollama** on the setup screen (or pass `-e MARQ_MODEL_URL=http://host.docker.internal:11434/v1`).
-
-</details>
+Shim env vars: `MARQ_CONTAINER` (default `marq`), `MARQ_IMAGE` (default
+`marq:latest`), `MARQ_ENV_FILE` (optional env-file for API keys plus
+`MARQ_OPERATOR` / `MARQ_ENGAGEMENT` / `MARQ_SCOPE`, passed as `--env-file`).
 
 ---
 
@@ -142,57 +131,16 @@ docker build -t marq .          # native amd64 (or arm64 on ARM boards)
 
 Same as macOS step 3 above — identical command.
 
-### 4. Run the agent host / TUI (local model)
+### 4. Run with a local model (Pi + the marq skill)
 
-marq's baked default is LM Studio, but on a headless Debian box **Ollama** is
-the practical runtime (LM Studio is a desktop GUI app). The commands below set
-`MARQ_MODEL_URL` to the Ollama endpoint explicitly — overriding the default —
-or you can select Ollama in the TUI setup screen.
+Same as macOS step 4 — install the `pi/marq` shim, `marq up <dir>`, and drive it
+from Pi with [`pi/SKILL.md`](../pi/SKILL.md) loaded. Configure the model runtime
+(Ollama is the practical choice on a headless box) in Pi, not in marq.
 
-```bash
-# Install Ollama (installs a systemd service listening on 127.0.0.1:11434)
-curl -fsSL https://ollama.com/install.sh | sh
-ollama pull huihui_ai/Qwen3.6-abliterated:27b
-```
-
-**Networking — the one real difference from macOS.** Linux containers do _not_
-get `host.docker.internal` for free and the host's `127.0.0.1` is not the
-container's. Two clean options:
-
-**Option A — `--network=host` (recommended for a marq box).** The container
-shares the host network namespace, so Ollama on `127.0.0.1:11434` is reached
-directly _and_ the scanning tools get unmediated network access to targets.
-
-```bash
-mkdir -p work && chmod a+rwx work      # so the container's non-root user can write findings
-docker run --rm -it --network=host -v "$PWD/work:/work" marq tui
-# In the setup screen: set Base URL to http://localhost:11434/v1 (Ollama),
-# pick the model, and fill operator / engagement / scope.
-```
-
-**Option B — bridge networking with `host-gateway`.** Keep the container on its
-own network and add a host alias. Ollama must then listen on an interface the
-bridge can reach, so set `OLLAMA_HOST=0.0.0.0` (⚠️ this exposes Ollama on all
-host interfaces — restrict with a firewall):
-
-```bash
-sudo systemctl edit ollama     # add:  [Service]  Environment="OLLAMA_HOST=0.0.0.0:11434"
-sudo systemctl restart ollama
-
-mkdir -p work && chmod a+rwx work
-docker run --rm -it --add-host=host.docker.internal:host-gateway -v "$PWD/work:/work" marq tui
-# Setup screen: Base URL http://host.docker.internal:11434/v1, then model + operator/scope.
-```
-
-> With `--network=host` the Base URL must be `http://localhost:11434/v1`
-> (or `:1234` for LM Studio) — there is no `host.docker.internal` in the host
-> namespace. Set it in the TUI setup screen, or pass `-e MARQ_MODEL_URL=…`.
-
-> **Bind-mount permissions (Linux).** The container runs as the non-root
-> `marq` user, so a bind-mounted `./work` must be writable by it —
-> `chmod a+rwx work` (shown above) is the simplest. macOS Docker Desktop handles
-> this automatically. Alternatively use a named volume (`-v marq-work:/work`)
-> and copy results out with `docker cp`.
+> **Bind-mount permissions (Linux).** The container runs as the non-root `marq`
+> user, so the engagement dir you pass to `marq up` must be writable by it —
+> `chmod a+rwx <dir>` is the simplest. macOS Docker Desktop handles this
+> automatically.
 
 ---
 
@@ -216,17 +164,15 @@ go run ./cmd/marq run nmap '{"target":"scanme.nmap.org"}'   # invoke one tool
 docker run --rm --cap-add NET_RAW --cap-add NET_ADMIN marq nmap --version
 docker run --rm marq nuclei -version
 
-# MCP server lists its tools (expects ~53)
+# MCP server lists its tools (expects ~80)
 printf '%s\n' \
  '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"c","version":"0"}}}' \
  '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
  '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
  | docker run --rm -i marq | grep -o '"name":"[a-z_]*"' | wc -l
 
-# Validate the model does reliable multi-tool calling (needs a model runtime running):
-docker run --rm -i <networking flags for your OS> \
-  -e MARQ_MODEL_URL=... -e MARQ_MODEL=... \
-  marq agent "resolve and port-scan scanme.nmap.org, then summarize"
+# List every tool with a one-line description (also how the model discovers them):
+docker run --rm marq tools
 ```
 
 The full end-to-end harness is `scripts/verify_tools.sh` (drives the built image

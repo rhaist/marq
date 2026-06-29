@@ -183,8 +183,9 @@ func backgroundMsg(tool, target, jobDir string) string {
 func serverInfoTool() Tool {
 	return Tool{
 		Name: "server_info",
-		Desc: "Return the authorization banner, configured scope and operator metadata. " +
-			"Call this first to confirm you are authorized to test the intended targets.",
+		Desc: "Return the scope/operator metadata and the domains marq covers (offensive, " +
+			"malware, threat-intel, governance). Call this first; before any active testing " +
+			"(scanning/exploitation) confirm the targets are in the authorized scope it reports.",
 		Handler: func(a Args) string {
 			raw := "disabled"
 			if config.C.AllowRawShell {
@@ -201,19 +202,10 @@ func All() []Tool {
 	tools := slices.Concat(
 		[]Tool{serverInfoTool()},
 		recon(), osint(), people(), web(),
-		exploit(), creds(), fileTools(), reportTools(), knowledgeTools(),
+		exploit(), creds(), internal(), malware(), fileTools(), reportTools(), knowledgeTools(),
 	)
 	if config.C.AllowRawShell {
 		tools = append(tools, shell()...)
 	}
 	return tools
-}
-
-// ByName indexes the registered tools by name for dispatch.
-func ByName() map[string]Tool {
-	m := map[string]Tool{}
-	for _, t := range All() {
-		m[t.Name] = t
-	}
-	return m
 }

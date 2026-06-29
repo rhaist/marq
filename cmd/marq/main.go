@@ -1,11 +1,13 @@
 // Command marq is the single binary for the marq toolkit. It exposes the
 // shared tool registry two ways:
 //
-//	marq serve          run the MCP stdio server (external client brings the model)
-//	marq tui            run the TUI agent host (local model runtime)  [phase 3/4]
-//	marq run <tool> [json]   invoke one tool directly (smoke testing)
+//	marq serve               run the MCP stdio server (external client brings the model)
+//	marq run <tool> [json]   invoke one tool directly (the host shim / Pi skill uses this)
+//	marq tools               list every tool with a one-line description
 //
 // With no arguments it defaults to `serve` (so `docker run -i` starts the server).
+// Local-model agent UX lives outside the binary now — drive `marq run` from a
+// terminal agent (Pi) or any MCP client against `marq serve`. See pi/SKILL.md.
 package main
 
 import (
@@ -17,19 +19,10 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"marq/internal/agent"
 	"marq/internal/config"
 	"marq/internal/mcpserver"
 	"marq/internal/registry"
-	"marq/internal/tui"
 )
-
-func runTUI() {
-	if err := tui.Run(); err != nil {
-		fmt.Fprintln(os.Stderr, "tui error:", err)
-		os.Exit(1)
-	}
-}
 
 func main() {
 	cmd := "serve"
@@ -41,10 +34,8 @@ func main() {
 		serve()
 	case "run":
 		runTool(os.Args[2:])
-	case "agent":
-		runAgent(os.Args[2:])
-	case "tui":
-		runTUI()
+	case "tools":
+		listTools()
 	case "-h", "--help", "help":
 		usage()
 	default:
@@ -89,50 +80,25 @@ func runTool(argv []string) {
 	os.Exit(1)
 }
 
-// runAgent runs the headless agent loop against the configured model runtime,
-// printing each step. Example: marq agent "footprint example.com"
-func runAgent(argv []string) {
-	task := strings.TrimSpace(strings.Join(argv, " "))
-	if task == "" {
-		fmt.Fprintln(os.Stderr, `usage: marq agent "<task>"`)
-		os.Exit(1)
+// listTools prints every registered tool with the first line of its
+// description, so a terminal agent (or the operator) can browse the catalog on
+// demand instead of carrying 70+ tool specs in the system prompt.
+func listTools() {
+	for _, t := range registry.All() {
+		desc, _, _ := strings.Cut(t.Desc, "\n")
+		fmt.Printf("%-24s %s\n", t.Name, desc)
 	}
-	fmt.Fprintf(os.Stderr, "model: %s @ %s\n\n", config.C.ModelName, config.C.ModelBaseURL)
-	loop := agent.NewLoop()
-	loop.User(task)
-	loop.Run(context.Background(), func(e agent.Event) {
-		switch e.Kind {
-		case agent.EventAssistant:
-			fmt.Printf("\n🤖 %s\n", e.Text)
-		case agent.EventToolCall:
-			fmt.Printf("\n→ %s %s\n", e.Tool, e.Args)
-		case agent.EventToolResult:
-			fmt.Printf("%s\n", truncForLog(e.Text, 1500))
-		case agent.EventError:
-			fmt.Fprintf(os.Stderr, "\n✖ error: %s\n", e.Text)
-		case agent.EventDone:
-			fmt.Println("\n✓ done")
-		}
-	})
-}
-
-func truncForLog(s string, n int) string {
-	if len(s) <= n {
-		return s
-	}
-	return s[:n] + "\n…[truncated for log]…"
 }
 
 func usage() {
-	fmt.Fprint(os.Stderr, `marq — Kali marq/OSINT toolkit (MCP server + TUI agent host)
+	fmt.Fprint(os.Stderr, `marq — Kali pentest/OSINT toolkit (MCP server + direct tool runner)
 
 usage:
   marq serve              run the MCP stdio server (default)
-  marq tui                run the TUI agent host (local model runtime)
-  marq agent "<task>"     run the agent host headless (prints each step)
-  marq run <tool> [json]  invoke one tool directly (smoke testing)
+  marq run <tool> [json]  invoke one tool directly
+  marq tools              list every tool with a one-line description
 
-The agent/tui modes need a local OpenAI-compatible model runtime (LM Studio by
-default, or Ollama / llama.cpp). Configure it with MARQ_MODEL_URL / MARQ_MODEL.
+Interactive local-model use: drive `+"`marq run`"+` from a terminal agent such as
+Pi (see pi/SKILL.md), or point any MCP client at `+"`marq serve`"+`.
 `)
 }

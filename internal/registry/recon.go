@@ -151,5 +151,132 @@ func recon() []Tool {
 				return Invocation{Argv: argv, Target: a.S("domain")}
 			},
 		},
+		{
+			Name: "ssh_audit",
+			Desc: "Audit an SSH server's algorithms and configuration with ssh-audit.",
+			Params: []Param{
+				{Name: "host", Type: StringParam, Desc: "SSH host", Required: true},
+				{Name: "port", Type: IntParam, Desc: "SSH port", Default: 22},
+			},
+			Build: func(a Args) Invocation {
+				argv := []string{"ssh-audit", "-p", strconv.Itoa(a.I("port")), a.S("host")}
+				return Invocation{Argv: argv, Target: a.S("host")}
+			},
+		},
+		{
+			Name: "fping_sweep",
+			Desc: "Ping sweep a CIDR or host list with fping (-a -q -g).",
+			Params: []Param{
+				{Name: "target", Type: StringParam, Desc: "CIDR or host list", Required: true},
+			},
+			Build: func(a Args) Invocation {
+				return Invocation{Argv: []string{"fping", "-a", "-q", "-g", a.S("target")}, Target: a.S("target")}
+			},
+		},
+		{
+			Name: "snmp_walk",
+			Desc: "Walk an SNMP MIB tree with snmpwalk (v2c).",
+			Params: []Param{
+				{Name: "host", Type: StringParam, Desc: "SNMP host", Required: true},
+				{Name: "community", Type: StringParam, Desc: "community string", Default: "public"},
+				{Name: "options", Type: StringParam, Desc: "extra snmpwalk flags", Default: ""},
+			},
+			Build: func(a Args) Invocation {
+				argv := []string{"snmpwalk", "-v", "2c", "-c", a.S("community")}
+				argv = append(argv, shellword.Split(a.S("options"))...)
+				argv = append(argv, a.S("host"))
+				return Invocation{Argv: argv, Target: a.S("host")}
+			},
+		},
+		{
+			Name: "snmp_check",
+			Desc: "Quick SNMP enumeration with snmpcheck.",
+			Params: []Param{
+				{Name: "host", Type: StringParam, Desc: "SNMP host", Required: true},
+				{Name: "community", Type: StringParam, Desc: "community string", Default: "public"},
+			},
+			Build: func(a Args) Invocation {
+				return Invocation{Argv: []string{"snmpcheck", "-t", a.S("host"), "-c", a.S("community")}, Target: a.S("host")}
+			},
+		},
+		{
+			Name: "snmp_brute",
+			Desc: "Brute-force SNMP community strings with onesixtyone.",
+			Params: []Param{
+				{Name: "host", Type: StringParam, Desc: "SNMP host", Required: true},
+				{Name: "wordlist", Type: StringParam, Desc: "community string wordlist path", Required: true},
+			},
+			Build: func(a Args) Invocation {
+				return Invocation{Argv: []string{"onesixtyone", "-c", a.S("wordlist"), a.S("host")}, Target: a.S("host")}
+			},
+		},
+		{
+			Name: "smtp_user_enum",
+			Desc: "Enumerate SMTP users with smtp-user-enum.",
+			Params: []Param{
+				{Name: "host", Type: StringParam, Desc: "SMTP host", Required: true},
+				{Name: "method", Type: StringParam, Desc: "VRFY/EXPN/RCPT", Default: "VRFY"},
+				{Name: "users", Type: StringParam, Desc: "user list file path", Required: true},
+				{Name: "options", Type: StringParam, Desc: "extra smtp-user-enum flags", Default: ""},
+			},
+			Build: func(a Args) Invocation {
+				argv := []string{"smtp-user-enum", "-M", a.S("method"), "-U", a.S("users"), "-t", a.S("host")}
+				argv = append(argv, shellword.Split(a.S("options"))...)
+				return Invocation{Argv: argv, Target: a.S("host")}
+			},
+		},
+		{
+			Name: "smtp_test",
+			Desc: "SMTP testing with swaks — test relay, injection, auth. Flexible Swiss-army knife for SMTP.",
+			Params: []Param{
+				{Name: "target", Type: StringParam, Desc: "target host", Required: true},
+				{Name: "options", Type: StringParam, Desc: "raw swaks flags (--to --from --body ...)", Default: ""},
+			},
+			Build: func(a Args) Invocation {
+				argv := []string{"swaks", "--server", a.S("target")}
+				argv = append(argv, shellword.Split(a.S("options"))...)
+				return Invocation{Argv: argv, Target: a.S("target")}
+			},
+		},
+		{
+			Name: "asnmap",
+			Desc: "Map ASN to CIDR ranges / IP to ASN / organization to network ranges with asnmap (ProjectDiscovery). " +
+				"`target` is an IP, ASN (e.g. AS12345), or org name. Returns CIDR blocks.",
+			Params: []Param{
+				{Name: "target", Type: StringParam, Desc: "IP, ASN or org name", Required: true},
+				{Name: "options", Type: StringParam, Desc: "extra asnmap flags", Default: ""},
+			},
+			Build: func(a Args) Invocation {
+				argv := []string{"asnmap", "-silent"}
+				argv = append(argv, shellword.Split(a.S("options"))...)
+				argv = append(argv, a.S("target"))
+				return Invocation{Argv: argv, Target: a.S("target")}
+			},
+		},
+		{
+			Name: "cdncheck",
+			Desc: "Identify whether IPs belong to a CDN, cloud, or WAF provider with cdncheck (ProjectDiscovery). " +
+				"`target` is a comma/newline-separated IP list. Useful to exclude third-party infra from scans.",
+			Params: []Param{
+				{Name: "targets", Type: StringParam, Desc: "comma/newline-separated IPs", Required: true},
+			},
+			Build: func(a Args) Invocation {
+				argv := []string{"cdncheck", "-silent"}
+				return Invocation{Argv: argv, Target: a.S("targets"), Stdin: strings.Join(splitHosts(a.S("targets")), "\n")}
+			},
+		},
+		{
+			Name: "censys_search",
+			Desc: "Search Censys for exposed assets. Requires CENSYS_API_ID and CENSYS_API_SECRET env vars.",
+			Params: []Param{
+				{Name: "query", Type: StringParam, Desc: "Censys query", Required: true},
+				{Name: "index", Type: StringParam, Desc: "hosts/certs/v2", Default: "hosts"},
+				{Name: "options", Type: StringParam, Desc: "extra censys flags", Default: ""},
+			},
+			Build: func(a Args) Invocation {
+				cmd := "if [ -n \"$CENSYS_API_ID\" ]; then export CENSYS_API_ID; fi; if [ -n \"$CENSYS_API_SECRET\" ]; then export CENSYS_API_SECRET; fi; censys search " + shellword.Quote(a.S("query")) + " --type " + a.S("index") + " " + a.S("options")
+				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("query")}
+			},
+		},
 	}
 }

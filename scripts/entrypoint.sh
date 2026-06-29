@@ -8,12 +8,15 @@
 #   docker run --rm marq nmap --version
 set -euo pipefail
 
+init_jwt_keys() {
+    rm -rf "$HOME/.jwt_tool"
+    jwt_tool x >/dev/null 2>&1 || true
+}
+
 case "${1:-}" in
     "" | mcp | serve)
+        init_jwt_keys
         exec marq serve
-        ;;
-    tui)
-        exec marq tui
         ;;
 esac
 

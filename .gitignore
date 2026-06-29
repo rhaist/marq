@@ -6,6 +6,9 @@ venv/
 dist/
 build/
 
+# Engagement working area — runtime mount, never committed.
+/work/
+
 # Never commit audit logs, scan output, loot or scope files.
 *.jsonl
 *.log

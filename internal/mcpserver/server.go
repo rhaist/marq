@@ -22,7 +22,8 @@ const Version = "2.0.0"
 // New builds the MCP server with every registered tool, the authorization +
 // methodology resources, and the server_info tool.
 func New() *mcp.Server {
-	s := mcp.NewServer(&mcp.Implementation{Name: "marq", Version: Version}, nil)
+	s := mcp.NewServer(&mcp.Implementation{Name: "marq", Version: Version},
+		&mcp.ServerOptions{Instructions: instructions()})
 
 	for _, t := range registry.All() {
 		addTool(s, t)
@@ -30,6 +31,31 @@ func New() *mcp.Server {
 
 	addResources(s)
 	return s
+}
+
+// instructions is the server-level briefing surfaced into the model's context by
+// MCP clients (Claude Code, Codex, …). Resources aren't auto-loaded, so this is
+// how a client-driven model learns to drive marq across all domains: call
+// server_info first, then load_skill the right playbook. Mirrors pi/SKILL.md's
+// role for the Pi flow.
+func instructions() string {
+	return "marq is a universal cyber assistant: ~80 security tools plus a skills " +
+		"library of expert playbooks across 14 domains (offensive, malware, " +
+		"threat-intel, sec-ops, architecture, GRC, standards & regulation, CISO, " +
+		"resilience, human factors, DevSecOps/privacy).\n\n" +
+		"How to work:\n" +
+		"1. Call the `server_info` tool first — it reports scope and the domains.\n" +
+		"2. Load the playbook for the task with the `load_skill` tool (call it with " +
+		"no arguments to list every skill, then load the relevant one by name). The " +
+		"skills carry current-standards detail and the right tool order.\n" +
+		"3. Record results with `report_finding`; render the deliverable with " +
+		"`render_report`. Long scans run in the background — poll with `list_jobs` / " +
+		"`job_status`.\n\n" +
+		"Advisory and knowledge work is unrestricted. Active testing (scanning, " +
+		"exploitation, credential attacks) is authorized-only — confirm targets are " +
+		"in the scope server_info reports before touching anything; every call is " +
+		"audit-logged.\n\n" +
+		"--- methodology ---\n\n" + registry.Methodology
 }
 
 // addTool bridges one registry.Tool into the MCP server with a raw-args handler.

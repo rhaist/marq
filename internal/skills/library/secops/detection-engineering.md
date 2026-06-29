@@ -1,0 +1,95 @@
+---
+name: detection-engineering
+description: Build detections as code — Sigma rules, ATT&CK coverage mapping, testing with Atomic Red Team / CALDERA, and the detect-tune lifecycle that controls false positives.
+---
+
+# Detection engineering
+
+Treat every detection like production software: version-controlled, peer-reviewed,
+tested, deployed via pipeline, measured. The output is detection _content_ that
+the SIEM/SOAR runs (`load_skill siem-soar` for the platform + triage side). Many
+detections are born from a hunt — `load_skill threat-hunting` for the discovery
+loop that feeds this one.
+
+## Detection-as-code workflow
+
+1. **Source the requirement** — a hunt finding, a threat-intel TTP (`load_skill
+actor-ttp-attribution`), a new ATT&CK technique, a public PoC, or a post-
+   incident gap. Each becomes a documented detection idea, not a hunch.
+2. **Author** the rule in a portable format (Sigma) in a Git repo, organized by
+   ATT&CK technique / log source.
+3. **Peer review** via pull request — logic, FP exposure, performance, runbook.
+4. **Test** against labeled data + emulated attacks (below). Red = true-positive
+   fires AND benign data stays quiet.
+5. **CI** validates schema, converts to backend queries (sigma-cli), runs against
+   test data; promote through staging → production via API with rollback.
+6. **Deploy + monitor** FP/TP rates; loop back to tune. Rule lifecycle: draft →
+   test → production → tuning → deprecated.
+   verify: https://github.com/sigmahq/sigma
+
+## Sigma rules (the portable standard)
+
+Vendor-agnostic YAML describing suspicious log behaviour; convert once to Splunk/
+Sentinel/Elastic/etc with the converter. Mandatory anatomy:
+
+- `title`, `id` (UUID), `status`, `description`, `author`, `references`, `date`.
+- `logsource` — product/category/service (e.g. `category: process_creation`,
+  `product: windows`). Wrong logsource = rule silently never fires.
+- `detection` — one or more named selections + a `condition` combining them
+  (`selection and not filter`). Build the _filter_ (known-benign) in from day one.
+- `level` (informational→critical) and `tags` — `attack.tXXXX`, tactic. The tag
+  is what drives coverage mapping, so never omit it.
+- `falsepositives` — document them; an undocumented FP source is an un-tunable rule.
+
+Write **behaviour**, not brittle IOCs: parent/child process chains, suspicious
+command lines, LOLBin abuse > a single hash/IP (pyramid of pain — behaviour
+detections survive, atomic IOCs churn). Import SigmaHQ's ~3000 rules as candidates,
+but tune each to your environment before trusting it.
+
+## ATT&CK coverage mapping (v18)
+
+- Tag every detection with its technique id; aggregate into a heatmap (ATT&CK
+  Navigator) to see covered vs blind techniques.
+- ATT&CK v18 (Oct 2025) replaced Detections/Data Sources with **Detection
+  Strategies + Analytics** — each Analytic names the platform-specific log source/
+  data component to operationalize. Use them as the authoring blueprint.
+  verify: https://attack.mitre.org/resources/updates/updates-october-2025/
+- Chase coverage _gaps that match your threat model_ (sector, actors, exposed
+  tech), not raw technique count. 100% of the matrix is neither achievable nor the
+  goal; high-fidelity coverage of likely TTPs is.
+- Watch data-source dependency: a detection you can't feed is a paper rule — flag
+  the missing telemetry to `load_skill siem-soar`.
+
+## Testing detections (prove they fire)
+
+- **Atomic Red Team** (Red Canary) — ~1225 atomic tests across ~261 ATT&CK
+  techniques; `Invoke-AtomicTest` runs one technique → confirm the detection
+  fires + benign data stays quiet. The fast, granular unit test of a detection.
+- **MITRE CALDERA** — autonomous adversary emulation (chained TTPs, C2, full
+  scenarios) for end-to-end / breach-and-attack-simulation coverage validation.
+  verify: https://github.com/redcanaryco/atomic-red-team
+- Purple-team loop: red emulates the TTP → blue confirms detection → tune the
+  miss → re-run. A detection with no executed test is unvalidated.
+- Also test the **negatives**: replay normal-activity data and confirm the rule
+  stays silent. That's the FP gate.
+
+## Detect-tune lifecycle (control false positives)
+
+- Every production rule carries an expected FP profile + a triage runbook. No
+  runbook = don't ship (analysts can't action it).
+- Tune order: build benign filters in → raise thresholds / add context (asset,
+  user, change-window) → narrow logsource → deprecate dead rules.
+- Beware rule decay: env/vendor-API/attacker drift silently breaks rules. Schedule
+  a periodic detection audit — top-noise rules, never-fired rules (broken or
+  truly-no-activity?), and rules whose data source went dark.
+- Close the loop with `siem-soar`: SOAR auto-close + analyst close-codes (true/
+  benign/FP) are the tuning telemetry that feeds the next revision.
+
+## marq tie-in
+
+Use marq as the _red_ half of the purple loop: run the offensive technique
+(`nmap`, `nuclei`, exploit tooling — in scope per `server_info`) and verify the
+detection would catch it; `yara_scan` patterns can themselves be a host detection.
+`report_finding` any technique you execute that produced no alert — a proven
+detection gap is a deliverable; `run_shell` for ad-hoc rule/log testing on `/work`
+data.

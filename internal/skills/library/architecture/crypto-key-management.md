@@ -1,0 +1,73 @@
+---
+name: crypto-key-management
+description: Cryptography & key management — choosing algorithms, PKI, HSM/KMS, secrets management, and the post-quantum migration.
+---
+
+# Cryptography & key management
+
+You rarely implement crypto; you make decisions about it. The failures are never
+the math — they're key management, stale algorithms, and rolled-your-own.
+
+## Use, don't invent
+
+- Never design a primitive or a protocol. Use vetted libraries (libsodium, the
+  platform's TLS, AWS/GCP/Azure KMS) and standard protocols (TLS 1.3, SSH,
+  Signal/MLS). "We wrote our own encryption" is a finding — `report_finding` it.
+- Prefer authenticated encryption (AES-GCM, ChaCha20-Poly1305). Encrypt-then-MAC
+  only if you must compose; never MAC-then-encrypt or unauthenticated CBC.
+
+## Current algorithm floor (2026)
+
+- Symmetric: **AES-128+ or ChaCha20** (AES-256 for long-life/regulated data).
+- Hash: **SHA-256+ / SHA-3**. MD5 and SHA-1 are dead — flag any use.
+- Asymmetric (classical): **RSA-3072+** or **ECC P-256/Ed25519**.
+- KDF/passwords: **Argon2id** (or scrypt/bcrypt); PBKDF2 only for compat. Never
+  a bare hash for passwords (see `load_skill password-cracking` for why).
+- TLS: **1.3** preferred, 1.2 floor; disable everything below.
+
+## Post-quantum (the live migration — verify, this moves)
+
+- NIST finalized the first PQC standards in Aug 2024: **FIPS 203 (ML-KEM /
+  Kyber)** for key exchange, **FIPS 204 (ML-DSA / Dilithium)** and **FIPS 205
+  (SLH-DSA / SPHINCS+)** for signatures; **HQC** selected (2025) as a KEM
+  backup. verify: https://csrc.nist.gov/projects/post-quantum-cryptography
+- Threat is **harvest-now-decrypt-later** — long-lived secrets are at risk today.
+- Act now: build a **crypto inventory** (where keys/algorithms live), demand
+  **crypto-agility** (algorithms swappable, not hard-coded), and deploy **hybrid**
+  key exchange (classical + ML-KEM) for data that must stay secret for years.
+
+## Key management (where it actually breaks)
+
+- **Hierarchy:** a root/key-encryption-key protects data-encryption-keys; only
+  the KEK lives in the HSM/KMS, DEKs are wrapped (envelope encryption).
+- **HSM / KMS:** keep key material in an HSM (on-prem) or cloud KMS; the
+  application gets encrypt/decrypt operations, never the raw key. FIPS 140-3
+  validation where required.
+- **Rotation:** rotate on a schedule and on suspected compromise; design so
+  rotation doesn't require re-encrypting everything (rotate the KEK, not every
+  DEK). Keep old keys for decrypt-only until data is re-wrapped.
+- **Separation of duties:** the people who manage keys ≠ the people who access
+  the data. Log every key use (it feeds `load_skill siem-soar`).
+
+## PKI & certificates
+
+- Internal PKI: protect the offline root, issue from intermediates, publish
+  CRL/OCSP. Short-lived certs + automation (ACME) beat long-lived + manual.
+- **Certificate lifecycle is an outage source** — inventory and auto-renew;
+  expired certs cause more downtime than attacks. The CA/Browser Forum is moving
+  public TLS toward ~47-day max lifetimes — automate or bleed. verify:
+  https://www.cabforum.org/
+- mTLS for service-to-service; tie identity to the cert (see `load_skill iam`).
+
+## Secrets management
+
+- No secrets in code, env files, images, or git. Detect leaks with `gitleaks` /
+  `trufflehog`; if one ships, **rotate it** — masking isn't remediation.
+- Use a secrets manager (Vault, cloud secret stores) with short-lived/dynamic
+  secrets and tight access policies. Pairs with `load_skill devsecops`.
+
+## Report
+
+- `report_finding` for: weak/deprecated algorithms, hardcoded keys/secrets,
+  unauthenticated encryption, missing rotation, self-rolled crypto, no PQC plan
+  for long-life data. Map to CWE-327/328/320 and `load_skill control-mapping`.

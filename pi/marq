@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# marq host shim — the "binary outside Docker".
+#
+# marq's tools (nmap, nuclei, impacket, …) live inside the Kali image, but Pi and
+# the local model run on the host. This shim forwards tool calls into a long-lived
+# marq container so the model can just call `marq run <tool> '<json>'` from bash.
+#
+# Install:  cp pi/marq /usr/local/bin/marq && chmod +x /usr/local/bin/marq
+# Session:  marq up ~/engagements/acme      # start the container, bind /work
+#           marq run server_info '{}'        # the model uses this form
+#           marq down                        # tear down
+#
+# A long-lived container (not `docker run` per call) is required: background tools
+# (spiderfoot, responder, ntlmrelayx) detach inside it and are polled later with
+# list_jobs/job_status — an ephemeral per-call container would kill them.
+set -euo pipefail
+C="${MARQ_CONTAINER:-marq}"
+IMG="${MARQ_IMAGE:-marq:latest}"
+
+case "${1:-}" in
+  up)
+    work="${2:?usage: marq up <engagement-dir>}"
+    mkdir -p "$work"
+    docker rm -f "$C" >/dev/null 2>&1 || true
+    # caps: nmap/masscan/naabu SYN scans. env-file (optional): API keys.
+    docker run -d --name "$C" \
+      --cap-add NET_ADMIN --cap-add NET_RAW \
+      -v "$(cd "$work" && pwd):/work" \
+      ${MARQ_ENV_FILE:+--env-file "$MARQ_ENV_FILE"} \
+      "$IMG" sleep infinity >/dev/null
+    echo "marq up: container '$C', /work -> $(cd "$work" && pwd)"
+    ;;
+  down)
+    docker rm -f "$C" >/dev/null 2>&1 || true
+    ;;
+  shell)
+    exec docker exec -it "$C" bash
+    ;;
+  "")
+    echo "usage: marq up <dir> | down | shell | run <tool> '<json>' | tools" >&2
+    exit 1
+    ;;
+  *)
+    # Forward everything else (run, tools, …) to the marq binary in the container.
+    exec docker exec -i "$C" marq "$@"
+    ;;
+esac

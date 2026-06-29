@@ -1,7 +1,7 @@
 # Security & Safe-Use Guide
 
-This project bundles **active, offensive security tooling** (metasploit, hydra,
-sqlmap, hashcat, masscan, …) plus **OSINT / footprinting tooling** that profiles
+This project bundles **active, offensive security tooling** (netexec, impacket,
+hydra, sqlmap, hashcat, masscan, …) plus **OSINT / footprinting tooling** that profiles
 people and organisations (theHarvester, spiderfoot, sherlock, holehe, h8mail,
 phoneinfoga, …), and exposes it all to an LLM through MCP. That is powerful and
 inherently dual-use. Read this before you run anything.
@@ -13,7 +13,7 @@ inherently dual-use. Read this before you run anything.
   jurisdictions (e.g. the US CFAA, UK Computer Misuse Act).
 - Keep your rules of engagement / scope document handy and record it in
   `MARQ_SCOPE` so it lands in every audit record.
-- Online brute force (hydra), exploitation (metasploit) and aggressive scanning
+- Online brute force (hydra), exploitation (impacket, evil-winrm) and aggressive scanning
   (masscan at high rates) can disrupt or lock out production systems. Use the
   least aggressive technique that answers the question.
 - **OSINT on people is still in-scope work, not a free-for-all.** Profiling
@@ -53,8 +53,9 @@ The audit log is append-only and `fsync`'d per write. Default location:
 - **`no-new-privileges`** is set in the sample run configs.
 - **No network port is opened.** Transport is stdio only; the MCP client spawns
   the container and talks over stdin/stdout. There is no listening service to
-  attack. (The local TUI/agent mode makes only an outbound call to the model
-  runtime you configure.)
+  attack. With the `pi/marq` shim, the agent reaches tools via `docker exec` into
+  a local container — the model runtime is the client's concern (e.g. Pi), not
+  marq's, so marq itself opens no outbound model connection.
 - **Raw shell is enabled by default but audit-logged.** The image is a full
   offensive toolkit (hundreds of tools without dedicated wrappers), so the
   arbitrary-command tool ships on so the model can chain and stage them; every
@@ -67,6 +68,12 @@ The audit log is append-only and `fsync`'d per write. Default location:
   container. These ops are audit-logged like every tool run.
 - Output is truncated to a token budget so a runaway scan can't flood the model.
 - A per-command timeout (`MARQ_TIMEOUT`, default 900s) bounds runaway tools.
+- **Audit completeness depends on the driver.** Every call through `marq run` /
+  `marq serve` is logged at `runner.Run`. The `pi/marq` shim, however, hands the
+  agent raw host bash, so a model _could_ `docker exec` a tool directly and skip
+  the audit trail — the skill instructs "always use `marq run`," but that's
+  guidance, not enforcement. For a hard, unbypassable audit boundary use
+  `marq serve` (no shell exposed to the model).
 
 ## Recommended operational practices
 

@@ -1,15 +1,17 @@
 # Usage
 
-How to build, smoke-test and drive the toolkit. For a guided per-OS install
-(macOS / Debian Testing) see [`SETUP.md`](SETUP.md); for the safety model see
-[`SECURITY.md`](SECURITY.md).
+How to build, smoke-test and drive marq — your universal cyber assistant (~80
+tools + ~70 skill playbooks across 14 domains). For choosing a client and model
+for the job (Claude Code / Codex as the expert, Pi for local uncensored work, LM
+Studio for testing) see [`CLIENTS.md`](CLIENTS.md); for a guided per-OS install
+see [`SETUP.md`](SETUP.md); for the safety model see [`SECURITY.md`](SECURITY.md).
 
 **Contents**
 
 - [1. Build the image](#1-build-the-image)
 - [2. Smoke-test the image](#2-smoke-test-the-image)
 - [3. Wire it into an MCP client](#3-wire-it-into-an-mcp-client)
-- [4. Agent host (TUI) with a local model](#4-agent-host-tui-with-a-local-model)
+- [4. Run with a local model (Pi)](#4-run-with-a-local-model-pi)
 - [Available tools](#available-tools)
 - [API keys for OSINT sources](#api-keys-for-osint-sources)
 - [Environment variables](#environment-variables)
@@ -32,7 +34,7 @@ network-dependent first scan:
 
 - `nuclei` — the template repository (`nuclei -update-templates`)
 - `wpscan` — the WordPress vulnerability database (`wpscan --update`)
-- `metasploit` — the module cache (a one-shot `msfconsole` run)
+- `trivy` — the vulnerability database (`trivy image --download-db-only`)
 - `rockyou` — decompressed to `/usr/share/wordlists/rockyou.txt`
 
 These steps are best-effort: a network hiccup during build won't fail the
@@ -66,98 +68,78 @@ docker run --rm -i marq        # prints the authorization banner to stderr
 
 ## 3. Wire it into an MCP client
 
-These steps use LM Studio; Claude Desktop and other MCP clients are equivalent
-(point them at the same `docker run` command).
+Any MCP client works — **Claude Code** and **Codex** (frontier model as the
+expert), **LM Studio** (local model, for testing), **Claude Desktop**. Per-client
+setup and which-brain-for-which-job guidance is in [`CLIENTS.md`](CLIENTS.md). The
+shared shape:
 
-1. In LM Studio open the MCP config (**Program → Edit `mcp.json`**, or the
-   "Integrations" panel).
-2. Merge the `marq` entry from [`mcp.json.example`](../mcp.json.example)
-   into your `mcpServers`.
-3. Edit the `env` block — set `MARQ_OPERATOR`, `MARQ_ENGAGEMENT`
-   and especially `MARQ_SCOPE` to your authorized targets.
-4. Save and toggle the server on. Load a tool-use-capable model.
-5. Ask the model to call `server_info` first — it returns the authorization
-   banner and confirms scope before any scanning.
+1. Add the `marq` server from [`mcp.json.example`](../mcp.json.example) — drop the
+   `mcpServers` block into Claude Code's `.mcp.json`, LM Studio's `mcp.json`
+   (**Program → Edit mcp.json**), or Claude Desktop's config. Codex uses TOML
+   (`codex mcp add marq -- …`, see CLIENTS.md).
+2. Set `MARQ_OPERATOR` / `MARQ_ENGAGEMENT`, and `MARQ_SCOPE` before any active
+   testing (advisory/knowledge use needs no scope).
+3. Use a tool-capable model. Have it call `server_info` first, then `load_skill`
+   the domain it's working in.
 
-## 4. Agent host (TUI) with a local model
+## 4. Run with a local model (Pi)
 
-Instead of an external MCP client, the same binary can drive a **local** model
-itself, with its own tool-calling loop and a terminal UI. The model runs on the
-**host** (Docker on Apple Silicon has no GPU passthrough), reached over
-`host.docker.internal`.
+Instead of an external MCP client, drive marq from [Pi](https://pi.dev/) — a
+minimal terminal agent that runs a local/abliterated model over an
+OpenAI-compatible endpoint (LM Studio / Ollama / llama-server) and gives the
+model bash. The model invokes `marq run <tool> '<json>'`; the `pi/marq` host
+shim forwards each call into a long-lived container over `docker exec`.
 
 ```bash
-# On the host: load an uncensored, tool-calling model and start a local
-# OpenAI-compatible server. marq defaults to LM Studio (port 1234); Ollama
-# (port 11434) and llama.cpp's llama-server work too — pick either in the TUI.
-#   - LM Studio (default): download the app, load a model, Developer → start server
-#   - Ollama:  ollama pull huihui_ai/Qwen3.6-abliterated:27b   # ~17 GB; strong tool-calling
-#   lighter / cyber-specialist option: WhiteRabbitNeo-V3-7B (~5 GB)
+# Install the shim
+cp pi/marq /usr/local/bin/marq && chmod +x /usr/local/bin/marq
 
-# Run the TUI agent host (model on host, tools in the container). No -e flags
-# needed — the setup screen collects model, operator, engagement and scope, and
-# persists them to ./work/.marq/tui.json (that's what the -v mount is for):
-docker run --rm -it -v "$PWD/work:/work" marq tui
-
-# For automation/CI, any MARQ_* env var overrides the saved file:
-docker run --rm -it \
-  -e MARQ_MODEL=<your-loaded-model-id> \
-  -e MARQ_OPERATOR=your-name -e MARQ_ENGAGEMENT=acme-2026 \
-  -e MARQ_SCOPE="*.example.com — per SOW" \
-  -v "$PWD/work:/work" \
-  marq tui
-
-# Headless equivalent (prints each step) — also the way to validate that the
-# chosen model does reliable multi-tool calling:
-docker run --rm -i ... marq agent "footprint example.com, report findings"
+# Start ONE long-lived container, bound to your engagement dir
+marq up ~/engagements/acme        # docker run -d … sleep infinity
+marq tools                        # list every tool
+marq run server_info '{}'         # confirm scope
+marq down                         # tear down when finished
 ```
 
-The agent gets the authorization banner + methodology as its system prompt,
+Configure your model runtime **in Pi** (it owns the endpoint — that's no longer
+marq's concern), then load [`pi/SKILL.md`](../pi/SKILL.md) into Pi as a skill so
+the model knows the calling convention and scope rules. From there the model
 calls `server_info` first, works the tools, records findings with
 `report_finding`, and writes the report with `render_report` into `/work`.
 
-### In-TUI setup (interactive alternative to the env vars above)
+A long-lived container is **required**: background tools (spiderfoot, responder,
+ntlmrelayx) detach inside it and are polled later, so a per-call `docker run`
+would kill them.
 
-On first launch (no saved config), `marq tui` opens a **setup screen** instead
-of going straight to the chat:
-
-1. **Backend** — cycle with ←/→ between `LM Studio` (the default), `Ollama`,
-   and `Custom`. Picking one fills in its default Base URL + API key (LM Studio
-   uses `http://host.docker.internal:1234/v1` and key `lm-studio`; Ollama uses
-   `:11434/v1` and key `ollama`).
-2. Edit **Base URL**, **Model**, **API key**, **Operator**, **Engagement**,
-   and **Scope** (Tab/↑↓ to move between fields).
-3. **Enter** probes the endpoint with `GET /v1/models` (using the same client
-   the agent loop uses) and shows `✓ connected — N models available` or the
-   error. **Ctrl+S** saves without probing.
-4. From the result line: **Enter** to proceed, **e** to edit, **r** to retry.
-
-Choices persist to `$MARQ_WORK_DIR/.marq/tui.json` (override with
-`MARQ_TUI_CONFIG`), so the next launch skips setup and goes straight to chat.
-**Ctrl+S from the chat view re-opens setup**, preloaded with the current
-config. Env vars (`MARQ_MODEL_URL`, `MARQ_MODEL`, …) always override the saved
-file when set, so automated runs stay reproducible.
-
-> **Linux note:** under `--network=host` change the Base URL to
-> `http://localhost:1234/v1` (or `:11434` for Ollama) in the setup screen —
-> the container shares the host namespace so there's no `host.docker.internal`.
+Shim env vars: `MARQ_CONTAINER` (default `marq`), `MARQ_IMAGE` (default
+`marq:latest`), `MARQ_ENV_FILE` (optional env-file for API keys plus
+`MARQ_OPERATOR` / `MARQ_ENGAGEMENT` / `MARQ_SCOPE`, passed as `--env-file`).
 
 ## Available tools
 
 ### Recon / network
 
-| Tool           | Wraps     | Purpose                           |
-| -------------- | --------- | --------------------------------- |
-| `server_info`  | —         | Show authorization banner + scope |
-| `nmap`         | nmap      | Port/service scanning             |
-| `masscan`      | masscan   | Fast port sweeps                  |
-| `naabu`        | naabu     | Fast modern port scan (top-ports) |
-| `dns_lookup`   | dig       | DNS records                       |
-| `dnsx`         | dnsx      | Bulk DNS resolution / record enum |
-| `dnsrecon`     | dnsrecon  | DNS recon, zone transfer, brute   |
-| `whois_lookup` | whois     | Registration data                 |
-| `subfinder`    | subfinder | Passive subdomain enum            |
-| `httpx_probe`  | httpx     | Live HTTP probing / tech detect   |
+| Tool             | Wraps          | Purpose                           |
+| ---------------- | -------------- | --------------------------------- |
+| `server_info`    | —              | Show authorization banner + scope |
+| `nmap`           | nmap           | Port/service scanning             |
+| `masscan`        | masscan        | Fast port sweeps                  |
+| `naabu`          | naabu          | Fast modern port scan (top-ports) |
+| `dns_lookup`     | dig            | DNS records                       |
+| `dnsx`           | dnsx           | Bulk DNS resolution / record enum |
+| `dnsrecon`       | dnsrecon       | DNS recon, zone transfer, brute   |
+| `whois_lookup`   | whois          | Registration data                 |
+| `subfinder`      | subfinder      | Passive subdomain enum            |
+| `httpx_probe`    | httpx          | Live HTTP probing / tech detect   |
+| `ssh_audit`      | ssh-audit      | SSH server algorithm/config audit |
+| `fping_sweep`    | fping          | Fast parallel ping sweep          |
+| `snmp_walk`      | snmpwalk       | SNMP MIB tree walk                |
+| `snmp_check`     | snmpcheck      | SNMP service enumeration          |
+| `snmp_brute`     | onesixtyone    | SNMP community-string bruteforce  |
+| `smtp_user_enum` | smtp-user-enum | SMTP VRFY/EXPN user enum          |
+| `smtp_test`      | swaks          | SMTP relay/injection testing      |
+| `asnmap`         | asnmap         | ASN ↔ CIDR ↔ IP mapping           |
+| `cdncheck`       | cdncheck       | CDN/cloud/WAF IP detection        |
 
 ### Information gathering — company & domain footprint
 
@@ -172,6 +154,7 @@ file when set, so automated runs stay reproducible.
 | `trufflehog`    | trufflehog   | Verified leaked secrets (git/GitHub) ‡                              |
 | `wayback_urls`  | waybackurls  | Historical URLs from the Wayback Machine                            |
 | `gau_urls`      | gau          | Known URLs (Wayback/CommonCrawl/OTX)                                |
+| `censys_search` | censys       | Search Censys for exposed assets †                                  |
 
 ### Information gathering — people footprint
 
@@ -201,18 +184,44 @@ file when set, so automated runs stay reproducible.
 | `testssl`      | testssl.sh  | SSL/TLS configuration analysis   |
 | `dalfox`       | dalfox      | XSS scanning                     |
 | `sqlmap`       | sqlmap      | SQL injection testing            |
+| `jwt_tool`     | jwt_tool    | JWT analysis / attacks           |
+| `trivy`        | Trivy       | Vuln/secret/misconfig scanning   |
+| `interactsh`   | interactsh  | OOB blind-vuln listener (bg)     |
+| `subjack`      | subjack     | Subdomain takeover detection     |
+| `paramspider`  | paramspider | Hidden parameter mining          |
+| `sstimap`      | sstimap     | SSTI detection / exploitation    |
 
 ### Exploitation / credentials
 
-| Tool            | Wraps      | Purpose                    |
-| --------------- | ---------- | -------------------------- |
-| `searchsploit`  | exploitdb  | Local exploit DB search    |
-| `msfconsole`    | metasploit | Run a resource script      |
-| `hydra`         | hydra      | Online credential testing  |
-| `john`          | john       | Offline hash cracking      |
-| `hashcat`       | hashcat    | GPU/CPU hash cracking      |
-| `hash_identify` | hashid     | Identify hash type         |
-| `run_shell`     | bash       | Arbitrary command (opt-in) |
+| Tool            | Wraps     | Purpose                      |
+| --------------- | --------- | ---------------------------- |
+| `searchsploit`  | exploitdb | Local exploit DB search      |
+| `donut`         | go-donut  | Payload/shellcode generation |
+| `hydra`         | hydra     | Online credential testing    |
+| `john`          | john      | Offline hash cracking        |
+| `hashcat`       | hashcat   | GPU/CPU hash cracking        |
+| `hash_identify` | hashid    | Identify hash type           |
+| `run_shell`     | bash      | Arbitrary command (opt-in)   |
+
+### AD / internal network
+
+| Tool                   | Wraps                | Purpose                                   |
+| ---------------------- | -------------------- | ----------------------------------------- |
+| `impacket_secretsdump` | impacket-secretsdump | Dump NTDS / SAM / LSA secrets             |
+| `impacket_kerberoast`  | impacket-kerberoast  | Kerberoasting (TGS-REQ crack offline)     |
+| `impacket_asreproast`  | impacket-GetNPUsers  | AS-REP roasting (pre-auth accounts)       |
+| `impacket_psexec`      | impacket-psexec      | PsExec-style remote exec (SMB)            |
+| `impacket_wmiexec`     | impacket-wmiexec     | WMI-based remote exec                     |
+| `impacket_ntlmrelayx`  | impacket-ntlmrelayx  | NTLM relay server                         |
+| `netexec`              | netexec (nxc)        | Mass auth / spray / exec across hosts     |
+| `certipy_find`         | certipy-ad           | AD CS vulnerability enumeration (ESC1-17) |
+| `bloodhound_collect`   | bloodhound-python    | AD attack-path data collection            |
+| `evil_winrm`           | evil-winrm           | PowerShell remoting over WinRM            |
+| `enum4linux`           | enum4linux-ng        | SMB/RPC/NetBIOS enumeration               |
+| `smb_enum`             | smbmap               | Share & permission enumeration            |
+| `ldap_search`          | ldapsearch           | LDAP directory queries                    |
+| `responder`            | responder            | LLMNR/NBT-NS/mDNS poisoner (background)   |
+| `nbtscan`              | nbtscan              | NetBIOS host discovery                    |
 
 ### Working files (`/work`, `/tmp`)
 
@@ -263,7 +272,7 @@ to keyless sources or return limited results.
 | Variable                              | Used by                        |
 | ------------------------------------- | ------------------------------ |
 | `SHODAN_API_KEY`                      | `shodan_host`, `shodan_search` |
-| `CENSYS_API_ID` / `CENSYS_API_SECRET` | censys (via raw shell)         |
+| `CENSYS_API_ID` / `CENSYS_API_SECRET` | `censys_search`                |
 | `GITHUB_TOKEN`                        | `trufflehog` (GitHub scans)    |
 | `NUMVERIFY_API_KEY`                   | `phoneinfoga`                  |
 | `GOOGLE_API_KEY` / `GOOGLECSE_CX`     | `phoneinfoga` (Google CSE)     |
@@ -273,21 +282,17 @@ an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.
 
 ## Environment variables
 
-| Variable               | Default                                | Meaning                                                          |
-| ---------------------- | -------------------------------------- | ---------------------------------------------------------------- |
-| `MARQ_OPERATOR`        | `unknown`                              | Recorded in every audit record                                   |
-| `MARQ_ENGAGEMENT`      | `unspecified`                          | Engagement / SOW identifier                                      |
-| `MARQ_SCOPE`           | `""`                                   | Free-text authorized scope (banner + log)                        |
-| `MARQ_AUDIT_LOG`       | `/var/log/marq/audit.jsonl`            | Audit log path                                                   |
-| `MARQ_TIMEOUT`         | `900`                                  | Default per-command timeout (seconds)                            |
-| `MARQ_MAX_TIMEOUT`     | `3600`                                 | Ceiling for a tool's per-call timeout override                   |
-| `MARQ_MAX_OUTPUT`      | `60000`                                | Max output chars returned to the model                           |
-| `MARQ_ALLOW_RAW_SHELL` | `true`                                 | Expose the arbitrary-shell tool (set `false` to disable)         |
-| `MARQ_WORK_DIR`        | `/work`                                | Working area (findings, job dirs)                                |
-| `MARQ_MODEL_URL`       | `http://host.docker.internal:1234/v1`  | Agent/TUI: OpenAI-compatible model endpoint (default: LM Studio) |
-| `MARQ_MODEL`           | _(none — set to your loaded model id)_ | Agent/TUI: model name (pick in the TUI or set for headless)      |
-| `MARQ_MODEL_KEY`       | `lm-studio`                            | Agent/TUI: API key (local runtimes ignore it)                    |
-| `MARQ_TUI_CONFIG`      | `<MARQ_WORK_DIR>/.marq/tui.json`       | Where the TUI setup form persists; set to skip/force re-setup    |
+| Variable               | Default                     | Meaning                                                  |
+| ---------------------- | --------------------------- | -------------------------------------------------------- |
+| `MARQ_OPERATOR`        | `unknown`                   | Recorded in every audit record                           |
+| `MARQ_ENGAGEMENT`      | `unspecified`               | Engagement / SOW identifier                              |
+| `MARQ_SCOPE`           | `""`                        | Free-text authorized scope (banner + log)                |
+| `MARQ_AUDIT_LOG`       | `/var/log/marq/audit.jsonl` | Audit log path                                           |
+| `MARQ_TIMEOUT`         | `900`                       | Default per-command timeout (seconds)                    |
+| `MARQ_MAX_TIMEOUT`     | `3600`                      | Ceiling for a tool's per-call timeout override           |
+| `MARQ_MAX_OUTPUT`      | `60000`                     | Max output chars returned to the model                   |
+| `MARQ_ALLOW_RAW_SHELL` | `true`                      | Expose the arbitrary-shell tool (set `false` to disable) |
+| `MARQ_WORK_DIR`        | `/work`                     | Working area (findings, job dirs)                        |
 
 ## Reading the audit log
 

@@ -4,10 +4,8 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -32,20 +30,6 @@ type Config struct {
 	AllowRawShell bool
 	// WorkDir is the engagement working area (findings, job dirs live here).
 	WorkDir string
-
-	// Model runtime — used by the TUI agent host; ignored in MCP serve mode
-	// (there the external client brings its own model). Defaults target LM
-	// Studio (host.docker.internal:1234); select Ollama in the TUI setup screen
-	// or set MARQ_MODEL_URL. ModelName has no default — LM Studio's model id is
-	// whatever you loaded; pick it in the TUI or set MARQ_MODEL for headless use.
-	ModelBaseURL string
-	ModelName    string
-	ModelAPIKey  string
-
-	// TUIConfigPath is where the TUI setup form persists its choices so the
-	// next launch skips setup. Defaults to <WorkDir>/.marq/tui.json (the only
-	// host-mounted path in the container); override with MARQ_TUI_CONFIG.
-	TUIConfigPath string
 }
 
 func env(name, def string) string {
@@ -77,101 +61,21 @@ func envBool(name string, def bool) bool {
 	}
 }
 
-// Load reads configuration from the environment. Precedence for the
-// TUI-editable fields (operator/engagement/scope/model_*): explicit env var >
-// persisted TUI config file > built-in default. Non-editable knobs stay
-// env-only.
+// Load reads configuration from the environment (MARQ_*). Operator, engagement,
+// and scope are set per-engagement via env — the host shim passes them through
+// with --env-file.
 func Load() Config {
-	c := Config{
+	return Config{
 		AuditLog:          env("MARQ_AUDIT_LOG", "/var/log/marq/audit.jsonl"),
 		CommandTimeout:    envInt("MARQ_TIMEOUT", 900),
 		MaxCommandTimeout: envInt("MARQ_MAX_TIMEOUT", 3600),
 		MaxOutputChars:    envInt("MARQ_MAX_OUTPUT", 60000),
 		AllowRawShell:     envBool("MARQ_ALLOW_RAW_SHELL", true),
 		WorkDir:           env("MARQ_WORK_DIR", "/work"),
-		ModelBaseURL:      env("MARQ_MODEL_URL", "http://host.docker.internal:1234/v1"),
-		ModelName:         env("MARQ_MODEL", ""),
-		ModelAPIKey:       env("MARQ_MODEL_KEY", "lm-studio"),
 		Operator:          env("MARQ_OPERATOR", "unknown"),
 		Engagement:        env("MARQ_ENGAGEMENT", "unspecified"),
 		ScopeNote:         env("MARQ_SCOPE", ""),
 	}
-	c.TUIConfigPath = env("MARQ_TUI_CONFIG", filepath.Join(c.WorkDir, ".marq", "tui.json"))
-
-	// Overlay the persisted TUI file for fields not explicitly set by env.
-	// os.LookupEnv distinguishes "unset" from "set to empty".
-	if fc := loadTUIFile(c.TUIConfigPath); fc != nil {
-		overlay := func(env string, dst, src *string) {
-			if _, set := os.LookupEnv(env); !set && src != nil {
-				*dst = *src
-			}
-		}
-		overlay("MARQ_OPERATOR", &c.Operator, fc.Operator)
-		overlay("MARQ_ENGAGEMENT", &c.Engagement, fc.Engagement)
-		overlay("MARQ_SCOPE", &c.ScopeNote, fc.ScopeNote)
-		overlay("MARQ_MODEL_URL", &c.ModelBaseURL, fc.ModelBaseURL)
-		overlay("MARQ_MODEL", &c.ModelName, fc.ModelName)
-		overlay("MARQ_MODEL_KEY", &c.ModelAPIKey, fc.ModelAPIKey)
-	}
-	return c
-}
-
-// tuiFile is the on-disk shape of the TUI setup form. Pointer fields so an
-// omitted key is distinguishable from an explicitly-empty value.
-type tuiFile struct {
-	Operator     *string `json:"operator,omitempty"`
-	Engagement   *string `json:"engagement,omitempty"`
-	ScopeNote    *string `json:"scope_note,omitempty"`
-	ModelBaseURL *string `json:"model_base_url,omitempty"`
-	ModelName    *string `json:"model_name,omitempty"`
-	ModelAPIKey  *string `json:"model_api_key,omitempty"`
-}
-
-// loadTUIFile reads the persisted TUI config. Returns nil if the file is
-// missing or unreadable (a malformed file is ignored, not fatal — the user
-// just re-runs setup).
-func loadTUIFile(path string) *tuiFile {
-	b, err := os.ReadFile(path)
-	if err != nil {
-		return nil
-	}
-	var f tuiFile
-	if err := json.Unmarshal(b, &f); err != nil {
-		return nil
-	}
-	return &f
-}
-
-// TUIConfigExists reports whether a persisted TUI config is present — used by
-// the TUI to decide whether to skip the setup screen on launch.
-func TUIConfigExists(path string) bool {
-	_, err := os.Stat(path)
-	return path != "" && err == nil
-}
-
-// SaveTUIConfig persists the TUI-editable fields of c to c.TUIConfigPath
-// (creating parent dirs as needed). Best-effort: callers treat an error as
-// non-fatal (next launch simply re-runs setup).
-func SaveTUIConfig(c Config) error {
-	if c.TUIConfigPath == "" {
-		return fmt.Errorf("no TUI config path configured")
-	}
-	f := tuiFile{
-		Operator:     &c.Operator,
-		Engagement:   &c.Engagement,
-		ScopeNote:    &c.ScopeNote,
-		ModelBaseURL: &c.ModelBaseURL,
-		ModelName:    &c.ModelName,
-		ModelAPIKey:  &c.ModelAPIKey,
-	}
-	if err := os.MkdirAll(filepath.Dir(c.TUIConfigPath), 0o755); err != nil {
-		return err
-	}
-	b, err := json.MarshalIndent(f, "", "  ")
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(c.TUIConfigPath, b, 0o600)
 }
 
 // C is the process-wide configuration, resolved once at startup (mirrors the
@@ -185,9 +89,11 @@ func (c Config) Banner() string {
 		scope = "(none provided — set MARQ_SCOPE)"
 	}
 	return fmt.Sprintf(
-		"AUTHORIZED USE ONLY. This server runs active security testing tools. "+
-			"Only use it against systems you own or are explicitly authorized in "+
-			"writing to test. All invocations are audit-logged.\n"+
+		"marq spans offensive, malware, threat-intel, and governance work. "+
+			"Advisory and knowledge work is unrestricted. ACTIVE SECURITY TESTING "+
+			"(scanning, exploitation, credential attacks) is AUTHORIZED USE ONLY — "+
+			"run it only against systems you own or are authorized in writing to "+
+			"test, within the scope below. All invocations are audit-logged.\n"+
 			"  operator   : %s\n"+
 			"  engagement : %s\n"+
 			"  scope note : %s\n"+

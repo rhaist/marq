@@ -205,5 +205,102 @@ func web() []Tool {
 				return Invocation{Argv: argv, Target: a.S("url")}
 			},
 		},
+		{
+			Name: "jwt_tool",
+			Desc: "Analyse or attack a JSON Web Token with jwt_tool. `token` is the raw JWT. With no " +
+				"`options` it decodes the header/claims and flags known weaknesses (alg:none, key " +
+				"confusion, weak/expired signature). Add raw flags via `options`: '-X a' forges an " +
+				"alg:none token, '-C -d <wordlist>' brute-forces the HMAC signing key, '-T' tampers " +
+				"interactively (don't — no TTY). Operates on the token string only; no network.",
+			Params: []Param{
+				{Name: "token", Type: StringParam, Desc: "raw JWT", Required: true},
+				{Name: "options", Type: StringParam, Desc: "extra raw flags", Default: ""},
+			},
+			Build: func(a Args) Invocation {
+				argv := []string{"jwt_tool", a.S("token")}
+				argv = append(argv, shellword.Split(a.S("options"))...)
+				return Invocation{Argv: argv, Target: a.S("token")}
+			},
+		},
+		{
+			Name: "trivy",
+			Desc: "Scan for vulnerabilities, exposed secrets and misconfigurations with Trivy. `mode` " +
+				"selects the target type: fs (a filesystem path, stage it under /work), image (a " +
+				"container image ref), repo (a git URL), or config (IaC / Dockerfiles). `target` is the " +
+				"path/image/URL. Reports CVEs by severity.",
+			Params: []Param{
+				{Name: "mode", Type: StringParam, Desc: "fs/image/repo/config", Default: "fs"},
+				{Name: "target", Type: StringParam, Desc: "path / image ref / repo URL", Required: true},
+			},
+			Build: func(a Args) Invocation {
+				argv := []string{"trivy", a.S("mode"), "--quiet", "--scanners", "vuln,secret,misconfig", a.S("target")}
+				return Invocation{Argv: argv, Target: a.S("target")}
+			},
+		},
+		{
+			Name: "interactsh",
+			Desc: "Start an Interactsh out-of-band (OOB) listener for detecting BLIND vulnerabilities " +
+				"(blind SQLi, SSRF, RCE, XXE, blind XSS). Runs in the BACKGROUND and returns a job dir. " +
+				"The generated callback domain is printed at the top of the job's stdout.log — read it " +
+				"with job_status, embed that domain in payloads, then poll job_status again: any " +
+				"DNS/HTTP/SMTP callback to it is logged back, proving the payload fired. Uses a public " +
+				"interactsh server by default; override with a self-hosted `server`.",
+			Params: []Param{
+				{Name: "server", Type: StringParam, Desc: "self-hosted interactsh server URL", Default: ""},
+			},
+			Build: func(a Args) Invocation {
+				argv := []string{"interactsh-client", "-v"}
+				if a.S("server") != "" {
+					argv = append(argv, "-server", a.S("server"))
+				}
+				return Invocation{Argv: argv, Target: "interactsh", Background: true}
+			},
+		},
+		{
+			Name: "subjack",
+			Desc: "Check subdomains for takeover vulnerability with subjack. `target` is a " +
+				"comma/newline-separated list of subdomain URLs. Use write_file to stage a list, " +
+				"then pass it via options (-w /work/subs.txt).",
+			Params: []Param{
+				{Name: "target", Type: StringParam, Desc: "subdomain list or use -w via options", Required: true},
+				{Name: "options", Type: StringParam, Desc: "raw subjack flags (-w wordlist -t timeout)", Default: ""},
+			},
+			Build: func(a Args) Invocation {
+				argv := []string{"subjack"}
+				argv = append(argv, shellword.Split(a.S("options"))...)
+				argv = append(argv, a.S("target"))
+				return Invocation{Argv: argv, Target: a.S("target")}
+			},
+		},
+		{
+			Name: "paramspider",
+			Desc: "Discover hidden injectable parameters for a domain with paramspider. " +
+				"Crawls and extracts URLs with parameters, excluding common noise. `domain` " +
+				"is the target domain.",
+			Params: []Param{
+				{Name: "domain", Type: StringParam, Desc: "target domain", Required: true},
+				{Name: "options", Type: StringParam, Desc: "extra paramspider flags", Default: ""},
+			},
+			Build: func(a Args) Invocation {
+				argv := []string{"paramspider", "-d", a.S("domain")}
+				argv = append(argv, shellword.Split(a.S("options"))...)
+				return Invocation{Argv: argv, Target: a.S("domain")}
+			},
+		},
+		{
+			Name: "sstimap",
+			Desc: "Detect and exploit Server-Side Template Injection (SSTI) with sstimap. `url` " +
+				"is the target URL. Use `options` for method, parameters, and template engine " +
+				"hints (e.g. -d data.txt -m POST -p name).",
+			Params: []Param{
+				{Name: "url", Type: StringParam, Desc: "target URL", Required: true},
+				{Name: "options", Type: StringParam, Desc: "extra sstimap flags", Default: ""},
+			},
+			Build: func(a Args) Invocation {
+				argv := []string{"sstimap", "-u", a.S("url")}
+				argv = append(argv, shellword.Split(a.S("options"))...)
+				return Invocation{Argv: argv, Target: a.S("url")}
+			},
+		},
 	}
 }
