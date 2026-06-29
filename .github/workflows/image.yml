@@ -20,7 +20,7 @@ on:
 
 permissions:
   contents: read
-  packages: write   # push to GHCR with the built-in GITHUB_TOKEN (publish step only)
+  packages: write # push to GHCR with the built-in GITHUB_TOKEN (publish step only)
 
 # Cancel an in-progress image build when a newer commit supersedes it — the
 # ~35-min rebuild is the expensive one to leave running.

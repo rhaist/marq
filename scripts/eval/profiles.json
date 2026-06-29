@@ -2,5 +2,12 @@
   "_comment": "Per-model harness config — merged over the CLI defaults so each model competes under its own recorded settings (stamped into every measurement). Harness-control keys: no_think, max_steps. Everything else is passed as sampling: temperature, top_p, and LM Studio extras top_k, min_p, repeat_penalty. 'default' applies to any model without its own entry.",
   "default": {},
   "qwen3-14b-uncensored-i1": { "no_think": true, "max_steps": 5 },
-  "gemma4-12b-qat-uncensored-hauhaucs-balanced": { "temperature": 0.6, "top_p": 0.9, "top_k": 64, "min_p": 0.05, "repeat_penalty": 1.1, "max_steps": 6 }
+  "gemma4-12b-qat-uncensored-hauhaucs-balanced": {
+    "temperature": 0.6,
+    "top_p": 0.9,
+    "top_k": 64,
+    "min_p": 0.05,
+    "repeat_penalty": 1.1,
+    "max_steps": 6
+  }
 }
