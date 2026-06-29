@@ -76,9 +76,17 @@ A score is only comparable alongside its context, so every measurement pins it:
   version (`tasks.version`); bump it when you change tasks materially, and old
   results stay valid under their version.
 - **sampling** — the harness pins and records `temperature` + `top_p` (`--temperature`
-  / `--top-p`); don't rely on the server's hidden defaults. A Q3 vs Q6 of the same
-  model also tool-calls very differently, so **`quant`** is required and the rest of
-  the load config (context length, GPU offload, server version) goes in **`--note`**.
+  / `--top-p`); don't rely on the server's hidden defaults.
+- **load config** — when the server is LM Studio, the harness auto-reads
+  `quant`, `arch`, and `loaded_context_length` from its native `/api/v0/models`
+  (a Q3 vs Q6 tool-calls very differently, so quant matters). Override with
+  `--quant` / add `--note` for anything the API can't see (GPU offload, server
+  version). Other runtimes (Ollama, llama-server) fall back to the flags.
+
+Slow models: thinking models (qwen3 etc.) reason before every tool call, which
+is costly over marq's ~90 tool schemas. `--no-think` appends `/no_think` to skip
+it; combine with a modest `--max-steps` (e.g. 5) so a model that flails on a
+missing tool doesn't burn the budget.
 
 `results/<model>.json` keeps a **history** (a measurement per run), so you can
 watch a model move as marq evolves and see new models slot in. Pass-rates are

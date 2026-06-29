@@ -109,18 +109,19 @@ def rate(bools):
     return round(sum(bools) / len(bools), 3) if bools else 0.0
 
 
-def sampling_used(runs):
-    """The sampling config the harness actually sent (read from a run's meta),
-    so the recorded provenance reflects reality rather than a hardcoded guess."""
+def meta_for(runs, model):
+    """A representative run's meta for one model — carries the sampling + model_info
+    provenance (read from disk, so it reflects what actually ran)."""
     for p in sorted(runs.iterdir()):
-        meta = p / "meta.json"
-        if meta.is_file():
-            m = json.loads(meta.read_text())
-            return m.get("sampling") or {"temperature": m.get("temperature")}
+        f = p / "meta.json"
+        if f.is_file():
+            m = json.loads(f.read_text())
+            if m.get("model") == model:
+                return m
     return {}
 
 
-def measurement(model_cells, tasks, args, sampling):
+def measurement(model_cells, tasks, args, sampling, info):
     task_ids = sorted({t for (_on, t) in model_cells})
     on = {t: rate(model_cells.get((True, t), [])) for t in task_ids}
     off = {t: rate(model_cells.get((False, t), [])) for t in task_ids}
@@ -134,6 +135,8 @@ def measurement(model_cells, tasks, args, sampling):
         "marq_commit": marq_commit(),
         "taskset": taskset_meta(args.tasks),
         "runtime": dict({"server": args.runtime, "repeats": args.repeats}, **sampling,
+                        **({"context_length": info["loaded_context_length"]}
+                           if info.get("loaded_context_length") else {}),
                         **({"note": args.note} if args.note else {})),
         "scores": {
             "skills_on": on_rate,
@@ -145,13 +148,16 @@ def measurement(model_cells, tasks, args, sampling):
     }
 
 
-def publish(model, meas, args):
+def publish(model, meas, args, info):
     path = args.results / f"{slug(model)}.json"
+    quant = args.quant or info.get("quantization") or "?"
     doc = json.loads(path.read_text()) if path.exists() else {
-        "model": {"id": model, "quant": args.quant, "params": args.params},
+        "model": {"id": model, "quant": quant, "params": args.params},
         "measurements": [],
     }
-    doc["model"]["quant"] = args.quant
+    doc["model"]["quant"] = quant
+    if info.get("arch"):
+        doc["model"]["arch"] = info["arch"]
     if args.params:
         doc["model"]["params"] = args.params
     doc["measurements"].append(meas)
@@ -203,7 +209,7 @@ def render_leaderboard(args):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("runs")
-    ap.add_argument("--quant", default="?", help="model quantization, e.g. Q4_K_M (records provenance)")
+    ap.add_argument("--quant", default="", help="override; auto-detected from LM Studio's /api/v0 when present")
     ap.add_argument("--params", default="", help="param count, e.g. 7B (optional)")
     ap.add_argument("--runtime", default="lm-studio", help="server name, e.g. lm-studio / ollama")
     ap.add_argument("--note", default="", help="load-config provenance the harness can't see, e.g. 'ctx=8192, full GPU offload, LM Studio 0.3.x'")
@@ -220,16 +226,19 @@ def main():
     if not by_model:
         print("no runs found in", args.runs)
         return 1
-    sampling = sampling_used(runs)
 
     for model, cells in sorted(by_model.items()):
-        meas = measurement(cells, tasks, args, sampling)
+        meta0 = meta_for(runs, model)
+        sampling = meta0.get("sampling") or (
+            {"temperature": meta0["temperature"]} if meta0.get("temperature") is not None else {})
+        info = meta0.get("model_info") or {}
+        meas = measurement(cells, tasks, args, sampling, info)
         s = meas["scores"]
         print(f"{model}  on={s['skills_on']}  off={s['skills_off']}  lift={s['lift']}  safety={s['safety']}")
         for t, r in s["per_task"].items():
             print(f"    {t:24} on={r['on']:.2f} off={r['off']:.2f}")
         if not args.no_publish:
-            print("  ->", publish(model, meas, args))
+            print("  ->", publish(model, meas, args, info))
     if not args.no_publish:
         n = render_leaderboard(args)
         print(f"leaderboard: {HERE / 'LEADERBOARD.md'} ({n} models)")
