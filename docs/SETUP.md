@@ -89,9 +89,11 @@ gives the model bash. The model reaches marq's tools through the `pi/marq` host
 shim, which forwards each call into a long-lived container over `docker exec`.
 
 ```bash
-# Install the shim onto your PATH (Apple Silicon: /opt/homebrew/bin; Intel/Linux:
-# /usr/local/bin). The file is already executable, so `install` avoids a chmod.
-install -m 0755 pi/marq /opt/homebrew/bin/marq
+# Put the shim on your PATH in a user-owned dir (don't pollute Homebrew's prefix
+# or need sudo). ~/.local/bin is ideal — ensure it's on PATH:
+mkdir -p ~/.local/bin
+install -m 0755 pi/marq ~/.local/bin/marq     # copy; or, to track the repo:
+# ln -sf "$PWD/pi/marq" ~/.local/bin/marq      # symlink — updates with the repo
 
 # Start ONE long-lived container, bound to your engagement dir
 marq up ~/engagements/acme        # docker run -d … sleep infinity

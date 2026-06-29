@@ -93,7 +93,7 @@ The fully-local path — no cloud, no refusals, on-box execution. See
 [`SETUP.md`](SETUP.md#4-run-with-a-local-model-pi--the-marq-skill):
 
 ```bash
-install -m 0755 pi/marq /opt/homebrew/bin/marq   # or /usr/local/bin
+install -m 0755 pi/marq ~/.local/bin/marq         # user-owned dir on PATH
 marq up ~/engagements/acme                        # long-lived container
 # add an LM Studio provider extension + register the marq skill in
 # ~/.pi/agent/settings.json, then run `pi` — full steps in SETUP.md
