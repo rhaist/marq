@@ -89,8 +89,9 @@ gives the model bash. The model reaches marq's tools through the `pi/marq` host
 shim, which forwards each call into a long-lived container over `docker exec`.
 
 ```bash
-# Install the shim
-cp pi/marq /usr/local/bin/marq && chmod +x /usr/local/bin/marq
+# Install the shim onto your PATH (Apple Silicon: /opt/homebrew/bin; Intel/Linux:
+# /usr/local/bin). The file is already executable, so `install` avoids a chmod.
+install -m 0755 pi/marq /opt/homebrew/bin/marq
 
 # Start ONE long-lived container, bound to your engagement dir
 marq up ~/engagements/acme        # docker run -d … sleep infinity
@@ -99,11 +100,75 @@ marq run server_info '{}'         # confirm scope
 marq down                         # tear down when finished
 ```
 
-Then **configure your model runtime in Pi** (LM Studio / Ollama / llama-server —
-Pi owns the endpoint, that's no longer marq's concern) and load
-[`pi/SKILL.md`](../pi/SKILL.md) into Pi as a skill so the model knows the calling
-convention and scope rules. The model then calls `marq run <tool> '<json>'` from
-bash and the shim runs it inside the container.
+The model reaches marq through **bash** (`marq run <tool> '<json>'`), not MCP —
+so all Pi needs is the `marq` skill loaded and a model. Configure Pi once
+(verified against Pi 0.80):
+
+**1. Point Pi at your local model** — Pi configures providers via an extension.
+For LM Studio, drop this at `~/.pi/agent/extensions/lm-studio.ts` (auto-discovered):
+
+```typescript
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+const BASE = "http://localhost:1234";
+export default async function (pi: ExtensionAPI) {
+  let models: any[] = [];
+  try {
+    const data =
+      ((await (await fetch(`${BASE}/api/v0/models`)).json()) as { data: any[] })
+        .data ?? [];
+    models = data
+      .filter((m) => m.type === "llm" || m.type === "vlm")
+      .map((m) => ({
+        id: m.id,
+        name: m.id,
+        reasoning: false,
+        input: ["text"],
+        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: m.loaded_context_length ?? m.max_context_length ?? 32768,
+        maxTokens: 4096,
+      }));
+  } catch {}
+  pi.registerProvider("lm-studio", {
+    name: "LM Studio (local)",
+    baseUrl: `${BASE}/v1`,
+    apiKey: "lm-studio",
+    api: "openai-completions",
+    models,
+  });
+}
+```
+
+LM Studio's native `/api/v0/models` (vs the OpenAI `/v1/models`) reports the
+real loaded context length, so Pi sizes the window correctly. For Ollama/
+llama-server, change `BASE` and the discovery call.
+
+**2. Register the marq skill + model defaults** in `~/.pi/agent/settings.json`:
+
+```json
+{
+  "defaultProvider": "lm-studio",
+  "defaultModel": "lm-studio/qwen3-14b-uncensored-i1",
+  "skills": ["/path/to/marq/pi"]
+}
+```
+
+Pi discovers any directory containing a `SKILL.md` (recursively), so pointing
+`skills` at the repo's [`pi/`](../pi/) dir registers [`pi/SKILL.md`](../pi/SKILL.md)
+as the `marq` skill — kept in sync with the repo, no copy.
+
+**3. Verify** (no model call, so it won't disturb anything):
+
+```bash
+pi --list-models                  # → lists `lm-studio  qwen3-…  41.0K …`
+```
+
+Then just run `pi` in an engagement dir. The model loads the marq skill and
+drives `marq run` from bash; the shim runs it inside the container.
+
+> **Gotchas learned the hard way:** settings live in `~/.pi/agent/` (not
+> `~/.pi/`); extensions auto-load only from `~/.pi/agent/extensions/*.ts` (the
+> settings `extensions` array needs full paths, not bare names); Pi's bundled
+> docs are at `…/pi-coding-agent/<ver>/libexec/.../docs/`.
 
 A long-lived container is **required**: background tools (spiderfoot, responder,
 ntlmrelayx) detach inside it and are polled later, so a per-call `docker run`
