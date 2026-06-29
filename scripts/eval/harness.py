@@ -124,9 +124,10 @@ def spawn_marq(marq_cmd, work):
     )
 
 
-def run_task(args, model, skills_on, task):
+def run_task(args, model, skills_on, task, repeat):
     slug = model.replace("/", "_").replace(":", "_")
-    rundir = pathlib.Path(args.out) / f"{slug}__skills-{'on' if skills_on else 'off'}__{task['id']}"
+    rundir = (pathlib.Path(args.out)
+              / f"{slug}__skills-{'on' if skills_on else 'off'}__{task['id']}__r{repeat}")
     work = rundir / "work"
     work.mkdir(parents=True, exist_ok=True)
 
@@ -170,7 +171,8 @@ def run_task(args, model, skills_on, task):
         (rundir / "trace.jsonl").write_text("".join(json.dumps(t) + "\n" for t in trace))
         (rundir / "messages.json").write_text(json.dumps(messages, indent=2))
         (rundir / "meta.json").write_text(json.dumps({
-            "model": model, "skills_on": skills_on, "task": task["id"],
+            "model": model, "skills_on": skills_on, "task": task["id"], "repeat": repeat,
+            "temperature": 0.2, "base_url": args.base_url,
             "steps": len(trace), "final": final,
         }, indent=2))
         print(f"  {rundir.name}: {len(trace)} tool calls")
@@ -200,6 +202,7 @@ def main():
     p.add_argument("--out", default=str(pathlib.Path(__file__).with_name("runs")))
     p.add_argument("--marq-cmd", default=DEFAULT_MARQ_CMD, help="command to start `marq serve`; {work} is substituted")
     p.add_argument("--max-steps", type=int, default=12)
+    p.add_argument("--repeats", type=int, default=1, help="runs per task (use 3+ for published numbers; LLMs are stochastic)")
     p.add_argument("--timeout", type=int, default=300, help="per model call (s)")
     p.add_argument("--list-tools", action="store_true", help="smoke the marq MCP leg and exit")
     args = p.parse_args()
@@ -229,8 +232,11 @@ def main():
         for on in skills:
             print(f"# model={model} skills={'on' if on else 'off'}")
             for task in tasks:
-                run_task(args, model, on, task)
-    print(f"\nruns in {args.out} — score with: python3 scripts/eval/score.py {args.out}")
+                for r in range(args.repeats):
+                    run_task(args, model, on, task, r)
+    print(f"\nruns in {args.out}")
+    print(f"score:   python3 scripts/eval/score.py {args.out}")
+    print(f"publish: python3 scripts/eval/report.py {args.out} --quant <Q> --runtime lm-studio")
     return 0
 
 
