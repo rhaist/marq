@@ -120,7 +120,8 @@ func osint() []Tool {
 			Name: "wayback_urls",
 			Desc: "Pull historical URLs for a DOMAIN from the Wayback Machine (waybackurls). Reveals old " +
 				"endpoints, parameters and forgotten assets without touching the live target. " +
-				"`include_subs` also fetches subdomains.",
+				"`include_subs` also fetches subdomains. Runs in the background (archive volume varies " +
+				"wildly by domain); poll with list_jobs / job_status and read the job's stdout.log.",
 			Params: []Param{
 				{Name: "domain", Type: StringParam, Desc: "domain", Required: true},
 				{Name: "include_subs", Type: BoolParam, Desc: "include subdomains", Default: true},
@@ -130,8 +131,11 @@ func osint() []Tool {
 				if a.B("include_subs") {
 					flag = ""
 				}
+				// Background for the same reason as gau_urls: archive size sets the runtime,
+				// which the caller can't scope down, so a synchronous run blows the client
+				// call timeout. See CLAUDE.md.
 				cmd := "echo " + shellword.Quote(a.S("domain")) + " | waybackurls " + flag
-				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("domain")}
+				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("domain"), Background: true}
 			},
 		},
 		{
