@@ -58,7 +58,10 @@ func instructions() string {
 		"the wrapper if one exists (it's scoped, structured and audited). Use " +
 		"`run_shell` only for actions with no dedicated tool.\n" +
 		"- When you have what you need, stop calling tools and give a concise final " +
-		"answer — lead with the key facts/numbers, then the supporting detail.\n\n" +
+		"answer — lead with the key facts/numbers, then the supporting detail.\n" +
+		"- Report only what a tool actually returned this session — never open ports, " +
+		"hosts, subdomains or findings from prior knowledge (even for well-known " +
+		"targets). No tool output means no finding; run the tool first.\n\n" +
 		"Advisory and knowledge work is unrestricted. Active testing (scanning, " +
 		"exploitation, credential attacks) is authorized-only — confirm targets are " +
 		"in the scope server_info reports before touching anything; every call is " +

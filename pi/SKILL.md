@@ -139,6 +139,10 @@ marq run render_report '{}'      # writes /work/findings.md + findings.csv
   the skill carries the current facts; don't answer those from memory.
 - **Converge.** When you have what you need, stop calling tools and give a
   concise final answer — lead with the key facts/numbers, then the detail.
+- **Never report from memory.** Open ports, live hosts, subdomains, findings —
+  state only what a tool actually returned *this session*. If you haven't run the
+  tool, run it; do not answer a scan/lookup from prior knowledge (even for
+  well-known hosts). No tool output ⇒ no finding.
 
 ## Worked example
 
