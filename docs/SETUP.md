@@ -152,7 +152,7 @@ llama-server, change `BASE` and the discovery call.
 ```json
 {
   "defaultProvider": "lm-studio",
-  "defaultModel": "lm-studio/qwen3-14b-uncensored-i1",
+  "defaultModel": "lm-studio/gemma4-12b-qat-uncensored-hauhaucs-balanced",
   "skills": ["/path/to/marq/pi"]
 }
 ```
@@ -160,6 +160,31 @@ llama-server, change `BASE` and the discovery call.
 Pi discovers any directory containing a `SKILL.md` (recursively), so pointing
 `skills` at the repo's [`pi/`](../pi/) dir registers [`pi/SKILL.md`](../pi/SKILL.md)
 as the `marq` skill — kept in sync with the repo, no copy.
+
+**Recommended model:** [`Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced`](https://huggingface.co/HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced)
+(Q4_K_M) — the default above. It's uncensored (no refusals on offensive work),
+tool-capable, and fits a 12–16 GB GPU at a long context. It needs the LM Studio
+settings below to behave; without them it leaks reasoning tokens into its
+answers and (without SYSTEM.md) bypasses marq.
+
+**2a. LM Studio settings for Gemma** (in the model's right-sidebar config):
+
+- **Reasoning parsing** — Gemma emits its thinking inside `<|channel>thought …
+<channel|>` markers; unset, LM Studio leaks those into the reply. Enable
+  reasoning parsing and set **Start String** `<|channel>thought`, **End String**
+  `<channel|>` so the block is split out of the final answer.
+  (Background: [enabling Gemma thinking mode in LM Studio](https://antonioleiva.com/enable-gemma-thinking-mode-lm-studio-opencode).)
+- **Sampling** (Gemma's recommended, what marq's evals run under): temperature
+  `0.6`, top_p `0.9`, top_k `64`, min_p `0.05`, repeat_penalty `1.1`. These also
+  live in [`scripts/eval/profiles.json`](../scripts/eval/profiles.json).
+- **Context length** — load it as high as VRAM allows (the model is 262 K
+  native). Tool outputs (nuclei/katana dumps) are large; a short window truncates
+  them. Pi reads the loaded length from LM Studio's `/api/v0/models` and sizes its
+  window to match.
+
+Impact order if it misbehaves: **SYSTEM.md (2b) ≫ context length ≫ reasoning
+parsing ≫ sampling.** SYSTEM.md decides whether it uses marq at all; the rest is
+output quality.
 
 **2b. Replace Pi's system prompt with marq's** (important for smaller models):
 
