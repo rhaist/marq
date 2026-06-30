@@ -67,6 +67,9 @@ pentest; reach for `methodology` and the `vuln/*` skills instead.
   _alerts_, so don't disable it, evade it and record what got through.
 - Tag every implant/op with the engagement ID so blue can deconflict a real
   intrusion from your activity.
+- **Payload staging**: `donut` turns a .NET assembly / EXE / DLL into
+  position-independent shellcode for in-memory loaders (avoids dropping the PE to
+  disk). Generate, then deliver via your loader of choice — authorized scope only.
 
 ## 5. Rules of engagement & deconfliction
 

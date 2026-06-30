@@ -24,6 +24,13 @@ description: Find hidden paths, endpoints, and parameters on a web app.
 
 - `arjun` on interesting endpoints to discover undocumented GET/POST/JSON params
   — the inputs scanners miss and where injection often hides.
+- `paramspider` mines parameter names from archived URLs (passive) — a fast seed
+  list to feed `arjun` or the vuln-class tools.
+
+## Known-issue scan
+
+- `nikto` — quick scan for known web-server misconfigurations, dangerous/default
+  files, and outdated software. Noisy; run once for the low-hanging fruit.
 
 ## CMS-aware
 

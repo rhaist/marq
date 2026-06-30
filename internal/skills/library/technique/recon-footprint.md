@@ -16,12 +16,17 @@ Start passive (no packets at the target), then go active only in scope.
 - `wayback_urls` / `gau_urls` — historical URLs, forgotten endpoints and params
   without touching the live target.
 - `spiderfoot` — broad automated sweep (background job; poll with `job_status`).
+- People: `sherlock` / `maigret_username` (a username across sites),
+  `holehe_email` (email → accounts), `phoneinfoga` (phone numbers).
 - Secrets/exposure: `gitleaks` / `trufflehog` on any retrieved repos.
 
 ## 2. Resolve & find what's live
 
 - Collect subdomains into a file with `write_file`, then `dnsx` to resolve and
   `httpx_probe` to find live HTTP services (status, title, tech).
+- `cdncheck` to flag hosts behind a CDN/WAF (you may be hitting the edge, not the
+  origin); `subjack` on resolved subdomains to catch subdomain takeover (dangling
+  CNAMEs).
 
 ## 3. Enumerate hosts (active)
 
