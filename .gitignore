@@ -10,7 +10,7 @@ build/
 /work/
 
 # Eval harness output (traces, transcripts, per-run /work).
-/scripts/eval/runs/
+/scripts/eval/runs*/
 
 # Real secrets — only the .env.example template is committed.
 .env
