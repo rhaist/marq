@@ -174,9 +174,13 @@ answers and (without SYSTEM.md) bypasses marq.
   reasoning parsing and set **Start String** `<|channel>thought`, **End String**
   `<channel|>` so the block is split out of the final answer.
   (Background: [enabling Gemma thinking mode in LM Studio](https://antonioleiva.com/enable-gemma-thinking-mode-lm-studio-opencode).)
-- **Sampling** (Gemma's recommended, what marq's evals run under): temperature
-  `0.6`, top_p `0.9`, top_k `64`, min_p `0.05`, repeat_penalty `1.1`. These also
-  live in [`scripts/eval/profiles.json`](../scripts/eval/profiles.json).
+- **Sampling** — Google's official Gemma config is temperature `1.0`, top_p
+  `0.95`, top_k `64` (nothing else). The HauhauCS _"Balanced"_ uncensored build
+  ships a calmer community preset — temperature `0.6`, top_p `0.9`, top_k `64`,
+  min_p `0.05`, repeat_penalty `1.1` — which is what marq's eval runs that model
+  under (`scripts/eval/profiles.json`). Use Google's 1.0 set for the stock
+  `-it` model; use the Balanced preset for the HauhauCS build. Either is fine —
+  it's the smallest lever (see impact order below).
 - **Context length** — load it as high as VRAM allows (the model is 262 K
   native). Tool outputs (nuclei/katana dumps) are large; a short window truncates
   them. Pi reads the loaded length from LM Studio's `/api/v0/models` and sizes its
