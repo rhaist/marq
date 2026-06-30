@@ -127,8 +127,12 @@ where nothing leaves the box and nothing is filtered.
 - **Pick the model to the job.** A big reasoning model for analysis and writing;
   a fast tool-capable local model for chaining scans; an abliterated local model
   for offensive work that a hosted model would refuse.
-- **Weak local model?** Lean on the skills, keep it to one tool call at a time,
-  and let it read each result before the next step — that discipline beats a
-  bigger prompt.
+- **Weak local model bypassing marq (raw `curl`/`grep`, ignoring the tools)?**
+  Install [`pi/SYSTEM.md`](../pi/SYSTEM.md): `ln -sf "$PWD/pi/SYSTEM.md"
+~/.pi/agent/SYSTEM.md` (SETUP.md step 2b). Pi's default prompt frames the model
+  as a coding assistant; this replaces it with "drive everything through `marq
+run`" and in testing flipped a 12B model from 300+ `curl` calls to clean,
+  audited tool use — it's the model's prompt, not your LM Studio settings. Then
+  lean on the skills and keep it to one tool call at a time.
 - **Long scans run in the background.** `list_jobs` / `job_status` instead of
   blocking; works the same in every client.

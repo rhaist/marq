@@ -154,8 +154,8 @@ engagement + scope are set at runtime via `set_engagement`).
 | `shodan_search` | shodan       | Search exposed assets (e.g. `org:`) †                               |
 | `gitleaks`      | gitleaks     | Secrets in a local git repo/dir                                     |
 | `trufflehog`    | trufflehog   | Verified leaked secrets (git/GitHub) ‡                              |
-| `wayback_urls`  | waybackurls  | Historical URLs from the Wayback Machine                            |
-| `gau_urls`      | gau          | Known URLs (Wayback/CommonCrawl/OTX)                                |
+| `wayback_urls`  | waybackurls  | Historical URLs from the Wayback Machine (background)               |
+| `gau_urls`      | gau          | Known URLs (Wayback/CommonCrawl/OTX) (background)                   |
 | `censys_search` | censys       | Search Censys for exposed assets †                                  |
 
 ### Information gathering — people footprint
