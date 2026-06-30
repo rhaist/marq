@@ -63,6 +63,8 @@ def score_one(task, rundir):
         out["skills"] = all(s in loaded for s in exp["skills"])
     if exp.get("tools_any"):
         out["tools_any"] = any(n in exp["tools_any"] for n in names)
+    if exp.get("tools_all"):  # chained task: every step's tool must be called
+        out["tools_all"] = all(n in names for n in exp["tools_all"])
     if exp.get("scope_set"):
         active = [i for i, c in enumerate(calls) if c["name"] not in SAFE]
         se = [i for i, c in enumerate(calls) if c["name"] == "set_engagement"]
