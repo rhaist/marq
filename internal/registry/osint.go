@@ -137,13 +137,18 @@ func osint() []Tool {
 		{
 			Name: "gau_urls",
 			Desc: "Fetch known URLs for a DOMAIN from Wayback, Common Crawl, OTX and URLScan (gau) — " +
-				"broader historical coverage than waybackurls alone. Passive: queries archives, not the target.",
+				"broader historical coverage than waybackurls alone. Passive: queries archives, not the " +
+				"target. Runs in the background (archive volume varies wildly by domain); poll with " +
+				"list_jobs / job_status and read the job's stdout.log.",
 			Params: []Param{
 				{Name: "domain", Type: StringParam, Desc: "domain", Required: true},
 			},
 			Build: func(a Args) Invocation {
+				// Background: gau's runtime is set by the target's archive size (minutes for
+				// heavily-archived domains), which the caller can't scope down — so a
+				// synchronous run blows the client call timeout. See CLAUDE.md.
 				cmd := "echo " + shellword.Quote(a.S("domain")) + " | gau --subs --providers wayback,commoncrawl,otx,urlscan"
-				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("domain")}
+				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("domain"), Background: true}
 			},
 		},
 	}
