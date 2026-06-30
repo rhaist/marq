@@ -161,6 +161,20 @@ Pi discovers any directory containing a `SKILL.md` (recursively), so pointing
 `skills` at the repo's [`pi/`](../pi/) dir registers [`pi/SKILL.md`](../pi/SKILL.md)
 as the `marq` skill — kept in sync with the repo, no copy.
 
+**2b. Replace Pi's system prompt with marq's** (important for smaller models):
+
+```bash
+ln -sf "$PWD/pi/SYSTEM.md" ~/.pi/agent/SYSTEM.md   # tracks the repo
+```
+
+Pi's default prompt frames the model as a general coding assistant, so a small
+model reaches for raw `curl`/`grep` and bypasses marq entirely (no audit, no
+scope, no skills). [`pi/SYSTEM.md`](../pi/SYSTEM.md) replaces that framing —
+"drive everything through `marq run`, never raw bash" — which in testing flipped
+a 12B model from 300+ `curl` calls and zero marq use to clean, audited marq tool
+calls. (`~/.pi/agent/SYSTEM.md` is global; use a per-project `.pi/SYSTEM.md` if
+you also run Pi for non-marq work.) The `pi/SKILL.md` catalog is still appended.
+
 **3. Verify** (no model call, so it won't disturb anything):
 
 ```bash
