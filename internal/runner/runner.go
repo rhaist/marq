@@ -62,6 +62,12 @@ func (r Result) Render() string {
 	if r.Stderr != "" {
 		fmt.Fprintf(&b, "\n--- stderr ---\n%s", r.Stderr)
 	}
+	// A non-zero exit with no output is opaque to a model (e.g. a missing input
+	// file or an absent API key). Name the likely causes instead of leaving it bare.
+	if !r.TimedOut && r.ExitCode != nil && *r.ExitCode != 0 && r.Stdout == "" && r.Stderr == "" {
+		b.WriteString("\n[no output — the tool failed silently; check that input files/paths exist, " +
+			"required flags are set, and any needed API key is present in the container env]")
+	}
 	if r.Truncated {
 		fmt.Fprintf(&b, "\n\n[output truncated to %d chars — narrow the scan or "+
 			"write results to a file inside the container]", config.C.MaxOutputChars)

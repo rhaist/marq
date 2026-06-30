@@ -118,7 +118,7 @@ func LoadMany(names string) string {
 		}
 	}
 	if len(wanted) == 0 {
-		return "error: name a skill to load. Available:\n" + IndexText()
+		return "Available skills (load one or more by name):\n" + IndexText()
 	}
 	if len(wanted) > 5 {
 		return fmt.Sprintf("error: at most 5 skills per call (got %d)", len(wanted))

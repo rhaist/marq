@@ -219,6 +219,24 @@ func (t Tool) Usage() string {
 	return b.String()
 }
 
+// unknownArgs returns raw keys that aren't declared parameters — a misnamed
+// param a model passed (e.g. `recordtype` for `record_type`) would otherwise be
+// silently dropped and the tool run with defaults.
+func (t Tool) unknownArgs(raw map[string]any) []string {
+	valid := make(map[string]bool, len(t.Params))
+	for _, p := range t.Params {
+		valid[p.Name] = true
+	}
+	var unknown []string
+	for k := range raw {
+		if !valid[k] {
+			unknown = append(unknown, k)
+		}
+	}
+	slices.Sort(unknown)
+	return unknown
+}
+
 // Call executes the tool with raw JSON arguments and returns the text envelope
 // the model reads. This is the single execution entry shared by both adapters.
 func (t Tool) Call(raw map[string]any) string {
@@ -226,24 +244,31 @@ func (t Tool) Call(raw map[string]any) string {
 		return fmt.Sprintf("error: missing required parameter(s): %s\n\n%s",
 			strings.Join(missing, ", "), t.Usage())
 	}
+	// Surface misnamed args instead of silently dropping them; still run with
+	// what was understood so a typo'd optional doesn't waste the whole call.
+	var warn string
+	if unknown := t.unknownArgs(raw); len(unknown) > 0 {
+		warn = fmt.Sprintf("note: ignored unknown argument(s): %s — not a parameter of %s. "+
+			"Run `marq tools %s` for valid parameters.\n\n", strings.Join(unknown, ", "), t.Name, t.Name)
+	}
 	args := Resolve(t.Params, raw)
 	if t.Handler != nil {
-		return t.Handler(args)
+		return warn + t.Handler(args)
 	}
 	inv := t.Build(args)
 	if inv.Background {
 		jobDir, errMsg := runner.RunBackground(t.Name, inv.Argv, inv.Target)
 		if errMsg != "" {
-			return "error: " + errMsg
+			return warn + "error: " + errMsg
 		}
-		return backgroundMsg(t.Name, inv.Target, jobDir)
+		return warn + backgroundMsg(t.Name, inv.Target, jobDir)
 	}
 	res := runner.Run(t.Name, inv.Argv, runner.Opts{
 		Target:  inv.Target,
 		Stdin:   inv.Stdin,
 		Timeout: inv.Timeout,
 	})
-	return res.Render()
+	return warn + res.Render()
 }
 
 func backgroundMsg(tool, target, jobDir string) string {

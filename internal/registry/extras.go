@@ -17,7 +17,7 @@ func knowledgeTools() []Tool {
 				"that kind of issue. Pass one skill name or a comma list (max 5). Available skills:\n" +
 				skills.IndexText(),
 			Params: []Param{
-				{Name: "name", Type: StringParam, Desc: "skill name(s), comma-separated (max 5)", Required: true},
+				{Name: "name", Type: StringParam, Desc: "skill name(s), comma-separated (max 5); omit to list all skills"},
 			},
 			Handler: func(a Args) string { return skills.LoadMany(a.S("name")) },
 		},
