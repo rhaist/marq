@@ -84,23 +84,57 @@ func runTool(argv []string) {
 		fmt.Fprintf(os.Stderr, "unknown tool %q\n", name)
 		os.Exit(1)
 	}
-	// No JSON args given: if the tool needs required params, print its schema
-	// instead of running with empty args (which silently produces garbage). This
-	// is how a local model discovers a tool's arguments on the `marq run` path.
-	if len(argv) < 2 || strings.TrimSpace(argv[1]) == "" {
+	rest := argv[1:]
+	// No args given: if the tool needs required params, print its schema instead
+	// of running empty — this is how a local model discovers a tool's arguments.
+	if len(rest) == 0 || (len(rest) == 1 && strings.TrimSpace(rest[0]) == "") {
 		if tool.HasRequired() {
 			fmt.Println(tool.Usage())
 			return
 		}
 	}
-	args := map[string]any{}
-	if len(argv) > 1 && argv[1] != "" {
-		if err := json.Unmarshal([]byte(argv[1]), &args); err != nil {
-			fmt.Fprintln(os.Stderr, "invalid json args:", err)
-			os.Exit(1)
-		}
+	args, err := parseToolArgs(rest)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 	fmt.Println(tool.Call(args))
+}
+
+// parseToolArgs accepts either a single JSON object ('{"k":"v"}') OR
+// `--key value` / `--key=value` flags — small models reach for CLI flags by
+// reflex and stumble on JSON-in-shell escaping, so marq run takes both. A bare
+// `--json '<obj>'` merges the object; a valueless flag is boolean true. Values
+// stay strings; Resolve coerces them to each param's declared type.
+func parseToolArgs(rest []string) (map[string]any, error) {
+	args := map[string]any{}
+	if len(rest) >= 1 && strings.HasPrefix(strings.TrimSpace(rest[0]), "{") {
+		if err := json.Unmarshal([]byte(strings.TrimSpace(rest[0])), &args); err != nil {
+			return nil, fmt.Errorf("invalid json args: %w", err)
+		}
+		return args, nil
+	}
+	for i := 0; i < len(rest); i++ {
+		if !strings.HasPrefix(rest[i], "--") {
+			continue // tolerate stray tokens
+		}
+		key := strings.TrimPrefix(rest[i], "--")
+		val := "true" // bare flag → true
+		if eq := strings.IndexByte(key, '='); eq >= 0 {
+			key, val = key[:eq], key[eq+1:]
+		} else if i+1 < len(rest) && !strings.HasPrefix(rest[i+1], "--") {
+			val = rest[i+1]
+			i++
+		}
+		if key == "json" { // `--json '<obj>'`
+			if err := json.Unmarshal([]byte(val), &args); err != nil {
+				return nil, fmt.Errorf("invalid json args: %w", err)
+			}
+			continue
+		}
+		args[key] = val
+	}
+	return args, nil
 }
 
 // listTools prints every registered tool with the first line of its

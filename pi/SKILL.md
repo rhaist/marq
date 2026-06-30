@@ -56,19 +56,26 @@ metrics, vendor), **standards** (frameworks + EU & US regulation), **ciso**
 
 ## How to call a tool
 
-`marq run <tool> '<json>'` — args are a single JSON object, quoted for the shell:
+Two forms — pick whichever is easier. The **`--key value`** form is simplest (no
+JSON, no shell-escaping) and is preferred:
 
 ```
-marq run nmap '{"target":"10.0.0.5","options":"-sV -p 1-1000"}'
+marq run nmap --target 10.0.0.5 --options "-sV -p 1-1000"
+marq run nuclei --target https://acme.test --severity critical,high
+marq run set_engagement --scope scanme.nmap.org --engagement acme-2026
+```
+
+Or pass a single JSON object, quoted for the shell:
+
+```
 marq run httpx_probe '{"targets":"https://acme.test"}'
-marq run nuclei '{"target":"https://acme.test","severity":"critical,high"}'
 ```
 
-- No JSON args needed? Pass `'{}'`.
+- No args needed? Just `marq run server_info`. Don't invent a `--json` flag.
 - **Unsure of a tool's arguments? Ask the tool.** `marq tools <name>` prints its
-  exact parameters (name, type, required) and a ready-to-edit call example.
-  Omitting a required arg returns `error: missing required parameter(s): …`
-  followed by that schema — read it and fix the call; never retry the same way.
+  exact parameters (name, type, required) and a ready-to-run example. Omitting a
+  required arg returns `error: missing required parameter(s): …` with that schema
+  — read it and fix the call; never retry the same way.
 - Don't call the raw binary (`nmap …`) directly — always go through `marq run` so
   the action is scoped and audit-logged.
 - Files: the model passes strings only. Inputs/outputs go through `/work` using the

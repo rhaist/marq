@@ -8,6 +8,7 @@ package registry
 import (
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 
 	"marq/internal/audit"
@@ -103,13 +104,22 @@ func Resolve(params []Param, raw map[string]any) Args {
 				out[p.Name] = int(n)
 			case int:
 				out[p.Name] = n
+			case string: // from the `--key value` form
+				if i, err := strconv.Atoi(strings.TrimSpace(n)); err == nil {
+					out[p.Name] = i
+				} else {
+					out[p.Name] = p.Default
+				}
 			default:
 				out[p.Name] = p.Default
 			}
 		case BoolParam:
-			if b, ok := v.(bool); ok {
+			switch b := v.(type) {
+			case bool:
 				out[p.Name] = b
-			} else {
+			case string: // from the `--key value` / bare-flag form
+				out[p.Name] = b == "true" || b == "1" || b == "yes" || b == "on"
+			default:
 				out[p.Name] = p.Default
 			}
 		default: // string
@@ -189,11 +199,13 @@ func (t Tool) Usage() string {
 	desc, _, _ := strings.Cut(t.Desc, "\n")
 	fmt.Fprintf(&b, "%s — %s\n", t.Name, desc)
 	if len(t.Params) == 0 {
-		fmt.Fprintf(&b, "parameters: none\ncall: marq run %s '{}'", t.Name)
+		fmt.Fprintf(&b, "parameters: none\ncall: marq run %s", t.Name)
 		return b.String()
 	}
 	b.WriteString("parameters:\n")
-	var reqExample []string
+	// Example uses the `--key value` form: small models drive it far more reliably
+	// than JSON-in-shell (no escaping), and angle brackets read as "replace me".
+	call := "marq run " + t.Name
 	for _, p := range t.Params {
 		req := "optional"
 		if p.Required {
@@ -205,14 +217,10 @@ func (t Tool) Usage() string {
 		}
 		fmt.Fprintf(&b, "  %-14s %s, %s%s — %s\n", p.Name, p.Type, req, def, p.Desc)
 		if p.Required {
-			reqExample = append(reqExample, fmt.Sprintf("%q:%q", p.Name, "..."))
+			call += fmt.Sprintf(" --%s <%s>", p.Name, p.Name)
 		}
 	}
-	ex := "{}"
-	if len(reqExample) > 0 {
-		ex = "{" + strings.Join(reqExample, ",") + "}"
-	}
-	fmt.Fprintf(&b, "call: marq run %s '%s'", t.Name, ex)
+	fmt.Fprintf(&b, "call: %s", call)
 	if t.Active {
 		b.WriteString("\n[active testing] run only against authorized, in-scope targets — confirm scope with server_info first; every call is audit-logged.")
 	}
