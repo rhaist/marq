@@ -10,10 +10,18 @@
     "repeat_penalty": 1.1,
     "max_steps": 10
   },
-  "hf.co/google/gemma-4-12B-it-qat-q4_0-gguf:latest": {
+  "gemma-4-12b-it-qat": {
     "temperature": 1.0,
     "top_p": 0.95,
     "top_k": 64,
+    "max_steps": 10
+  },
+  "gemma-4-12b-uncensored-balanced": {
+    "temperature": 0.6,
+    "top_p": 0.9,
+    "top_k": 64,
+    "min_p": 0.05,
+    "repeat_penalty": 1.1,
     "max_steps": 10
   }
 }
