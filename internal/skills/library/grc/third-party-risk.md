@@ -70,7 +70,7 @@ Any single domain at 5 on a Critical-tier vendor = High overall regardless of av
 - Recheck on trigger events too: vendor breach, M&A, scope change — not just the calendar.
 - **EU financial sector:** DORA (in force since 17 Jan 2025) mandates a **register of all ICT
   third-party arrangements**, forces you to flag provider concentration/substitutability, and
-  puts *critical* ICT providers under direct EU oversight. `load_skill nis2-dora`.
+  puts _critical_ ICT providers under direct EU oversight. `load_skill nis2-dora`.
 - **APAC pitfall (what EU/US teams get wrong):** a SOC 2 + DPA is not enough. APRA **CPS 230**
   (Australia, since 1 Jul 2025) and MAS's regime (revised Outsourcing Guidelines Dec 2024; a
   broader TPRM guideline proposed 2026) demand a **material-service-provider register**, named

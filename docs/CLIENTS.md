@@ -8,10 +8,10 @@ depends on the work.
 
 ## Match the brain to the work
 
-| You want to…                                                                                                             | Use                                                           | Why                                                                                                         |
-| :----------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------- |
-| Run fully local & uncensored — hands-on offensive ops, on-box execution, nothing leaves the host, no model refusals _(recommended default)_ | **Pi** + a local/abliterated model on **llama.cpp** + the `pi/marq` shim | Terminal-native, no cloud, no refusals; the model gets bash and calls `marq run` directly.       |
-| Reason hard — architecture review, threat modeling, GRC/compliance, IR leadership, write the report, app/code-sec review | **Claude Code** or **Codex** (frontier model) + marq over MCP _(fallback)_ | Strongest reasoning. marq hands it the current-standards skills and the tools; the model supplies judgment. |
+| You want to…                                                                                                                                | Use                                                                        | Why                                                                                                         |
+| :------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- |
+| Run fully local & uncensored — hands-on offensive ops, on-box execution, nothing leaves the host, no model refusals _(recommended default)_ | **Pi** + a local/abliterated model on **llama.cpp** + the `pi/marq` shim   | Terminal-native, no cloud, no refusals; the model gets bash and calls `marq run` directly.                  |
+| Reason hard — architecture review, threat modeling, GRC/compliance, IR leadership, write the report, app/code-sec review                    | **Claude Code** or **Codex** (frontier model) + marq over MCP _(fallback)_ | Strongest reasoning. marq hands it the current-standards skills and the tools; the model supplies judgment. |
 
 Rule of thumb: **local uncensored model by default** — hands-on offensive and
 privacy-sensitive work stays on your box. Reach for a **frontier model as a

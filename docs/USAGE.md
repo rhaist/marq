@@ -192,15 +192,15 @@ engagement + scope are set at runtime via `set_engagement`).
 
 ### Exploitation / credentials
 
-| Tool            | Wraps     | Purpose                      |
-| --------------- | --------- | ---------------------------- |
-| `searchsploit`  | exploitdb | Local exploit DB search      |
-| `donut`         | go-donut  | Payload/shellcode generation |
-| `hydra`         | hydra     | Online credential testing    |
-| `john`          | john      | Offline hash cracking        |
-| `hashcat`       | hashcat   | GPU/CPU hash cracking        |
-| `hash_identify` | name-that-hash | Identify hash type (nth)  |
-| `run_shell`     | bash      | Arbitrary command (opt-in)   |
+| Tool            | Wraps          | Purpose                      |
+| --------------- | -------------- | ---------------------------- |
+| `searchsploit`  | exploitdb      | Local exploit DB search      |
+| `donut`         | go-donut       | Payload/shellcode generation |
+| `hydra`         | hydra          | Online credential testing    |
+| `john`          | john           | Offline hash cracking        |
+| `hashcat`       | hashcat        | GPU/CPU hash cracking        |
+| `hash_identify` | name-that-hash | Identify hash type (nth)     |
+| `run_shell`     | bash           | Arbitrary command (opt-in)   |
 
 ### AD / internal network
 
@@ -290,7 +290,7 @@ an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.
 | `MARQ_TIMEOUT`         | `900`                       | Default per-command timeout (seconds)                                          |
 | `MARQ_MAX_TIMEOUT`     | `3600`                      | Ceiling for a tool's per-call timeout override                                 |
 | `MARQ_MAX_OUTPUT`      | `60000`                     | Max output chars returned to the model                                         |
-| `MARQ_ALLOW_RAW_SHELL` | `false`                     | Expose the arbitrary-shell `run_shell` tool (opt-in; set `true` to enable)      |
+| `MARQ_ALLOW_RAW_SHELL` | `false`                     | Expose the arbitrary-shell `run_shell` tool (opt-in; set `true` to enable)     |
 | `MARQ_WORK_DIR`        | `/work`                     | Working area (findings, job dirs)                                              |
 
 Engagement and scope are per-task, so the model sets them at session start with
