@@ -178,19 +178,25 @@ in [`scripts/eval/llama.cpp/`](../scripts/eval/llama.cpp/)):
 # Uncensored "Balanced" build (the default above). -hf pulls the GGUF from HF.
 llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
   --host 0.0.0.0 --port 8080 -ngl 99 --ctx-size 65536 --jinja \
+  -fa on -ctk q8_0 -ctv q8_0 \
   --temp 0.6 --top-p 0.9 --top-k 64 --min-p 0.05 --repeat-penalty 1.1
 ```
 
 - **`--jinja`** applies the model's chat template so **tool calls parse** — the
-  single most important flag for driving marq. It also lets llama.cpp split
-  Gemma's `<|channel>thought … <channel|>` reasoning out of the final answer, so
-  you don't get thinking tokens leaking into replies.
+  single most important flag for driving marq. (If the model exposes
+  chain-of-thought and it leaks into replies, add `--reasoning-format deepseek`
+  to route it into a separate `reasoning_content` field.)
+- **`-fa on` + `-ctk q8_0 -ctv q8_0`** — the memory win that makes 64K context
+  fit on a 12–16 GB GPU. `-fa on` is flash attention (exact, not lossy; faster
+  long-context prefill, smaller attention footprint) and is a prerequisite for
+  the KV-cache flags; `-ctk/-ctv q8_0` quantize the K/V cache (default `f16`),
+  ~halving its VRAM at negligible quality cost. Drop all three for CPU-only.
 - **`--ctx-size`** as high as VRAM allows (Gemma is 262 K native). Tool outputs
   (nuclei/katana dumps) are large; a short window truncates them.
 - **Sampling** — the flags above are the HauhauCS _"Balanced"_ preset. For the
   **stock** Google `-it` model use Google's official set instead (`--temp 1.0
   --top-p 0.95 --top-k 64`). Either is fine — it's the smallest lever (see impact
-  order). `-ngl 99` offloads all layers to the GPU; drop it for CPU-only.
+  order). `-ngl 99` offloads all layers to the GPU.
 - Flaky small model emitting malformed tool JSON? llama.cpp can **constrain
   decoding** to a grammar/JSON schema (`--grammar-file`, or `json_schema` in the
   request) — the reliability lever GUI wrappers don't expose.
