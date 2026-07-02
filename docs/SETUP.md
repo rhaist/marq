@@ -197,12 +197,16 @@ in [`scripts/eval/llama.cpp/`](../scripts/eval/llama.cpp/)):
 ```bash
 # Uncensored "Balanced" build (the default above). -hf pulls the GGUF from HF.
 llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
-  --host 0.0.0.0 --port 8080 -ngl 99 --ctx-size 65536 --jinja \
+  --host 127.0.0.1 --port 8080 -ngl 99 --ctx-size 65536 --jinja \
   --reasoning-format deepseek \
   -fa on -ctk q8_0 -ctv q8_0 \
   --temp 0.6 --top-p 0.9 --top-k 64 --min-p 0.05 --repeat-penalty 1.1
 ```
 
+- **`--host 127.0.0.1`** binds loopback only — the Pi extension connects there,
+  so that's all you need. Don't use `--host 0.0.0.0` unless you deliberately want
+  to serve the model to other machines: it exposes an **uncensored** model on an
+  open completions endpoint to your whole network. If you must, firewall the port.
 - **`--jinja`** applies the model's chat template so **tool calls parse** — the
   single most important flag for driving marq.
 - **`--reasoning-format deepseek`** routes the model's chain-of-thought into a

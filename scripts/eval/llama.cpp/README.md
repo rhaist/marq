@@ -12,7 +12,7 @@ HauhauCS Gemma-4-12B QAT Uncensored "Balanced" (Q4_K_M), its card's preset:
 
 ```bash
 llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
-    --host 0.0.0.0 --port 8080 --ctx-size 65536 --jinja -fa on \
+    --host 127.0.0.1 --port 8080 --ctx-size 65536 --jinja -fa on \
     --temp 0.6 --top-p 0.9 --top-k 64 --min-p 0.05 --repeat-penalty 1.1
 ```
 
@@ -22,7 +22,7 @@ Google's official sampling:
 
 ```bash
 llama-server -hf google/gemma-4-12B-it-qat-q4_0-gguf \
-    --host 0.0.0.0 --port 8080 --ctx-size 65536 --jinja -fa on \
+    --host 127.0.0.1 --port 8080 --ctx-size 65536 --jinja -fa on \
     --temp 1.0 --top-p 0.95 --top-k 64
 ```
 

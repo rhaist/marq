@@ -42,7 +42,7 @@ host. Drive marq from [Pi](https://pi.dev/) over [llama.cpp](https://github.com/
 # 1. the model — full flags matter: --reasoning-format keeps chain-of-thought
 #    out of the reply, --jinja makes tool calls parse (see docs/SETUP.md §2a)
 llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
-  --host 0.0.0.0 --port 8080 -ngl 99 --ctx-size 65536 --jinja \
+  --host 127.0.0.1 --port 8080 -ngl 99 --ctx-size 65536 --jinja \
   --reasoning-format deepseek \
   -fa on -ctk q8_0 -ctv q8_0 \
   --temp 0.6 --top-p 0.9 --top-k 64 --min-p 0.05 --repeat-penalty 1.1

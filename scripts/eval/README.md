@@ -31,7 +31,7 @@ serve` per task with a fresh `/work`).
    [`llama.cpp/README.md`](llama.cpp/README.md) for ready-to-run commands):
    ```bash
    llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
-       --host 0.0.0.0 --port 8080 --ctx-size 65536 --jinja -ngl 99
+       --host 127.0.0.1 --port 8080 --ctx-size 65536 --jinja -ngl 99
    ```
 3. Smoke the marq side (no model needed):
    ```bash
