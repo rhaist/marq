@@ -70,8 +70,9 @@ and TOTP are a transition state, not a destination.
   bakes phishing-resistance + syncable authenticators into AAL2/AAL3:
   fetch https://pages.nist.gov/800-63-4/sp800-63b.html and the syncable supplement
   https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63Bsup1.pdf
-- Microsoft "passkey profiles" (device-bound vs synced policy split) rolling out
-  early 2026 — verify Entra capability before you promise enforcement:
+- Microsoft Entra "passkey profiles" (per-group device-bound vs synced policy
+  via `passkeyType`) hit GA March 2026, with existing FIDO2 tenants auto-migrated —
+  the enforcement lever exists now; verify tenant state before you promise it:
   https://learn.microsoft.com/en-us/entra/identity/authentication/concept-authentication-passkeys-fido2
 
 Also drop legacy password theater: NIST 800-63B-4 says **no forced periodic rotation,

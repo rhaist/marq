@@ -64,8 +64,8 @@ but tune each to your environment before trusting it.
 
 ## Testing detections (prove they fire)
 
-- **Atomic Red Team** (Red Canary) — ~1225 atomic tests across ~261 ATT&CK
-  techniques; `Invoke-AtomicTest` runs one technique → confirm the detection
+- **Atomic Red Team** (Red Canary) — ~1800 atomic tests mapped across the ATT&CK
+  matrix; `Invoke-AtomicTest` runs one technique → confirm the detection
   fires + benign data stays quiet. The fast, granular unit test of a detection.
 - **MITRE CALDERA** — autonomous adversary emulation (chained TTPs, C2, full
   scenarios) for end-to-end / breach-and-attack-simulation coverage validation.

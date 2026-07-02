@@ -51,12 +51,13 @@ EIOPA. These cite RTS that get revised — verify exact figures before relying.
 - **Incident notification: within 72 hours** (assessment, severity, IoCs).
 - **Final report: within 1 month** of the notification. (Intermediate update on request.)
 
-**DORA — major ICT-related incident (per RTS — verify current figures)**
+**DORA — major ICT-related incident (RTS: Commission Delegated Regulation (EU) 2025/301)**
 
-- **Initial: ~4 hours after classifying** as major, and **≤24 hours** from awareness.
-- **Intermediate: ~72 hours** after the initial notification.
-- **Final: ~1 month.** Significant cyber-_threat_ notification is voluntary;
-  inform affected clients where relevant.
+- **Initial: within 4 hours of classifying** as major, and **≤24 hours** from awareness
+  (classification itself due within 24h of detection).
+- **Intermediate: within 72 hours** of the initial notification.
+- **Final: within 1 month** of the intermediate report. Significant cyber-_threat_
+  notification is voluntary; inform affected clients where relevant.
 
 ## Overlap & precedence
 
@@ -73,11 +74,17 @@ EIOPA. These cite RTS that get revised — verify exact figures before relying.
 ## Key dates
 
 - **NIS2:** member-state **transposition deadline was 17 Oct 2024**, widely
-  missed — as of mid-2026 a handful of states (incl. France, Ireland,
-  Netherlands, Spain) still haven't fully transposed and the Commission has
-  infringement proceedings open. Check the specific national law that actually
-  binds you (entry-into-force dates, competent authorities and penalties differ).
+  missed — as of mid-2026, **22 of 27 states have adopted transposing law**;
+  **France, Ireland, Luxembourg, the Netherlands and Spain** are still in
+  legislative procedure, with Commission infringement proceedings open. Check
+  the specific national law that actually binds you (entry-into-force dates,
+  competent authorities and penalties differ). Verify:
+  https://digital-strategy.ec.europa.eu/en/policies/nis-transposition
 - **DORA:** **applies from 17 Jan 2025.**
+- **Pending change:** the Commission's **Digital Omnibus** (proposed Nov 2025)
+  would route NIS2/DORA/GDPR/eIDAS/CER incident reports through a **single
+  entry point** run by ENISA — **proposal only, not yet law as of mid-2026**;
+  the per-regime clocks above still apply.
 
 ## Penalties (orders of magnitude — NIS2 set in national law, verify)
 

@@ -73,9 +73,11 @@ safe harbor and is just unauthorized access. This skill covers both sides:
 ## 5. Disclosure timelines
 
 - **Coordinated** is the norm: agree a fix window, disclose together. Common
-  default deadlines researchers use — **Google Project Zero: 90 days** (+14-day
-  grace if a fix is imminent), CERT/CC: **45 days**. Cite the policy you're
-  operating under. verify: https://googleprojectzero.blogspot.com/p/vulnerability-disclosure-policy.html
+  default deadlines researchers use — **Google Project Zero: 90+30** (90 days to
+  fix, then +30 days for patch adoption before full technical detail; +14-day
+  grace if a fix is imminent, and since its 2025 policy update a ~1-week
+  transparency notice that a report exists), CERT/CC: **45 days**. Cite the policy
+  you're operating under. verify: https://projectzero.google/vulnerability-disclosure-policy.html
 - Adjust for actively-exploited (0-day) bugs — shorten and coordinate with a
   CERT. Never sit on an in-the-wild exploit waiting for a tidy fix.
 - As a program: communicate the patch ETA; as a researcher: hold publication to

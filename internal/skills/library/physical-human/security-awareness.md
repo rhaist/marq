@@ -15,7 +15,7 @@ backstops in `load_skill social-engineering-defense`.
 
 - **Continuous > annual**: short, frequent touches (monthly micro-learning,
   in-context nudges) beat one long yearly dump. Twelve months of continuous
-  training cut global phish-prone rate ~33% → ~4% in industry data.
+  training cut global phish-prone rate ~33% → ~5% (an ~86% drop) in industry data.
   verify: https://www.knowbe4.com/resources/reports/phishing-by-industry-benchmarking-report
 - **Role-based**: tailor content to risk surface. Finance/AP → BEC & payment
   fraud; execs/admins → spear-phish & credential theft; devs → secrets, supply

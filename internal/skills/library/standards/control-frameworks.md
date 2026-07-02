@@ -9,7 +9,7 @@ Three different jobs. Don't pick by brand — pick by what you need: an **exhaus
 
 ## NIST SP 800-53 — the control _catalog_
 
-- **Current: Release 5.2.0, published 27 Aug 2025** (a patch release on Rev 5; verify: https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final and the 5.2.0 news at https://csrc.nist.gov/News/2025/nist-releases-revision-to-sp-800-53-controls). 5.2.0 adds **no new families**; it strengthens existing controls around **secure software development, update management, software integrity/validation** (driven by EO 14306). Still **20 control families**, ~1000+ controls+enhancements, security **and** privacy.
+- **Current: Release 5.2.0, published 27 Aug 2025** (a patch release on Rev 5; verify: https://csrc.nist.gov/projects/cprt/catalog#/cprt/framework/version/SP_800_53_5_2_0/home and the 5.2.0 news at https://csrc.nist.gov/News/2025/nist-releases-revision-to-sp-800-53-controls). 5.2.0 adds **no new families**; it strengthens existing controls around **secure software development, update management, software integrity/validation** (driven by EO 14306). Still **20 control families**, ~1000+ controls+enhancements, security **and** privacy.
 - **For**: U.S. federal systems and **FISMA/FedRAMP** (mandatory there), or anyone wanting the most comprehensive control library to draw from. Baselines (Low/Moderate/High) come from **SP 800-53B**; the selection _process_ is **SP 800-53A** (assessment) + the **RMF (SP 800-37)**.
 - **Not for**: a small org wanting a quick start — it's a reference catalog, **not prioritized**. You tailor down, you don't implement all of it.
 

@@ -21,18 +21,18 @@ don't reassess per-standard, and so one fix can close N audit line items.
 
 ## Pivot table (verify ids against current versions)
 
-| Theme (CWE pivot)                            | ISO 27001:2022 Annex A | NIST CSF 2.0 | NIST 800-53      | SOC 2 (TSC)  | CIS v8 |
-| -------------------------------------------- | ---------------------- | ------------ | ---------------- | ------------ | ------ |
-| Access control / least priv (CWE-284/639)    | A.5.15, A.5.18, A.8.3  | PR.AA        | AC-2, AC-3, AC-6 | CC6.1-6.3    | 5, 6   |
-| Authentication (CWE-287/798)                 | A.5.17, A.8.5          | PR.AA-01/02  | IA-2, IA-5       | CC6.1        | 5, 6   |
-| Crypto / data protection (CWE-311/327)       | A.8.24, A.5.34         | PR.DS        | SC-13, SC-28     | CC6.7        | 3      |
-| Input validation / injection (CWE-79/89/918) | A.8.28, A.8.26         | PR.PS        | SI-10, SC-7      | CC7.1, CC8.1 | 16     |
-| Vuln & patch mgmt (CWE-1104)                 | A.8.8                  | ID.RA, PR.PS | RA-5, SI-2       | CC7.1        | 7      |
-| Logging & monitoring (CWE-778)               | A.8.15, A.8.16         | DE.CM        | AU-2, AU-6       | CC7.2        | 8      |
-| Secure config / hardening (CWE-16)           | A.8.9                  | PR.PS-01     | CM-6, CM-7       | CC7.1        | 4      |
-| Secrets exposure (CWE-798/200)               | A.8.24, A.5.10         | PR.DS, PR.AA | IA-5, SC-12      | CC6.1        | 3, 16  |
-| Network segmentation (CWE-668)               | A.8.20, A.8.22         | PR.IR        | SC-7             | CC6.6        | 12, 13 |
-| Backup / resilience (CWE-...)                | A.8.13, A.5.29         | RC.RP, PR.IR | CP-9, CP-10      | A1.2         | 11     |
+| Theme (CWE pivot)                            | ISO 27001:2022 Annex A | NIST CSF 2.0 | NIST 800-53      | SOC 2 (TSC)  | CIS v8.1 |
+| -------------------------------------------- | ---------------------- | ------------ | ---------------- | ------------ | -------- |
+| Access control / least priv (CWE-284/639)    | A.5.15, A.5.18, A.8.3  | PR.AA        | AC-2, AC-3, AC-6 | CC6.1-6.3    | 5, 6     |
+| Authentication (CWE-287/798)                 | A.5.17, A.8.5          | PR.AA-01/02  | IA-2, IA-5       | CC6.1        | 5, 6     |
+| Crypto / data protection (CWE-311/327)       | A.8.24, A.5.34         | PR.DS        | SC-13, SC-28     | CC6.7        | 3        |
+| Input validation / injection (CWE-79/89/918) | A.8.28, A.8.26         | PR.PS        | SI-10, SC-7      | CC7.1, CC8.1 | 16       |
+| Vuln & patch mgmt (CWE-1104)                 | A.8.8                  | ID.RA, PR.PS | RA-5, SI-2       | CC7.1        | 7        |
+| Logging & monitoring (CWE-778)               | A.8.15, A.8.16         | DE.CM        | AU-2, AU-6       | CC7.2        | 8        |
+| Secure config / hardening (CWE-16)           | A.8.9                  | PR.PS-01     | CM-6, CM-7       | CC7.1        | 4        |
+| Secrets exposure (CWE-798/200)               | A.8.24, A.5.10         | PR.DS, PR.AA | IA-5, SC-12      | CC6.1        | 3, 16    |
+| Network segmentation (CWE-668)               | A.8.20, A.8.22         | PR.IR        | SC-7             | CC6.6        | 12, 13   |
+| Backup / resilience (CWE-...)                | A.8.13, A.5.29         | RC.RP, PR.IR | CP-9, CP-10      | A1.2         | 11       |
 
 ## Output
 

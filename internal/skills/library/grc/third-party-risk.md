@@ -72,8 +72,10 @@ Any single domain at 5 on a Critical-tier vendor = High overall regardless of av
   third-party arrangements**, forces you to flag provider concentration/substitutability, and
   puts _critical_ ICT providers under direct EU oversight. `load_skill nis2-dora`.
 - **APAC pitfall (what EU/US teams get wrong):** a SOC 2 + DPA is not enough. APRA **CPS 230**
-  (Australia, since 1 Jul 2025) and MAS's regime (revised Outsourcing Guidelines Dec 2024; a
-  broader TPRM guideline proposed 2026) demand a **material-service-provider register**, named
+  (Australia, since 1 Jul 2025; the pre-existing-contract transition ended 1 Jul 2026, so it now
+  covers all arrangements) and MAS's regime (revised Outsourcing Guidelines in effect Dec 2024; a
+  broader TPRM guideline — consulted Mar 2026, will supersede the Outsourcing Guidelines — verify:
+  https://www.mas.gov.sg/regulation/third-party-risk-management) demand a **material-service-provider register**, named
   **fourth-party / sub-outsourcing** disclosure, and **data-location** clauses — and
   data-localization laws (China PIPL, India DPDP) can block the flows your vendor assumes.
   Tier and contract to the strictest in-scope jurisdiction, not your home one.

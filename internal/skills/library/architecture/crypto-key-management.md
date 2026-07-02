@@ -34,8 +34,12 @@ the math — they're key management, stale algorithms, and rolled-your-own.
 
 - NIST finalized the first PQC standards in Aug 2024: **FIPS 203 (ML-KEM /
   Kyber)** for key exchange, **FIPS 204 (ML-DSA / Dilithium)** and **FIPS 205
-  (SLH-DSA / SPHINCS+)** for signatures; **HQC** selected (2025) as a KEM
-  backup. verify: https://csrc.nist.gov/projects/post-quantum-cryptography
+  (SLH-DSA / SPHINCS+)** for signatures; **HQC** selected (Mar 2025) as a KEM
+  backup, draft FIPS expected 2026. verify: https://csrc.nist.gov/projects/post-quantum-cryptography
+- Migration deadline is set: NIST's transition roadmap (**IR 8547**, draft)
+  deprecates quantum-vulnerable RSA/ECC/DH **by 2030** and disallows them
+  **after 2035** — that's the planning horizon for the inventory below.
+  verify: https://csrc.nist.gov/pubs/ir/8547/ipd
 - Threat is **harvest-now-decrypt-later** — long-lived secrets are at risk today.
 - Act now: build a **crypto inventory** (where keys/algorithms live), demand
   **crypto-agility** (algorithms swappable, not hard-coded), and deploy **hybrid**
@@ -59,8 +63,9 @@ the math — they're key management, stale algorithms, and rolled-your-own.
 - Internal PKI: protect the offline root, issue from intermediates, publish
   CRL/OCSP. Short-lived certs + automation (ACME) beat long-lived + manual.
 - **Certificate lifecycle is an outage source** — inventory and auto-renew;
-  expired certs cause more downtime than attacks. The CA/Browser Forum is moving
-  public TLS toward ~47-day max lifetimes — automate or bleed. verify:
+  expired certs cause more downtime than attacks. The CA/Browser Forum schedule
+  (ballot SC-081v3) is now in force: public TLS max lifetime **200 days since
+  Mar 2026**, 100 days Mar 2027, **47 days Mar 2029** — automate or bleed. verify:
   https://www.cabforum.org/
 - mTLS for service-to-service; tie identity to the cert (see `load_skill iam`).
 

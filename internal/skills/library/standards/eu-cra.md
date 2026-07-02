@@ -22,7 +22,7 @@ Authoritative text + dates (web-verify, these are load-bearing): EUR-Lex https:/
 - **SBOM** — produce and maintain a software bill of materials (at least top-level dependencies), in a commonly used machine-readable format; keep it (provide to authorities on request).
 - **Support period** — provide security updates for the expected product lifetime, **default minimum 5 years** (unless the product is reasonably expected to be in use for less).
 - **Documentation** — technical documentation (Annex VII), risk assessment, EU declaration of conformity, user information/instructions.
-- **Reporting** to **ENISA** (single reporting platform) **and the relevant CSIRT**: **actively exploited vulnerabilities** and **severe incidents** — **early warning within 24h**, notification within 72h, final report within 14 days/1 month (Article 14). Verify exact stage clocks against Art. 14.
+- **Reporting** to **ENISA and the relevant CSIRT** via the **CRA Single Reporting Platform**: **actively exploited vulnerabilities** and **severe incidents** — **early warning within 24h**, notification within 72h, final report within **14 days** (exploited vuln, after a corrective measure is available) / **1 month** (severe incident) (Article 14). Confirmed: https://digital-strategy.ec.europa.eu/en/policies/cra-reporting
 
 ## Conformity assessment & CE marking
 
@@ -33,8 +33,8 @@ Authoritative text + dates (web-verify, these are load-bearing): EUR-Lex https:/
 ## Phased timeline (WEB-VERIFY each — dates are dynamic and load-bearing)
 
 - **Entry into force: 10 December 2024.**
-- **11 June 2026** — rules on **notification of conformity assessment bodies** (notified bodies) begin to apply. (Reported widely; confirm against Art. 71 — verify: EUR-Lex.)
-- **11 September 2026 (~21 months)** — the **reporting obligations** (Art. 14: actively-exploited-vulnerability and severe-incident reporting to ENISA/CSIRT) start applying.
+- **11 June 2026 — in effect**: Chapter IV rules on **notification of conformity assessment bodies** (notified bodies) apply; member states had to designate notifying authorities by this date. https://digital-strategy.ec.europa.eu/en/policies/cra-summary
+- **11 September 2026** — the **reporting obligations** (Art. 14: actively-exploited-vulnerability and severe-incident reporting to ENISA/CSIRT) start applying. The ENISA-run **Single Reporting Platform** is due operational by this date (dry-run/registration support ran through mid-2026).
 - **11 December 2027 (~36 months)** — **full application**: all essential requirements, vulnerability handling, conformity assessment, CE marking, and SBOM obligations apply. Products placed on the market before this date are generally only caught if substantially modified afterward — verify transition provisions (Art. 69) against the text.
 
 Penalties: up to **€15M or 2.5% of worldwide annual turnover** for breach of essential requirements (lower tiers for other breaches) — verify Art. 64.

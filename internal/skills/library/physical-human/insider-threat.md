@@ -96,7 +96,8 @@ Done wrong, the program is illegal, toxic, or both. Concrete guardrails:
 - **Multi-disciplinary team**: Security, HR, Legal/Privacy, IT, and management —
   no single function runs it. CISA's Jan-2026 guidance: assemble a
   multi-disciplinary insider-threat management team spanning physical + cyber +
-  personnel. verify: https://www.cisa.gov/resources-tools/resources/insider-threat-mitigation-guide
+  personnel, run through its POEM lifecycle (Plan → Organize → Execute → Maintain).
+  verify: https://www.cisa.gov/resources-tools/resources/assembling-multi-disciplinary-insider-threat-management-team
 - **HR** owns behavioral context and intervention; **Legal/Privacy** owns the
   lawful-basis gate and adjudication; **Security** owns detection/response.
 - Documented charter, escalation path, evidence handling, and audit of the

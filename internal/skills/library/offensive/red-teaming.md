@@ -104,8 +104,8 @@ pentest; reach for `methodology` and the `vuln/*` skills instead.
   exercise** for CSPs (test plan + report, 3PAO-validated), distinct from the
   standard pentest: it tests people/process/tech detection+response, not just
   "can it be breached." Still current mid-2026, but the **FedRAMP 20x** transition
-  is underway (consolidated rules ~June 2026, applications from July 2026) — check
-  which regime the CSP is under before citing. verify:
+  is underway (pilot authorizations began March 2026; broader submission pipeline
+  opening ~Q4 FY26) — check which regime the CSP is under before citing. verify:
   https://help.fedramp.gov/hc/en-us/articles/28907820003227-CA-8-2-requires-Red-Team-exercises
 - Common thread: independent threat intel drives the scenario, a control group
   oversees, and the deliverable is resilience evidence — not a bug list.

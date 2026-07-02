@@ -40,7 +40,7 @@ Move security checks into the pipeline **without turning the pipeline into a wal
 
 - **Generate an SBOM per build** and store it as an artifact. Formats: **CycloneDX** (OWASP, AppSec/vuln-focused — at **1.7**, Oct 2025, ECMA-424 2nd ed.) and **SPDX** (Linux Foundation, license-focused — **3.0.1**, much of the field still emits 2.3). Pick one canonical, convert as needed. Tools: Syft, Trivy, cdxgen. verify: https://cyclonedx.org/specification/overview/
 - Feed the SBOM into continuous vuln matching (Grype/Trivy/Dependency-Track) so a _newly disclosed_ CVE flags against _already-shipped_ artifacts.
-- **SLSA** = build-integrity levels (provenance, not vuln-freeness). v1.0 → **v1.1 approved ~Apr 2025**; **v1.2 (Nov 2025) adds a Source track**. Build track: **L0** none → **L1** provenance exists → **L2** signed provenance from a hosted build → **L3** hardened, isolated builder, non-falsifiable provenance. Target **L2–L3** for anything you ship externally. Self-attestation is still the weak link — verify provenance, don't trust a logo. verify: https://slsa.dev/spec/v1.0/whats-new
+- **SLSA** = build-integrity levels (provenance, not vuln-freeness). v1.0 → **v1.1 approved ~Apr 2025**; **v1.2 (Nov 2025) adds a Source track**. Build track: **L0** none → **L1** provenance exists → **L2** signed provenance from a hosted build → **L3** hardened, isolated builder, non-falsifiable provenance. Target **L2–L3** for anything you ship externally. Self-attestation is still the weak link — verify provenance, don't trust a logo. verify: https://slsa.dev/spec/v1.2/
 
 ## Signing (Sigstore / cosign)
 

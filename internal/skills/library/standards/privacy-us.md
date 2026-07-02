@@ -20,7 +20,7 @@ Authoritative, fast-moving trackers (web-fetch for current state, do not trust m
 
 ## Layer 1 — State comprehensive privacy laws
 
-- **~20 states have a comprehensive law in effect as of 2026** (CA, CO, CT, DE, IN, IA, KY, MD, MN, MT, NE, NH, NJ, OR, RI, TN, TX, UT, VA, WA); more are enacted-but-not-yet-effective. **verify current count + which are live:** https://www.multistate.us/insider/2026/2/4/all-of-the-comprehensive-privacy-laws-that-take-effect-in-2026 and the IAPP tracker. New for 2026 (Jan 1): Indiana, Kentucky, Rhode Island.
+- **20 states have a comprehensive law in effect as of mid-2026** (CA, CO, CT, DE, FL, IN, IA, KY, MD, MN, MT, NE, NH, NJ, OR, RI, TN, TX, UT, VA); more are enacted-but-not-yet-effective (e.g. **Oklahoma**, signed Mar 2026, effective Jan 1 2027). **verify current count + which are live:** https://www.multistate.us/insider/2026/2/4/all-of-the-comprehensive-privacy-laws-that-take-effect-in-2026 and the IAPP tracker. New for 2026 (Jan 1): Indiana, Kentucky, Rhode Island.
 - **California is the outlier**: CCPA as amended by **CPRA** (2020) — has a dedicated regulator, the **California Privacy Protection Agency (CPPA)**, plus a private right of action for certain breaches. https://cppa.ca.gov/
 - Most other states follow the **"Washington/Virginia model"**: enforced **only by the state Attorney General**, no private right of action, with a **cure period** (some sunsetting).
 - **Applicability is threshold-gated, not universal** — typically by revenue and/or number of consumers' data processed (e.g. ~100k consumers, or ~25k + selling data). Thresholds vary per state; a small B2B SaaS may be out of scope in most. **verify per state.**
@@ -30,7 +30,7 @@ Authoritative, fast-moving trackers (web-fetch for current state, do not trust m
 
 - **HIPAA** — Protected Health Information held by covered entities (providers, plans, clearinghouses) + business associates. Regulator: **HHS Office for Civil Rights (OCR)**. (See `load_skill us-sectoral-regs` for the Security Rule / breach clock.)
 - **GLBA** — "nonpublic personal information" held by financial institutions. Regulators: **FTC** (nonbank) + banking agencies. (Safeguards Rule detail in `us-sectoral-regs`.)
-- **COPPA** — personal info of **children under 13** collected online. Regulator: **FTC**. Note the 2025 amended COPPA Rule tightened consent/retention — **verify effective dates:** https://www.ftc.gov/legal-library/browse/rules/childrens-online-privacy-protection-rule-coppa
+- **COPPA** — personal info of **children under 13** collected online. Regulator: **FTC**. The amended COPPA Rule (effective June 23 2025) tightened consent/retention and has been in **full effect since April 22 2026**: https://www.ftc.gov/legal-library/browse/rules/childrens-online-privacy-protection-rule-coppa
 - **FERPA** — student education records at federally-funded schools. Regulator: **US Dept of Education**.
 - Others a security team meets: **CAN-SPAM** (email), **TCPA** (calls/texts), **VPPA** (video viewing — a live class-action magnet for web pixels/trackers), **BIPA** (Illinois biometric, private right of action, heavy litigation), **state genetic/health data laws** (e.g. Washington **My Health My Data**, consumer health data, broad).
 

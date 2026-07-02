@@ -16,7 +16,9 @@ program/culture side see `load_skill security-awareness`.
 
 - **Phishing** — mass email lure → credentials/malware/payment.
 - **Spear-phishing / whaling** — targeted, recon-driven, often impersonating an exec.
-- **Vishing** — phone/voice, now with cloned-voice deepfakes; ~30% of orgs report incidents.
+- **Vishing** — phone/voice, now with cloned-voice deepfakes; ~40% of orgs report a
+  deepfake-plus-social-engineering audio call (Gartner 2026); ~62% a deepfake incident of any kind.
+  verify: https://keepnetlabs.com/blog/deepfake-statistics-and-trends
 - **Smishing** — SMS/iMessage/WhatsApp lures, often "package"/"toll"/"boss needs you."
 - **Pretexting** — fabricated scenario to extract info or access (IT support, auditor, new vendor).
 - **BEC** — compromised or look-alike business email → fraudulent wire/payroll/invoice change.
@@ -65,7 +67,8 @@ not judgment:
 
 - **DMARC at p=reject** (with aligned SPF + DKIM) — stops domain spoofing and
   look-alike-from-your-domain. CISA BOD 18-01 mandates p=reject for US federal
-  domains; PCI DSS v4.0 requires DMARC for card-data orgs (since Mar 2025).
+  domains; PCI DSS v4.0.1 req. 5.4.1 makes anti-phishing controls (DMARC/SPF/DKIM
+  named) mandatory for card-data orgs since Mar 31, 2025.
   Limit: DMARC does **not** stop a _real compromised account_ or display-name
   spoofing from a different domain — layer the rest.
   verify: https://dmarcreport.com/blog/business-email-compromise-bec-scams-take-new-dimension-with-multi-stage-attacks/

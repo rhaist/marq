@@ -32,6 +32,10 @@ Canonical text (web-fetch for current wording): eur-lex Regulation (EU) 2016/679
   rights (Art. 34). Strong encryption of the lost data can remove this duty.
 - **Processor → controller: "without undue delay"** — push this into your DPAs
   (see `load_skill legal-contractual`).
+- **Pending change:** the EU **Digital Omnibus** proposal (Nov 2025) would raise
+  the Art. 33 trigger to _high risk_ and extend the clock to **96 hours** via a
+  single EU reporting entry point — **proposal only, not law as of mid-2026**;
+  the 72-hour regime above still applies. Web-verify before relying.
 
 ## Data-subject rights & DPIAs
 
@@ -50,9 +54,10 @@ Canonical text (web-fetch for current wording): eur-lex Regulation (EU) 2016/679
   decision**, **SCCs** (+ a transfer impact assessment post-_Schrems II_), or **BCRs**.
 - **EU–US: Data Privacy Framework** — adequacy for US firms self-certified to the
   DPF (in force July 2023). The General Court **upheld it (Sept 2025, dismissing
-  the _Latombe_ challenge)**, but an appeal is **pending at the CJEU (C-703/25 P)**
-  — a third _Schrems_-style invalidation isn't off the table, so keep **SCCs as a
-  fallback**. Web-verify status before relying.
+  the _Latombe_ challenge)**, but an appeal is **pending at the CJEU (C-703/25 P,
+  filed Oct 2025; no ruling as of mid-2026)** — a third _Schrems_-style
+  invalidation isn't off the table, so keep **SCCs as a fallback**. Web-verify
+  status before relying.
 - **APAC pitfall**: GDPR compliance does **not** satisfy APAC transfer/localization
   law. **China PIPL** mandates local storage of important data plus a cross-border
   route (security assessment / SCC filing / certification); **India DPDP Act**
