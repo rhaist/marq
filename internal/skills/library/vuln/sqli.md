@@ -33,4 +33,4 @@ description: Find and confirm SQL injection, then report with proof.
   URL+param, `evidence` = the sqlmap line proving injection (DBMS, technique) or
   the differential responses, and a recommendation: parameterized queries /
   prepared statements, least-privilege DB user.
-- CWE-89. Provide a CVSS vector if you can.
+- CWE-89; OWASP A05:2025 Injection (dropped from A03:2021). Provide a CVSS vector if you can.

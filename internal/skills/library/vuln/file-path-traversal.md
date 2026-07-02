@@ -29,4 +29,5 @@ description: Path traversal, local file include, and unsafe upload.
   upload/LFI), `target` = endpoint+param, `evidence` = the retrieved file
   contents or the executed payload. Recommend canonicalize + allowlist paths,
   store uploads outside webroot, validate content not just extension.
-- CWE-22 / CWE-98 / CWE-434.
+- CWE-22 / CWE-98 / CWE-434; path traversal/LFI now map under OWASP A01:2025
+  Broken Access Control (a sub-pattern in the 2025 Top 10).

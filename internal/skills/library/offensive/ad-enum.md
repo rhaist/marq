@@ -8,6 +8,12 @@ description: Active Directory & internal-network enumeration and attack path —
 Authorized internal engagements only — confirm the scope `server_info` reports
 (domain, subnets, hosts) before scanning. Work in order; each phase feeds the next.
 
+`secretsdump`/BloodHound loot is real credential material and often personal data
+— keep it inside the client's authorized boundary. A common cross-border pitfall
+(EU/US tester on an APAC estate): pulling domain hashes back to a home-region host
+can breach local data-residency/computer-misuse law even with owner authorization.
+Store and process loot in-region unless the ROE says otherwise.
+
 ## 1. Discover hosts & services
 
 - `nmap` / `naabu` for live hosts and open ports; `nbtscan` to sweep NetBIOS
@@ -20,7 +26,8 @@ Authorized internal engagements only — confirm the scope `server_info` reports
 - `netexec` (protocol `smb`) to spray null/guest and map signing — flags hosts
   where SMB signing is off (relay targets).
 - `ldap_search` for anonymous binds; `certipy_find` to enumerate AD CS templates
-  (look for ESC1-8 misconfigurations).
+  (look for ESC1-ESC16 misconfigurations — Certipy v5 covers the full ESC1-16 set,
+  incl. ESC16's global szOID_NTDS_CA_SECURITY_EXT bypass).
 
 ## 3. Get a first credential
 

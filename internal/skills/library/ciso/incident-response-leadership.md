@@ -8,7 +8,10 @@ description: Run a security incident as the decision-maker — phases, the notif
 You are the incident commander, not the analyst. Your job is decisions, tempo,
 and who-gets-told — not running the forensic tools yourself. Follow the NIST
 SP 800-61 lifecycle: Prepare → Detect & Analyze → Contain, Eradicate & Recover
-→ Post-incident. Map adversary actions to MITRE ATT&CK so handoffs are unambiguous.
+→ Post-incident. (**SP 800-61r3**, 2025, recasts IR around the CSF 2.0 functions —
+Govern/Identify/Protect/Detect/Respond/Recover — and retires the rigid lifecycle; the
+four phases below remain a fine operating mental model.) Map adversary actions to
+MITRE ATT&CK so handoffs are unambiguous.
 
 ## First 60 minutes (commander checklist)
 
@@ -45,8 +48,14 @@ SP 800-61 lifecycle: Prepare → Detect & Analyze → Contain, Eradicate & Recov
 
 - Personal data breach likely → GDPR Art. 33: **72 hours** to the supervisory
   authority from _awareness_, not from resolution. The clock has started already.
+- EU beyond GDPR: **NIS2** essential/important entities — **24h early warning → 72h
+  notification → 1-month final report**; **DORA** financial entities — major ICT
+  incident **4h from classification / 24h from awareness → 72h → 1 month**. `load_skill nis2-dora`.
 - US: state breach laws + sector rules; **SEC** public companies — material cyber
-  incident → 8-K within **4 business days** of materiality determination.
+  incident → **8-K Item 1.05 within 4 business days** of the materiality determination.
+- APAC pitfall (EU/US teams assume GDPR-style 72h windows): clocks are far tighter and
+  vary by country — **India CERT-In: 6 hours** from awareness; **Australia SOCI: 12h**
+  (significant impact) / 72h (relevant). Pre-stage the report; you can't draft it inside a 6h clock.
 - HIPAA, PCI-DSS, contractual notify clauses — Legal owns the matrix; your job is
   to surface "we may have a notifiable event" _early_, not when you're certain.
 - Decision: if _plausible_ that regulated data was accessed → tell Legal now and

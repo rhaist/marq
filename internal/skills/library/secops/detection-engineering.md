@@ -46,14 +46,16 @@ command lines, LOLBin abuse > a single hash/IP (pyramid of pain — behaviour
 detections survive, atomic IOCs churn). Import SigmaHQ's ~3000 rules as candidates,
 but tune each to your environment before trusting it.
 
-## ATT&CK coverage mapping (v18)
+## ATT&CK coverage mapping (v19)
 
 - Tag every detection with its technique id; aggregate into a heatmap (ATT&CK
   Navigator) to see covered vs blind techniques.
-- ATT&CK v18 (Oct 2025) replaced Detections/Data Sources with **Detection
-  Strategies + Analytics** — each Analytic names the platform-specific log source/
-  data component to operationalize. Use them as the authoring blueprint.
-  verify: https://attack.mitre.org/resources/updates/updates-october-2025/
+- ATT&CK v19 (Apr 2026) is current; the **Detection Strategies + Analytics** model
+  that replaced Detections/Data Sources in v18 (Oct 2025) still holds — each
+  Analytic names the platform-specific log source/data component to operationalize.
+  Use them as the authoring blueprint. v19 also split Defense Evasion into Stealth
+  (TA0005) + Defense Impairment (TA0112) — re-tag affected rules.
+  verify: https://attack.mitre.org/resources/updates/updates-april-2026/
 - Chase coverage _gaps that match your threat model_ (sector, actors, exposed
   tech), not raw technique count. 100% of the matrix is neither achievable nor the
   goal; high-fidelity coverage of likely TTPs is.

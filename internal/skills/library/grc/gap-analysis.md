@@ -11,7 +11,8 @@ Don't lecture on the framework — fetch its current control text and score agai
 ## 1. Fix the target
 
 - Confirm framework + version: ISO 27001:2022 Annex A, NIST CSF 2.0, SOC 2 TSC,
-  CIS Controls v8, PCI DSS 4.0, etc. Versions move — `load_skill` the standards
+  CIS Controls v8, PCI DSS v4.0.1 (its future-dated requirements are mandatory since
+  31 Mar 2025 — score against those, not v3.2.1), etc. Versions move — `load_skill` the standards
   domain and web-fetch the live control list; never score against memory.
 - Confirm scope boundary (which systems/org units) before scoring, or gaps are noise.
 

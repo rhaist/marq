@@ -35,9 +35,10 @@ compliance). Normalize to a schema (OCSF/ASIM/ECS) so detections are portable.
 - Buy/import a baseline (vendor analytics, SigmaHQ ~3000 rules) but treat each as a
   candidate — every imported rule is a noise liability until tuned for _your_ env.
 - Prefer behaviour over atomic IOC matches (pyramid of pain — TTP detections
-  survive; hash/IP rules churn). ATT&CK v18 ships Detection Strategies + Analytics
-  (Data Sources retired Oct 2025) — use them to anchor coverage.
-  verify: https://attack.mitre.org/resources/updates/updates-october-2025/
+  survive; hash/IP rules churn). ATT&CK's Detection Strategies + Analytics model
+  (introduced v18, Oct 2025, replacing the old Detections/Data Sources; current
+  release v19, Apr 2026) — use it to anchor coverage.
+  verify: https://attack.mitre.org/resources/updates/updates-april-2026/
 - Every detection needs: a documented hypothesis, ATT&CK id, expected FP sources,
   data-source dependency, and a triage runbook. No runbook = don't ship it.
 - Track coverage as an ATT&CK heatmap; chase _gaps that match your threat model_,
@@ -78,7 +79,9 @@ incident-response`. A recurring detection gap becomes a hunt
 - SIEM/SOAR/XDR are converging into single platforms. Leaders 2026: Microsoft
   Sentinel (+ Defender XDR, Security Copilot), Google SecOps (Chronicle + Gemini),
   Splunk (now Cisco), Palo Alto XSIAM, CrowdStrike Next-Gen SIEM, Elastic.
-- QRadar SaaS (now Palo Alto) end-of-life **2026-04-14** — migration driver.
+- QRadar SaaS (QROC/SOAR/Log Insights, sold to Palo Alto) hit end-of-life
+  **2026-04-14**; Palo Alto migrates customers to Cortex XSIAM — an active
+  displacement driver.
 - Standalone SOAR is being absorbed; AI/agentic triage is the 2026 pitch (auto-
   enrich + correlate, escalate to human only on genuine need). Treat AI triage as
   a tuned auto-close, not a replacement for detection rigor.

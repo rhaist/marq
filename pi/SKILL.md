@@ -51,7 +51,7 @@ marq run load_skill '{"name":"choosing-a-framework"}'   # one or more skills
 marq tools                                              # the executable catalog
 ```
 
-~70 skills in 14 domains — run `marq run load_skill '{}'` for the full index.
+~75 skills across 14 domains — run `marq run load_skill '{}'` for the full index.
 The domains: **offensive** (`vuln/*`, `technique/*`), **malware**,
 **threat-intel**, **secops** (SIEM/SOAR, hunting, IR, forensics, vuln-mgmt,
 detection-engineering), **architecture** (zero-trust, cloud, appsec,
@@ -137,6 +137,12 @@ marq run render_report '{}'      # writes /work/findings.md + findings.csv
 - One `marq run` call per step. Wait for the result before the next call.
 - Emit the JSON object exactly — double quotes, no trailing commas, no comments.
 - If a call errors, read the message and fix the args; don't repeat the same call.
+  After **two** failed attempts at the same step, stop looping — report what you
+  tried and the exact error, and ask the operator or move on. Retrying blindly
+  wastes the engagement.
+- **A skill you load is meant to be used.** After `load_skill`, read what it
+  returns and follow its steps and tool suggestions — don't load it and then
+  fall back on your own memory.
 - **Prefer the dedicated tool over `run_shell`.** Check `marq tools` first — if a
   wrapper exists (e.g. `dalfox`, `john`, `nuclei`), use it; it's scoped and
   structured. `run_shell` is only for actions with no dedicated tool.

@@ -54,10 +54,14 @@ of truth, shared with IR — don't fork the narrative.
 - **External** (customers, partners, market): Legal + PR approve every word. Never promise
   "no data taken" before you know — an over-promise that reverses is the lasting wound, not
   the breach. Hold a single spokesperson.
-- **Regulators**: run the clock early — GDPR Art. 33 **72h** from awareness; SEC material
-  cyber **8-K within 4 business days**; sector rules (HIPAA, PCI, DORA in EU financial).
-  If a notifiable event is _plausible_, tell Legal now; under-notifying is the costly error.
-  (Decision rules detailed in `load_skill incident-response-leadership`.)
+- **Regulators**: run the clock early — GDPR Art. 33 **72h** from awareness; **NIS2 Art. 23**
+  (EU essential/important entities) **24h early-warning → 72h notification → 1-month final
+  report**; SEC material cyber **8-K within 4 business days**; sector rules (HIPAA, PCI, DORA
+  in EU financial). **APAC clocks differ and rarely match GDPR's 72h** — e.g. Singapore PDPA
+  ~3 days to the PDPC, Australia OAIC ~30 days, Japan APPI prompt-then-~30-day, often needing a
+  **local-language filing** to the local regulator; a EU/US playbook that assumes GDPR covers
+  everyone under-notifies. If a notifiable event is _plausible_, tell Legal now; under-notifying
+  is the costly error. (Decision rules detailed in `load_skill incident-response-leadership`.)
 
 ## Tabletop exercise design
 

@@ -44,7 +44,7 @@ Steps: 1) **Describe** the processing + data flows systematically. 2) **Necessit
 
 ## NIST Privacy Framework
 
-Voluntary, risk-based, **CSF-compatible** companion for privacy risk. v1.0 (2020) → **v1.1** updated 2025: realigned to **CSF 2.0**, adds a **Govern** function and an **AI + privacy** section; use guidelines moved to an online FAQ. (Final expected ~late 2025 — confirm status.) verify: https://www.nist.gov/privacy-framework/new-projects/privacy-framework-version-11
+Voluntary, risk-based, **CSF-compatible** companion for privacy risk. v1.0 (2020) → **v1.1**: realigns to **CSF 2.0**, adds a **Govern** function and an **AI + privacy** section; use guidelines moved to an online FAQ. (Still an **Initial Public Draft** — IPD released Apr 2025, comments closed Jun 2025; not finalized as of mid-2026, so cite it as draft and confirm status.) verify: https://www.nist.gov/privacy-framework/new-projects/privacy-framework-version-11
 
 - Functions: **Identify-P, Govern-P, Control-P, Communicate-P, Protect-P** — pair it with CSF so one program covers privacy _and_ security risk (overlap: data inventory, access control, incident response).
 - Use it to structure the program; use the **DPIA** to assess a specific processing activity; use **PETs** as the mitigations.

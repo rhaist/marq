@@ -5,6 +5,11 @@ description: Port/service enumeration and TLS review on hosts in scope.
 
 # Network & service enumeration
 
+Scan only hosts inside the authorized scope. Cross-border pitfall: active scanning
+of a host physically located in another jurisdiction can breach that country's
+computer-misuse law (e.g. APAC regimes) even when the asset owner authorized it —
+confirm target geography, not just ownership, before packets leave.
+
 ## Discover hosts and ports
 
 - `naabu` — fast modern port scan (`-host`), explicit `ports` or `top_ports`.

@@ -33,4 +33,6 @@ description: Find server-side request forgery and prove out-of-band reach.
   `target` = endpoint+param, `evidence` = the OOB callback log or the internal
   response body returned. Recommend allowlist of destinations, block link-local
   and private ranges, disable unused URL schemes, IMDSv2.
-- CWE-918.
+- CWE-918; OWASP A01:2025 Broken Access Control — SSRF was folded into A01 in the
+  2025 Top 10 (it's an access-control failure: the server reaches a resource the
+  user shouldn't), no longer the standalone A10:2021 category.

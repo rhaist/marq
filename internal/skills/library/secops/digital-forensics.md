@@ -26,7 +26,7 @@ incident-response`); a found binary goes to `load_skill malware-triage` /
 ## Host / disk forensics
 
 - Image: `dd`/`dcfldd`/`ewfacquire` (E01 w/ embedded hash) or FTK Imager.
-- Analyze with **The Sleuth Kit + Autopsy** (TSK 4.14.0, Autopsy 4.22.x+, Apr 2025
+- Analyze with **The Sleuth Kit + Autopsy** (TSK 4.15.0, Autopsy 4.23.x, 2026
   — verify https://www.sleuthkit.org/). Filesystem timeline, deleted-file
   recovery, carving.
 - Build a **super-timeline** with Plaso/log2timeline (`psort`) — correlates FS,
@@ -42,8 +42,8 @@ incident-response`); a found binary goes to `load_skill malware-triage` /
 
 - Acquire RAM _before_ disk: WinPMEM/DumpIt (Win), AVML/LiME (Linux), `osxpmem`
   (macOS). A page file + hibernation file complement it.
-- Analyze with **Volatility 3** (v2.27, Jan 2026; it replaced Vol2 as the
-  supported version in Apr 2025 — verify
+- Analyze with **Volatility 3** (v2.28, Apr 2026; the v2.26 parity release
+  deprecated + archived Vol2 in May 2025 — verify
   https://github.com/volatilityfoundation/volatility3). Symbol tables auto-resolve
   most modern OSes. High-value plugins: `pslist`/`pstree`/`psscan` (hidden procs),
   `malfind` (injected code), `cmdline`, `netscan`, `dlllist`/`ldrmodules`,

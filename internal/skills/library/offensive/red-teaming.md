@@ -79,7 +79,10 @@ pentest; reach for `methodology` and the `vuln/*` skills instead.
 - **Stop conditions**: pre-agreed triggers (instability, safety risk, evidence
   of a genuine breach) that pause the op. Escalation contacts 24/7.
 - **No collateral**: no DoS, no destroying data, no touching the no-go list,
-  no exfil of real regulated data beyond an agreed canary token.
+  no exfil of real regulated data beyond an agreed canary token. Cross-border
+  pitfall: even authorized "exfil" of loot/evidence to a home-region team server
+  can breach data-residency law on an APAC engagement — keep captured data in the
+  client's jurisdiction unless the ROE says otherwise.
 - If you trip something fragile, **stop and report up** — don't improvise on
   production.
 
@@ -97,10 +100,12 @@ pentest; reach for `methodology` and the `vuln/*` skills instead.
   STAR-FS is the lighter complementary scheme. 2025 thematic findings published
   Jan 2025. verify:
   https://www.bankofengland.co.uk/financial-stability/operational-resilience-of-the-financial-sector/cbest-threat-intelligence-led-assessments-implementation-guide
-- **FedRAMP Rev 5** — control **CA-8(2)** now mandates an **annual red team
+- **FedRAMP Rev 5** — control **CA-8(2)** mandates an **annual red team
   exercise** for CSPs (test plan + report, 3PAO-validated), distinct from the
   standard pentest: it tests people/process/tech detection+response, not just
-  "can it be breached." verify:
+  "can it be breached." Still current mid-2026, but the **FedRAMP 20x** transition
+  is underway (consolidated rules ~June 2026, applications from July 2026) — check
+  which regime the CSP is under before citing. verify:
   https://help.fedramp.gov/hc/en-us/articles/28907820003227-CA-8-2-requires-Red-Team-exercises
 - Common thread: independent threat intel drives the scenario, a control group
   oversees, and the deliverable is resilience evidence — not a bug list.

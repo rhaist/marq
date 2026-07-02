@@ -36,6 +36,10 @@ system on nightly backups. Tier per-activity, not one tier for the whole estate.
 - **Beware shared blast radius**: same cloud account, same IAM, same backup vault as
   prod ⇒ a ransomware/account compromise takes DR with it. Isolate the DR copy
   (separate account/tenant, immutable vault — `load_skill backup-recovery`).
+- **DR-region data residency (APAC pitfall)**: the DR region must satisfy the _same_
+  data-sovereignty law as prod. A EU/US team that fails over to the nearest/cheapest region
+  can breach localization rules (China PIPL, India DPDPA, Indonesia, Vietnam) — pick the DR
+  site by residency law, not just latency and cost.
 
 ## Failover & failback
 

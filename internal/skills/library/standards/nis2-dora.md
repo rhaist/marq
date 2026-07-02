@@ -72,8 +72,11 @@ EIOPA. These cite RTS that get revised — verify exact figures before relying.
 
 ## Key dates
 
-- **NIS2:** member-state **transposition deadline 17 Oct 2024** (several states
-  were late — check the specific national law that actually binds you).
+- **NIS2:** member-state **transposition deadline was 17 Oct 2024**, widely
+  missed — as of mid-2026 a handful of states (incl. France, Ireland,
+  Netherlands, Spain) still haven't fully transposed and the Commission has
+  infringement proceedings open. Check the specific national law that actually
+  binds you (entry-into-force dates, competent authorities and penalties differ).
 - **DORA:** **applies from 17 Jan 2025.**
 
 ## Penalties (orders of magnitude — NIS2 set in national law, verify)

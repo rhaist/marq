@@ -114,3 +114,20 @@ Encryption at rest is theater if the key sits next to the data. Enforce:
   data unrecoverable when physical deletion is impractical.
 - Lifecycle stages to control: create/classify -> store -> use -> share -> archive ->
   destroy. Each tier gets stricter rules at every stage.
+
+## APAC data-localization pitfall (where EU/US instincts break)
+
+An EU/US team assumes SCCs/adequacy (EU) or one global datastore (US) travels
+everywhere. It doesn't — residency is a per-dataset design input in APAC:
+
+- **China** (PIPL/DSL/CSL) gates personal-data export behind a **CAC security
+  assessment**, an **SCC filing**, or **certification**, chosen by volume (security
+  assessment at ≥1M individuals or ≥10k sensitive; ≤100k non-sensitive exempt since
+  the 2024 relaxation). "Important data" may not leave at all without assessment.
+- **India** (DPDP Rules 2025) is permissive by default — a **blocklist** model, transfer
+  allowed unless the government restricts a country — **but** sector rules override:
+  RBI forces payment data to stay in-country, SEBI/IRDAI add their own localization.
+- **Indonesia** and others layer sector localization on top of the general privacy law.
+- The lesson: the general privacy regime and the sector localization mandate are
+  **separate obligations** — meet both, map residency per dataset, and don't assume a
+  transfer mechanism that works for the EU covers China or a regulated Indian workload.

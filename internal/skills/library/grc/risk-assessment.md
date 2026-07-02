@@ -69,6 +69,10 @@ Write `/work/risk-register.md` with `write_file`, one row per risk:
 
 ## Notes
 
+- Qualitative 5x5 is right for triaging a register; for a **top risk driving a real spend
+  decision**, complement it with a quantitative pass — FAIR-style, loss = frequency x
+  magnitude in dollars — so treatment cost can be weighed against expected loss.
+  `load_skill board-metrics-reporting`.
 - Inherent (no controls) vs residual (with controls) — state which you scored; be consistent.
 - Framework-specific risk methods (ISO 27005, NIST 800-30): `load_skill` the standards
   domain and web-fetch the current clause rather than guessing the steps.

@@ -7,8 +7,9 @@ description: Run a compliance audit/assessment as a process — evidence collect
 
 Framework-agnostic mechanics of running or surviving an audit. For the frameworks
 themselves load the standard: `load_skill iso27001`, `load_skill pci-dss`, `load_skill nist-csf`.
-Audit-method standards: ISO 19011 (any management-system audit; current 2018, a revision
-is in DIS — verify the live edition), ISO/IEC 27007 (ISMS-specific audit guidance layered
+Audit-method standards: ISO 19011:2026 (any management-system audit; the 2026 edition
+superseded 2018 — a technical revision folding in remote/hybrid audits, digital-evidence
+reliability, and supply-chain scope), ISO/IEC 27007 (ISMS-specific audit guidance layered
 on 19011), ISO/IEC 27006-1 (accreditation rules for certification bodies). SOC 2 = AICPA
 attestation, not certification.
 
