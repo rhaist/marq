@@ -77,5 +77,5 @@ record results with `report_finding`, then `render_report` at the end.
   (sandboxed to /work and /tmp).
 - Prefer narrow scans; large output is truncated. Write big results to a file and
   read it back in parts.
-- Every invocation is audit-logged. Nothing is blocked — you are accountable for
-  staying in scope.
+- Every invocation is audit-logged (a call that can't be logged is refused). Scope
+  is recorded, not enforced — you are accountable for staying in scope.

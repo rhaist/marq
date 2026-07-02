@@ -292,7 +292,7 @@ an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.
 | `MARQ_TIMEOUT`         | `900`                       | Default per-command timeout (seconds)                                          |
 | `MARQ_MAX_TIMEOUT`     | `3600`                      | Ceiling for a tool's per-call timeout override                                 |
 | `MARQ_MAX_OUTPUT`      | `60000`                     | Max output chars returned to the model                                         |
-| `MARQ_ALLOW_RAW_SHELL` | `true`                      | Expose the arbitrary-shell tool (set `false` to disable)                       |
+| `MARQ_ALLOW_RAW_SHELL` | `false`                     | Expose the arbitrary-shell `run_shell` tool (opt-in; set `true` to enable)      |
 | `MARQ_WORK_DIR`        | `/work`                     | Working area (findings, job dirs)                                              |
 
 Engagement and scope are per-task, so the model sets them at session start with

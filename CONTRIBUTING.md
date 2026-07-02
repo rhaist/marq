@@ -6,8 +6,9 @@ binary over MCP (`marq serve`) and direct invocation (`marq run`). This guide
 covers how to build it, the quality gates, and how to add a tool or a skill.
 
 > **Authorized use is the contract.** marq's safety model is _attribution, not
-> prevention_: every tool call funnels through one audited choke point. Any
-> contribution must preserve that — see [Design invariants](#design-invariants)
+> prevention_: every external-tool call funnels through one audited choke point
+> (`runner.Run`) that fails closed if it can't log. Any contribution must preserve
+> that — see [Design invariants](#design-invariants)
 > below and [`docs/SECURITY.md`](docs/SECURITY.md). Contributions that add
 > evasion, anti-forensics, or that bypass the audit log will not be merged.
 
