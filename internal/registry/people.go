@@ -45,7 +45,8 @@ func people() []Tool {
 			Name: "holehe_email",
 			Desc: "Discover which sites have an account registered to an EMAIL address (holehe), via " +
 				"silent password-reset/registration probes — it does not alert the account owner. Only " +
-				"prints sites where the email is in use.",
+				"prints sites where the email is in use. (Note: holehe is unmaintained upstream as of " +
+				"2026 — some site modules may be stale/false-negative.)",
 			Params: []Param{
 				{Name: "email", Type: StringParam, Desc: "email address", Required: true},
 			},
@@ -58,7 +59,8 @@ func people() []Tool {
 			Name: "h8mail_breach",
 			Desc: "Check an EMAIL against breach/leak databases (h8mail). Largely keyless-limited — " +
 				"configure HIBP/Hunter/Snusbase/Dehashed/IntelX keys via a config file passed in `options` " +
-				"(e.g. '-c config.ini'), or point at a local breach compilation with '-bc /path --loose'.",
+				"(e.g. '-c config.ini'), or point at a local breach compilation with '-bc /path --loose'. " +
+				"(Note: h8mail is unmaintained upstream as of 2026 — some API integrations may have drifted.)",
 			Params: []Param{
 				{Name: "email", Type: StringParam, Desc: "email address", Required: true},
 				{Name: "options", Type: StringParam, Desc: "extra raw flags", Default: ""},
@@ -73,7 +75,8 @@ func people() []Tool {
 			Name: "phoneinfoga",
 			Desc: "OSINT on a PHONE NUMBER (phoneinfoga): carrier, line type, country and footprint " +
 				"search links. Pass an E.164 number, e.g. '+15554441212'. Optional NUMVERIFY_API_KEY / " +
-				"GOOGLE_API_KEY+GOOGLECSE_CX enrich results.",
+				"GOOGLE_API_KEY+GOOGLECSE_CX enrich results. (Note: phoneinfoga upstream self-declares " +
+				"unmaintained as of 2026 — still functional.)",
 			Params: []Param{
 				{Name: "number", Type: StringParam, Desc: "E.164 phone number", Required: true},
 			},

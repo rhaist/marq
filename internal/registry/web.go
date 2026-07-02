@@ -271,23 +271,6 @@ func web() []Tool {
 			},
 		},
 		{
-			Name:   "subjack",
-			Active: true,
-			Desc: "Check subdomains for takeover vulnerability with subjack. `target` is a " +
-				"comma/newline-separated list of subdomain URLs. Use write_file to stage a list, " +
-				"then pass it via options (-w /work/subs.txt).",
-			Params: []Param{
-				{Name: "target", Type: StringParam, Desc: "subdomain list or use -w via options", Required: true},
-				{Name: "options", Type: StringParam, Desc: "raw subjack flags (-w wordlist -t timeout)", Default: ""},
-			},
-			Build: func(a Args) Invocation {
-				argv := []string{"subjack"}
-				argv = append(argv, shellword.Split(a.S("options"))...)
-				argv = append(argv, a.S("target"))
-				return Invocation{Argv: argv, Target: a.S("target")}
-			},
-		},
-		{
 			Name: "paramspider",
 			Desc: "Discover hidden injectable parameters for a domain with paramspider. " +
 				"Crawls and extracts URLs with parameters, excluding common noise. `domain` " +

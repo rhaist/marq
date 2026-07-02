@@ -19,8 +19,8 @@ cross-border misstep.
   single opening move.
 - `subfinder` — passive subdomain enumeration. Feed results onward.
 - `whois_lookup` + `dns_lookup` — registration, name servers, records.
-- `wayback_urls` / `gau_urls` — historical URLs, forgotten endpoints and params
-  without touching the live target.
+- `gau_urls` — historical URLs (Wayback/CommonCrawl/OTX/URLScan), forgotten
+  endpoints and params without touching the live target.
 - `spiderfoot` — broad automated sweep (background job; poll with `job_status`).
 - People: `sherlock` / `maigret_username` (a username across sites),
   `holehe_email` (email → accounts), `phoneinfoga` (phone numbers).
@@ -31,8 +31,8 @@ cross-border misstep.
 - Collect subdomains into a file with `write_file`, then `dnsx` to resolve and
   `httpx_probe` to find live HTTP services (status, title, tech).
 - `cdncheck` to flag hosts behind a CDN/WAF (you may be hitting the edge, not the
-  origin); `subjack` on resolved subdomains to catch subdomain takeover (dangling
-  CNAMEs).
+  origin). For subdomain takeover on resolved subdomains (dangling CNAMEs), run
+  `nuclei` with the takeover templates (`--tags takeover`).
 
 ## 3. Enumerate hosts (active)
 
