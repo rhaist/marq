@@ -138,6 +138,11 @@ task set is large (50+) and a rubric'd judge (with human-agreement spot-checks)
 replaces the weakest proxies — notably `answer_contains` keyword matching, which
 stands in for semantic correctness only until the judge lands.
 
+The single committed baseline (`gemma4-12b-uncensored`, 2026-06) was measured
+before marq standardized on **llama.cpp** — treat it as provisional and
+re-baseline under `llama-server` (see [`llama.cpp/`](llama.cpp/README.md)) before
+citing; runtimes are not cross-comparable.
+
 ## Tasks (`tasks.jsonl`)
 
 Eighteen seeds spanning the layers (offensive, web, creds, malware, threat-intel,
