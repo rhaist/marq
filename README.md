@@ -44,7 +44,8 @@ llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
   --port 8080 --jinja -fa on -ngl 99 --ctx-size 65536
 # 2. marq in a long-lived container bound to your workspace
 install -m 0755 pi/marq ~/.local/bin/marq && marq up ~/work
-# 3. point Pi at llama.cpp + load the marq skill, then run `pi`
+# 3. point Pi at llama.cpp + load the marq skill (one-time) → docs/SETUP.md §4
+#    then run `pi`
 ```
 
 Then just talk to it: _"Set scope to scanme.nmap.org and run a quick nmap,"_ or
@@ -91,11 +92,11 @@ Any MCP client works (Codex, Claude Desktop) → [`docs/CLIENTS.md`](docs/CLIENT
 <summary><b>Full tool suite</b> — ~80 tools on a Kali base (click to expand)</summary>
 
 | Category                              | Tools                                                                                                                                                                                                                                                                            |
-| :------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| :------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Recon / network**                   | `nmap` · `masscan` · `naabu` · `dnsx` · `dnsrecon` · `subfinder` · `httpx_probe` · `dns_lookup` · `whois_lookup` · `ssh_audit` · `fping_sweep` · `snmp_walk` · `snmp_check` · `snmp_brute` · `smtp_user_enum` · `smtp_test` · `asnmap` · `cdncheck` · `censys_search`            |
-| **OSINT — org/domain**                | `theharvester` · `spiderfoot` · `shodan_host` · `shodan_search` · `gitleaks` · `trufflehog` · `gau_urls` · `exif_metadata`                                                                                                                                      |
+| **OSINT — org/domain**                | `theharvester` · `spiderfoot` · `shodan_host` · `shodan_search` · `gitleaks` · `trufflehog` · `gau_urls` · `exif_metadata`                                                                                                                                                       |
 | **OSINT — people**                    | `sherlock` · `maigret_username` · `holehe_email` · `h8mail_breach` · `phoneinfoga`                                                                                                                                                                                               |
-| **Web app**                           | `nuclei` · `nikto` · `feroxbuster` · `katana` · `ffuf` · `gobuster_dir` · `arjun` · `whatweb` · `wafw00f` · `cmseek` · `wpscan` · `testssl` · `dalfox` · `sqlmap` · `jwt_tool` · `trivy` · `interactsh` · `paramspider` · `sstimap`                                  |
+| **Web app**                           | `nuclei` · `nikto` · `feroxbuster` · `katana` · `ffuf` · `gobuster_dir` · `arjun` · `whatweb` · `wafw00f` · `cmseek` · `wpscan` · `testssl` · `dalfox` · `sqlmap` · `jwt_tool` · `trivy` · `interactsh` · `paramspider` · `sstimap`                                              |
 | **Exploitation**                      | `donut` · `hydra` · `searchsploit`                                                                                                                                                                                                                                               |
 | **AD / internal network**             | `impacket_secretsdump` · `impacket_kerberoast` · `impacket_asreproast` · `impacket_psexec` · `impacket_wmiexec` · `impacket_ntlmrelayx` · `netexec` · `certipy_find` · `bloodhound_collect` · `evil_winrm` · `enum4linux` · `smb_enum` · `ldap_search` · `responder` · `nbtscan` |
 | **Credentials**                       | `john` · `hashcat` · `hash_identify`                                                                                                                                                                                                                                             |
@@ -141,12 +142,12 @@ point for audit logging, timeouts, and output truncation.
 
 ## Documentation
 
-| Doc                                    | What's in it                                                       |
-| :------------------------------------- | :---------------------------------------------------------------- |
-| [`docs/SETUP.md`](docs/SETUP.md)       | Per-OS install (macOS & Debian), both run modes                    |
-| [`docs/CLIENTS.md`](docs/CLIENTS.md)   | Pick a client/model — Claude Code, Codex, Pi + llama.cpp           |
-| [`docs/USAGE.md`](docs/USAGE.md)       | Every tool, env vars, API keys, reading the audit log              |
-| [`docs/SECURITY.md`](docs/SECURITY.md) | Legal/ethical baseline, the guardrail model, hardening             |
+| Doc                                    | What's in it                                             |
+| :------------------------------------- | :------------------------------------------------------- |
+| [`docs/SETUP.md`](docs/SETUP.md)       | Per-OS install (macOS & Debian), both run modes          |
+| [`docs/CLIENTS.md`](docs/CLIENTS.md)   | Pick a client/model — Claude Code, Codex, Pi + llama.cpp |
+| [`docs/USAGE.md`](docs/USAGE.md)       | Every tool, env vars, API keys, reading the audit log    |
+| [`docs/SECURITY.md`](docs/SECURITY.md) | Legal/ethical baseline, the guardrail model, hardening   |
 
 ## License
 

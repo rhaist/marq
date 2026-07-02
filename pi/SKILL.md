@@ -1,6 +1,6 @@
 ---
 name: marq
-description: marq is an all-round cyber assistant — pentest/OSINT, malware research, threat intel, GRC, standards & regulations, and CISO advisory. Load this for any security task: scanning, web/AD testing, sample analysis, IOC pivoting, risk/gap assessment, framework mapping, or leadership decisions.
+description: "marq is an all-round cyber assistant — pentest/OSINT, malware research, threat intel, GRC, standards & regulations, and CISO advisory. Load this for any security task: scanning, web/AD testing, sample analysis, IOC pivoting, risk/gap assessment, framework mapping, or leadership decisions."
 ---
 
 # marq — cyber assistant
@@ -11,7 +11,7 @@ marq covers offensive testing, malware research, threat intel, and governance
 --name <skill>` (domain playbooks). Run **one tool at a time**, read the
 output, decide the next step.
 
-> **Do the work *through* marq — never with raw bash.** Don't `curl`, `wget`,
+> **Do the work _through_ marq — never with raw bash.** Don't `curl`, `wget`,
 > `grep`, `dig`, `nmap`, `openssl` or any tool directly: that bypasses marq's
 > audit log, scope, and skills, and your findings won't count. Use `marq run`
 > for every action (e.g. fetch a page with `marq run httpx_probe` or
@@ -155,7 +155,7 @@ marq run render_report '{}'      # writes /work/findings.md + findings.csv
 - **Converge.** When you have what you need, stop calling tools and give a
   concise final answer — lead with the key facts/numbers, then the detail.
 - **Never report from memory.** Open ports, live hosts, subdomains, findings —
-  state only what a tool actually returned *this session*. If you haven't run the
+  state only what a tool actually returned _this session_. If you haven't run the
   tool, run it; do not answer a scan/lookup from prior knowledge (even for
   well-known hosts). No tool output ⇒ no finding.
 

@@ -132,9 +132,9 @@ Drop this at `~/.pi/agent/extensions/llama-cpp.ts` (auto-discovered):
 
 ```typescript
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-const BASE = "http://localhost:8080";               // llama-server default port
+const BASE = "http://127.0.0.1:8080"; // llama-server default port
 export default async function (pi: ExtensionAPI) {
-  let ctx = 65536;                                   // fallback; matches --ctx-size below
+  let ctx = 65536; // fallback; matches --ctx-size below
   try {
     const props = (await (await fetch(`${BASE}/props`)).json()) as any;
     ctx = props?.default_generation_settings?.n_ctx ?? ctx;
@@ -144,15 +144,17 @@ export default async function (pi: ExtensionAPI) {
     baseUrl: `${BASE}/v1`,
     apiKey: "llama",
     api: "openai-completions",
-    models: [{
-      id: "gemma-uncensored",                        // just a label (see note)
-      name: "gemma-uncensored",
-      reasoning: false,
-      input: ["text"],
-      cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-      contextWindow: ctx,
-      maxTokens: 4096,
-    }],
+    models: [
+      {
+        id: "gemma-uncensored", // just a label (see note)
+        name: "gemma-uncensored",
+        reasoning: false,
+        input: ["text"],
+        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: ctx,
+        maxTokens: 4096,
+      },
+    ],
   });
 }
 ```
@@ -218,7 +220,7 @@ llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
   (nuclei/katana dumps) are large; a short window truncates them.
 - **Sampling** — the flags above are the HauhauCS _"Balanced"_ preset. For the
   **stock** Google `-it` model use Google's official set instead (`--temp 1.0
-  --top-p 0.95 --top-k 64`). Either is fine — it's the smallest lever (see impact
+--top-p 0.95 --top-k 64`). Either is fine — it's the smallest lever (see impact
   order). `-ngl 99` offloads all layers to the GPU.
 - Flaky small model emitting malformed tool JSON? llama.cpp can **constrain
   decoding** to a grammar/JSON schema (`--grammar-file`, or `json_schema` in the
