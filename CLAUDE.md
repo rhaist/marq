@@ -86,7 +86,7 @@ The serve transport is **synchronous, one-shot, stateless, no interactivity** (`
 
 1. **Stage 1 (`golang` builder)** compiles the static `marq` binary (`CGO_ENABLED=0`).
 2. apt installs the bulk of the suite (explicit package list, not `kali-linux-everything`, for auditability).
-3. Go-built tools not in Kali apt (`katana`, `gau`, `waybackurls`, `dalfox`, `interactsh-client`, `asnmap`, `cdncheck`, `phoneinfoga`) — installed system-wide to `/usr/local/bin` (these still use the apt `golang-go`).
+3. Go-built tools not in Kali apt (`katana`, `gau`, `dalfox`, `interactsh-client`, `asnmap`, `cdncheck`, `phoneinfoga`) — installed system-wide to `/usr/local/bin` (these still use the apt `golang-go`).
 4. `setcap` grants `nmap`/`masscan`/`naabu` SYN-scan caps so they run non-root.
 5. venv at `/opt/venv` (on PATH) holds the pip-only OSINT tools (`maigret`, `holehe`) — **no MCP SDK** (the server is the Go binary). The `marq` binary is copied from stage 1.
 6. Drops to the unprivileged `marq` user, **then** runs the build-time warm-up.

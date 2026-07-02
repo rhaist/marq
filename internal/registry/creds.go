@@ -45,12 +45,16 @@ func creds() []Tool {
 		},
 		{
 			Name: "hash_identify",
-			Desc: "Identify the likely type of a hash string using hashid.",
+			Desc: "Identify the likely type of a hash string with name-that-hash (nth), ranked " +
+				"most-likely first with the matching hashcat/john modes. Feed the top mode into hashcat.",
 			Params: []Param{
 				{Name: "hash_value", Type: StringParam, Desc: "hash string", Required: true},
 			},
 			Build: func(a Args) Invocation {
-				return Invocation{Argv: []string{"hashid", a.S("hash_value")}, Target: "(hash)"}
+				// name-that-hash: -t takes the hash string directly; it prints ranked
+				// candidates (most-likely first) by default. --no-banner keeps the
+				// output clean for the model.
+				return Invocation{Argv: []string{"nth", "--no-banner", "-t", a.S("hash_value")}, Target: "(hash)"}
 			},
 		},
 	}

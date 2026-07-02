@@ -36,7 +36,9 @@ func osint() []Tool {
 			Desc: "Broad automated OSINT footprint of a target (spiderfoot, 200+ modules) — domains, " +
 				"IPs, netblocks, ASN, emails, names, breach data. `target` may be a domain, IP, email, " +
 				"name or username. `use_case` is one of all/footprint/investigate/passive (`passive` is " +
-				"safe + fastest). Runs in the BACKGROUND and returns a job dir to poll.",
+				"safe + fastest). Runs in the BACKGROUND and returns a job dir to poll. " +
+				"(Note: the open-source spiderfoot is unmaintained upstream as of 2026 — still functional; " +
+				"cross-check anything critical.)",
 			Params: []Param{
 				{Name: "target", Type: StringParam, Desc: "domain/IP/email/name/username", Required: true},
 				{Name: "use_case", Type: StringParam, Desc: "all/footprint/investigate/passive", Default: "passive"},
@@ -117,33 +119,11 @@ func osint() []Tool {
 			},
 		},
 		{
-			Name: "wayback_urls",
-			Desc: "Pull historical URLs for a DOMAIN from the Wayback Machine (waybackurls). Reveals old " +
-				"endpoints, parameters and forgotten assets without touching the live target. " +
-				"`include_subs` also fetches subdomains. Runs in the background (archive volume varies " +
-				"wildly by domain); poll with list_jobs / job_status and read the job's stdout.log.",
-			Params: []Param{
-				{Name: "domain", Type: StringParam, Desc: "domain", Required: true},
-				{Name: "include_subs", Type: BoolParam, Desc: "include subdomains", Default: true},
-			},
-			Build: func(a Args) Invocation {
-				flag := "-no-subs"
-				if a.B("include_subs") {
-					flag = ""
-				}
-				// Background for the same reason as gau_urls: archive size sets the runtime,
-				// which the caller can't scope down, so a synchronous run blows the client
-				// call timeout. See CLAUDE.md.
-				cmd := "echo " + shellword.Quote(a.S("domain")) + " | waybackurls " + flag
-				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("domain"), Background: true}
-			},
-		},
-		{
 			Name: "gau_urls",
 			Desc: "Fetch known URLs for a DOMAIN from Wayback, Common Crawl, OTX and URLScan (gau) — " +
-				"broader historical coverage than waybackurls alone. Passive: queries archives, not the " +
-				"target. Runs in the background (archive volume varies wildly by domain); poll with " +
-				"list_jobs / job_status and read the job's stdout.log.",
+				"broad historical coverage of old endpoints, parameters and forgotten assets. Passive: " +
+				"queries archives, not the target. Runs in the background (archive volume varies wildly " +
+				"by domain); poll with list_jobs / job_status and read the job's stdout.log.",
 			Params: []Param{
 				{Name: "domain", Type: StringParam, Desc: "domain", Required: true},
 			},

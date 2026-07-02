@@ -53,7 +53,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         # web app  (dalfox is not in apt — installed via go below)
         nikto ffuf gobuster whatweb wpscan sqlmap \
         feroxbuster arjun wafw00f cmseek testssl.sh sslscan gospider \
-        subjack paramspider sstimap \
+        paramspider sstimap \
         trivy \
         # osint / information gathering — company & domain footprint
         # (python3-pkg-resources: shodan CLI imports pkg_resources at runtime)
@@ -70,8 +70,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         golang-github-binject-go-donut \
         # malware research — static analysis (capa/floss/oletools come via pip below)
         yara radare2 \
-        # credentials / hashes (mesa-opencl-icd gives hashcat a CPU OpenCL device)
-        john hashcat hashid mesa-opencl-icd ocl-icd-libopencl1 \
+        # credentials / hashes (mesa-opencl-icd gives hashcat a CPU OpenCL device;
+        # name-that-hash installed via pip below — replaces the unmaintained hashid)
+        john hashcat mesa-opencl-icd ocl-icd-libopencl1 \
         # wordlists
         wordlists \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -86,7 +87,6 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends golang-go \
     && go install github.com/projectdiscovery/katana/cmd/katana@latest \
     && go install github.com/lc/gau/v2/cmd/gau@latest \
-    && go install github.com/tomnomnom/waybackurls@latest \
     && go install github.com/hahwul/dalfox/v2@latest \
     && go install github.com/projectdiscovery/interactsh/cmd/interactsh-client@latest \
     && go install github.com/projectdiscovery/asnmap/cmd/asnmap@latest \
@@ -118,13 +118,15 @@ RUN setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip /usr/bin/nmap || t
 RUN gunzip -f /usr/share/wordlists/rockyou.txt.gz 2>/dev/null || true
 
 # --- Python OSINT + malware tools (no MCP SDK — the server is the Go binary) -
-# venv holds pip-only tools: OSINT (maigret, holehe) and maldoc analysis
-# (oletools → olevba). capa is installed as a standalone binary below instead of
-# pip — flare-capa hard-pins PyYAML==6.0.1, which has no Python-3.13 wheel and
-# won't build from sdist (Cython-3 bug). floss is dropped: no linux-arm64 build,
-# and it pulls flare-capa transitively (capa + `bin_headers -z` cover strings).
+# venv holds pip-only tools: OSINT (maigret, holehe), maldoc analysis
+# (oletools → olevba), and hash-ID (name-that-hash → nth, the maintained
+# replacement for the unmaintained hashid). capa is installed as a standalone
+# binary below instead of pip — flare-capa hard-pins PyYAML==6.0.1, which has no
+# Python-3.13 wheel and won't build from sdist (Cython-3 bug). floss is dropped:
+# no linux-arm64 build, and it pulls flare-capa transitively (capa + `bin_headers
+# -z` cover strings).
 RUN python3 -m venv --system-site-packages "$VIRTUAL_ENV" \
-    && pip install --no-cache-dir maigret holehe oletools
+    && pip install --no-cache-dir maigret holehe oletools name-that-hash
 
 # capa (FLARE) static-capability analysis — official standalone binary, picked by
 # arch (ships linux-arm64 + linux x86_64). The standalone bundles its rule set.

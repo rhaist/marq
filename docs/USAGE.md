@@ -153,8 +153,7 @@ engagement + scope are set at runtime via `set_engagement`).
 | `shodan_search` | shodan       | Search exposed assets (e.g. `org:`) †                               |
 | `gitleaks`      | gitleaks     | Secrets in a local git repo/dir                                     |
 | `trufflehog`    | trufflehog   | Verified leaked secrets (git/GitHub) ‡                              |
-| `wayback_urls`  | waybackurls  | Historical URLs from the Wayback Machine (background)               |
-| `gau_urls`      | gau          | Known URLs (Wayback/CommonCrawl/OTX) (background)                   |
+| `gau_urls`      | gau          | Known URLs from Wayback/CommonCrawl/OTX/URLScan (background)        |
 | `censys_search` | censys       | Search Censys for exposed assets †                                  |
 
 ### Information gathering — people footprint
@@ -188,7 +187,6 @@ engagement + scope are set at runtime via `set_engagement`).
 | `jwt_tool`     | jwt_tool    | JWT analysis / attacks           |
 | `trivy`        | Trivy       | Vuln/secret/misconfig scanning   |
 | `interactsh`   | interactsh  | OOB blind-vuln listener (bg)     |
-| `subjack`      | subjack     | Subdomain takeover detection     |
 | `paramspider`  | paramspider | Hidden parameter mining          |
 | `sstimap`      | sstimap     | SSTI detection / exploitation    |
 
@@ -201,7 +199,7 @@ engagement + scope are set at runtime via `set_engagement`).
 | `hydra`         | hydra     | Online credential testing    |
 | `john`          | john      | Offline hash cracking        |
 | `hashcat`       | hashcat   | GPU/CPU hash cracking        |
-| `hash_identify` | hashid    | Identify hash type           |
+| `hash_identify` | name-that-hash | Identify hash type (nth)  |
 | `run_shell`     | bash      | Arbitrary command (opt-in)   |
 
 ### AD / internal network

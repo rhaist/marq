@@ -30,12 +30,12 @@ record results with `report_finding`, then `render_report` at the end.
 ## 1. Scope & recon (passive first)
 
 - `server_info` — confirm operator, engagement and scope.
-- Company/domain footprint: `theharvester`, `subfinder`, `dnsx`, `wayback_urls`,
-  `gau_urls`, `whois_lookup`, `dns_lookup`, `asnmap` (ASN mapping), `censys_search`.
+- Company/domain footprint: `theharvester`, `subfinder`, `dnsx`, `gau_urls`,
+  `whois_lookup`, `dns_lookup`, `asnmap` (ASN mapping), `censys_search`.
   People: `sherlock`, `holehe_email`.
 - Broad automated sweep: `spiderfoot` (runs in the background — poll with
   `job_status` / `list_jobs`, do not block waiting on it).
-- Subdomain bruteforce: `dnsx` (-w wordlist). Takeover check: `subjack`.
+- Subdomain bruteforce: `dnsx` (-w wordlist). Takeover check: `nuclei --tags takeover`.
 - SSH config audit: `ssh_audit`. SNMP enum: `snmp_walk` / `snmp_check`. SMTP: `smtp_user_enum` / `smtp_test`.
 
 ## 2. Enumerate (active, scope-sensitive)
