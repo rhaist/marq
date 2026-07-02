@@ -145,7 +145,9 @@ marq run render_report '{}'      # writes /work/findings.md + findings.csv
   fall back on your own memory.
 - **Prefer the dedicated tool over `run_shell`.** Check `marq tools` first — if a
   wrapper exists (e.g. `dalfox`, `john`, `nuclei`), use it; it's scoped and
-  structured. `run_shell` is only for actions with no dedicated tool.
+  structured. `run_shell` is opt-in (off unless `MARQ_ALLOW_RAW_SHELL=true`) and
+  only for actions with no dedicated tool — if `marq tools` doesn't list it, it's
+  disabled; use the wrapped tools.
 - Prefer a narrow scan first (`-p 1-1000`, `--severity critical,high`) then widen.
 - Keep notes terse. Save anything important with `report_finding` immediately.
 - **Knowledge/standards/regulation questions still start with `load_skill`** —
