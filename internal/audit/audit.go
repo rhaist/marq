@@ -30,30 +30,43 @@ func newID() string {
 	return fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:16])
 }
 
-// write appends one JSON record to the audit log, flushing and fsync'ing so the
-// trail survives a crash. Guarded by a mutex so concurrent calls never interleave.
-func write(record map[string]any) {
+// write appends one JSON record to the audit log and mirrors it to stderr,
+// returning an error if the durable on-disk write fails. The stderr copy goes to
+// the container's log stream — outside the unprivileged `marq` user's reach and
+// separate from the MCP stdout protocol channel — so a record survives even if
+// the on-disk log is unwritable or later truncated by the audited process.
+// Callers at the exec choke point use the returned error to fail closed rather
+// than run a tool unlogged. Guarded by a mutex so concurrent calls never interleave.
+func write(record map[string]any) error {
 	line, err := json.Marshal(record)
 	if err != nil {
-		return
+		return err
 	}
 	mu.Lock()
 	defer mu.Unlock()
+	// Integrity mirror first, so it lands even if the file write below fails.
+	fmt.Fprintf(os.Stderr, "%s\n", line)
 	path := config.C.AuditLog
-	_ = os.MkdirAll(filepath.Dir(path), 0o755)
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
 	fh, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
-		return
+		return err
 	}
 	defer fh.Close()
-	_, _ = fh.Write(append(line, '\n'))
-	_ = fh.Sync()
+	if _, err := fh.Write(append(line, '\n')); err != nil {
+		return err
+	}
+	return fh.Sync()
 }
 
-// LogStart records the start of an invocation and returns a correlation id.
-func LogStart(tool, target string, argv []string) string {
+// LogStart records the start of an invocation and returns a correlation id plus
+// any error persisting the record. Exec callers should fail closed when the
+// error is non-nil rather than run an unlogged tool.
+func LogStart(tool, target string, argv []string) (string, error) {
 	id := newID()
-	write(map[string]any{
+	err := write(map[string]any{
 		"event":      "invocation.start",
 		"id":         id,
 		"ts":         now(),
@@ -63,7 +76,7 @@ func LogStart(tool, target string, argv []string) string {
 		"target":     target,
 		"argv":       argv,
 	})
-	return id
+	return id, err
 }
 
 // LogEnd records the completion of an invocation. exitCode is nil when the tool
@@ -83,7 +96,9 @@ func LogEnd(id, tool string, exitCode *int, durationS float64, timedOut bool, er
 	} else {
 		rec["error"] = nil
 	}
-	write(rec)
+	// Best-effort: the tool has already run, so a failure here can't be prevented
+	// — but the record is still mirrored to stderr inside write().
+	_ = write(rec)
 }
 
 func round3(f float64) float64 {

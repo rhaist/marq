@@ -263,7 +263,7 @@ func endAudit(id, op string, err error) {
 // RenderReport. A soft error (returned with a nil err) passes straight through
 // to the model; a hard error (non-nil err) is surfaced as "error: <msg>".
 func withAudit(op, target string, argv []string, fn func() (string, error)) string {
-	id := audit.LogStart(op, target, argv)
+	id, _ := audit.LogStart(op, target, argv)
 	out, err := fn()
 	endAudit(id, op, err)
 	if err != nil {

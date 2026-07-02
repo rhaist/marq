@@ -27,17 +27,26 @@ inherently dual-use. Read this before you run anything.
 ## Guardrail model: logging-only
 
 This build uses **logging-only** guardrails (an explicit operator choice). That
-means: nothing is blocked, but **every invocation is audit-logged** as JSON
-lines, before and after it runs, with:
+means: nothing is blocked on **scope** grounds (scope is recorded, not enforced),
+but **every invocation is audit-logged** as JSON lines, before and after it runs
+— and a tool whose start record can't be persisted is refused (fail-closed), so
+the log can't be silently skipped. Each record carries:
 
 - a correlation id, UTC timestamps and duration
 - the logical tool name and the **full argument vector**
 - the operator and engagement identifiers
 - a best-effort `target`
 
-The audit log is append-only and `fsync`'d per write. Default location:
+The audit log is append-only and `fsync`'d per write, and each record is also
+mirrored to **stderr** — the container's log stream, outside the unprivileged
+`marq` user's reach and separate from the MCP stdout protocol channel — so a copy
+survives even if the on-disk log is truncated. At the exec choke point
+(`runner.Run`) marq **fails closed**: if a start record cannot be persisted, the
+tool does not run (rather than executing unlogged). Default location:
 `/var/log/marq/audit.jsonl` (mount it to the host to persist it — see
-`mcp.json.example`).
+`mcp.json.example`). The on-disk log is owned by the same `marq` user that runs
+the tools, so for a tamper-resistant trail rely on the stderr mirror / ship it
+off-box (below), or make it append-only at the filesystem level.
 
 > If you later want hard controls, the natural place to add them is
 > `internal/runner/runner.go::Run` (e.g. a scope allowlist check before the
@@ -56,16 +65,20 @@ The audit log is append-only and `fsync`'d per write. Default location:
   attack. With the `pi/marq` shim, the agent reaches tools via `docker exec` into
   a local container — the model runtime is the client's concern (e.g. Pi), not
   marq's, so marq itself opens no outbound model connection.
-- **Raw shell is enabled by default but audit-logged.** The image is a full
-  offensive toolkit (hundreds of tools without dedicated wrappers), so the
-  arbitrary-command tool ships on so the model can chain and stage them; every
-  invocation is logged like any other. It is still the broadest capability the
-  server grants — set `MARQ_ALLOW_RAW_SHELL=false` to remove it for a
-  more locked-down deployment.
-- **File access is sandboxed.** The `read_file`/`write_file`/`list_dir` tools
-  resolve real paths and refuse anything outside `/work` and `/tmp`, so the
-  model can exchange working files without reading or clobbering the rest of the
-  container. These ops are audit-logged like every tool run.
+- **Raw shell is OFF by default (opt-in).** `run_shell` executes an arbitrary
+  in-container command — the broadest capability the server grants — so it is
+  **not registered** unless you set `MARQ_ALLOW_RAW_SHELL=true`. Enable it when
+  you need the model to chain the hundreds of tools that have no dedicated
+  wrapper; every invocation is still audit-logged. Left off, the model is bounded
+  to the wrapped tool set.
+- **File access is sandboxed — for the file tools.** The
+  `read_file`/`write_file`/`list_dir` tools resolve real paths (defeating symlink
+  and `..` escapes) and refuse anything outside `/work` and `/tmp`, so the model
+  can exchange working files without reading or clobbering the rest of the
+  container. This bounds **those tools**, not tool _execution_: an exec tool with
+  an output flag (e.g. `nmap -oN …`) can still write anywhere the `marq` user can,
+  so the sandbox is a file-exchange boundary, not a jail. These ops are
+  audit-logged like every tool run.
 - Output is truncated to a token budget so a runaway scan can't flood the model.
 - A per-command timeout (`MARQ_TIMEOUT`, default 900s) bounds runaway tools.
 - **Audit completeness depends on the driver.** Every call through `marq run` /

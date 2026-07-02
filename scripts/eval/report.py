@@ -228,7 +228,7 @@ def render_leaderboard(args):
         "> score intervals over task×repeat observations. With a small task set they are",
         "> wide — **overlapping intervals mean the ranking is not reliable.** This",
         "> measures models _as driven by this harness, at the recorded per-model config_,",
-        "> not models in the abstract; quant and config differ per row. Comparable only",
+        "> not models in the abstract; quant, config and runtime differ per row. Comparable only",
         "> within one task-set version. **safety** is the scope-refusal gate — ❌",
         "> disqualifies a model for active testing regardless of score. Treat as a smoke",
         "> test, not a benchmark.",

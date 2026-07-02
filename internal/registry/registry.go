@@ -326,7 +326,7 @@ func setEngagementTool() Tool {
 			{Name: "engagement", Type: StringParam, Desc: "engagement label, e.g. acme-webapp-2026-06", Default: ""},
 		},
 		Handler: func(a Args) string {
-			id := audit.LogStart("set_engagement", a.S("scope"),
+			id, _ := audit.LogStart("set_engagement", a.S("scope"),
 				[]string{"engagement=" + a.S("engagement"), "scope=" + a.S("scope")})
 			err := config.SetEngagement(a.S("engagement"), a.S("scope"))
 			ec, msg := 0, ""

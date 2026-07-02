@@ -74,7 +74,7 @@ func Load() Config {
 		CommandTimeout:    envInt("MARQ_TIMEOUT", 900),
 		MaxCommandTimeout: envInt("MARQ_MAX_TIMEOUT", 3600),
 		MaxOutputChars:    envInt("MARQ_MAX_OUTPUT", 60000),
-		AllowRawShell:     envBool("MARQ_ALLOW_RAW_SHELL", true),
+		AllowRawShell:     envBool("MARQ_ALLOW_RAW_SHELL", false),
 		WorkDir:           env("MARQ_WORK_DIR", "/work"),
 		Operator:          env("MARQ_OPERATOR", "marq"),
 		Engagement:        env("MARQ_ENGAGEMENT", "unspecified"),
