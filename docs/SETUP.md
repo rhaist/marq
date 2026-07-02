@@ -6,9 +6,10 @@ the only OS-specific part is installing Docker.
 
 marq is your **universal cyber assistant** — it brings the tools and the
 knowledge; your client brings the model. After building the image, see
-[`CLIENTS.md`](CLIENTS.md) to pick a client (Claude Code / Codex as the expert
-brain, Pi + llama.cpp for fully-local uncensored work). This page is
-just install + the two connection methods.
+[`CLIENTS.md`](CLIENTS.md) to pick a client (Pi + llama.cpp for fully-local
+uncensored work — the recommended default; Claude Code / Codex as a frontier
+fallback for the heaviest reasoning). This page is just install + the two
+connection methods.
 
 > Advisory and knowledge work is open; **active testing is authorized-only** —
 > read [`SECURITY.md`](SECURITY.md) first.
@@ -38,13 +39,25 @@ and/or the **local model (Pi)** subsection.
 
 ### 1. Prerequisites
 
+You need a container engine that provides the `docker` CLI. **Docker Desktop is
+not required** (and its licence is commercial for larger orgs) — prefer a lighter,
+open alternative:
+
 ```bash
-# Docker Desktop
-brew install --cask docker        # then launch Docker.app once and let it start
+# Recommended: OrbStack — fast, light, native Apple-Silicon, drop-in `docker` CLI
+brew install orbstack
+
+# Fully-FOSS alternative (macOS + Linux):
+#   brew install colima docker && colima start
+# Docker Desktop still works if you already run it.
 
 # Optional, only for local Go dev (not needed to run the image)
 brew install go
 ```
+
+All three expose the same `docker` command, so every command below is unchanged.
+(Prefer Podman? See the Debian note; set `MARQ_ENGINE=podman` for the `pi/marq`
+shim.)
 
 ### 2. Build the image
 
@@ -248,9 +261,10 @@ ntlmrelayx) detach inside it and are polled later, so a per-call `docker run`
 would kill them.
 
 Shim env vars: `MARQ_CONTAINER` (default `marq`), `MARQ_IMAGE` (default
-`marq:latest`), `MARQ_ENV_FILE` (optional env-file for `MARQ_OPERATOR` plus API
-keys, passed as `--env-file` — copy `.env.example` to `.env` for a template;
-engagement + scope are set at runtime via `set_engagement`).
+`marq:latest`), `MARQ_ENGINE` (container CLI, default `docker`; set `podman` to
+run daemonless without Docker Desktop), `MARQ_ENV_FILE` (optional env-file for
+`MARQ_OPERATOR` plus API keys, passed as `--env-file` — copy `.env.example` to
+`.env` for a template; engagement + scope are set at runtime via `set_engagement`).
 
 ---
 
@@ -258,17 +272,28 @@ engagement + scope are set at runtime via `set_engagement`).
 
 ### 1. Prerequisites
 
+On Linux the Docker **Engine** is free and open-source (only Docker _Desktop_ is
+the commercial GUI you don't need). Or run **Podman** — rootless, daemonless, a
+drop-in for `docker`:
+
 ```bash
-# Docker engine + buildx (Testing ships a recent docker.io with BuildKit)
+# Option A — Docker Engine (open-source; docker.io from Testing ships BuildKit)
 sudo apt update && sudo apt install -y docker.io docker-buildx git curl
 sudo usermod -aG docker "$USER"        # log out/in (or: newgrp docker) so this takes effect
 sudo systemctl enable --now docker
+
+# Option B — Podman (rootless/daemonless). `podman-docker` adds a `docker` alias:
+sudo apt install -y podman podman-docker git curl
+#   then either use `podman` directly, or set MARQ_ENGINE=podman for the pi/marq shim.
 
 # Optional, only for local Go dev
 sudo apt install -y golang
 ```
 
-(Alternatively use Docker's official CE repo; `docker.io` from Testing is fine.)
+Podman note: the scan tools (nmap/masscan/naabu) need `--cap-add NET_RAW
+NET_ADMIN`, which the shim already passes; **rootless** Podman may additionally
+need `net.ipv4.ping_group_range` set (or rootful `sudo podman`) for raw-socket
+scans. Docker's official CE repo is also fine instead of `docker.io`.
 
 ### 2. Build the image
 

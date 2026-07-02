@@ -26,25 +26,44 @@ auditable binary.** You bring the model; marq brings the tools and the knowledge
 ## Start
 
 ```bash
-# 1. Get marq (prebuilt image — or build from source: docker build -t marq .)
+# Get marq (prebuilt image — or build from source: docker build -t marq .)
 docker pull ghcr.io/rhaist/marq && docker tag ghcr.io/rhaist/marq marq
+```
 
-# 2. Plug into Claude Code (any MCP client works)
+No Docker Desktop needed — **OrbStack** (macOS) or **Podman / Colima** (Linux) run
+the image just as well ([`docs/SETUP.md`](docs/SETUP.md)).
+
+### Run it fully local — recommended
+
+Your own uncensored model, on your box: no cloud, no refusals, nothing leaves the
+host. Drive marq from [Pi](https://pi.dev/) over [llama.cpp](https://github.com/ggml-org/llama.cpp):
+
+```bash
+# 1. the model
+llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
+  --port 8080 --jinja -fa on -ngl 99 --ctx-size 65536
+# 2. marq in a long-lived container bound to your workspace
+install -m 0755 pi/marq ~/.local/bin/marq && marq up ~/work
+# 3. point Pi at llama.cpp + load the marq skill, then run `pi`
+```
+
+Then just talk to it: _"Set scope to scanme.nmap.org and run a quick nmap,"_ or
+_"Load the nis2-dora skill — what's our breach clock?"_ Full local walkthrough
+(Pi provider, skill, tuning) → [`docs/SETUP.md`](docs/SETUP.md#4-run-with-a-local-model-pi--the-marq-skill).
+
+### Or fall back to a frontier model
+
+For the heaviest reasoning (architecture, GRC, IR write-ups), point a frontier MCP
+client at marq instead:
+
+```bash
 claude mcp add marq -- docker run --rm -i \
   -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR=marq marq
 ```
 
-Restart the client and ask: _"Load the nis2-dora skill — what's our breach
-clock?"_ or _"Set scope to scanme.nmap.org, then run a quick nmap."_ (Scanning
-tools also need `--cap-add NET_RAW --cap-add NET_ADMIN`; full hardened args in
+Any MCP client works (Codex, Claude Desktop) → [`docs/CLIENTS.md`](docs/CLIENTS.md).
+(Scanning tools need `--cap-add NET_RAW --cap-add NET_ADMIN`; hardened args in
 [`mcp.json.example`](mcp.json.example).)
-
-**Two ways to use it:**
-
-- **Frontier brain** — Claude Code / Codex for reasoning-heavy work (architecture,
-  GRC, threat modeling, IR, the report). → [`docs/CLIENTS.md`](docs/CLIENTS.md)
-- **Local & uncensored** — a local model via Pi + llama.cpp for hands-on offensive
-  ops, nothing leaving the box. → [`docs/SETUP.md`](docs/SETUP.md#4-run-with-a-local-model-pi--the-marq-skill)
 
 > **Authorized use.** Advisory/knowledge is open; scanning & exploitation are
 > authorized-only and audit-logged — [`docs/SECURITY.md`](docs/SECURITY.md).
