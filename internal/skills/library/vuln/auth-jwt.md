@@ -33,4 +33,4 @@ description: Attack authentication and JWT handling.
   `target` = the auth endpoint/token, `evidence` = the forged/cracked token and
   the request it authorized. Recommend strong server-side verification, pinned
   algorithm, rotated high-entropy secrets, short expiry.
-- CWE-287 / CWE-345 / CWE-347.
+- CWE-287 / CWE-345 / CWE-347; OWASP A07:2025 Authentication Failures.

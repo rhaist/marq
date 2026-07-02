@@ -54,6 +54,7 @@ Adjacent (don't confuse): **SSPM** = SaaS posture (Salesforce/M365/Workday confi
 - **Tooling lowest-common-denominator** — multi-cloud CNAPP coverage is uneven; depth per provider varies. Verify the tool actually covers your weakest cloud.
 - **Identity federation sprawl** — federating one IdP into N clouds multiplies the blast radius of that IdP. The IdP becomes the crown jewel (`load_skill zero-trust`).
 - **Don't go multi-cloud for security** — it multiplies the control surface and the expertise required. Multi-cloud is a business/resilience choice that _adds_ security cost, not a security win.
+- **APAC sovereignty pitfall** — your global AWS/Azure/GCP tenant does **not** extend into China. The China regions are legally separate partitions run by a **local licensed operator** (AWS by Sinnet/NWCD, Azure by 21Vianet; GCP has no China region), with their own accounts, IAM, and no shared identity — plus ICP licensing and data-localization duties. Treat China (and other sovereign-cloud / data-localization regimes) as a distinct cloud with its own posture baseline, not just another region toggle.
 
 ## Where to enforce / cross-links
 

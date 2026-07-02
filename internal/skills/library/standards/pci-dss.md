@@ -1,9 +1,9 @@
 ---
 name: pci-dss
-description: PCI DSS v4.0 at a glance — scope/CDE rules, SAQ types, the 12 requirements, and the scoping mistakes that blow up an assessment.
+description: PCI DSS v4.0.1 at a glance — scope/CDE rules, SAQ types, the 12 requirements, and the scoping mistakes that blow up an assessment.
 ---
 
-# PCI DSS v4.0
+# PCI DSS v4.0.1
 
 Protects **cardholder data**. Contractual (card brands), not law, but enforced hard. The whole game is **scope**: PCI applies to the **CDE** (cardholder data environment) — every system that stores, processes, or transmits **account data**, _plus_ systems connected to or that could impact the security of those.
 

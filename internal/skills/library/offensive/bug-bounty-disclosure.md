@@ -37,6 +37,11 @@ safe harbor and is just unauthorized access. This skill covers both sides:
 - HackerOne's "Gold Standard Safe Harbor" raised the bar for program language —
   prefer programs that adopt it. verify:
   https://www.hackerone.com/press-release/hackerone-announces-gold-standard-safe-harbor-improve-protections-good-faith-security
+- **Jurisdiction matters.** The CFAA good-faith framing is US-specific; many APAC
+  computer-misuse laws (e.g. Singapore CMA, and equivalents in JP/AU) have no
+  good-faith carve-out, so out-of-scope or cross-border testing is plain
+  unauthorized access no matter how the program reads. Confirm where the asset —
+  and you — sit before testing.
 - Hard lines regardless of policy: no data exfiltration beyond a proof token,
   no pivoting to third-party/other-tenant data, no DoS, no social-engineering
   staff unless explicitly allowed, no extortion ("pay or I publish" voids good

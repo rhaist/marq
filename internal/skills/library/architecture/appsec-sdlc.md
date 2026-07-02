@@ -50,7 +50,7 @@ Two OWASP standards, two different jobs. Use them together.
 Two questions: **what's in it** (SBOM) and **how was it built / can I trust it** (provenance, SLSA, signing).
 
 - **SBOM** (Software Bill of Materials) — machine-readable inventory of every component + version + license (formats: **SPDX**, **CycloneDX**). Generate it in CI per build; it's what lets you answer "are we affected by CVE-X" in minutes, not weeks (the Log4Shell lesson). An SBOM you don't ingest/query is shelfware.
-- **SLSA** (Supply-chain Levels for Software Artifacts, **v1.0**, OpenSSF — `https://slsa.dev`) — a graded framework for **build integrity + provenance**, focused on the build track:
+- **SLSA** (Supply-chain Levels for Software Artifacts, OpenSSF — `https://slsa.dev`; **v1.2** current, 2025) — a graded framework for **build integrity + provenance**. Now split into a **Build track** (below) and a **Source track** (v1.2 promoted it from experimental to approved — grades version-control history integrity + enforced code review). Build track:
   - **L1** — produce provenance (releases traceable to how they were built).
   - **L2** — signed provenance on a hosted/protected build platform.
   - **L3** — hardened, isolated builds with non-falsifiable provenance and protected signing secrets.

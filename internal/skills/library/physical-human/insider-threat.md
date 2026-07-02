@@ -72,7 +72,9 @@ Done wrong, the program is illegal, toxic, or both. Concrete guardrails:
 - **Least privilege on the program.** Who can de-anonymize an alert or open an
   investigation is tightly scoped, dual-control, and audited — watch the watchers.
 - **Legal basis & jurisdiction.** EU/works-council settings → DPIA, works-council
-  agreement, lawful basis; US → state/wiretap/consent rules. Legal owns this gate.
+  agreement, lawful basis; US → state/wiretap/consent rules; APAC → consent-based
+  employee-monitoring regimes (China PIPL, Japan APPI, Korea PIPA) that a US-style
+  blanket-monitoring default violates. Legal owns this gate.
 - **Due process.** An alert is an _inquiry_, not a verdict; humans adjudicate;
   the subject gets fair handling. Constitutional/privacy rights preserved (NITTF).
   verify: https://www.dni.gov/index.php/ncsc-how-we-work/ncsc-nittf/ncsc-nittf-training

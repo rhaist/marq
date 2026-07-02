@@ -24,6 +24,11 @@ the math — they're key management, stale algorithms, and rolled-your-own.
 - KDF/passwords: **Argon2id** (or scrypt/bcrypt); PBKDF2 only for compat. Never
   a bare hash for passwords (see `load_skill password-cracking` for why).
 - TLS: **1.3** preferred, 1.2 floor; disable everything below.
+- **APAC pitfall (national crypto):** the AES/RSA/ECC floor above is a Western default.
+  **China**'s Commercial Cryptography regime mandates the national **SM2/SM3/SM4/SM9**
+  algorithms and **OSCCA/SCA-approved** products for in-country government and many
+  regulated systems; foreign crypto faces import/approval limits. Crypto-agility (below)
+  is exactly what lets you slot in an SM profile for a China deployment without a rebuild.
 
 ## Post-quantum (the live migration — verify, this moves)
 

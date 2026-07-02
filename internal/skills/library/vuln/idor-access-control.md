@@ -32,4 +32,5 @@ manual comparison.
   `target` = endpoint + the id you swapped, `evidence` = paired requests showing
   A's session returning B's data (redact real PII). Recommend server-side
   authorization checks per object, deny-by-default, unpredictable ids are not a fix.
-- CWE-639 / CWE-284.
+- CWE-639 / CWE-284; OWASP A01:2025 Broken Access Control — still #1, and in the
+  2025 Top 10 it also absorbs SSRF and path traversal as sub-patterns.

@@ -7,6 +7,12 @@ description: Opening recon — map a domain's external footprint passively first
 
 Start passive (no packets at the target), then go active only in scope.
 
+Passive doesn't mean lawful-by-default: OSINT on named people collects personal
+data governed by GDPR and APAC privacy regimes (Singapore PDPA, Japan APPI, etc.).
+Collect only what the engagement needs, and keep findings/PoC data in the client's
+region — shipping a dossier of employee data to a home-region host is a common
+cross-border misstep.
+
 ## 1. Passive footprint (company/domain)
 
 - `theharvester` — emails, names, hosts, subdomains from public sources. Best

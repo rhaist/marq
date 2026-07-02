@@ -36,4 +36,4 @@ still need to discover endpoints/params.
 - `report_finding`: severity by impact (stored > reflected; admin context is
   worse), `target` = URL+param+context, `evidence` = the dalfox PoC or the
   reflected payload that executed. Recommend context-aware output encoding + CSP.
-- CWE-79.
+- CWE-79; OWASP A05:2025 Injection (XSS stays under Injection, now ranked A05).

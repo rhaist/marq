@@ -8,8 +8,8 @@ description: Hypothesis-driven, ATT&CK-anchored threat hunting — the hunt loop
 Hunting is the proactive search for adversary activity that evaded existing
 detections. It assumes compromise and tries to disprove it. Not alert-chasing,
 not running a scanner — a _hypothesis_ tested against data. Use the PEAK loop
-(Plan → Execute → Analyze → Knowledge/Communicate).
-verify: https://huntbook.predefender.com/part-1/frameworks/threathunting/peak/
+(Prepare → Execute → Act, with Knowledge woven through every phase).
+verify: https://www.splunk.com/en_us/blog/security/peak-threat-hunting-framework.html
 
 ## The hunt loop
 
@@ -36,12 +36,14 @@ actor-ttp-attribution` to turn an actor into testable TTPs).
    - Found nothing → record the hunt, data coverage, and queries so it's
      repeatable and counts as assurance.
 
-## Anchor to ATT&CK (v18)
+## Anchor to ATT&CK (v19)
 
 - Map every hypothesis to a technique id; it makes hunts comparable, communicable,
-  and feeds a coverage heatmap. v18 (Oct 2025) replaced Data Sources with
-  Detection Strategies + Analytics — read the technique's Analytics for the exact
-  log sources/data components to query.
+  and feeds a coverage heatmap. v19 (Apr 2026, current) carries the Detection
+  Strategies + Analytics model that replaced Data Sources in v18 (Oct 2025) — read
+  the technique's Analytics for the exact log sources/data components to query.
+  v19 also split Defense Evasion into Stealth (TA0005) + Defense Impairment
+  (TA0112), so re-map any older evasion hypotheses.
   verify: https://attack.mitre.org/matrices/enterprise/
 - Prioritize techniques in your threat model (sector, actors, exposed tech), not
   the whole matrix.

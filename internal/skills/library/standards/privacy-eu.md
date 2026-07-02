@@ -44,6 +44,21 @@ Canonical text (web-fetch for current wording): eur-lex Regulation (EU) 2016/679
 
 - Up to **€20M or 4%** of global annual turnover — whichever is higher.
 
+## International transfers (Chapter V)
+
+- Moving personal data outside the EEA needs a transfer tool: an **adequacy
+  decision**, **SCCs** (+ a transfer impact assessment post-_Schrems II_), or **BCRs**.
+- **EU–US: Data Privacy Framework** — adequacy for US firms self-certified to the
+  DPF (in force July 2023). The General Court **upheld it (Sept 2025, dismissing
+  the _Latombe_ challenge)**, but an appeal is **pending at the CJEU (C-703/25 P)**
+  — a third _Schrems_-style invalidation isn't off the table, so keep **SCCs as a
+  fallback**. Web-verify status before relying.
+- **APAC pitfall**: GDPR compliance does **not** satisfy APAC transfer/localization
+  law. **China PIPL** mandates local storage of important data plus a cross-border
+  route (security assessment / SCC filing / certification); **India DPDP Act**
+  (rules notified Nov 2025) and others regulate outbound transfer on their own
+  terms. Map each jurisdiction; don't extrapolate from GDPR.
+
 ## vs the US
 
 - GDPR is **opt-in / omnibus**: one law, all personal data, consent-forward. The

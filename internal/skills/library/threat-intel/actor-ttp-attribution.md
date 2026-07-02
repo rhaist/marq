@@ -37,6 +37,11 @@ tradecraft. Lead with TTPs, treat actor naming as a hypothesis.
   axes raises confidence; a single shared tool does not.
 - Beware: shared open-source tooling (Cobalt Strike, Mimikatz, Impacket), false
   flags, and copied IOCs from prior reports. Commodity malware ≠ attribution.
+- **APAC source-bias pitfall:** ORKL and English-language reporting skew Western
+  and under-cover APAC-targeting activity. For actors hitting JP/KR/IN/SEA, a "no
+  ORKL hits" result is often a coverage gap, not a clean sheet — cross-check
+  regional CERTs (JPCERT/CC, KrCERT/KISA, CERT-In, AusCERT) and regional vendors
+  (AhnLab, NSFOCUS, QiAnXin), and expect heavier alias sprawl across them.
 
 ## 4. Confidence + output
 

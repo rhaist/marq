@@ -8,7 +8,7 @@ description: Design security metrics that drive decisions — KPI vs KRI vs metr
 This is the **design** side: what to measure and how to make a number actionable. For
 how to _present_ these to a board/exec, `load_skill board-metrics-reporting` (don't
 duplicate framing here). Standards anchor: ISO/IEC 27004:2016 (ISMS measurement model —
-measure → analyze → evaluate; a revision is in DIS, verify: https://www.iso.org/standard/85920.html)
+measure → analyze → evaluate; 2016 is still the live edition, a revision is under way — verify: https://www.iso.org/standard/85920.html)
 and NIST CSF 2.0 GV.OV (oversight uses metrics to adjust strategy).
 
 ## The one design rule
@@ -48,8 +48,10 @@ risk appetite** (green/amber/red), not an arbitrary round number.
 | **Vuln backlog aging**            | KRI/lead | Age of oldest open critical; backlog trend                    | Backlog growing faster than burn-down → capacity problem               |
 
 Set **MFA/EDR/patch SLAs to your appetite**, then benchmark against current authority,
-don't hard-code memory. KEV deadlines: US federal BOD 22-01 set **14 days**, but CISA is
-moving to **risk-based deadlines** (and floated 72h for critical) — verify the live policy:
+don't hard-code memory. KEV deadlines: US federal **BOD 22-01**'s flat 14-day KEV clock was
+**superseded by BOD 26-04 (June 2026)** — risk-based tiers (**3 / 14 / 60 days**) keyed to
+asset exposure, KEV status, exploit automation, and post-exploit impact, not one clock. Model
+your KEV-window KRI on that, and verify the live directive + catalog:
 https://www.cisa.gov/known-exploited-vulnerabilities-catalog . Industry phishing/MTTR
 benchmarks drift yearly — cite the current Verizon DBIR / vendor report, don't assert a stale %.
 

@@ -6,7 +6,9 @@ description: Offline hash identification and cracking workflow.
 # Offline password / hash cracking
 
 For hashes you are authorized to assess (dumped DB, captured handshake, JWT
-secret, /etc/shadow on an owned box).
+secret, /etc/shadow on an owned box). Cracked credentials are personal data —
+keep hashes and any recovered plaintext inside the client's authorized region;
+exporting them to a home-region cracking rig can breach data-residency law.
 
 ## 1. Identify
 

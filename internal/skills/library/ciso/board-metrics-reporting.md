@@ -53,6 +53,11 @@ risk-assessment`), their score now vs last quarter, and what moved them. Shows
    clear, owned decision to accept or fund — don't hide it or cry wolf.
 6. Tie spend to risk bought down. Every dollar maps to a risk moved, or it's
    questioned next cycle.
+7. For US public companies, disclosure is a board clock, not just the CISO's: a
+   **material** incident → **Form 8-K Item 1.05 within 4 business days** of the
+   materiality determination, plus annual **10-K** cyber governance/oversight
+   disclosure (Reg S-K Item 106). Board cyber oversight is itself reportable — brief
+   them so the filing isn't the first they hear of a breach.
 
 ## Cadence
 

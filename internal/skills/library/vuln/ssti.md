@@ -32,4 +32,4 @@ description: Find server-side template injection and confirm code execution.
 - `report_finding`: severity usually high/critical (RCE), `target` = URL+param,
   `evidence` = the rendered math result and/or the command output. Recommend
   sandboxed/logic-less templates, no user input as template source, allowlist.
-- CWE-1336 (SSTI) / CWE-94 (code injection).
+- CWE-1336 (SSTI) / CWE-94 (code injection); OWASP A05:2025 Injection.
