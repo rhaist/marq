@@ -39,13 +39,19 @@ Your own uncensored model, on your box: no cloud, no refusals, nothing leaves th
 host. Drive marq from [Pi](https://pi.dev/) over [llama.cpp](https://github.com/ggml-org/llama.cpp):
 
 ```bash
-# 1. the model
+# 1. the model — full flags matter: --reasoning-format keeps chain-of-thought
+#    out of the reply, --jinja makes tool calls parse (see docs/SETUP.md §2a)
 llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
-  --port 8080 --jinja -fa on -ngl 99 --ctx-size 65536
+  --host 0.0.0.0 --port 8080 -ngl 99 --ctx-size 65536 --jinja \
+  --reasoning-format deepseek \
+  -fa on -ctk q8_0 -ctv q8_0 \
+  --temp 0.6 --top-p 0.9 --top-k 64 --min-p 0.05 --repeat-penalty 1.1
 # 2. marq in a long-lived container bound to your workspace
 install -m 0755 pi/marq ~/.local/bin/marq && marq up ~/work
-# 3. point Pi at llama.cpp + load the marq skill (one-time) → docs/SETUP.md §4
-#    then run `pi`
+# 3. one-time Pi config — llama.cpp provider + marq's system prompt + skill.
+#    Without SYSTEM.md a small model narrates instead of driving marq. → docs/SETUP.md §4
+ln -sf "$PWD/pi/SYSTEM.md" ~/.pi/agent/SYSTEM.md
+# then run `pi`
 ```
 
 Then just talk to it: _"Set scope to scanme.nmap.org and run a quick nmap,"_ or
