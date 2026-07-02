@@ -2,8 +2,8 @@
 #
 # verify_tools.sh — one-stop verification for the marq toolkit.
 #
-# Two phases, both against a throwaway container (never touches the LM Studio
-# instance):
+# Two phases, both against a throwaway container (never touches your local
+# model runtime or a running marq container):
 #   1. HELP   — for every wrapped tool, print the exact invocation the MCP
 #               wrapper uses next to the tool's own --help/usage, so the flags
 #               can be verified by eye (this is how the httpx-toolkit / amass /

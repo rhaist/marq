@@ -2,10 +2,11 @@
 """marq eval harness — drive marq's MCP tools with an OpenAI-compatible model and
 record the tool-call trajectory for scoring (scripts/eval/score.py).
 
-Free + local by design: point --base-url at LM Studio (default :1234/v1), Ollama
-(:11434/v1) or llama-server and sweep --models — nothing leaves the box and there
-is no per-token cost. The skills on/off ablation measures the *lift* from marq's
-knowledge layer (does loading skills make a small model pick the right tool?).
+Free + local by design: point --base-url at llama.cpp's `llama-server` (default
+:8080/v1) — or any OpenAI-compatible endpoint — and sweep --models: nothing
+leaves the box and there is no per-token cost. The skills on/off ablation measures
+the *lift* from marq's knowledge layer (does loading skills make a small model
+pick the right tool?).
 
 The harness owns the loop (model <-> marq MCP), so it sees every tool call the
 model makes — including load_skill, which is in-process and never hits the audit
@@ -122,20 +123,29 @@ def openai_tools(tools):
 
 
 def native_model_info(base_url, model):
-    """Load-time metadata from LM Studio's native API (/api/v0/models) — quant,
-    arch, loaded context length, capabilities. Best-effort: empty dict for other
-    servers (Ollama / llama-server) or older LM Studio, so callers fall back to
-    flags. Temperature is deliberately absent — it's a request param, not a load
-    property, and the harness pins it.
+    """Load-time metadata from llama.cpp's `/props` endpoint — the loaded context
+    length (default_generation_settings.n_ctx) and the model id/path. Best-effort:
+    empty dict for non-llama.cpp servers or on any failure, so callers fall back to
+    the --quant / --note flags. Temperature is deliberately absent — it's a request
+    param, not a load property, and the harness pins it.
+
+    The keys are normalized to the same shape the rest of the harness expects
+    (loaded_context_length) so downstream code (meta.json, report.py) is unchanged.
     """
     root = base_url.rstrip("/")
     root = root[:-3] if root.endswith("/v1") else root
     try:
-        with urllib.request.urlopen(root.rstrip("/") + "/api/v0/models", timeout=10) as r:
-            for m in json.load(r).get("data", []):
-                if m.get("id") == model:
-                    return {k: m[k] for k in ("quantization", "arch", "loaded_context_length",
-                                              "max_context_length", "capabilities") if k in m}
+        with urllib.request.urlopen(root.rstrip("/") + "/props", timeout=10) as r:
+            props = json.load(r)
+        info = {}
+        gen = props.get("default_generation_settings") or {}
+        n_ctx = gen.get("n_ctx") or props.get("n_ctx")
+        if n_ctx:
+            info["loaded_context_length"] = n_ctx
+        model_id = props.get("model_path") or props.get("model")
+        if model_id:
+            info["model_path"] = model_id
+        return info
     except Exception:
         pass
     return {}
@@ -194,7 +204,8 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
         tool_schemas = openai_tools(tools)
         # Everything in cfg except the harness-control keys is sampling, so a
         # profile can carry a model's full recommended set (top_k/min_p/
-        # repeat_penalty etc.) — LM Studio's OpenAI endpoint accepts the extras.
+        # repeat_penalty etc.) — llama.cpp's OpenAI server accepts the sampling
+        # extras (top_k, min_p, repeat_penalty).
         sampling = {k: v for k, v in cfg.items() if k not in ("no_think", "max_steps")}
         trace = []      # tool calls (scored)
         responses = []  # raw model turns incl. reasoning (for later semantic analysis)
@@ -274,8 +285,8 @@ def _loads(s):
 
 def main():
     p = argparse.ArgumentParser(description="marq eval harness")
-    p.add_argument("--base-url", default="http://localhost:1234/v1", help="OpenAI-compatible endpoint")
-    p.add_argument("--api-key", default="lm-studio", help="ignored by local servers; some require non-empty")
+    p.add_argument("--base-url", default="http://localhost:8080/v1", help="OpenAI-compatible endpoint (llama.cpp llama-server default)")
+    p.add_argument("--api-key", default="llama", help="ignored by most local servers; some require non-empty")
     p.add_argument("--models", default="", help="comma-separated model ids to sweep")
     p.add_argument("--skills", choices=["on", "off", "both"], default="both")
     p.add_argument("--tasks", default=str(pathlib.Path(__file__).with_name("tasks.jsonl")))
@@ -329,7 +340,7 @@ def main():
                     run_task(args, model, on, task, r, info, cfg)
     print(f"\nruns in {args.out}")
     print(f"look:    python3 scripts/eval/report.py {args.out} --no-publish")
-    print(f"publish: python3 scripts/eval/report.py {args.out} --quant <Q> --runtime lm-studio")
+    print(f"publish: python3 scripts/eval/report.py {args.out} --quant <Q> --runtime llama.cpp")
     return 0
 
 

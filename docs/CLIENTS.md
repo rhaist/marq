@@ -11,8 +11,7 @@ depends on the work.
 | You want to…                                                                                                             | Use                                                           | Why                                                                                                         |
 | :----------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------- |
 | Reason hard — architecture review, threat modeling, GRC/compliance, IR leadership, write the report, app/code-sec review | **Claude Code** or **Codex** (frontier model) + marq over MCP | Strongest reasoning. marq hands it the current-standards skills and the tools; the model supplies judgment. |
-| Run fully local & uncensored — hands-on offensive ops, on-box execution, nothing leaves the host, no model refusals      | **Pi** + a local/abliterated model + the `pi/marq` shim       | Terminal-native, no cloud, no refusals; the model gets bash and calls `marq run` directly.                  |
-| Test marq, try a model, or chat in a GUI                                                                                 | **LM Studio** + marq over MCP                                 | Easiest local MCP client; load any tool-capable GGUF and go.                                                |
+| Run fully local & uncensored — hands-on offensive ops, on-box execution, nothing leaves the host, no model refusals      | **Pi** + a local/abliterated model on **llama.cpp** + the `pi/marq` shim | Terminal-native, no cloud, no refusals; the model gets bash and calls `marq run` directly.       |
 
 Rule of thumb: **frontier model for judgment** (the governance/architecture/
 advisory domains), **local uncensored model for hands-on offensive and
@@ -20,10 +19,10 @@ privacy-sensitive work**. You can keep both configured and switch per task.
 
 ## Two ways marq connects
 
-- **MCP server** (`marq serve`) — for Claude Code, Codex, LM Studio, Claude
-  Desktop, and any MCP client. The client's model sees marq's tools as typed MCP
-  tools and calls them directly. The same `mcp.json.example` works for all of
-  the JSON-config clients.
+- **MCP server** (`marq serve`) — for Claude Code, Codex, Claude Desktop, and
+  any MCP client. The client's model sees marq's tools as typed MCP tools and
+  calls them directly. The same `mcp.json.example` works for all of the
+  JSON-config clients.
 - **Direct run** (`pi/marq` shim) — for Pi (or any agent with a shell). The
   model calls `marq run <tool> '<json>'` from bash; the shim forwards it into a
   long-lived container.
@@ -84,16 +83,6 @@ env_vars = { MARQ_OPERATOR = "marq" }
 
 Same uses as Claude Code. Docs: [Codex MCP](https://developers.openai.com/codex/mcp).
 
-## LM Studio (local model, for testing)
-
-`Program` tab → `Install` → `Edit mcp.json`, paste the `marq` entry from
-[`../mcp.json.example`](../mcp.json.example) (LM Studio uses the same
-`mcpServers` schema). Load a **tool-capable** GGUF (e.g. a recent Qwen/Llama
-that supports function calling), then chat. Docs: [LM Studio MCP](https://lmstudio.ai/docs/app/mcp).
-
-**Best for:** trying marq locally, lighter Q&A, and checking whether a given
-local model is good enough at tool-calling before you wire it into Pi.
-
 ## Pi (local, uncensored, standalone)
 
 The fully-local path — no cloud, no refusals, on-box execution. See
@@ -102,8 +91,8 @@ The fully-local path — no cloud, no refusals, on-box execution. See
 ```bash
 install -m 0755 pi/marq ~/.local/bin/marq         # user-owned dir on PATH
 marq up ~/marq/work                               # long-lived container, any workspace
-# add an LM Studio provider extension + register the marq skill in
-# ~/.pi/agent/settings.json, then run `pi` — full steps in SETUP.md
+# start llama-server, add a llama.cpp provider extension + register the marq
+# skill in ~/.pi/agent/settings.json, then run `pi` — full steps in SETUP.md
 ```
 
 **Best for:** any cyber work you want fully local on an uncensored model —
@@ -132,7 +121,7 @@ where nothing leaves the box and nothing is filtered.
 ~/.pi/agent/SYSTEM.md` (SETUP.md step 2b). Pi's default prompt frames the model
   as a coding assistant; this replaces it with "drive everything through `marq
 run`" and in testing flipped a 12B model from 300+ `curl` calls to clean,
-  audited tool use — it's the model's prompt, not your LM Studio settings. Then
+  audited tool use — it's the model's prompt, not your `llama-server` flags. Then
   lean on the skills and keep it to one tool call at a time.
 - **Long scans run in the background.** `list_jobs` / `job_status` instead of
   blocking; works the same in every client.

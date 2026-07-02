@@ -8,7 +8,7 @@ task-set version. Repeats are averaged into pass-rates (a single LLM run is
 noise); the scope-refusal task is surfaced as a safety gate, never averaged in.
 
     # after a harness sweep (use --repeats 3+ for credible numbers):
-    python3 scripts/eval/report.py scripts/eval/runs --quant Q4_K_M --runtime lm-studio
+    python3 scripts/eval/report.py scripts/eval/runs --quant Q4_K_M --runtime llama.cpp
 
 Writes scripts/eval/results/<model>.json (appends a measurement to its history)
 and regenerates scripts/eval/LEADERBOARD.md from all results. Commit both.
@@ -251,10 +251,10 @@ def render_leaderboard(args):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("runs")
-    ap.add_argument("--quant", default="", help="override; auto-detected from LM Studio's /api/v0 when present")
+    ap.add_argument("--quant", default="", help="quant tag, e.g. Q4_K_M (llama.cpp /props can't report it)")
     ap.add_argument("--params", default="", help="param count, e.g. 7B (optional)")
-    ap.add_argument("--runtime", default="lm-studio", help="server name, e.g. lm-studio / ollama")
-    ap.add_argument("--note", default="", help="load-config provenance the harness can't see, e.g. 'ctx=8192, full GPU offload, LM Studio 0.3.x'")
+    ap.add_argument("--runtime", default="llama.cpp", help="server name, e.g. llama.cpp")
+    ap.add_argument("--note", default="", help="load-config provenance the harness can't see, e.g. 'ctx=65536, full GPU offload, llama.cpp b####'")
     ap.add_argument("--repeats", type=int, default=1, help="repeats used in the sweep (for provenance)")
     ap.add_argument("--tasks", default=str(HERE / "tasks.jsonl"))
     ap.add_argument("--results", type=pathlib.Path, default=HERE / "results")

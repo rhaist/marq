@@ -12,14 +12,13 @@ want the _interaction_, and marq already emits the ground truth: the harness own
 the agent loop, so it records every tool call the model makes (`trace.jsonl`) —
 including `load_skill`, which never reaches the audit log.
 
-## Why local / LM Studio
+## Why local (llama.cpp)
 
 The harness talks to any **OpenAI-compatible** endpoint, so it runs entirely
 local and free — no per-token cost — and you can sweep several models:
 
-- **LM Studio** (default `http://localhost:1234/v1`)
-- **Ollama** (`--base-url http://localhost:11434/v1`)
-- **llama-server** / vLLM / anything OpenAI-shaped
+- **llama.cpp `llama-server`** (default `http://localhost:8080/v1`)
+- any other **OpenAI-compatible** endpoint (vLLM, …) via `--base-url`
 
 The model must support **tool calling**; models that only emit tool calls as
 plain text won't drive the loop.
@@ -28,10 +27,11 @@ plain text won't drive the loop.
 
 1. Build the image once: `docker build -t marq .` (the harness docker-runs `marq
 serve` per task with a fresh `/work`).
-2. Start LM Studio's server and download a few tool-capable models:
+2. Start `llama-server` with a tool-capable model (see
+   [`llama.cpp/README.md`](llama.cpp/README.md) for ready-to-run commands):
    ```bash
-   lms server start
-   lms ls                       # see what's downloaded; copy the model ids
+   llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
+       --host 0.0.0.0 --port 8080 --ctx-size 65536 --jinja -ngl 99
    ```
 3. Smoke the marq side (no model needed):
    ```bash
@@ -74,8 +74,8 @@ regenerating [`LEADERBOARD.md`](LEADERBOARD.md):
 ```bash
 # Use repeats for credible numbers — a single LLM run is noise:
 python3 scripts/eval/harness.py --models qwen2.5-7b-instruct --skills both --repeats 5 --temperature 0.2
-python3 scripts/eval/report.py scripts/eval/runs --quant Q4_K_M --params 7B --runtime lm-studio \
-    --repeats 5 --note "ctx=8192, full GPU offload, LM Studio 0.3.x"
+python3 scripts/eval/report.py scripts/eval/runs --quant Q4_K_M --params 7B --runtime llama.cpp \
+    --repeats 5 --note "ctx=65536, full GPU offload, llama.cpp b####"
 git add scripts/eval/results scripts/eval/LEADERBOARD.md && git commit -m "eval: qwen2.5-7b"
 ```
 
@@ -87,11 +87,11 @@ A score is only comparable alongside its context, so every measurement pins it:
   results stay valid under their version.
 - **sampling** — the harness pins and records `temperature` + `top_p` (`--temperature`
   / `--top-p`); don't rely on the server's hidden defaults.
-- **load config** — when the server is LM Studio, the harness auto-reads
-  `quant`, `arch`, and `loaded_context_length` from its native `/api/v0/models`
-  (a Q3 vs Q6 tool-calls very differently, so quant matters). Override with
-  `--quant` / add `--note` for anything the API can't see (GPU offload, server
-  version). Other runtimes (Ollama, llama-server) fall back to the flags.
+- **load config** — when the server is llama.cpp, the harness auto-reads the
+  loaded context length (`n_ctx`) and model id/path from its `/props` endpoint.
+  Quant isn't reported there (a Q3 vs Q6 tool-calls very differently, so it
+  matters) — pass `--quant`, and add `--note` for anything else the API can't see
+  (GPU offload, server build). Other runtimes fall back to the flags.
 
 ### Per-model config (`profiles.json`)
 
@@ -191,7 +191,7 @@ genuine model failure.
 
 ## Driving the GUI clients (Pi, Claude Code)
 
-The harness automates the OpenAI-endpoint path (LM Studio/Ollama/llama-server).
+The harness automates the OpenAI-endpoint path (llama.cpp; any OpenAI-compatible server).
 **Pi** and **Claude Code** run their own loops, so run the same task prompts by
 hand in those clients against the marq MCP server, then judge against the
 container's `/work` artifacts + audit trail — the rubric is client-agnostic; only

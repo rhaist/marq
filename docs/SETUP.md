@@ -7,7 +7,7 @@ the only OS-specific part is installing Docker.
 marq is your **universal cyber assistant** — it brings the tools and the
 knowledge; your client brings the model. After building the image, see
 [`CLIENTS.md`](CLIENTS.md) to pick a client (Claude Code / Codex as the expert
-brain, Pi for fully-local uncensored work, LM Studio for testing). This page is
+brain, Pi + llama.cpp for fully-local uncensored work). This page is
 just install + the two connection methods.
 
 > Advisory and knowledge work is open; **active testing is authorized-only** —
@@ -25,8 +25,8 @@ just install + the two connection methods.
 
 | Method              | Command                       | Clients                                         | Who drives the model                               |
 | ------------------- | ----------------------------- | ----------------------------------------------- | -------------------------------------------------- |
-| **MCP server**      | `marq serve` (default)        | Claude Code, Codex, LM Studio, Claude Desktop   | The client brings its own model                    |
-| **Direct run (Pi)** | `pi/marq` shim + `marq run …` | [Pi](https://pi.dev/) (local/abliterated model) | Pi drives the model; it calls `marq run` from bash |
+| **MCP server**      | `marq serve` (default)        | Claude Code, Codex, Claude Desktop              | The client brings its own model                    |
+| **Direct run (Pi)** | `pi/marq` shim + `marq run …` | [Pi](https://pi.dev/) + llama.cpp (local model) | Pi drives the model; it calls `marq run` from bash |
 
 The image is the same for both. Do the **build** once, then use the **MCP server**
 command below with any client (per-client setup is in [`CLIENTS.md`](CLIENTS.md)),
@@ -79,16 +79,21 @@ the `set_engagement` tool (from the operator's written authorization). The
 mount (`-v ~/engagements/acme:/work`) to read them straight off the host.
 
 Wire it into a client with [`mcp.json.example`](../mcp.json.example) — per-client
-steps (Claude Code, Codex, LM Studio) are in [`CLIENTS.md`](CLIENTS.md).
+steps (Claude Code, Codex, Claude Desktop) are in [`CLIENTS.md`](CLIENTS.md).
 
 ### 4. Run with a local model (Pi + the marq skill)
 
 [Pi](https://pi.dev/) is a minimal terminal agent that runs a local/abliterated
-model over an OpenAI-compatible endpoint (LM Studio / Ollama / llama-server) and
-gives the model bash. This is the fully-local way to drive marq as an all-round
-cyber agent — research, malware triage, threat-intel, GRC and standards work, and
-authorized testing — through the `pi/marq` host shim, which forwards each call
-into a long-lived container over `docker exec`.
+model and gives it bash. We drive it with **[llama.cpp](https://github.com/ggml-org/llama.cpp)'s
+`llama-server`** — the OpenAI-compatible local runtime, no GUI, fully scriptable,
+and the layer the GUI wrappers sit on anyway (going direct gets you grammar-constrained
+tool calls and reproducible flags). Pi talks to any OpenAI-compatible endpoint, so
+vLLM or another server works too — the steps below assume `llama-server`.
+
+This is the fully-local way to drive marq as an all-round cyber agent — research,
+malware triage, threat-intel, GRC and standards work, and authorized testing —
+through the `pi/marq` host shim, which forwards each call into a long-lived
+container over `docker exec`.
 
 ```bash
 # Put the shim on your PATH in a user-owned dir (don't pollute Homebrew's prefix
@@ -110,49 +115,47 @@ so all Pi needs is the `marq` skill loaded and a model. Configure Pi once
 (verified against Pi 0.80):
 
 **1. Point Pi at your local model** — Pi configures providers via an extension.
-For LM Studio, drop this at `~/.pi/agent/extensions/lm-studio.ts` (auto-discovered):
+Drop this at `~/.pi/agent/extensions/llama-cpp.ts` (auto-discovered):
 
 ```typescript
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-const BASE = "http://localhost:1234";
+const BASE = "http://localhost:8080";               // llama-server default port
 export default async function (pi: ExtensionAPI) {
-  let models: any[] = [];
+  let ctx = 65536;                                   // fallback; matches --ctx-size below
   try {
-    const data =
-      ((await (await fetch(`${BASE}/api/v0/models`)).json()) as { data: any[] })
-        .data ?? [];
-    models = data
-      .filter((m) => m.type === "llm" || m.type === "vlm")
-      .map((m) => ({
-        id: m.id,
-        name: m.id,
-        reasoning: false,
-        input: ["text"],
-        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-        contextWindow: m.loaded_context_length ?? m.max_context_length ?? 32768,
-        maxTokens: 4096,
-      }));
+    const props = (await (await fetch(`${BASE}/props`)).json()) as any;
+    ctx = props?.default_generation_settings?.n_ctx ?? ctx;
   } catch {}
-  pi.registerProvider("lm-studio", {
-    name: "LM Studio (local)",
+  pi.registerProvider("llama-cpp", {
+    name: "llama.cpp (local)",
     baseUrl: `${BASE}/v1`,
-    apiKey: "lm-studio",
+    apiKey: "llama",
     api: "openai-completions",
-    models,
+    models: [{
+      id: "gemma-uncensored",                        // just a label (see note)
+      name: "gemma-uncensored",
+      reasoning: false,
+      input: ["text"],
+      cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+      contextWindow: ctx,
+      maxTokens: 4096,
+    }],
   });
 }
 ```
 
-LM Studio's native `/api/v0/models` (vs the OpenAI `/v1/models`) reports the
-real loaded context length, so Pi sizes the window correctly. For Ollama/
-llama-server, change `BASE` and the discovery call.
+`llama-server` serves a single loaded model and ignores the request's `model`
+field, so the `id` above is just a label — name it what you like and match it in
+`defaultModel`. Pi reads the real context length from llama.cpp's `/props`
+(`n_ctx`) and sizes its window to match. (Any OpenAI-compatible server works —
+point `BASE` at it instead.)
 
 **2. Register the marq skill + model defaults** in `~/.pi/agent/settings.json`:
 
 ```json
 {
-  "defaultProvider": "lm-studio",
-  "defaultModel": "lm-studio/gemma4-12b-qat-uncensored-hauhaucs-balanced",
+  "defaultProvider": "llama-cpp",
+  "defaultModel": "llama-cpp/gemma-uncensored",
   "skills": ["/path/to/marq/pi"]
 }
 ```
@@ -162,32 +165,54 @@ Pi discovers any directory containing a `SKILL.md` (recursively), so pointing
 as the `marq` skill — kept in sync with the repo, no copy.
 
 **Recommended model:** [`Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced`](https://huggingface.co/HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced)
-(Q4_K_M) — the default above. It's uncensored (no refusals on offensive work),
-tool-capable, and fits a 12–16 GB GPU at a long context. It needs the LM Studio
-settings below to behave; without them it leaks reasoning tokens into its
-answers and (without SYSTEM.md) bypasses marq.
+(Q4_K_M). It's uncensored (no refusals on offensive work), tool-capable, and fits
+a 12–16 GB GPU at a long context. Launch it with the flags below; without them it
+leaks reasoning tokens into its answers and (without SYSTEM.md) bypasses marq.
 
-**2a. LM Studio settings for Gemma** (in the model's right-sidebar config):
+**2a. Start `llama-server` for Gemma.** Install it once — macOS: `brew install
+llama.cpp` (builds with **Metal** on Apple Silicon; CPU on Intel Macs). Linux:
+Linuxbrew `brew install llama.cpp`, a prebuilt CPU binary from the
+[llama.cpp releases](https://github.com/ggml-org/llama.cpp/releases), or a
+source/container build with **CUDA/ROCm/Vulkan** for GPU (the prebuilt Linux
+binaries are CPU-only). Then one command — these are the model's recommended
+settings baked into flags (the same values marq's eval pins in
+[`scripts/eval/profiles.json`](../scripts/eval/profiles.json), and the quickstarts
+in [`scripts/eval/llama.cpp/`](../scripts/eval/llama.cpp/)):
 
-- **Reasoning parsing** — Gemma emits its thinking inside `<|channel>thought …
-<channel|>` markers; unset, LM Studio leaks those into the reply. Enable
-  reasoning parsing and set **Start String** `<|channel>thought`, **End String**
-  `<channel|>` so the block is split out of the final answer.
-  (Background: [enabling Gemma thinking mode in LM Studio](https://antonioleiva.com/enable-gemma-thinking-mode-lm-studio-opencode).)
-- **Sampling** — Google's official Gemma config is temperature `1.0`, top_p
-  `0.95`, top_k `64` (nothing else). The HauhauCS _"Balanced"_ uncensored build
-  ships a calmer community preset — temperature `0.6`, top_p `0.9`, top_k `64`,
-  min_p `0.05`, repeat_penalty `1.1` — which is what marq's eval runs that model
-  under (`scripts/eval/profiles.json`). Use Google's 1.0 set for the stock
-  `-it` model; use the Balanced preset for the HauhauCS build. Either is fine —
-  it's the smallest lever (see impact order below).
-- **Context length** — load it as high as VRAM allows (the model is 262 K
-  native). Tool outputs (nuclei/katana dumps) are large; a short window truncates
-  them. Pi reads the loaded length from LM Studio's `/api/v0/models` and sizes its
-  window to match.
+```bash
+# Uncensored "Balanced" build (the default above). -hf pulls the GGUF from HF.
+llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
+  --host 0.0.0.0 --port 8080 -ngl 99 --ctx-size 65536 --jinja \
+  -fa on -ctk q8_0 -ctv q8_0 \
+  --temp 0.6 --top-p 0.9 --top-k 64 --min-p 0.05 --repeat-penalty 1.1
+```
 
-Impact order if it misbehaves: **SYSTEM.md (2b) ≫ context length ≫ reasoning
-parsing ≫ sampling.** SYSTEM.md decides whether it uses marq at all; the rest is
+- **`--jinja`** applies the model's chat template so **tool calls parse** — the
+  single most important flag for driving marq. (If the model exposes
+  chain-of-thought and it leaks into replies, add `--reasoning-format deepseek`
+  to route it into a separate `reasoning_content` field.)
+- **`-fa on` + `-ctk q8_0 -ctv q8_0`** — the memory win that makes 64K context
+  fit on a 12–16 GB GPU. `-fa on` is flash attention (exact, not lossy; faster
+  long-context prefill, smaller attention footprint) and is a prerequisite for
+  the KV-cache flags; `-ctk/-ctv q8_0` quantize the K/V cache (default `f16`),
+  ~halving its VRAM at negligible quality cost. Both work on **Metal**
+  (Apple Silicon) and **CUDA/ROCm/Vulkan** (Linux); keep K and V the **same**
+  type (mixed quant fails on Metal). Drop all three for CPU-only.
+- **Platform:** works on Linux and macOS. Apple Silicon uses unified memory, so
+  "12–16 GB GPU" means a 16 GB+ Mac (a 12B Q4 is ~7–8 GB). Intel Macs and
+  CPU-only Linux run but are slow for a 12B — drop `-ngl -fa -ctk -ctv` there.
+- **`--ctx-size`** as high as VRAM allows (Gemma is 262 K native). Tool outputs
+  (nuclei/katana dumps) are large; a short window truncates them.
+- **Sampling** — the flags above are the HauhauCS _"Balanced"_ preset. For the
+  **stock** Google `-it` model use Google's official set instead (`--temp 1.0
+  --top-p 0.95 --top-k 64`). Either is fine — it's the smallest lever (see impact
+  order). `-ngl 99` offloads all layers to the GPU.
+- Flaky small model emitting malformed tool JSON? llama.cpp can **constrain
+  decoding** to a grammar/JSON schema (`--grammar-file`, or `json_schema` in the
+  request) — the reliability lever GUI wrappers don't expose.
+
+Impact order if it misbehaves: **SYSTEM.md (2b) ≫ context length ≫ `--jinja`
+≫ sampling.** SYSTEM.md decides whether it uses marq at all; the rest is
 output quality.
 
 **2b. Replace Pi's system prompt with marq's** (important for smaller models):
@@ -207,7 +232,7 @@ you also run Pi for non-marq work.) The `pi/SKILL.md` catalog is still appended.
 **3. Verify** (no model call, so it won't disturb anything):
 
 ```bash
-pi --list-models                  # → lists `lm-studio  qwen3-…  41.0K …`
+pi --list-models                  # → lists `llama-cpp  gemma-uncensored  64.0K …`
 ```
 
 Then just run `pi` in an engagement dir. The model loads the marq skill and
@@ -259,8 +284,10 @@ Same as macOS step 3 above — identical command.
 ### 4. Run with a local model (Pi + the marq skill)
 
 Same as macOS step 4 — install the `pi/marq` shim, `marq up <dir>`, and drive it
-from Pi with [`pi/SKILL.md`](../pi/SKILL.md) loaded. Configure the model runtime
-(Ollama is the practical choice on a headless box) in Pi, not in marq.
+from Pi with [`pi/SKILL.md`](../pi/SKILL.md) loaded. Run `llama-server` on the box
+(see the install options in macOS step 2a; on a headless GPU box, a source or
+container build with CUDA/ROCm/Vulkan) and point Pi at it — the runtime lives in
+Pi, not in marq.
 
 > **Bind-mount permissions (Linux).** The container runs as the non-root `marq`
 > user, so the engagement dir you pass to `marq up` must be writable by it —

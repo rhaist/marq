@@ -1,6 +1,6 @@
 {
-  "//": "MCP server config for marq — works as-is in Claude Code (.mcp.json),",
-  "//2": "Claude Desktop, and LM Studio (Program > Edit mcp.json). Codex uses TOML;",
+  "//": "MCP server config for marq — works as-is in Claude Code (.mcp.json)",
+  "//2": "and Claude Desktop. Codex uses TOML;",
   "//3": "see docs/CLIENTS.md. Paste the 'marq' entry into your mcpServers and adjust",
   "//4": "env. stdio (-i keeps it open). Engagement + scope are set at runtime by",
   "//5": "the model via the set_engagement tool, not here; operator stays env-set.",

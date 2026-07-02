@@ -20,84 +20,56 @@ answer it — on whatever model you choose, local or frontier.
 "Build the ransomware incident runbook."               → IR + resilience
 ```
 
-**~80 security tools + ~70 expert playbooks across 14 domains, in one auditable
-binary.** You bring the brain — [Claude Code or Codex](docs/CLIENTS.md) for deep
-reasoning, a local uncensored model in [Pi](https://pi.dev/) for hands-on
-offensive work, LM Studio to test.
+**~80 security tools + ~70 expert playbooks (current 2026 standards), in one
+auditable binary.** You bring the model; marq brings the tools and the knowledge.
 
-> **Authorized use.** Advisory and knowledge work is open; scanning and
-> exploitation are authorized-only and audit-logged — see
-> [`docs/SECURITY.md`](docs/SECURITY.md).
-
----
-
-## Why
-
-marq is two layers your model drives:
-
-- **Execution** — ~80 wrapped Kali tools (recon, web, AD/internal, exploitation,
-  hash cracking, malware static analysis, OSINT) called as typed tools. Every
-  call is audit-logged, file access sandboxed, findings render to a report.
-- **Knowledge** — ~70 on-demand skill playbooks across 14 domains (offensive,
-  malware, threat-intel, sec-ops, architecture, GRC, standards & regulation
-  (EU + US), CISO, red/purple teaming, resilience, human factors,
-  DevSecOps/privacy), web-researched against current (2026) standards. Loaded
-  with `load_skill`, they tell the model _how_ to use the tools and _what_ to do
-  where there's no tool to run.
-
-One binary, two ways in, one registry.
-
-| Way in                        | What it is                                                          | Drives the model                       |
-| :---------------------------- | :------------------------------------------------------------------ | :------------------------------------- |
-| **MCP server** (`marq serve`) | Stdio JSON-RPC; plug into Claude Desktop, LM Studio, any MCP client | The client                             |
-| **Direct run** (`marq run`)   | Run one tool by name; a terminal agent calls it from bash via `pi/` | A local model in [Pi](https://pi.dev/) |
-
-marq runs the tools. The model and the agent loop live in the client, so
-every tool, resource, and audit record behaves the same either way.
-
----
-
-## Quick start
+## Start
 
 ```bash
-# 1. Get the image — pull the prebuilt one (skips the slow Kali build; amd64):
+# 1. Get marq (prebuilt image — or build from source: docker build -t marq .)
 docker pull ghcr.io/rhaist/marq && docker tag ghcr.io/rhaist/marq marq
-#    …or build it yourself (large — Kali base + full tool suite; first build is slow):
-docker build -t marq .
 
-# 2. Smoke-test a tool (nmap/masscan/naabu need file-capability passthrough;
-#    other tools run with a plain `docker run`)
-docker run --rm --cap-add NET_RAW --cap-add NET_ADMIN marq nmap --version
-
-# 3. Run the MCP server (waits for JSON-RPC on stdin; banner → stderr)
-docker run --rm -i marq
+# 2. Plug into Claude Code (any MCP client works)
+claude mcp add marq -- docker run --rm -i \
+  -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR=marq marq
 ```
 
-**Pick the brain for the job** — marq brings the tools and knowledge; your client
-brings the model:
+Restart the client and ask: _"Load the nis2-dora skill — what's our breach
+clock?"_ or _"Set scope to scanme.nmap.org, then run a quick nmap."_ (Scanning
+tools also need `--cap-add NET_RAW --cap-add NET_ADMIN`; full hardened args in
+[`mcp.json.example`](mcp.json.example).)
 
-- **Claude Code / Codex** (frontier model = the expert) — `claude mcp add` /
-  `codex mcp add` and point it at the [`mcp.json.example`](mcp.json.example) args.
-  Best for the reasoning-heavy domains: architecture, GRC, threat modeling, IR
-  leadership, writing the report.
-- **Pi** (local/abliterated model = standalone, uncensored) — install the
-  `pi/marq` shim, `marq up <dir>`, load [`pi/SKILL.md`](pi/SKILL.md). Best for
-  hands-on offensive ops with nothing leaving the box.
-- **LM Studio** (local model = testing) — paste the `marq` entry into `mcp.json`.
+**Two ways to use it:**
 
-Full guidance — which client and model for which work — in
-**[`docs/CLIENTS.md`](docs/CLIENTS.md)**. Per-OS install:
-**[`docs/SETUP.md`](docs/SETUP.md)**. Tools, env vars & API keys:
-**[`docs/USAGE.md`](docs/USAGE.md)**.
+- **Frontier brain** — Claude Code / Codex for reasoning-heavy work (architecture,
+  GRC, threat modeling, IR, the report). → [`docs/CLIENTS.md`](docs/CLIENTS.md)
+- **Local & uncensored** — a local model via Pi + llama.cpp for hands-on offensive
+  ops, nothing leaving the box. → [`docs/SETUP.md`](docs/SETUP.md#4-run-with-a-local-model-pi--the-marq-skill)
+
+> **Authorized use.** Advisory/knowledge is open; scanning & exploitation are
+> authorized-only and audit-logged — [`docs/SECURITY.md`](docs/SECURITY.md).
 
 ---
 
-## Features
+## What you get
 
-### Full tool suite on a Kali base
+- **Execution** — ~80 wrapped Kali tools (recon, web, AD/internal, exploitation,
+  cred cracking, malware static analysis, OSINT), each audit-logged and sandboxed;
+  findings render to `findings.md` / `.csv` (with optional CVSS + CWE).
+- **Knowledge** — ~70 `load_skill` playbooks across 14 domains, web-researched to
+  current (2026) standards, telling the model _how_ to use the tools and _what_ to
+  do where there's no tool: offensive, malware, threat-intel, sec-ops, architecture,
+  GRC, standards & EU/US regulation, CISO, red/purple, resilience, human factors,
+  DevSecOps/privacy.
+- **Safe by construction** — every call funnels through one choke point: an
+  append-only audit log, timeouts, output caps, a `/work`+`/tmp` file sandbox, and
+  a non-root, capability-dropped container.
+
+<details>
+<summary><b>Full tool suite</b> — ~80 tools on a Kali base (click to expand)</summary>
 
 | Category                              | Tools                                                                                                                                                                                                                                                                            |
-| :------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| :------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Recon / network**                   | `nmap` · `masscan` · `naabu` · `dnsx` · `dnsrecon` · `subfinder` · `httpx_probe` · `dns_lookup` · `whois_lookup` · `ssh_audit` · `fping_sweep` · `snmp_walk` · `snmp_check` · `snmp_brute` · `smtp_user_enum` · `smtp_test` · `asnmap` · `cdncheck` · `censys_search`            |
 | **OSINT — org/domain**                | `theharvester` · `spiderfoot` · `shodan_host` · `shodan_search` · `gitleaks` · `trufflehog` · `gau_urls` · `wayback_urls` · `exif_metadata`                                                                                                                                      |
 | **OSINT — people**                    | `sherlock` · `maigret_username` · `holehe_email` · `h8mail_breach` · `phoneinfoga`                                                                                                                                                                                               |
@@ -111,28 +83,10 @@ Full guidance — which client and model for which work — in
 | **Knowledge**                         | `load_skill`                                                                                                                                                                                                                                                                     |
 | **Escape hatch** (opt-in)             | `run_shell`                                                                                                                                                                                                                                                                      |
 
-### Built for engagements
+</details>
 
-- **Findings deliverable** — `report_finding` / `render_report` capture
-  validated issues (optional CVSS 3.1 vector → computed base score, plus CWE
-  & references) and write a severity-sorted `findings.md` + `findings.csv`.
-- **~70-skill library across 14 domains** — `load_skill` pulls playbooks for
-  offensive, malware, threat-intel, sec-ops, architecture, GRC, standards &
-  regulation (EU + US), CISO, red/purple teaming, resilience, physical/human, and
-  DevSecOps/privacy — web-researched against current standards, tied to the tool
-  names and findings output, so a small model knows what to do where there's no tool.
-- **Background-job visibility** — `list_jobs` / `job_status` for long scans
-  (e.g. spiderfoot) instead of polling files by hand.
-- **Sandboxed working files** (`/work`, `/tmp`) — the model stages inputs and
-  reads output back from disk, nowhere else.
-- **Audit log on every call** — append-only JSON lines with operator,
-  engagement, target, and the full argument vector. `fsync`'d per write.
-- **Hardened container** — non-root, capabilities dropped (only what SYN
-  scans need), `no-new-privileges`, opt-out raw-shell escape hatch.
-
----
-
-## How it works
+<details>
+<summary><b>How it works</b> — one registry, two front-ends (click to expand)</summary>
 
 ```
 MCP client  ──stdio JSON-RPC──▶  marq serve  ┐
@@ -153,31 +107,27 @@ terminal agent (Pi) ──bash──▶  pi/marq shim ─┤   both hit the same
                                              │
                                   runner.Run ──▶ audit.jsonl (every call)
 
-           load_skill ──▶ skills library (markdown, ~70 playbooks / 14 domains:
-                          offensive, malware, threat-intel, sec-ops, architecture,
-                          GRC, standards, CISO, resilience, human factors, …)
+           load_skill ──▶ skills library (markdown, ~70 playbooks / 14 domains)
 ```
 
 Every exec tool funnels through `internal/runner/runner.go::Run` — the single
-point where audit logging, timeouts, and output truncation happen (and where
-hard scope-enforcement would go to move beyond logging-only guardrails).
+point for audit logging, timeouts, and output truncation.
+
+</details>
 
 ---
 
 ## Documentation
 
-| Doc                                    | What's in it                                              |
-| :------------------------------------- | :-------------------------------------------------------- |
-| [`docs/SETUP.md`](docs/SETUP.md)       | Per-OS install for macOS & Debian Testing, both run modes |
-| [`docs/USAGE.md`](docs/USAGE.md)       | Every tool, env vars, API keys, reading the audit log     |
-| [`docs/SECURITY.md`](docs/SECURITY.md) | Legal/ethical baseline, the guardrail model, hardening    |
-
----
+| Doc                                    | What's in it                                                       |
+| :------------------------------------- | :---------------------------------------------------------------- |
+| [`docs/SETUP.md`](docs/SETUP.md)       | Per-OS install (macOS & Debian), both run modes                    |
+| [`docs/CLIENTS.md`](docs/CLIENTS.md)   | Pick a client/model — Claude Code, Codex, Pi + llama.cpp           |
+| [`docs/USAGE.md`](docs/USAGE.md)       | Every tool, env vars, API keys, reading the audit log              |
+| [`docs/SECURITY.md`](docs/SECURITY.md) | Legal/ethical baseline, the guardrail model, hardening             |
 
 ## License
 
-**GNU AGPLv3** — see [`LICENSE`](LICENSE). Copyright © 2026 marq contributors.
-marq is free software: you may use, study, modify and share it under the AGPLv3;
-if you run a modified version as a network service, you must offer your users its
-source. Provided for authorized security testing and education, **with no
-warranty** — use responsibly and legally.
+**GNU AGPLv3** — see [`LICENSE`](LICENSE). © 2026 marq contributors. Free software;
+run a modified version as a network service and you must offer users its source.
+For authorized security testing and education, **no warranty** — use responsibly.
