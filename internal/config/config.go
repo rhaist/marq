@@ -10,7 +10,14 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 )
+
+// engMu guards the only mutable fields of C — Engagement and ScopeNote — which
+// set_engagement can write while, in `serve` mode, the go-sdk dispatches other
+// tool handlers concurrently (their audit records read the same fields). Every
+// other field is set once at Load() and read-only thereafter.
+var engMu sync.RWMutex
 
 // Config is the resolved configuration for a server/agent run.
 type Config struct {
@@ -115,6 +122,7 @@ func readContext(workDir string) (engagement, scope string) {
 // processes inherit them. Operator is deliberately not settable here — it stays
 // the human/env-set attribution anchor.
 func SetEngagement(engagement, scope string) error {
+	engMu.Lock()
 	if engagement != "" {
 		C.Engagement = engagement
 	}
@@ -122,7 +130,18 @@ func SetEngagement(engagement, scope string) error {
 		C.ScopeNote = scope
 	}
 	b, _ := json.Marshal(engagementContext{C.Engagement, C.ScopeNote})
+	engMu.Unlock()
 	return os.WriteFile(contextPath(C.WorkDir), b, 0o644)
+}
+
+// Attribution returns the current engagement label and scope note under a read
+// lock — the race-free way to read the two mutable fields of C. Callers on the
+// concurrent path (audit records, banner, report rendering) must use this rather
+// than reading C.Engagement / C.ScopeNote directly.
+func Attribution() (engagement, scope string) {
+	engMu.RLock()
+	defer engMu.RUnlock()
+	return C.Engagement, C.ScopeNote
 }
 
 // C is the process-wide configuration, resolved once at startup (mirrors the
@@ -130,8 +149,10 @@ func SetEngagement(engagement, scope string) error {
 var C = Load()
 
 // Banner returns the authorization notice shown to the operator before tools run.
-func (c Config) Banner() string {
-	scope := c.ScopeNote
+// Pointer receiver + Attribution() so it doesn't copy/read the mutable fields
+// while set_engagement may be writing them concurrently.
+func (c *Config) Banner() string {
+	engagement, scope := Attribution()
 	if scope == "" {
 		scope = "(none provided — set MARQ_SCOPE)"
 	}
@@ -145,6 +166,6 @@ func (c Config) Banner() string {
 			"  engagement : %s\n"+
 			"  scope note : %s\n"+
 			"  audit log  : %s",
-		c.Operator, c.Engagement, scope, c.AuditLog,
+		c.Operator, engagement, scope, c.AuditLog,
 	)
 }

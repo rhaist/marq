@@ -100,24 +100,25 @@ func Run(tool string, argv []string, opts Opts) Result {
 		}
 	}
 
-	if _, err := exec.LookPath(argv[0]); err != nil {
-		code := 127
-		return Result{Tool: tool, Argv: argv, ExitCode: &code,
-			Stderr: "binary not found in image: " + argv[0], TimeoutS: limit}
-	}
-
 	target := opts.Target
 	if target == "" {
 		target = "(unspecified)"
 	}
+	// Audit first (fail closed) so even an attempt to run a missing/renamed binary
+	// is attributable — the start record is the core control, never skip it.
 	id, auditErr := audit.LogStart(tool, target, argv)
 	if auditErr != nil {
-		// Fail closed: the audit trail is the core control, so never run a tool
-		// whose start record couldn't be persisted.
 		code := 126
 		return Result{Tool: tool, Argv: argv, ExitCode: &code, TimeoutS: limit,
 			Stderr: "blocked: could not persist audit record (" + auditErr.Error() +
 				") — refusing to run unlogged. Set MARQ_AUDIT_LOG to a writable path."}
+	}
+
+	if _, err := exec.LookPath(argv[0]); err != nil {
+		code := 127
+		audit.LogEnd(id, tool, &code, 0, false, "binary not found: "+argv[0])
+		return Result{Tool: tool, Argv: argv, ExitCode: &code,
+			Stderr: "binary not found in image: " + argv[0], TimeoutS: limit}
 	}
 	start := time.Now()
 
@@ -191,8 +192,11 @@ func RunBackground(tool string, argv []string, target string) (jobDir string, er
 			") — refusing to run unlogged. Set MARQ_AUDIT_LOG to a writable path."
 	}
 	// Wrap so the child redirects its streams and records its own exit code.
-	cmdStr := fmt.Sprintf("( %s ) >%s 2>%s; echo \"exit=$?\" >%s",
-		shellword.Join(argv), shellword.Quote(out), shellword.Quote(errf), shellword.Quote(status))
+	// `timeout` caps the background job at the same ceiling the sync path clamps
+	// to, so a detached Active scanner can't run unbounded past the authorized
+	// window (a timed-out job records exit=124).
+	cmdStr := fmt.Sprintf("timeout %d %s >%s 2>%s; echo \"exit=$?\" >%s",
+		config.C.MaxCommandTimeout, shellword.Join(argv), shellword.Quote(out), shellword.Quote(errf), shellword.Quote(status))
 	c := exec.Command("/bin/bash", "-c", cmdStr)
 	c.SysProcAttr = &syscall.SysProcAttr{Setsid: true} // detach into its own session
 	c.Stdin, c.Stdout, c.Stderr = nil, nil, nil

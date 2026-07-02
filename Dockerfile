@@ -104,7 +104,7 @@ RUN case "${TARGETARCH:-amd64}" in \
         arm64) PA=arm64 ;; \
         *)     PA=x86_64 ;; \
     esac \
-    && curl -sSL "https://github.com/sundowndev/phoneinfoga/releases/download/v2.11.0/phoneinfoga_Linux_${PA}.tar.gz" \
+    && curl -fsSL "https://github.com/sundowndev/phoneinfoga/releases/download/v2.11.0/phoneinfoga_Linux_${PA}.tar.gz" \
         | tar -xz -C /usr/local/bin phoneinfoga \
     && chmod +x /usr/local/bin/phoneinfoga
 

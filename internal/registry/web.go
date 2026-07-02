@@ -35,12 +35,14 @@ func web() []Tool {
 		{
 			Name:   "nikto",
 			Active: true,
-			Desc:   "Run a Nikto web server scan against a URL or host.",
+			Desc: "Run a Nikto web server scan against a URL or host. Runs in the background (a full " +
+				"scan exceeds an interactive window and would blow the client call timeout) — poll with " +
+				"list_jobs / job_status.",
 			Params: []Param{
 				{Name: "target", Type: StringParam, Desc: "URL or host", Required: true},
 			},
 			Build: func(a Args) Invocation {
-				return Invocation{Argv: []string{"nikto", "-h", a.S("target")}, Target: a.S("target")}
+				return Invocation{Argv: []string{"nikto", "-h", a.S("target")}, Target: a.S("target"), Background: true}
 			},
 		},
 		{
@@ -101,14 +103,16 @@ func web() []Tool {
 		{
 			Name:   "sqlmap",
 			Active: true,
-			Desc: "Test a URL for SQL injection with sqlmap. `--batch` runs non-interactively with " +
-				"defaults. Add raw flags via `options`.",
+			Desc: "Test a URL for SQL injection with sqlmap. Always runs `--batch` (non-interactive); " +
+				"add raw flags via `options`.",
 			Params: []Param{
 				{Name: "url", Type: StringParam, Desc: "target URL", Required: true},
-				{Name: "options", Type: StringParam, Desc: "raw sqlmap flags", Default: "--batch"},
+				{Name: "options", Type: StringParam, Desc: "raw sqlmap flags", Default: ""},
 			},
 			Build: func(a Args) Invocation {
-				argv := []string{"sqlmap", "-u", a.S("url")}
+				// --batch is hard-coded (not in an overridable default) so passing
+				// `options` can never drop it and leave sqlmap prompting -> hang.
+				argv := []string{"sqlmap", "-u", a.S("url"), "--batch"}
 				argv = append(argv, shellword.Split(a.S("options"))...)
 				return Invocation{Argv: argv, Target: a.S("url")}
 			},
@@ -194,7 +198,8 @@ func web() []Tool {
 			Active: true,
 			Desc: "Analyse a host's SSL/TLS configuration with testssl.sh: protocols, ciphers, cert chain " +
 				"and known TLS vulnerabilities (Heartbleed, ROBOT, etc.). `host` is host:port (port " +
-				"defaults to 443). Extra flags via `options`. Thorough — can take a while.",
+				"defaults to 443). Extra flags via `options`. Thorough — runs in the background; poll with " +
+				"list_jobs / job_status.",
 			Params: []Param{
 				{Name: "host", Type: StringParam, Desc: "host:port", Required: true},
 				{Name: "options", Type: StringParam, Desc: "extra raw flags", Default: ""},
@@ -203,7 +208,7 @@ func web() []Tool {
 				argv := []string{"testssl", "--quiet", "--color", "0"}
 				argv = append(argv, shellword.Split(a.S("options"))...)
 				argv = append(argv, a.S("host"))
-				return Invocation{Argv: argv, Target: a.S("host")}
+				return Invocation{Argv: argv, Target: a.S("host"), Background: true}
 			},
 		},
 		{
@@ -274,7 +279,8 @@ func web() []Tool {
 			Name: "paramspider",
 			Desc: "Discover hidden injectable parameters for a domain with paramspider. " +
 				"Crawls and extracts URLs with parameters, excluding common noise. `domain` " +
-				"is the target domain.",
+				"is the target domain. NB: results are written to /work/results/<domain>.txt (not " +
+				"stdout) — read them back with read_file.",
 			Params: []Param{
 				{Name: "domain", Type: StringParam, Desc: "target domain", Required: true},
 				{Name: "options", Type: StringParam, Desc: "extra paramspider flags", Default: ""},

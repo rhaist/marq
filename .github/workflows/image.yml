@@ -35,8 +35,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # One job per architecture on a NATIVE runner (no QEMU — emulating the Kali apt
+  # install would take hours). Each builds, e2e-tests its own arch, and on main
+  # pushes an arch-tagged image. The manifest job then stitches them into a single
+  # multi-arch tag so `docker pull` picks the right arch (native arm64 on Apple
+  # Silicon instead of emulated amd64).
   image:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v7
       - name: free disk space
@@ -48,10 +61,29 @@ jobs:
         run: docker build -t marq .
       - name: e2e (image)
         run: bash scripts/e2e-image.sh --image marq
-      # Publish only after e2e passes, and only from main (a dispatch on main
-      # publishes too; PRs and other branches never do). Reuses the tested image.
-      - name: publish to GHCR
+      # Push an arch-tagged image after e2e passes, only from main. The manifest
+      # job below combines the arch tags into the user-facing :latest / :sha-….
+      - name: publish arch image to GHCR
         if: github.ref == 'refs/heads/main'
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTOR: ${{ github.actor }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          ARCH: ${{ matrix.arch }}
+        run: |
+          echo "$TOKEN" | docker login ghcr.io -u "$ACTOR" --password-stdin
+          img="ghcr.io/${REPO,,}"
+          docker tag marq "$img:sha-${SHA::7}-$ARCH"
+          docker push "$img:sha-${SHA::7}-$ARCH"
+
+  # Combine the per-arch images into one multi-arch manifest list.
+  manifest:
+    needs: image
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: create multi-arch manifest
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ACTOR: ${{ github.actor }}
@@ -60,7 +92,8 @@ jobs:
         run: |
           echo "$TOKEN" | docker login ghcr.io -u "$ACTOR" --password-stdin
           img="ghcr.io/${REPO,,}"
-          docker tag marq "$img:latest"
-          docker tag marq "$img:sha-${SHA::7}"
-          docker push "$img:latest"
-          docker push "$img:sha-${SHA::7}"
+          sha="sha-${SHA::7}"
+          for tag in "$sha" latest; do
+            docker buildx imagetools create -t "$img:$tag" \
+              "$img:$sha-amd64" "$img:$sha-arm64"
+          done

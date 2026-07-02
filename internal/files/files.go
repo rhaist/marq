@@ -49,9 +49,15 @@ func resolve(path string) (string, error) {
 	return "", fmt.Errorf("path %q is outside the allowed area (%s)", path, strings.Join(allowedRoots, ", "))
 }
 
-// audited runs fn with the same start/end audit envelope as tool runs.
+// audited runs fn with the same start/end audit envelope as tool runs, and
+// fails closed like runner.Run: if the start record can't be persisted, the
+// file op is refused rather than run unlogged.
 func audited(op, path string, fn func() (string, error)) string {
-	id, _ := audit.LogStart(op, path, []string{op, path})
+	id, auditErr := audit.LogStart(op, path, []string{op, path})
+	if auditErr != nil {
+		return "blocked: could not persist audit record (" + auditErr.Error() +
+			") — refusing to run unlogged. Set MARQ_AUDIT_LOG to a writable path."
+	}
 	out, err := fn()
 	code := 0
 	errMsg := ""
@@ -120,6 +126,9 @@ func ReadFile(path string, maxBytes int) string {
 		budget := config.C.MaxOutputChars
 		if maxBytes > 0 && maxBytes < budget {
 			budget = maxBytes
+		}
+		if budget < 1 { // guard a misconfigured MARQ_MAX_OUTPUT<=0 (s[:budget] would panic)
+			budget = 1
 		}
 		data, err := os.ReadFile(real)
 		if err != nil {

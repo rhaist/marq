@@ -103,7 +103,7 @@ func Report(title, severity, target, evidence, recommendation, cvss, cwe, refere
 		case explicit:
 			sev = normalizeSeverity(severity)
 		case cvssRating != "":
-			sev = cvssRating // derive only when the caller omitted severity
+			sev = normalizeSeverity(cvssRating) // derive only when the caller omitted severity; "none" -> info, not rank-0
 		default:
 			sev = "info"
 		}
@@ -182,7 +182,8 @@ func RenderReport() string {
 func renderMarkdown(all []Finding) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "# Penetration Test Findings\n\n")
-	fmt.Fprintf(&b, "_Operator: %s · Engagement: %s_\n\n", config.C.Operator, config.C.Engagement)
+	engagement, _ := config.Attribution()
+	fmt.Fprintf(&b, "_Operator: %s · Engagement: %s_\n\n", config.C.Operator, engagement)
 	counts := map[string]int{}
 	for _, f := range all {
 		counts[f.Severity]++
@@ -229,9 +230,26 @@ func writeCSV(path string, all []Finding) error {
 		if f.CVSSScore > 0 {
 			cvssScore = fmt.Sprintf("%.1f", f.CVSSScore)
 		}
-		_ = w.Write([]string{f.ID, f.Severity, cvssScore, f.CVSS, f.CWE, f.Title, f.Target, f.Recommendation, f.TS})
+		row := []string{f.ID, f.Severity, cvssScore, f.CVSS, f.CWE, f.Title, f.Target, f.Recommendation, f.TS}
+		for i, v := range row {
+			row[i] = csvSanitize(v)
+		}
+		_ = w.Write(row)
 	}
 	return w.Error()
+}
+
+// csvSanitize defuses spreadsheet formula injection: a field a model or target
+// controls that begins with =, +, -, @, tab, or CR is treated as a formula by
+// Excel/Sheets on open. Prefix it with a single quote so it renders as text.
+func csvSanitize(s string) string {
+	if s == "" {
+		return s
+	}
+	if strings.IndexByte("=+-@\t\r", s[0]) >= 0 {
+		return "'" + s
+	}
+	return s
 }
 
 func summarizeCounts(counts map[string]int) string {

@@ -25,6 +25,7 @@ import argparse, json, os, re, select, shlex, subprocess, sys, time, urllib.requ
 
 DEFAULT_MARQ_CMD = (
     "docker run --rm -i -v {work}:/work -e MARQ_OPERATOR=eval "
+    "-e MARQ_TIMEOUT "  # inherit the per-tool runtime cap set in spawn_marq's env
     "--cap-add NET_RAW --cap-add NET_ADMIN marq"
 )
 
@@ -192,6 +193,13 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
         tools = mcp.list_tools()
         if not skills_on:
             tools = [t for t in tools if t["name"] != "load_skill"]
+            # NOTE (known confound): this bare prompt differs from the skills-on
+            # arm's full server instructions (scope-first + methodology +
+            # reporting briefing), so the measured "lift" reflects briefing+skills
+            # combined, not the skill content alone. Kept as-is to preserve
+            # comparability with the committed LEADERBOARD; revisit as a
+            # methodology change (hold this prompt identical to the on-arm, minus
+            # load_skill) if isolating the knowledge-layer effect becomes the goal.
             system = ("You are a security operator with the following tools. Use them to "
                       "complete the task. Only act within authorized scope.")
         else:

@@ -59,7 +59,12 @@ off-box (below), or make it append-only at the filesystem level.
 - **Capabilities dropped**: `cap_drop: ALL`, re-adding only `NET_RAW`,
   `NET_ADMIN`, `NET_BIND_SERVICE` (needed for SYN scans). `nmap`/`masscan`/`naabu`
   get exactly those file capabilities via `setcap`, so no root is required.
-- **`no-new-privileges`** is set in the sample run configs.
+- **`no-new-privileges`** is set in the sample run configs. Note the tradeoff:
+  the kernel does not apply file capabilities across `execve` under
+  `no_new_privs`, so with it set the `setcap` grant above is inert — `masscan`/
+  `naabu` fail and `nmap -sS` degrades to a TCP-connect scan. Keep it for the
+  hardening; drop it (per `mcp.json.example`) only if you need raw-socket SYN
+  scans. TCP-connect scanning works under either configuration.
 - **No network port is opened.** Transport is stdio only; the MCP client spawns
   the container and talks over stdin/stdout. There is no listening service to
   attack. With the `pi/marq` shim, the agent reaches tools via `docker exec` into

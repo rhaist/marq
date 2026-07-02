@@ -32,6 +32,11 @@ case "${1:-}" in
       -v "$(cd "$work" && pwd):/work" \
       ${MARQ_ENV_FILE:+--env-file "$MARQ_ENV_FILE"} \
       "$IMG" sleep infinity >/dev/null
+    # Per-container jwt_tool keypair. The entrypoint only regenerates it on the
+    # serve path; the shim starts `sleep infinity` (exec'd verbatim, skipping
+    # that), so do it here — otherwise every shim container reuses the one keypair
+    # baked at build time, defeating the unique-per-container IOC.
+    "$ENGINE" exec "$C" sh -c 'rm -rf "$HOME/.jwt_tool"; jwt_tool x >/dev/null 2>&1 || true' || true
     echo "marq up: container '$C', /work -> $(cd "$work" && pwd)"
     ;;
   down)

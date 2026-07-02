@@ -198,13 +198,16 @@ func recon() []Tool {
 		{
 			Name:   "snmp_check",
 			Active: true,
-			Desc:   "Quick SNMP enumeration with snmpcheck.",
+			Desc:   "Quick SNMP enumeration with snmp-check.",
 			Params: []Param{
 				{Name: "host", Type: StringParam, Desc: "SNMP host", Required: true},
 				{Name: "community", Type: StringParam, Desc: "community string", Default: "public"},
 			},
 			Build: func(a Args) Invocation {
-				return Invocation{Argv: []string{"snmpcheck", "-t", a.S("host"), "-c", a.S("community")}, Target: a.S("host")}
+				// snmp-check (Cantoni's CLI enumerator) takes the target positionally;
+				// -c sets the community. NB: the hyphen-less `snmpcheck` is an unrelated
+				// Perl/Tk GUI tool that crashes headless — do not use it.
+				return Invocation{Argv: []string{"snmp-check", "-c", a.S("community"), a.S("host")}, Target: a.S("host")}
 			},
 		},
 		{
@@ -281,7 +284,7 @@ func recon() []Tool {
 			Desc: "Search Censys for exposed assets. Requires CENSYS_API_ID and CENSYS_API_SECRET env vars.",
 			Params: []Param{
 				{Name: "query", Type: StringParam, Desc: "Censys query", Required: true},
-				{Name: "index", Type: StringParam, Desc: "hosts/certs/v2", Default: "hosts"},
+				{Name: "index", Type: StringParam, Desc: "hosts or certificates", Default: "hosts"},
 				{Name: "options", Type: StringParam, Desc: "extra censys flags", Default: ""},
 			},
 			Build: func(a Args) Invocation {
@@ -289,7 +292,7 @@ func recon() []Tool {
 				// the child process (runner doesn't override cmd.Env), so the old
 				// `/bin/bash -c` export dance was redundant and let `index`/`options`
 				// inject shell commands. query/index are discrete args now.
-				argv := []string{"censys", "search", a.S("query"), "--type", a.S("index")}
+				argv := []string{"censys", "search", a.S("query"), "--index-type", a.S("index")}
 				argv = append(argv, shellword.Split(a.S("options"))...)
 				return Invocation{Argv: argv, Target: a.S("query")}
 			},

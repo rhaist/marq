@@ -5,6 +5,7 @@
   "//4": "env. stdio (-i keeps it open). Engagement + scope are set at runtime by",
   "//5": "the model via the set_engagement tool, not here; operator stays env-set.",
   "//6": "marq-work persists findings/reports; swap for a bind mount (-v /host/dir:/work) to read them on the host.",
+  "//caps": "no-new-privileges hardens the container but blocks the setcap SYN-scan grant: under it masscan/naabu fail and nmap -sS degrades to connect scans (nmap auto-uses -sT). If you need raw-socket SYN scans, drop the no-new-privileges line. TCP-connect scanning works either way.",
   "mcpServers": {
     "marq": {
       "command": "docker",
@@ -24,6 +25,9 @@
         "-e", "CENSYS_API_SECRET",
         "-e", "GITHUB_TOKEN",
         "-e", "NUMVERIFY_API_KEY",
+        "-e", "GOOGLE_API_KEY",
+        "-e", "GOOGLECSE_CX",
+        "-e", "WPSCAN_API_TOKEN",
         "marq"
       ],
       "env": {
@@ -35,7 +39,10 @@
         "CENSYS_API_ID": "",
         "CENSYS_API_SECRET": "",
         "GITHUB_TOKEN": "",
-        "NUMVERIFY_API_KEY": ""
+        "NUMVERIFY_API_KEY": "",
+        "GOOGLE_API_KEY": "",
+        "GOOGLECSE_CX": "",
+        "WPSCAN_API_TOKEN": ""
       }
     }
   }

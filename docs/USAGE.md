@@ -222,6 +222,18 @@ engagement + scope are set at runtime via `set_engagement`).
 | `responder`            | responder            | LLMNR/NBT-NS/mDNS poisoner (background)   |
 | `nbtscan`              | nbtscan              | NetBIOS host discovery                    |
 
+### Malware — static analysis
+
+Operate on a sample staged in `/work` (pass a container path; the model never
+uploads bytes). All static/offline — safe to run on untrusted samples.
+
+| Tool          | Wraps        | Purpose                                                 |
+| ------------- | ------------ | ------------------------------------------------------- |
+| `capa`        | capa (FLARE) | Identify capabilities / ATT&CK + MBC behaviors          |
+| `yara_scan`   | yara         | Match a sample against YARA rules                       |
+| `olevba`      | oletools     | Extract & analyse VBA macros from Office documents      |
+| `bin_headers` | rabin2       | Binary headers/imports/strings (format, sections, libs) |
+
 ### Working files (`/work`, `/tmp`)
 
 | Tool         | Purpose                                                          |
@@ -275,6 +287,7 @@ to keyless sources or return limited results.
 | `GITHUB_TOKEN`                        | `trufflehog` (GitHub scans)    |
 | `NUMVERIFY_API_KEY`                   | `phoneinfoga`                  |
 | `GOOGLE_API_KEY` / `GOOGLECSE_CX`     | `phoneinfoga` (Google CSE)     |
+| `WPSCAN_API_TOKEN`                    | `wpscan` (vuln data)           |
 
 theHarvester and h8mail read their own config files (`~/.theHarvester/api-keys.yaml`,
 an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.

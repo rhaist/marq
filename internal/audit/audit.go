@@ -66,12 +66,13 @@ func write(record map[string]any) error {
 // error is non-nil rather than run an unlogged tool.
 func LogStart(tool, target string, argv []string) (string, error) {
 	id := newID()
+	engagement, _ := config.Attribution() // read-locked; set_engagement may run concurrently in serve
 	err := write(map[string]any{
 		"event":      "invocation.start",
 		"id":         id,
 		"ts":         now(),
 		"operator":   config.C.Operator,
-		"engagement": config.C.Engagement,
+		"engagement": engagement,
 		"tool":       tool,
 		"target":     target,
 		"argv":       argv,

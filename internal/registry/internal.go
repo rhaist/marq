@@ -110,7 +110,9 @@ func internal() []Tool {
 			Desc: "NTLM relay attack with impacket-ntlmrelayx: relay captured NTLM auth " +
 				"to targets in a file. Stage a target list with write_file then pass " +
 				"the path via `options` (-tf /work/targets.txt). Runs in the BACKGROUND " +
-				"and returns a job dir — poll with job_status. High impact.",
+				"and returns a job dir — poll with job_status. Stands up SMB/HTTP listeners on " +
+				"privileged ports, so the container must be run with the needed capabilities/host " +
+				"networking or it binds nothing and captures nothing. High impact.",
 			Params: []Param{
 				{Name: "options", Type: StringParam, Desc: "extra flags (e.g. -tf targets.txt -smb2support)", Default: ""},
 			},
@@ -190,18 +192,28 @@ func internal() []Tool {
 		{
 			Name:   "evil_winrm",
 			Active: true,
-			Desc: "Connect to a Windows host via WinRM and execute a command (evil-winrm). " +
-				"`target` is the host:port. Pass credentials via `options` " +
-				"(-u user -p pass, or -u user -H NTLM-hash, or -S for SSL). " +
-				"Supports file upload/download. High impact — authorized only.",
+			Desc: "Connect to a Windows host via WinRM and run a command (evil-winrm). " +
+				"`target` is the host (IP). Pass credentials via `options` " +
+				"(-u user -p pass, or -u user -H NTLM-hash, or -S for SSL). Set `command` to run " +
+				"one PowerShell command and exit — REQUIRED for this non-interactive transport; " +
+				"without it evil-winrm opens an interactive REPL that this call can't drive and will " +
+				"hang to timeout (for command exec you can also use netexec with protocol=winrm -x). " +
+				"High impact — authorized only.",
 			Params: []Param{
-				{Name: "target", Type: StringParam, Desc: "host:port", Required: true},
+				{Name: "target", Type: StringParam, Desc: "host (IP)", Required: true},
 				{Name: "options", Type: StringParam, Desc: "raw evil-winrm flags (-u -p -H -S ...)", Default: ""},
+				{Name: "command", Type: StringParam, Desc: "PowerShell command to run, then exit (leave empty only if you know the call will hang)", Default: ""},
 			},
 			Build: func(a Args) Invocation {
 				argv := []string{"evil-winrm", "-i", a.S("target")}
 				argv = append(argv, shellword.Split(a.S("options"))...)
-				return Invocation{Argv: argv, Target: a.S("target")}
+				inv := Invocation{Argv: argv, Target: a.S("target")}
+				if cmd := a.S("command"); cmd != "" {
+					// Drive the PowerShell REPL over stdin, then exit so the one-shot
+					// call terminates instead of blocking on the interactive prompt.
+					inv.Stdin = cmd + "\nexit\n"
+				}
+				return inv
 			},
 		},
 		{
@@ -264,7 +276,9 @@ func internal() []Tool {
 			Desc: "Start Responder for LLMNR/NBT-NS/mDNS poisoning to capture NTLMv2 " +
 				"challenge/response hashes on the local network segment. Runs in the " +
 				"BACKGROUND and returns a job dir — poll with job_status for captured " +
-				"hashes. High impact — authorized networks only.",
+				"hashes. Binds privileged ports (137/138/53/80/443/445/88/389…), so the " +
+				"container must be run with the needed capabilities/host networking or it " +
+				"binds nothing and captures nothing. High impact — authorized networks only.",
 			Params: []Param{
 				{Name: "options", Type: StringParam, Desc: "raw responder flags (e.g. -I eth0 -rdw)", Default: ""},
 			},
