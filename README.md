@@ -58,11 +58,13 @@ client at marq instead:
 
 ```bash
 claude mcp add marq -- docker run --rm -i \
+  --security-opt no-new-privileges:true --cap-drop ALL \
+  --cap-add NET_RAW --cap-add NET_ADMIN --cap-add NET_BIND_SERVICE \
   -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR=marq marq
 ```
 
 Any MCP client works (Codex, Claude Desktop) → [`docs/CLIENTS.md`](docs/CLIENTS.md).
-(Scanning tools need `--cap-add NET_RAW --cap-add NET_ADMIN`; hardened args in
+(The caps are only what SYN scans need; full config incl. API keys in
 [`mcp.json.example`](mcp.json.example).)
 
 > **Authorized use.** Advisory/knowledge is open; scanning & exploitation are
@@ -80,9 +82,10 @@ Any MCP client works (Codex, Claude Desktop) → [`docs/CLIENTS.md`](docs/CLIENT
   do where there's no tool: offensive, malware, threat-intel, sec-ops, architecture,
   GRC, standards & EU/US regulation, CISO, red/purple, resilience, human factors,
   DevSecOps/privacy.
-- **Safe by construction** — every call funnels through one choke point: an
-  append-only audit log, timeouts, output caps, a `/work`+`/tmp` file sandbox, and
-  a non-root, capability-dropped container.
+- **Auditable by design** — every external-tool call funnels through one choke
+  point: an append-only, `fsync`'d audit log, a timeout, and an output cap. File
+  access is sandboxed to `/work`+`/tmp`, and the image runs non-root (the
+  recommended run args also drop all Linux capabilities + `no-new-privileges`).
 
 <details>
 <summary><b>Full tool suite</b> — ~80 tools on a Kali base (click to expand)</summary>
