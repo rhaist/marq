@@ -28,7 +28,8 @@
       ],
       "env": {
         "MARQ_OPERATOR": "marq",
-        "MARQ_ALLOW_RAW_SHELL": "true",
+        "//shell": "run_shell (arbitrary in-container command) is OFF by default; set true to opt in.",
+        "MARQ_ALLOW_RAW_SHELL": "false",
         "//keys": "Optional — enrich OSINT tools. Leave blank to use keyless sources.",
         "SHODAN_API_KEY": "",
         "CENSYS_API_ID": "",

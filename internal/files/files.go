@@ -51,7 +51,7 @@ func resolve(path string) (string, error) {
 
 // audited runs fn with the same start/end audit envelope as tool runs.
 func audited(op, path string, fn func() (string, error)) string {
-	id := audit.LogStart(op, path, []string{op, path})
+	id, _ := audit.LogStart(op, path, []string{op, path})
 	out, err := fn()
 	code := 0
 	errMsg := ""

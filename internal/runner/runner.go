@@ -110,7 +110,15 @@ func Run(tool string, argv []string, opts Opts) Result {
 	if target == "" {
 		target = "(unspecified)"
 	}
-	id := audit.LogStart(tool, target, argv)
+	id, auditErr := audit.LogStart(tool, target, argv)
+	if auditErr != nil {
+		// Fail closed: the audit trail is the core control, so never run a tool
+		// whose start record couldn't be persisted.
+		code := 126
+		return Result{Tool: tool, Argv: argv, ExitCode: &code, TimeoutS: limit,
+			Stderr: "blocked: could not persist audit record (" + auditErr.Error() +
+				") — refusing to run unlogged. Set MARQ_AUDIT_LOG to a writable path."}
+	}
 	start := time.Now()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(limit)*time.Second)
@@ -177,7 +185,11 @@ func RunBackground(tool string, argv []string, target string) (jobDir string, er
 	if target == "" {
 		target = "(unspecified)"
 	}
-	id := audit.LogStart(tool+":bg", target, argv)
+	id, auditErr := audit.LogStart(tool+":bg", target, argv)
+	if auditErr != nil {
+		return "", "blocked: could not persist audit record (" + auditErr.Error() +
+			") — refusing to run unlogged. Set MARQ_AUDIT_LOG to a writable path."
+	}
 	// Wrap so the child redirects its streams and records its own exit code.
 	cmdStr := fmt.Sprintf("( %s ) >%s 2>%s; echo \"exit=$?\" >%s",
 		shellword.Join(argv), shellword.Quote(out), shellword.Quote(errf), shellword.Quote(status))
