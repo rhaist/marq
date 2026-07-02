@@ -1,8 +1,10 @@
 # Builds the multi-GB Kali image, runs scripts/e2e-image.sh (the promises that
 # only hold for the running image: /work bind-mount persistence and per-container
 # jwt keys), and — on main — publishes it to GHCR so users can pull instead of
-# building. Expensive, so it only triggers when the image definition or its e2e
-# scripts change; Go-only changes are covered by ci.yml. Run on demand via the
+# building. Expensive, so it only triggers when something that ends up IN the
+# image changes: the image definition/scripts, or the Go sources + go:embed'd
+# skills the `marq` binary is built from (cmd/**, internal/**, go.mod/go.sum).
+# Host-side files (pi/, docs/) are not in the image. Run on demand via the
 # Actions tab (workflow_dispatch).
 name: image
 
@@ -13,6 +15,10 @@ on:
       - Dockerfile
       - scripts/entrypoint.sh
       - scripts/e2e-image.sh
+      - cmd/**
+      - internal/**
+      - go.mod
+      - go.sum
   pull_request:
     branches: [main]
     paths: *image-paths
