@@ -17,14 +17,17 @@
 set -euo pipefail
 C="${MARQ_CONTAINER:-marq}"
 IMG="${MARQ_IMAGE:-marq:latest}"
+# Container engine. Default `docker` (OrbStack/Colima expose the same CLI);
+# set MARQ_ENGINE=podman to run rootless/daemonless with no Docker Desktop.
+ENGINE="${MARQ_ENGINE:-docker}"
 
 case "${1:-}" in
   up)
     work="${2:?usage: marq up <workspace-dir>}"
     mkdir -p "$work"
-    docker rm -f "$C" >/dev/null 2>&1 || true
+    "$ENGINE" rm -f "$C" >/dev/null 2>&1 || true
     # caps: nmap/masscan/naabu SYN scans. env-file (optional, see .env.example): API keys.
-    docker run -d --name "$C" \
+    "$ENGINE" run -d --name "$C" \
       --cap-add NET_ADMIN --cap-add NET_RAW \
       -v "$(cd "$work" && pwd):/work" \
       ${MARQ_ENV_FILE:+--env-file "$MARQ_ENV_FILE"} \
@@ -32,10 +35,10 @@ case "${1:-}" in
     echo "marq up: container '$C', /work -> $(cd "$work" && pwd)"
     ;;
   down)
-    docker rm -f "$C" >/dev/null 2>&1 || true
+    "$ENGINE" rm -f "$C" >/dev/null 2>&1 || true
     ;;
   shell)
-    exec docker exec -it "$C" bash
+    exec "$ENGINE" exec -it "$C" bash
     ;;
   "")
     echo "usage: marq up <dir> | down | shell | run <tool> '<json>' | tools" >&2
@@ -43,6 +46,6 @@ case "${1:-}" in
     ;;
   *)
     # Forward everything else (run, tools, …) to the marq binary in the container.
-    exec docker exec -i "$C" marq "$@"
+    exec "$ENGINE" exec -i "$C" marq "$@"
     ;;
 esac

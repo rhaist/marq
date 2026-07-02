@@ -10,12 +10,13 @@ depends on the work.
 
 | You want to…                                                                                                             | Use                                                           | Why                                                                                                         |
 | :----------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------- |
-| Reason hard — architecture review, threat modeling, GRC/compliance, IR leadership, write the report, app/code-sec review | **Claude Code** or **Codex** (frontier model) + marq over MCP | Strongest reasoning. marq hands it the current-standards skills and the tools; the model supplies judgment. |
-| Run fully local & uncensored — hands-on offensive ops, on-box execution, nothing leaves the host, no model refusals      | **Pi** + a local/abliterated model on **llama.cpp** + the `pi/marq` shim | Terminal-native, no cloud, no refusals; the model gets bash and calls `marq run` directly.       |
+| Run fully local & uncensored — hands-on offensive ops, on-box execution, nothing leaves the host, no model refusals _(recommended default)_ | **Pi** + a local/abliterated model on **llama.cpp** + the `pi/marq` shim | Terminal-native, no cloud, no refusals; the model gets bash and calls `marq run` directly.       |
+| Reason hard — architecture review, threat modeling, GRC/compliance, IR leadership, write the report, app/code-sec review | **Claude Code** or **Codex** (frontier model) + marq over MCP _(fallback)_ | Strongest reasoning. marq hands it the current-standards skills and the tools; the model supplies judgment. |
 
-Rule of thumb: **frontier model for judgment** (the governance/architecture/
-advisory domains), **local uncensored model for hands-on offensive and
-privacy-sensitive work**. You can keep both configured and switch per task.
+Rule of thumb: **local uncensored model by default** — hands-on offensive and
+privacy-sensitive work stays on your box. Reach for a **frontier model as a
+fallback** when a task is judgment-heavy (governance/architecture/advisory) and
+the data isn't sensitive. Keep both configured and switch per task.
 
 ## Two ways marq connects
 
