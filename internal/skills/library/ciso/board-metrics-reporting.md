@@ -1,6 +1,6 @@
 ---
 name: board-metrics-reporting
-description: Communicate cyber risk to a board/exec — metrics that drive decisions vs vanity, how to frame risk, reporting cadence.
+description: Report cyber risk upward to a board/exec — translate technical posture into business-risk language, what belongs on a board deck, reporting cadence, and the questions directors actually ask. (Designing the metric set itself: security-metrics.)
 ---
 
 # Board metrics & reporting

@@ -105,7 +105,7 @@ func addResources(s *mcp.Server) {
 		&mcp.Resource{
 			URI:         "marq://methodology",
 			Name:        "methodology",
-			Description: "Engagement workflow: recon -> enumerate -> test -> exploit -> report. Read before driving the tools.",
+			Description: "Cross-domain methodology + the offensive engagement phases (recon -> enumerate -> test -> exploit -> report). Read before driving the tools.",
 			MIMEType:    "text/markdown",
 		},
 		func(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
@@ -122,7 +122,7 @@ func addSkillResources(s *mcp.Server) {
 		&mcp.Resource{
 			URI:         "marq://skills",
 			Name:        "skills",
-			Description: "Index of technique/vuln-class playbooks. Load a body with the load_skill tool or read marq://skills/<name>.",
+			Description: "Index of expert playbooks (offensive, malware, threat-intel, governance/standards/CISO). Load a body with the load_skill tool or read marq://skills/<name>.",
 			MIMEType:    "text/markdown",
 		},
 		func(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {

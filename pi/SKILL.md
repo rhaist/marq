@@ -51,7 +51,7 @@ marq run load_skill '{"name":"choosing-a-framework"}'   # one or more skills
 marq tools                                              # the executable catalog
 ```
 
-~75 skills across 14 domains — run `marq run load_skill '{}'` for the full index.
+~73 skills across 14 domains — run `marq run load_skill '{}'` for the full index.
 The domains: **offensive** (`vuln/*`, `technique/*`), **malware**,
 **threat-intel**, **secops** (SIEM/SOAR, hunting, IR, forensics, vuln-mgmt,
 detection-engineering), **architecture** (zero-trust, cloud, appsec,

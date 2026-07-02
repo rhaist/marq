@@ -1,6 +1,6 @@
 ---
 name: auth-jwt
-description: Attack authentication and JWT handling.
+description: Attack authentication and session handling — credential brute/spray, default creds, broken logout/session fixation, and JWT flaws (alg=none / alg-confusion, weak secret, unverified signature).
 ---
 
 # Authentication & JWT

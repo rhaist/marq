@@ -20,7 +20,7 @@ answer it — on whatever model you choose, local or frontier.
 "Build the ransomware incident runbook."               → IR + resilience
 ```
 
-**~80 security tools + ~70 expert playbooks (current 2026 standards), in one
+**~80 security tools + ~73 expert playbooks (current 2026 standards), in one
 auditable binary.** You bring the model; marq brings the tools and the knowledge.
 
 ## Start
@@ -84,7 +84,7 @@ Any MCP client works (Codex, Claude Desktop) → [`docs/CLIENTS.md`](docs/CLIENT
 - **Execution** — ~80 wrapped Kali tools (recon, web, AD/internal, exploitation,
   cred cracking, malware static analysis, OSINT), each audit-logged and sandboxed;
   findings render to `findings.md` / `.csv` (with optional CVSS + CWE).
-- **Knowledge** — ~70 `load_skill` playbooks across 14 domains, web-researched to
+- **Knowledge** — ~73 `load_skill` playbooks across 14 domains, web-researched to
   current (2026) standards, telling the model _how_ to use the tools and _what_ to
   do where there's no tool: offensive, malware, threat-intel, sec-ops, architecture,
   GRC, standards & EU/US regulation, CISO, red/purple, resilience, human factors,
@@ -136,7 +136,7 @@ terminal agent (Pi) ──bash──▶  pi/marq shim ─┤   both hit the same
                                              │
                                   runner.Run ──▶ audit.jsonl (every call)
 
-           load_skill ──▶ skills library (markdown, ~70 playbooks / 14 domains)
+           load_skill ──▶ skills library (markdown, ~73 playbooks / 14 domains)
 ```
 
 Every exec tool funnels through `internal/runner/runner.go::Run` — the single

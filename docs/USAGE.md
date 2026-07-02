@@ -1,7 +1,7 @@
 # Usage
 
 How to build, smoke-test and drive marq — your universal cyber assistant (~80
-tools + ~70 skill playbooks across 14 domains). For choosing a client and model
+tools + ~73 skill playbooks across 14 domains). For choosing a client and model
 for the job (Claude Code / Codex as the expert, Pi for local uncensored work, LM
 Studio for testing) see [`CLIENTS.md`](CLIENTS.md); for a guided per-OS install
 see [`SETUP.md`](SETUP.md); for the safety model see [`SECURITY.md`](SECURITY.md).

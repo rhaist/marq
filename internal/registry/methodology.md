@@ -1,6 +1,6 @@
 # marq methodology
 
-marq is a cyber assistant across disciplines — ~70 skill playbooks in 14
+marq is a cyber assistant across disciplines — ~73 skill playbooks in 14
 domains. Call `server_info` first for scope, run `load_skill '{}'` for the full
 index, then load the playbook(s) for the work in front of you:
 

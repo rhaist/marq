@@ -1,6 +1,6 @@
 ---
 name: devsecops
-description: Shift-left without breaking delivery — which pipeline checks block vs warn, IaC + secrets scanning, SBOM/SLSA supply-chain, signing, and policy-as-code.
+description: Operationalize AppSec in CI/CD without breaking delivery — gating strategy (block vs warn), IaC + secrets scanning, policy-as-code, and rolling out supply-chain controls (SBOM/SLSA/signing). (Choosing among scanner types SAST/DAST/SCA and program maturity: appsec-sdlc.)
 ---
 
 # DevSecOps

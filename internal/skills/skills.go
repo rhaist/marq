@@ -1,6 +1,7 @@
-// Package skills is an on-demand knowledge library: per-vuln-class and
-// per-technique playbooks as embedded markdown, tied to this server's actual
-// tool names. The model loads a skill when it starts on that kind of work — the
+// Package skills is an on-demand knowledge library: expert playbooks as
+// embedded markdown spanning offensive, malware, threat-intel, and governance
+// (GRC, standards, CISO) domains, tied to this server's actual tool names where
+// relevant. The model loads a skill when it starts on that kind of work — the
 // cheapest way to make a local model chain the tools competently (modeled on
 // Strix's skills, minus the multi-agent machinery).
 package skills
@@ -45,9 +46,9 @@ func parse(raw string) (name, desc, body string) {
 		}
 		switch strings.TrimSpace(k) {
 		case "name":
-			name = strings.TrimSpace(v)
+			name = strings.Trim(strings.TrimSpace(v), `"'`)
 		case "description":
-			desc = strings.TrimSpace(v)
+			desc = strings.Trim(strings.TrimSpace(v), `"'`)
 		}
 	}
 	return name, desc, strings.TrimSpace(raw[len(m[0]):])

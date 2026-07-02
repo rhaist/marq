@@ -13,8 +13,8 @@ func knowledgeTools() []Tool {
 	return []Tool{
 		{
 			Name: "load_skill",
-			Desc: "Load a technique/vuln-class playbook (tied to this server's tools) before working " +
-				"that kind of issue. Pass one skill name or a comma list (max 5). Available skills:\n" +
+			Desc: "Load an expert playbook (offensive, malware, threat-intel, and governance — GRC, " +
+				"standards, CISO) before working that kind of task. Pass one skill name or a comma list (max 5). Available skills:\n" +
 				skills.IndexText(),
 			Params: []Param{
 				{Name: "name", Type: StringParam, Desc: "skill name(s), comma-separated (max 5); omit to list all skills"},
