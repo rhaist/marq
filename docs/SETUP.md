@@ -169,8 +169,13 @@ as the `marq` skill — kept in sync with the repo, no copy.
 a 12–16 GB GPU at a long context. Launch it with the flags below; without them it
 leaks reasoning tokens into its answers and (without SYSTEM.md) bypasses marq.
 
-**2a. Start `llama-server` for Gemma** — one command; these are the model's
-recommended settings baked into flags (the same values marq's eval pins in
+**2a. Start `llama-server` for Gemma.** Install it once — macOS: `brew install
+llama.cpp` (builds with **Metal** on Apple Silicon; CPU on Intel Macs). Linux:
+Linuxbrew `brew install llama.cpp`, a prebuilt CPU binary from the
+[llama.cpp releases](https://github.com/ggml-org/llama.cpp/releases), or a
+source/container build with **CUDA/ROCm/Vulkan** for GPU (the prebuilt Linux
+binaries are CPU-only). Then one command — these are the model's recommended
+settings baked into flags (the same values marq's eval pins in
 [`scripts/eval/profiles.json`](../scripts/eval/profiles.json), and the quickstarts
 in [`scripts/eval/llama.cpp/`](../scripts/eval/llama.cpp/)):
 
@@ -190,7 +195,12 @@ llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
   fit on a 12–16 GB GPU. `-fa on` is flash attention (exact, not lossy; faster
   long-context prefill, smaller attention footprint) and is a prerequisite for
   the KV-cache flags; `-ctk/-ctv q8_0` quantize the K/V cache (default `f16`),
-  ~halving its VRAM at negligible quality cost. Drop all three for CPU-only.
+  ~halving its VRAM at negligible quality cost. Both work on **Metal**
+  (Apple Silicon) and **CUDA/ROCm/Vulkan** (Linux); keep K and V the **same**
+  type (mixed quant fails on Metal). Drop all three for CPU-only.
+- **Platform:** works on Linux and macOS. Apple Silicon uses unified memory, so
+  "12–16 GB GPU" means a 16 GB+ Mac (a 12B Q4 is ~7–8 GB). Intel Macs and
+  CPU-only Linux run but are slow for a 12B — drop `-ngl -fa -ctk -ctv` there.
 - **`--ctx-size`** as high as VRAM allows (Gemma is 262 K native). Tool outputs
   (nuclei/katana dumps) are large; a short window truncates them.
 - **Sampling** — the flags above are the HauhauCS _"Balanced"_ preset. For the
@@ -274,9 +284,10 @@ Same as macOS step 3 above — identical command.
 ### 4. Run with a local model (Pi + the marq skill)
 
 Same as macOS step 4 — install the `pi/marq` shim, `marq up <dir>`, and drive it
-from Pi with [`pi/SKILL.md`](../pi/SKILL.md) loaded. Run `llama-server` (a prebuilt
-llama.cpp binary or `apt`/`brew`/container build) on the box and point Pi at it —
-the runtime lives in Pi, not in marq.
+from Pi with [`pi/SKILL.md`](../pi/SKILL.md) loaded. Run `llama-server` on the box
+(see the install options in macOS step 2a; on a headless GPU box, a source or
+container build with CUDA/ROCm/Vulkan) and point Pi at it — the runtime lives in
+Pi, not in marq.
 
 > **Bind-mount permissions (Linux).** The container runs as the non-root `marq`
 > user, so the engagement dir you pass to `marq up` must be writable by it —
