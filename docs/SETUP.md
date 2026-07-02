@@ -198,14 +198,17 @@ in [`scripts/eval/llama.cpp/`](../scripts/eval/llama.cpp/)):
 # Uncensored "Balanced" build (the default above). -hf pulls the GGUF from HF.
 llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
   --host 0.0.0.0 --port 8080 -ngl 99 --ctx-size 65536 --jinja \
+  --reasoning-format deepseek \
   -fa on -ctk q8_0 -ctv q8_0 \
   --temp 0.6 --top-p 0.9 --top-k 64 --min-p 0.05 --repeat-penalty 1.1
 ```
 
 - **`--jinja`** applies the model's chat template so **tool calls parse** — the
-  single most important flag for driving marq. (If the model exposes
-  chain-of-thought and it leaks into replies, add `--reasoning-format deepseek`
-  to route it into a separate `reasoning_content` field.)
+  single most important flag for driving marq.
+- **`--reasoning-format deepseek`** routes the model's chain-of-thought into a
+  separate `reasoning_content` field instead of the reply. This model exposes
+  CoT, so without it the reasoning leaks into answers and can exhaust the output
+  budget mid-thought — keep it on.
 - **`-fa on` + `-ctk q8_0 -ctv q8_0`** — the memory win that makes 64K context
   fit on a 12–16 GB GPU. `-fa on` is flash attention (exact, not lossy; faster
   long-context prefill, smaller attention footprint) and is a prerequisite for
