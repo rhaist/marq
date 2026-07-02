@@ -2,7 +2,7 @@
 """Smoke-test every tool exposed by the marq server.
 
 Spawns a *fresh* MCP server (`docker run --rm -i <image>`) — it does NOT touch a
-container already bound to LM Studio — speaks the MCP stdio protocol, lists the
+long-lived marq container in use by a client — speaks the MCP stdio protocol, lists the
 tools the server actually registered, and calls each one with benign arguments
 to confirm the wrapper runs and its underlying binary is present.
 

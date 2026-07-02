@@ -69,14 +69,13 @@ docker run --rm -i marq        # prints the authorization banner to stderr
 ## 3. Wire it into an MCP client
 
 Any MCP client works — **Claude Code** and **Codex** (frontier model as the
-expert), **LM Studio** (local model, for testing), **Claude Desktop**. Per-client
-setup and which-brain-for-which-job guidance is in [`CLIENTS.md`](CLIENTS.md). The
+expert), **Claude Desktop**, and any other MCP client. Per-client setup and
+which-brain-for-which-job guidance is in [`CLIENTS.md`](CLIENTS.md). The
 shared shape:
 
 1. Add the `marq` server from [`mcp.json.example`](../mcp.json.example) — drop the
-   `mcpServers` block into Claude Code's `.mcp.json`, LM Studio's `mcp.json`
-   (**Program → Edit mcp.json**), or Claude Desktop's config. Codex uses TOML
-   (`codex mcp add marq -- …`, see CLIENTS.md).
+   `mcpServers` block into Claude Code's `.mcp.json` or Claude Desktop's config.
+   Codex uses TOML (`codex mcp add marq -- …`, see CLIENTS.md).
 2. Set `MARQ_OPERATOR` (the audit anchor). Engagement and scope are set at
    runtime — have the model call `set_engagement` before any active testing
    (advisory/knowledge use needs no scope).
@@ -86,10 +85,10 @@ shared shape:
 ## 4. Run with a local model (Pi)
 
 Instead of an external MCP client, drive marq from [Pi](https://pi.dev/) — a
-minimal terminal agent that runs a local/abliterated model over an
-OpenAI-compatible endpoint (LM Studio / Ollama / llama-server) and gives the
-model bash. The model invokes `marq run <tool> '<json>'`; the `pi/marq` host
-shim forwards each call into a long-lived container over `docker exec`.
+minimal terminal agent that runs a local/abliterated model on **llama.cpp's
+`llama-server`** (any OpenAI-compatible endpoint works) and gives the model
+bash. The model invokes `marq run <tool> '<json>'`; the `pi/marq` host shim
+forwards each call into a long-lived container over `docker exec`.
 
 ```bash
 # Install the shim

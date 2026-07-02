@@ -22,8 +22,8 @@ answer it — on whatever model you choose, local or frontier.
 
 **~80 security tools + ~70 expert playbooks across 14 domains, in one auditable
 binary.** You bring the brain — [Claude Code or Codex](docs/CLIENTS.md) for deep
-reasoning, a local uncensored model in [Pi](https://pi.dev/) for hands-on
-offensive work, LM Studio to test.
+reasoning, or a local uncensored model in [Pi](https://pi.dev/) on llama.cpp for
+hands-on offensive work.
 
 > **Authorized use.** Advisory and knowledge work is open; scanning and
 > exploitation are authorized-only and audit-logged — see
@@ -49,7 +49,7 @@ One binary, two ways in, one registry.
 
 | Way in                        | What it is                                                          | Drives the model                       |
 | :---------------------------- | :------------------------------------------------------------------ | :------------------------------------- |
-| **MCP server** (`marq serve`) | Stdio JSON-RPC; plug into Claude Desktop, LM Studio, any MCP client | The client                             |
+| **MCP server** (`marq serve`) | Stdio JSON-RPC; plug into Claude Code, Codex, Claude Desktop, any MCP client | The client                    |
 | **Direct run** (`marq run`)   | Run one tool by name; a terminal agent calls it from bash via `pi/` | A local model in [Pi](https://pi.dev/) |
 
 marq runs the tools. The model and the agent loop live in the client, so
@@ -80,10 +80,10 @@ brings the model:
   `codex mcp add` and point it at the [`mcp.json.example`](mcp.json.example) args.
   Best for the reasoning-heavy domains: architecture, GRC, threat modeling, IR
   leadership, writing the report.
-- **Pi** (local/abliterated model = standalone, uncensored) — install the
-  `pi/marq` shim, `marq up <dir>`, load [`pi/SKILL.md`](pi/SKILL.md). Best for
-  hands-on offensive ops with nothing leaving the box.
-- **LM Studio** (local model = testing) — paste the `marq` entry into `mcp.json`.
+- **Pi** (local/abliterated model = standalone, uncensored) — run `llama-server`
+  (llama.cpp), install the `pi/marq` shim, `marq up <dir>`, load
+  [`pi/SKILL.md`](pi/SKILL.md). Best for hands-on offensive ops with nothing
+  leaving the box.
 
 Full guidance — which client and model for which work — in
 **[`docs/CLIENTS.md`](docs/CLIENTS.md)**. Per-OS install:
