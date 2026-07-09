@@ -1,7 +1,7 @@
 # Usage
 
 How to build, smoke-test and drive marq — your universal cyber assistant (~80
-tools + ~73 skill playbooks across 14 domains). For choosing a client and model
+tools + ~74 skill playbooks across 14 domains). For choosing a client and model
 for the job (Claude Code / Codex as the expert, Pi for local uncensored work, LM
 Studio for testing) see [`CLIENTS.md`](CLIENTS.md); for a guided per-OS install
 see [`SETUP.md`](SETUP.md); for the safety model see [`SECURITY.md`](SECURITY.md).
@@ -294,17 +294,18 @@ an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.
 
 ## Environment variables
 
-| Variable               | Default                     | Meaning                                                                        |
-| ---------------------- | --------------------------- | ------------------------------------------------------------------------------ |
-| `MARQ_OPERATOR`        | `marq`                      | Recorded in every audit record — the accountability anchor; env-set only       |
-| `MARQ_ENGAGEMENT`      | `unspecified`               | Engagement / SOW identifier (initial default; overridable by `set_engagement`) |
-| `MARQ_SCOPE`           | `""`                        | Free-text authorized scope (initial default; overridable by `set_engagement`)  |
-| `MARQ_AUDIT_LOG`       | `/var/log/marq/audit.jsonl` | Audit log path                                                                 |
-| `MARQ_TIMEOUT`         | `900`                       | Default per-command timeout (seconds)                                          |
-| `MARQ_MAX_TIMEOUT`     | `3600`                      | Ceiling for a tool's per-call timeout override                                 |
-| `MARQ_MAX_OUTPUT`      | `60000`                     | Max output chars returned to the model                                         |
-| `MARQ_ALLOW_RAW_SHELL` | `false`                     | Expose the arbitrary-shell `run_shell` tool (opt-in; set `true` to enable)     |
-| `MARQ_WORK_DIR`        | `/work`                     | Working area (findings, job dirs)                                              |
+| Variable               | Default                     | Meaning                                                                                                           |
+| ---------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `MARQ_OPERATOR`        | `marq`                      | Recorded in every audit record — the accountability anchor; env-set only                                          |
+| `MARQ_ENGAGEMENT`      | `unspecified`               | Engagement / SOW identifier (initial default; overridable by `set_engagement`)                                    |
+| `MARQ_SCOPE`           | `""`                        | Free-text authorized scope (initial default; overridable by `set_engagement`)                                     |
+| `MARQ_AUDIT_LOG`       | `/var/log/marq/audit.jsonl` | Audit log path                                                                                                    |
+| `MARQ_TIMEOUT`         | `900`                       | Default per-command timeout (seconds)                                                                             |
+| `MARQ_MAX_TIMEOUT`     | `3600`                      | Ceiling for a tool's per-call timeout override                                                                    |
+| `MARQ_MAX_OUTPUT`      | `60000`                     | Max output chars returned to the model                                                                            |
+| `MARQ_ALLOW_RAW_SHELL` | `false`                     | Expose the arbitrary-shell `run_shell` tool (opt-in; set `true` to enable)                                        |
+| `MARQ_SKILLS_ONLY`     | `false`                     | Knowledge-only mode: serve just the skills + findings/files tools, drop every Kali exec tool (runs with no image) |
+| `MARQ_WORK_DIR`        | `/work`                     | Working area (findings, job dirs)                                                                                 |
 
 Engagement and scope are per-task, so the model sets them at session start with
 the **`set_engagement`** tool (from the operator's written authorization). It

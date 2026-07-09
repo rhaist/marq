@@ -20,18 +20,18 @@ answer it — on whatever model you choose, local or frontier.
 "Build the ransomware incident runbook."               → IR + resilience
 ```
 
-**~80 security tools + ~73 expert playbooks (current 2026 standards), in one
+**~80 security tools + ~74 expert playbooks (current 2026 standards), in one
 auditable binary.** You bring the model; marq brings the tools and the knowledge.
 
 ## Start
 
-```bash
-# Get marq (prebuilt image — or build from source: docker build -t marq .)
-docker pull ghcr.io/rhaist/marq && docker tag ghcr.io/rhaist/marq marq
-```
+Pick your path — start simple, add a layer only when you need it:
 
-No Docker Desktop needed — **OrbStack** (macOS) or **Podman / Colima** (Linux) run
-the image just as well ([`docs/SETUP.md`](docs/SETUP.md)).
+| I want…                                      | Path            | Setup                       |
+| :------------------------------------------- | :-------------- | :-------------------------- |
+| **cyber expertise inside my LLM**            | skills only     | one `go install`, no Docker |
+| **…plus the ~80-tool suite to _run_ things** | full MCP server | build/pull the image        |
+| **…driven by a local uncensored model**      | full + Pi       | image + Pi + llama.cpp      |
 
 ### Just the skills — cyber expertise for your LLM (no Docker)
 
@@ -43,7 +43,7 @@ the in-process knowledge tools (skills, findings, files) — no scan capabilitie
 ```bash
 go install github.com/rhaist/marq/cmd/marq@latest   # ~10 MB, skills embedded
 claude mcp add marq-skills \
-  -e MARQ_SKILLS_ONLY=true -e MARQ_WORK_DIR=$HOME/.marq \
+  -e MARQ_SKILLS_ONLY=1 -e MARQ_WORK_DIR=$HOME/.marq \
   -e MARQ_AUDIT_LOG=$HOME/.marq/audit.jsonl \
   -- marq serve
 ```
@@ -57,10 +57,24 @@ Prefer containers, or already pulled the image? The same mode runs there too —
 the `marq-skills` entry in [`mcp.json.example`](mcp.json.example). Add the full tool
 suite below when you need to _run_ something, not just reason about it.
 
-### Run it fully local — recommended
+### The full tool suite
+
+To _run_ tools (recon, web, AD, exploitation…), not just reason, get the image:
+
+```bash
+# prebuilt — or build from source: docker build -t marq .
+docker pull ghcr.io/rhaist/marq && docker tag ghcr.io/rhaist/marq marq
+```
+
+No Docker Desktop needed — **OrbStack** (macOS) or **Podman / Colima** (Linux) run
+it just as well ([`docs/SETUP.md`](docs/SETUP.md)). Then drive it fully local (below)
+or point a frontier MCP client at it.
+
+### Run it fully local
 
 Your own uncensored model, on your box: no cloud, no refusals, nothing leaves the
-host. Drive marq from [Pi](https://pi.dev/) over [llama.cpp](https://github.com/ggml-org/llama.cpp):
+host — the recommended setup for hands-on offensive work. Drive marq from
+[Pi](https://pi.dev/) over [llama.cpp](https://github.com/ggml-org/llama.cpp):
 
 ```bash
 # 1. the model — full flags matter: --reasoning-format keeps chain-of-thought
@@ -108,7 +122,7 @@ Any MCP client works (Codex, Claude Desktop) → [`docs/CLIENTS.md`](docs/CLIENT
 - **Execution** — ~80 wrapped Kali tools (recon, web, AD/internal, exploitation,
   cred cracking, malware static analysis, OSINT), each audit-logged and sandboxed;
   findings render to `findings.md` / `.csv` (with optional CVSS + CWE).
-- **Knowledge** — ~73 `load_skill` playbooks across 14 domains, web-researched to
+- **Knowledge** — ~74 `load_skill` playbooks across 14 domains, web-researched to
   current (2026) standards, telling the model _how_ to use the tools and _what_ to
   do where there's no tool: offensive, malware, threat-intel, sec-ops, architecture,
   GRC, standards & EU/US regulation, CISO, red/purple, resilience, human factors,
@@ -161,7 +175,7 @@ terminal agent (Pi) ──bash──▶  pi/marq shim ─┤   both hit the same
                                              │
                                   runner.Run ──▶ audit.jsonl (every call)
 
-           load_skill ──▶ skills library (markdown, ~73 playbooks / 14 domains)
+           load_skill ──▶ skills library (markdown, ~74 playbooks / 14 domains)
 ```
 
 Every exec tool funnels through `internal/runner/runner.go::Run` — the single
@@ -173,12 +187,12 @@ point for audit logging, timeouts, and output truncation.
 
 ## Documentation
 
-| Doc                                    | What's in it                                             |
-| :------------------------------------- | :------------------------------------------------------- |
-| [`docs/SETUP.md`](docs/SETUP.md)       | Per-OS install (macOS & Debian), both run modes          |
-| [`docs/CLIENTS.md`](docs/CLIENTS.md)   | Pick a client/model — Claude Code, Codex, Pi + llama.cpp |
-| [`docs/USAGE.md`](docs/USAGE.md)       | Every tool, env vars, API keys, reading the audit log    |
-| [`docs/SECURITY.md`](docs/SECURITY.md) | Legal/ethical baseline, the guardrail model, hardening   |
+| Doc                                    | What's in it                                                      |
+| :------------------------------------- | :---------------------------------------------------------------- |
+| [`docs/SETUP.md`](docs/SETUP.md)       | Per-OS install — skills-only (no Docker), full suite, local model |
+| [`docs/CLIENTS.md`](docs/CLIENTS.md)   | Pick a client/model — Claude Code, Codex, Pi + llama.cpp          |
+| [`docs/USAGE.md`](docs/USAGE.md)       | Every tool, env vars, API keys, reading the audit log             |
+| [`docs/SECURITY.md`](docs/SECURITY.md) | Legal/ethical baseline, the guardrail model, hardening            |
 
 ## License
 

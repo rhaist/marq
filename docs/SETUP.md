@@ -1,37 +1,58 @@
 # Setup
 
 Install + run steps for **macOS** (Apple Silicon or Intel) and **Debian Testing**
-(rolling). The container (Kali tools + the `marq` Go binary) is identical on both;
-the only OS-specific part is installing Docker.
+(rolling). marq is your **universal cyber assistant** — it brings the tools and
+the knowledge; your client brings the model.
 
-marq is your **universal cyber assistant** — it brings the tools and the
-knowledge; your client brings the model. After building the image, see
-[`CLIENTS.md`](CLIENTS.md) to pick a client (Pi + llama.cpp for fully-local
-uncensored work — the recommended default; Claude Code / Codex as a frontier
-fallback for the heaviest reasoning). This page is just install + the two
-connection methods.
+Start with the **Pick a path** table below. The simplest option — the skills
+library alone — is a single Go binary and needs no Docker at all; the full tool
+suite runs from one image that's identical on both OSes (the only OS-specific part
+is installing Docker). Once you're running, [`CLIENTS.md`](CLIENTS.md) helps you
+pick a client (Claude Code / Codex for the heaviest reasoning; Pi + llama.cpp for
+fully-local uncensored work).
 
 > Advisory and knowledge work is open; **active testing is authorized-only** —
 > read [`SECURITY.md`](SECURITY.md) first.
 
 **Contents**
 
-- [Two ways to connect](#two-ways-to-connect)
+- [Pick a path](#pick-a-path)
+- [Skills only — no Docker](#skills-only--no-docker)
 - [macOS](#macos)
 - [Debian Testing (rolling)](#debian-testing-rolling)
 - [Local Go development](#local-go-development-both-oses)
 - [Verify](#verify)
 
-## Two ways to connect
+## Pick a path
 
-| Method              | Command                       | Clients                                         | Who drives the model                               |
-| ------------------- | ----------------------------- | ----------------------------------------------- | -------------------------------------------------- |
-| **MCP server**      | `marq serve` (default)        | Claude Code, Codex, Claude Desktop              | The client brings its own model                    |
-| **Direct run (Pi)** | `pi/marq` shim + `marq run …` | [Pi](https://pi.dev/) + llama.cpp (local model) | Pi drives the model; it calls `marq run` from bash |
+| Path                   | You get                                       | Needs                   | Setup                                                             |
+| ---------------------- | --------------------------------------------- | ----------------------- | ----------------------------------------------------------------- |
+| **Skills only**        | the knowledge library + findings/files tools  | Go, no Docker           | [below](#skills-only--no-docker) — one `go install`               |
+| **Full MCP server**    | skills **+** the ~80-tool suite               | Docker                  | build the image, then any MCP client                              |
+| **Full + local model** | the above, driven by a local uncensored model | Docker + Pi + llama.cpp | the [Pi subsection](#4-run-with-a-local-model-pi--the-marq-skill) |
 
-The image is the same for both. Do the **build** once, then use the **MCP server**
-command below with any client (per-client setup is in [`CLIENTS.md`](CLIENTS.md)),
-and/or the **local model (Pi)** subsection.
+Start at the top and add a layer only when you need it. The image is the same for
+the two full paths — build it once. Per-client setup is in [`CLIENTS.md`](CLIENTS.md).
+
+## Skills only — no Docker
+
+Want the **cyber-skills library + advisory tools** (skills, findings, files) for
+your LLM, without the offensive tool suite? `MARQ_SKILLS_ONLY=1` drops every
+Kali-binary tool, so marq is a single static Go binary — no image, no scan
+capabilities:
+
+```bash
+go install github.com/rhaist/marq/cmd/marq@latest    # ~10 MB, skills embedded
+claude mcp add marq-skills \
+  -e MARQ_SKILLS_ONLY=1 -e MARQ_WORK_DIR=$HOME/.marq \
+  -e MARQ_AUDIT_LOG=$HOME/.marq/audit.jsonl \
+  -- marq serve
+```
+
+Any MCP client works (the same `marq serve` stdio server, just a smaller tool
+set) — see [`CLIENTS.md`](CLIENTS.md). Add the full tool suite below when you need
+to _run_ something, not just reason about it. To try it with no client at all:
+`scripts/demo-skills.sh`.
 
 ---
 

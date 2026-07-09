@@ -1,6 +1,6 @@
 # Driving marq — pick the brain for the job
 
-marq is **tools + knowledge**: ~80 wrapped Kali tools and ~70 skill playbooks
+marq is **tools + knowledge**: ~80 wrapped Kali tools and ~74 skill playbooks
 across 14 domains (pentest, malware, threat-intel, sec-ops, architecture, GRC,
 standards, CISO, resilience, human factors, …). It does **not** bring a model.
 Your client does. So the question is which **brain** you point at it — and that
@@ -18,7 +18,16 @@ privacy-sensitive work stays on your box. Reach for a **frontier model as a
 fallback** when a task is judgment-heavy (governance/architecture/advisory) and
 the data isn't sensitive. Keep both configured and switch per task.
 
-## Two ways marq connects
+## How marq runs & connects
+
+**Two footprints.** The **skills-only** build serves just the knowledge library +
+findings/files tools — `go install github.com/rhaist/marq/cmd/marq@latest` with
+`MARQ_SKILLS_ONLY=1`, a ~10 MB native binary, **no Docker** (see
+[`SETUP.md`](SETUP.md#skills-only--no-docker)). Reach for it when the work is
+advisory — architecture, GRC, standards, threat-intel research. The **full** build
+is the Docker image that adds the ~80-tool suite for when you need to _run_ things.
+
+**Two transports** (both builds use the same `marq serve` stdio server):
 
 - **MCP server** (`marq serve`) — for Claude Code, Codex, Claude Desktop, and
   any MCP client. The client's model sees marq's tools as typed MCP tools and
@@ -28,7 +37,7 @@ the data isn't sensitive. Keep both configured and switch per task.
   model calls `marq run <tool> '<json>'` from bash; the shim forwards it into a
   long-lived container.
 
-Either way it's the **same registry and the same audit log** — behavior is
+Every combination is the **same registry and the same audit log** — behavior is
 identical.
 
 ---
@@ -108,7 +117,7 @@ where nothing leaves the box and nothing is filtered.
   before diving in. The skills carry the current-standards detail and the right
   tool order — they're what make a smaller model competent and keep a frontier
   model from guessing at stale facts.
-- **Load only the skill you need.** There are ~70; pulling the one relevant
+- **Load only the skill you need.** There are ~74; pulling the one relevant
   playbook keeps context tight. `marq run load_skill '{}'` (or the `load_skill`
   tool) lists the index.
 - **Scope gates active testing, not advice.** GRC/architecture/standards

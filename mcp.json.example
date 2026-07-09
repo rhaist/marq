@@ -22,7 +22,7 @@
       ],
       "env": {
         "MARQ_OPERATOR": "marq",
-        "MARQ_SKILLS_ONLY": "true"
+        "MARQ_SKILLS_ONLY": "1"
       }
     },
     "marq": {

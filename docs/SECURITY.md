@@ -53,7 +53,21 @@ off-box (below), or make it append-only at the filesystem level.
 > subprocess is spawned) — auditing already funnels through that one function,
 > so enforcement can too.
 
+## Skills-only mode has a smaller surface
+
+The container hardening below is for the **full** Docker tool suite. The
+**skills-only** build (`MARQ_SKILLS_ONLY=1`, run as a bare `go install` binary)
+registers none of the exec tools — it runs **no external binaries at all**, only
+in-process handlers over embedded markdown and the `/work` file tools. So the
+offensive-tooling threat model (scanning, exploitation, raw shell) simply doesn't
+apply, and it needs no container to be safe. It's still audit-logged, and the file
+sandbox still bounds `read_file`/`write_file` to `MARQ_WORK_DIR` and `/tmp`. The
+one thing it doesn't get natively is the container's process/network isolation —
+run it where you'd run any small local service.
+
 ## Container hardening applied
+
+Applies to the full Docker tool suite (skills-only above needs none of it):
 
 - **Non-root**: the server runs as the unprivileged `marq` user.
 - **Capabilities dropped**: `cap_drop: ALL`, re-adding only `NET_RAW`,
