@@ -2,7 +2,7 @@
 
 How to build, smoke-test and drive marq — your universal cyber assistant (~80
 tools + ~74 skill playbooks across 14 domains). For choosing a client and model
-for the job (Claude Code / Codex as the expert, Pi for local uncensored work, LM
+for the job (Claude Code / Codex as the expert, Pi for local work, LM
 Studio for testing) see [`CLIENTS.md`](CLIENTS.md); for a guided per-OS install
 see [`SETUP.md`](SETUP.md); for the safety model see [`SECURITY.md`](SECURITY.md).
 
@@ -85,7 +85,7 @@ shared shape:
 ## 4. Run with a local model (Pi)
 
 Instead of an external MCP client, drive marq from [Pi](https://pi.dev/) — a
-minimal terminal agent that runs a local/abliterated model on **llama.cpp's
+minimal terminal agent that runs a local model on **llama.cpp's
 `llama-server`** (any OpenAI-compatible endpoint works) and gives the model
 bash. The model invokes `marq run <tool> '<json>'`; the `pi/marq` host shim
 forwards each call into a long-lived container over `docker exec`.

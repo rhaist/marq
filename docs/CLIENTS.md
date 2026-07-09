@@ -8,12 +8,12 @@ depends on the work.
 
 ## Match the brain to the work
 
-| You want to…                                                                                                                                | Use                                                                        | Why                                                                                                         |
-| :------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- |
-| Run fully local & uncensored — hands-on offensive ops, on-box execution, nothing leaves the host, no model refusals _(recommended default)_ | **Pi** + a local/abliterated model on **llama.cpp** + the `pi/marq` shim   | Terminal-native, no cloud, no refusals; the model gets bash and calls `marq run` directly.                  |
-| Reason hard — architecture review, threat modeling, GRC/compliance, IR leadership, write the report, app/code-sec review                    | **Claude Code** or **Codex** (frontier model) + marq over MCP _(fallback)_ | Strongest reasoning. marq hands it the current-standards skills and the tools; the model supplies judgment. |
+| You want to…                                                                                                             | Use                                                                        | Why                                                                                                         |
+| :----------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- |
+| Run fully local — hands-on offensive ops, on-box execution, nothing leaves the host _(recommended default)_              | **Pi** + a local model on **llama.cpp** + the `pi/marq` shim               | Terminal-native, no cloud; the model gets bash and calls `marq run` directly.                               |
+| Reason hard — architecture review, threat modeling, GRC/compliance, IR leadership, write the report, app/code-sec review | **Claude Code** or **Codex** (frontier model) + marq over MCP _(fallback)_ | Strongest reasoning. marq hands it the current-standards skills and the tools; the model supplies judgment. |
 
-Rule of thumb: **local uncensored model by default** — hands-on offensive and
+Rule of thumb: **local model by default** — hands-on offensive and
 privacy-sensitive work stays on your box. Reach for a **frontier model as a
 fallback** when a task is judgment-heavy (governance/architecture/advisory) and
 the data isn't sensitive. Keep both configured and switch per task.
@@ -93,9 +93,9 @@ env_vars = { MARQ_OPERATOR = "marq" }
 
 Same uses as Claude Code. Docs: [Codex MCP](https://developers.openai.com/codex/mcp).
 
-## Pi (local, uncensored, standalone)
+## Pi (local, standalone)
 
-The fully-local path — no cloud, no refusals, on-box execution. See
+The fully-local path — no cloud, on-box execution. See
 [`SETUP.md`](SETUP.md#4-run-with-a-local-model-pi--the-marq-skill):
 
 ```bash
@@ -105,9 +105,9 @@ marq up ~/marq/work                               # long-lived container, any wo
 # skill in ~/.pi/agent/settings.json, then run `pi` — full steps in SETUP.md
 ```
 
-**Best for:** any cyber work you want fully local on an uncensored model —
+**Best for:** any cyber work you want fully local —
 malware triage, threat-intel pivoting, research, and hands-on offensive testing —
-where nothing leaves the box and nothing is filtered.
+where nothing leaves the box.
 
 ---
 
@@ -124,8 +124,8 @@ where nothing leaves the box and nothing is filtered.
   conversations are unrestricted; scanning and exploitation are authorized-only
   and audit-logged. Record scope with `set_engagement` before any active testing.
 - **Pick the model to the job.** A big reasoning model for analysis and writing;
-  a fast tool-capable local model for chaining scans; an abliterated local model
-  for offensive work that a hosted model would refuse.
+  a fast tool-capable local model for chaining scans and hands-on offensive work
+  you want to keep on-box.
 - **Weak local model bypassing marq (raw `curl`/`grep`, ignoring the tools)?**
   Install [`pi/SYSTEM.md`](../pi/SYSTEM.md): `ln -sf "$PWD/pi/SYSTEM.md"
 ~/.pi/agent/SYSTEM.md` (SETUP.md step 2b). Pi's default prompt frames the model

@@ -9,7 +9,7 @@ library alone — is a single Go binary and needs no Docker at all; the full too
 suite runs from one image that's identical on both OSes (the only OS-specific part
 is installing Docker). Once you're running, [`CLIENTS.md`](CLIENTS.md) helps you
 pick a client (Claude Code / Codex for the heaviest reasoning; Pi + llama.cpp for
-fully-local uncensored work).
+fully-local work).
 
 > Advisory and knowledge work is open; **active testing is authorized-only** —
 > read [`SECURITY.md`](SECURITY.md) first.
@@ -25,11 +25,11 @@ fully-local uncensored work).
 
 ## Pick a path
 
-| Path                   | You get                                       | Needs                   | Setup                                                             |
-| ---------------------- | --------------------------------------------- | ----------------------- | ----------------------------------------------------------------- |
-| **Skills only**        | the knowledge library + findings/files tools  | Go, no Docker           | [below](#skills-only--no-docker) — one `go install`               |
-| **Full MCP server**    | skills **+** the ~80-tool suite               | Docker                  | build the image, then any MCP client                              |
-| **Full + local model** | the above, driven by a local uncensored model | Docker + Pi + llama.cpp | the [Pi subsection](#4-run-with-a-local-model-pi--the-marq-skill) |
+| Path                   | You get                                      | Needs                   | Setup                                                             |
+| ---------------------- | -------------------------------------------- | ----------------------- | ----------------------------------------------------------------- |
+| **Skills only**        | the knowledge library + findings/files tools | Go, no Docker           | [below](#skills-only--no-docker) — one `go install`               |
+| **Full MCP server**    | skills **+** the ~80-tool suite              | Docker                  | build the image, then any MCP client                              |
+| **Full + local model** | the above, driven by a local model           | Docker + Pi + llama.cpp | the [Pi subsection](#4-run-with-a-local-model-pi--the-marq-skill) |
 
 Start at the top and add a layer only when you need it. The image is the same for
 the two full paths — build it once. Per-client setup is in [`CLIENTS.md`](CLIENTS.md).
@@ -117,7 +117,7 @@ steps (Claude Code, Codex, Claude Desktop) are in [`CLIENTS.md`](CLIENTS.md).
 
 ### 4. Run with a local model (Pi + the marq skill)
 
-[Pi](https://pi.dev/) is a minimal terminal agent that runs a local/abliterated
+[Pi](https://pi.dev/) is a minimal terminal agent that runs a local
 model and gives it bash. We drive it with **[llama.cpp](https://github.com/ggml-org/llama.cpp)'s
 `llama-server`** — the OpenAI-compatible local runtime, no GUI, fully scriptable,
 and the layer the GUI wrappers sit on anyway (going direct gets you grammar-constrained
@@ -167,8 +167,8 @@ export default async function (pi: ExtensionAPI) {
     api: "openai-completions",
     models: [
       {
-        id: "gemma-uncensored", // just a label (see note)
-        name: "gemma-uncensored",
+        id: "gemma-local", // just a label (see note)
+        name: "gemma-local",
         reasoning: false,
         input: ["text"],
         cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
@@ -191,7 +191,7 @@ point `BASE` at it instead.)
 ```json
 {
   "defaultProvider": "llama-cpp",
-  "defaultModel": "llama-cpp/gemma-uncensored",
+  "defaultModel": "llama-cpp/gemma-local",
   "skills": ["/path/to/marq/pi"]
 }
 ```
@@ -201,7 +201,7 @@ Pi discovers any directory containing a `SKILL.md` (recursively), so pointing
 as the `marq` skill — kept in sync with the repo, no copy.
 
 **Recommended model:** [`Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced`](https://huggingface.co/HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced)
-(Q4_K_M). It's uncensored (no refusals on offensive work), tool-capable, and fits
+(Q4_K_M). It runs offensive work without refusals, is tool-capable, and fits
 a 12–16 GB GPU at a long context. Launch it with the flags below; without them it
 leaks reasoning tokens into its answers and (without SYSTEM.md) bypasses marq.
 
@@ -216,7 +216,7 @@ settings baked into flags (the same values marq's eval pins in
 in [`scripts/eval/llama.cpp/`](../scripts/eval/llama.cpp/)):
 
 ```bash
-# Uncensored "Balanced" build (the default above). -hf pulls the GGUF from HF.
+# "Balanced" build (the default above). -hf pulls the GGUF from HF.
 llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
   --host 127.0.0.1 --port 8080 -ngl 99 --ctx-size 65536 --jinja \
   --reasoning-format deepseek \
@@ -226,7 +226,7 @@ llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
 
 - **`--host 127.0.0.1`** binds loopback only — the Pi extension connects there,
   so that's all you need. Don't use `--host 0.0.0.0` unless you deliberately want
-  to serve the model to other machines: it exposes an **uncensored** model on an
+  to serve the model to other machines: it exposes the model on an
   open completions endpoint to your whole network. If you must, firewall the port.
 - **`--jinja`** applies the model's chat template so **tool calls parse** — the
   single most important flag for driving marq.
@@ -275,7 +275,7 @@ you also run Pi for non-marq work.) The `pi/SKILL.md` catalog is still appended.
 **3. Verify** (no model call, so it won't disturb anything):
 
 ```bash
-pi --list-models                  # → lists `llama-cpp  gemma-uncensored  64.0K …`
+pi --list-models                  # → lists `llama-cpp  gemma-local  64.0K …`
 ```
 
 Then just run `pi` in an engagement dir. The model loads the marq skill and

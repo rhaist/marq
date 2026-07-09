@@ -31,7 +31,7 @@ Pick your path — start simple, add a layer only when you need it:
 | :------------------------------------------- | :-------------- | :-------------------------- |
 | **cyber expertise inside my LLM**            | skills only     | one `go install`, no Docker |
 | **…plus the ~80-tool suite to _run_ things** | full MCP server | build/pull the image        |
-| **…driven by a local uncensored model**      | full + Pi       | image + Pi + llama.cpp      |
+| **…driven by a local model**                 | full + Pi       | image + Pi + llama.cpp      |
 
 ### Just the skills — cyber expertise for your LLM (no Docker)
 
@@ -72,7 +72,7 @@ or point a frontier MCP client at it.
 
 ### Run it fully local
 
-Your own uncensored model, on your box: no cloud, no refusals, nothing leaves the
+Your own model, on your box: no cloud, nothing leaves the
 host — the recommended setup for hands-on offensive work. Drive marq from
 [Pi](https://pi.dev/) over [llama.cpp](https://github.com/ggml-org/llama.cpp):
 
