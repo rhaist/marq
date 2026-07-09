@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"marq/internal/config"
+	"github.com/rhaist/marq/internal/config"
 )
 
 // TestSeverityPrecedence locks in: caller severity is authoritative; CVSS only

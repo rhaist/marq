@@ -3,7 +3,7 @@ package registry
 import (
 	"strconv"
 
-	"marq/internal/shellword"
+	"github.com/rhaist/marq/internal/shellword"
 )
 
 // creds returns the offline password/hash cracking tools.

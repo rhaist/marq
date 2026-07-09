@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"marq/internal/config"
+	"github.com/rhaist/marq/internal/config"
 )
 
 var mu sync.Mutex

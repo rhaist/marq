@@ -11,9 +11,9 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"marq/internal/config"
-	"marq/internal/registry"
-	"marq/internal/skills"
+	"github.com/rhaist/marq/internal/config"
+	"github.com/rhaist/marq/internal/registry"
+	"github.com/rhaist/marq/internal/skills"
 )
 
 // Version is the server's reported implementation version.

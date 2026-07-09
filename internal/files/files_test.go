@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"marq/internal/config"
+	"github.com/rhaist/marq/internal/config"
 )
 
 // TestSandboxRejectsSymlinkEscape exercises the whole reason realpath() exists:

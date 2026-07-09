@@ -18,9 +18,9 @@ import (
 	"syscall"
 	"time"
 
-	"marq/internal/audit"
-	"marq/internal/config"
-	"marq/internal/shellword"
+	"github.com/rhaist/marq/internal/audit"
+	"github.com/rhaist/marq/internal/config"
+	"github.com/rhaist/marq/internal/shellword"
 )
 
 // Opts are per-call options for Run.

@@ -12,7 +12,7 @@ import (
 	"sort"
 	"strings"
 
-	"marq/internal/config"
+	"github.com/rhaist/marq/internal/config"
 )
 
 func jobsRoot() string { return filepath.Join(config.C.WorkDir, "jobs") }

@@ -11,9 +11,9 @@ import (
 	"strconv"
 	"strings"
 
-	"marq/internal/audit"
-	"marq/internal/config"
-	"marq/internal/runner"
+	"github.com/rhaist/marq/internal/audit"
+	"github.com/rhaist/marq/internal/config"
+	"github.com/rhaist/marq/internal/runner"
 )
 
 // ParamType is the JSON-schema scalar type of a tool parameter.
@@ -352,6 +352,12 @@ func All() []Tool {
 	)
 	if config.C.AllowRawShell {
 		tools = append(tools, shell()...)
+	}
+	if config.C.SkillsOnly {
+		// Knowledge-only mode: keep the in-process tools (skills, findings, files,
+		// info), drop every exec tool so the server needs no Kali binaries. Exec
+		// tools are exactly those with a Build; in-process tools have a Handler.
+		tools = slices.DeleteFunc(tools, func(t Tool) bool { return t.Build != nil })
 	}
 	return tools
 }

@@ -3,9 +3,9 @@ package registry
 import (
 	_ "embed"
 
-	"marq/internal/findings"
-	"marq/internal/jobs"
-	"marq/internal/skills"
+	"github.com/rhaist/marq/internal/findings"
+	"github.com/rhaist/marq/internal/jobs"
+	"github.com/rhaist/marq/internal/skills"
 )
 
 // knowledgeTools returns the on-demand skills library tool.

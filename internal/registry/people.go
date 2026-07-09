@@ -3,7 +3,7 @@ package registry
 import (
 	"strconv"
 
-	"marq/internal/shellword"
+	"github.com/rhaist/marq/internal/shellword"
 )
 
 // people returns the people-footprint OSINT tools.

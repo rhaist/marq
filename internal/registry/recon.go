@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"marq/internal/shellword"
+	"github.com/rhaist/marq/internal/shellword"
 )
 
 // splitHosts turns a comma/newline-separated list into trimmed host entries.

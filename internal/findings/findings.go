@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
-	"marq/internal/audit"
-	"marq/internal/config"
+	"github.com/rhaist/marq/internal/audit"
+	"github.com/rhaist/marq/internal/config"
 )
 
 func nowTS() string { return time.Now().UTC().Format(time.RFC3339) }

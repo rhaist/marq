@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"marq/internal/config"
+	"github.com/rhaist/marq/internal/config"
 )
 
 // TestFailClosedOnAuditError pins the core safety invariant: if the audit start

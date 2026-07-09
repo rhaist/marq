@@ -96,6 +96,13 @@ for t in server_info set_engagement load_skill report_finding render_report; do
 done
 run no_such_tool '{}' >/dev/null; [[ $? -ne 0 ]]; check "unknown tool exits non-zero" $?
 
+echo "# 7. skills-only mode (MARQ_SKILLS_ONLY — knowledge server, no Kali binaries)"
+lite="$(MARQ_SKILLS_ONLY=1 "$BIN" tools)"
+grep -q '^load_skill ' <<<"$lite"; check "skills-only keeps load_skill" $?
+grep -q '^report_finding ' <<<"$lite"; check "skills-only keeps report_finding" $?
+! grep -q '^nmap ' <<<"$lite"; check "skills-only drops exec tools (nmap absent)" $?
+grep -qi 'knowledge-only mode' <<<"$(MARQ_SKILLS_ONLY=1 run server_info '{}')"; check "server_info announces knowledge-only mode" $?
+
 echo
 echo "# result: $pass passed, $fail failed, $skip skipped"
 [[ "$fail" == 0 ]]

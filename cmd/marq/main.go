@@ -28,9 +28,9 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"marq/internal/config"
-	"marq/internal/mcpserver"
-	"marq/internal/registry"
+	"github.com/rhaist/marq/internal/config"
+	"github.com/rhaist/marq/internal/mcpserver"
+	"github.com/rhaist/marq/internal/registry"
 )
 
 func main() {

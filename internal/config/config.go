@@ -37,6 +37,10 @@ type Config struct {
 	ScopeNote  string
 	// AllowRawShell exposes the generic run_shell escape hatch when true.
 	AllowRawShell bool
+	// SkillsOnly serves only the in-process knowledge tools (skills, findings,
+	// files, info) and drops every Kali-binary exec tool, so the server runs
+	// standalone without the tool image — the "cyber skills for your LLM" mode.
+	SkillsOnly bool
 	// WorkDir is the engagement working area (findings, job dirs live here).
 	WorkDir string
 }
@@ -82,6 +86,7 @@ func Load() Config {
 		MaxCommandTimeout: envInt("MARQ_MAX_TIMEOUT", 3600),
 		MaxOutputChars:    envInt("MARQ_MAX_OUTPUT", 60000),
 		AllowRawShell:     envBool("MARQ_ALLOW_RAW_SHELL", false),
+		SkillsOnly:        envBool("MARQ_SKILLS_ONLY", false),
 		WorkDir:           env("MARQ_WORK_DIR", "/work"),
 		Operator:          env("MARQ_OPERATOR", "marq"),
 		Engagement:        env("MARQ_ENGAGEMENT", "unspecified"),
@@ -155,6 +160,12 @@ func (c *Config) Banner() string {
 	engagement, scope := Attribution()
 	if scope == "" {
 		scope = "(none provided — set MARQ_SCOPE)"
+	}
+	if c.SkillsOnly {
+		return "marq is running in knowledge-only mode: the cyber skills library " +
+			"and advisory tools are available; the active-testing tool suite is not " +
+			"loaded. Advisory and knowledge work is unrestricted. All invocations are " +
+			"audit-logged.\n  operator   : " + c.Operator + "\n  audit log  : " + c.AuditLog
 	}
 	return fmt.Sprintf(
 		"marq spans offensive, malware, threat-intel, and governance work. "+

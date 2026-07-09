@@ -33,6 +33,30 @@ docker pull ghcr.io/rhaist/marq && docker tag ghcr.io/rhaist/marq marq
 No Docker Desktop needed — **OrbStack** (macOS) or **Podman / Colima** (Linux) run
 the image just as well ([`docs/SETUP.md`](docs/SETUP.md)).
 
+### Just the skills — cyber expertise for your LLM (no Docker)
+
+The lowest-friction way in: add the **skills library + advisory tools** to any MCP
+client and skip the offensive tool suite entirely. `MARQ_SKILLS_ONLY=1` loads only
+the in-process knowledge tools (skills, findings, files) — no scan capabilities and
+**no Kali binaries**, so it's a single static Go binary you run natively:
+
+```bash
+go install github.com/rhaist/marq/cmd/marq@latest   # ~10 MB, skills embedded
+claude mcp add marq-skills \
+  -e MARQ_SKILLS_ONLY=true -e MARQ_WORK_DIR=$HOME/.marq \
+  -e MARQ_AUDIT_LOG=$HOME/.marq/audit.jsonl \
+  -- marq serve
+```
+
+Now ask _"Map our pentest findings to ISO 27001 and SOC 2"_ or _"What's our
+breach-notification clock under GDPR and NIS2?"_ and the model loads the right
+playbook (current 2026 standards) and drafts the deliverable. See it end-to-end
+without any client: [`scripts/demo-skills.sh`](scripts/demo-skills.sh).
+
+Prefer containers, or already pulled the image? The same mode runs there too — use
+the `marq-skills` entry in [`mcp.json.example`](mcp.json.example). Add the full tool
+suite below when you need to _run_ something, not just reason about it.
+
 ### Run it fully local — recommended
 
 Your own uncensored model, on your box: no cloud, no refusals, nothing leaves the
@@ -88,7 +112,8 @@ Any MCP client works (Codex, Claude Desktop) → [`docs/CLIENTS.md`](docs/CLIENT
   current (2026) standards, telling the model _how_ to use the tools and _what_ to
   do where there's no tool: offensive, malware, threat-intel, sec-ops, architecture,
   GRC, standards & EU/US regulation, CISO, red/purple, resilience, human factors,
-  DevSecOps/privacy.
+  DevSecOps/privacy. Run these standalone with `MARQ_SKILLS_ONLY=1` — no tool
+  suite, no Kali binaries.
 - **Auditable by design** — every external-tool call funnels through one choke
   point: an append-only, `fsync`'d audit log, a timeout, and an output cap. File
   access is sandboxed to `/work`+`/tmp`, and the image runs non-root (the

@@ -1,4 +1,4 @@
-module marq
+module github.com/rhaist/marq
 
 go 1.26.4
 

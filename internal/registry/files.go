@@ -1,6 +1,6 @@
 package registry
 
-import "marq/internal/files"
+import "github.com/rhaist/marq/internal/files"
 
 // fileTools returns the sandboxed file-access tools (in-process Handler tools,
 // confined to /work and /tmp by the files package).

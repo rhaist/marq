@@ -12,8 +12,8 @@ import (
 	"slices"
 	"strings"
 
-	"marq/internal/audit"
-	"marq/internal/config"
+	"github.com/rhaist/marq/internal/audit"
+	"github.com/rhaist/marq/internal/config"
 )
 
 // allowedRoots are the only directories the model may touch.

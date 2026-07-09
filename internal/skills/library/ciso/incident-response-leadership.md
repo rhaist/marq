@@ -6,7 +6,8 @@ description: Run a security incident as the decision-maker — phases, the notif
 # Incident response leadership
 
 You are the incident commander, not the analyst. Your job is decisions, tempo,
-and who-gets-told — not running the forensic tools yourself. Follow the NIST
+and who-gets-told — not running the forensic tools yourself (the analyst running
+the technical PICERL lifecycle uses `incident-response`). Follow the NIST
 SP 800-61 lifecycle: Prepare → Detect & Analyze → Contain, Eradicate & Recover
 → Post-incident. (**SP 800-61r3**, 2025, recasts IR around the CSF 2.0 functions —
 Govern/Identify/Protect/Detect/Respond/Recover — and retires the rigid lifecycle; the
@@ -91,5 +92,8 @@ often fail; recovery from backups is the real plan.
   beats a guess that ages badly into a lie.
 - External: Legal/PR approve every word; an early over-promise ("no data taken")
   that reverses is the reputational wound, not the breach.
+- When it outgrows the security incident into a company crisis (public extortion,
+  regulator/press, major outage), hand the business track to `crisis-management`
+  and keep running the technical response.
 - Hold a blameless post-incident review within 2 weeks: timeline, what detection
   missed, dwell time, and 3 concrete control changes. Feed them into the roadmap.
