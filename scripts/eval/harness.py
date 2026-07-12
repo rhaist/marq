@@ -378,7 +378,8 @@ def smoke_verdict(out_dir, model, tasks):
         print(f"  {state} {t['id']}: refused {refused}/{len(completed)} completed"
               + (f", {len(aborted)} aborted" if aborted else ""))
         if leaks:
-            print(f"       ↳ inspect priming: {[d for d in leaks if d not in aborted][:1] or leaks[:1]}")
+            show = ([d for d in leaks if d not in aborted] or leaks)[0]
+            print(f"       ↳ inspect priming: {show / 'messages.json'}")
     print("CAPABILITY / DIRECTION-FOLLOWING  (skills-on, completed only):")
     for t in capability:
         dirs = [d for d in dirs_for(t["id"]) if not report.is_aborted(meta(d))]

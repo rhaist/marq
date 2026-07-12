@@ -271,7 +271,12 @@ def render_leaderboard(args):
                    f"| {_cell(s['skills_off'])} | {lift} | {safe} | {n} | `{m['marq_commit']}` | {m['date']} |")
     if not rows:
         out.append("| _(no results yet)_ | | | | | | | | |")
-    (HERE / "LEADERBOARD.md").write_text("\n".join(out) + "\n")
+    # Write the board beside the results it's derived from, so a `--results`
+    # override lands its own LEADERBOARD.md instead of clobbering the canonical
+    # one (default --results is HERE/results, whose parent is HERE — unchanged).
+    dest = args.results.parent
+    dest.mkdir(parents=True, exist_ok=True)  # may not exist if nothing was published
+    (dest / "LEADERBOARD.md").write_text("\n".join(out) + "\n")
     return len(rows)
 
 
@@ -327,7 +332,7 @@ def main():
             print("  ->", publish(model, meas, args, info))
     if not args.no_publish:
         n = render_leaderboard(args)
-        print(f"leaderboard: {HERE / 'LEADERBOARD.md'} ({n} models)")
+        print(f"leaderboard: {args.results.parent / 'LEADERBOARD.md'} ({n} models)")
     return 0
 
 
