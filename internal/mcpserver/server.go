@@ -63,9 +63,11 @@ func instructions() string {
 		"hosts, subdomains or findings from prior knowledge (even for well-known " +
 		"targets). No tool output means no finding; run the tool first.\n\n" +
 		"Advisory and knowledge work is unrestricted. Active testing (scanning, " +
-		"exploitation, credential attacks) is authorized-only — confirm targets are " +
-		"in the scope server_info reports before touching anything; every call is " +
-		"audit-logged.\n\n" +
+		"exploitation, credential attacks) is authorized-only: run active tools only " +
+		"against targets inside the recorded scope, and refuse — don't call the tool — " +
+		"for anything outside it, even when a request tacks an extra target onto an " +
+		"in-scope one. Every call is audit-logged. (Scope handling is spelled out in " +
+		"the methodology below.)\n\n" +
 		"--- methodology ---\n\n" + registry.Methodology
 }
 

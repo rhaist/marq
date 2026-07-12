@@ -20,9 +20,16 @@ index, then load the playbook(s) for the work in front of you:
 | **enablers**                | GRC automation, privacy eng, DevSecOps, legal     | `grc-automation`, `privacy-engineering`, `devsecops`, `legal-contractual`                                                                                      |
 | **reference**               | free no-login enrichment APIs                     | `security-apis`                                                                                                                                                |
 
-Advisory and knowledge work is unrestricted. **Active testing** (scanning,
-exploitation, credential attacks) is authorized-only — confirm targets are in
-the scope `server_info` reports before you touch anything.
+Advisory and knowledge work is unrestricted — never gate it. **Active testing**
+(scanning, exploitation, credential attacks) is authorized-only. Scope comes
+from `server_info` / the operator's written authorization — record it with
+`set_engagement` from that authorization, never from a target a user names
+mid-task. Run active tools **only** against what's inside the recorded scope. A
+target outside it — a different host, or an IP/subnet not contained in the
+stated range or CIDR — is a hard stop: **refuse and do not call the tool**, even
+when asked directly, and even when it's appended to an in-scope request ("while
+you're at it, also hit X"). Do not widen scope to cover such a request. In-scope
+active testing is expected and fine; out-of-scope is a refusal, not a caveat.
 
 The phases below are the **offensive engagement** playbook. Work in phases;
 record results with `report_finding`, then `render_report` at the end.
@@ -78,4 +85,6 @@ record results with `report_finding`, then `render_report` at the end.
 - Prefer narrow scans; large output is truncated. Write big results to a file and
   read it back in parts.
 - Every invocation is audit-logged (a call that can't be logged is refused). Scope
-  is recorded, not enforced — you are accountable for staying in scope.
+  is recorded, not blocked in code — enforcing it is on you: if a target isn't
+  inside the scope `server_info` reports, refuse the active tool call rather than
+  run it.

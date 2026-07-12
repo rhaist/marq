@@ -25,8 +25,19 @@ plain text won't drive the loop.
 
 ## Setup
 
-1. Build the image once: `docker build -t marq .` (the harness docker-runs `marq
-serve` per task with a fresh `/work`).
+1. Build the marq server the harness will spawn per task:
+   - **Sweeps (recommended): the bare Go binary.** `go build -o /tmp/marq-eval
+./cmd/marq`, then pass `--marq-cmd '/tmp/marq-eval serve'`. The eval scores
+     tool _selection_, not execution (see the `expect` checks below — all are
+     skill-load / tool-call / answer / artifact, none read a tool's real
+     output), so the Kali binaries aren't needed. A process spawns in
+     milliseconds and can't wedge, unlike a 6.8 GB `docker run` fired 200× while
+     `llama-server` saturates the host — that path orphaned containers and
+     failed 90%+ of runs at MCP init. The audit log auto-lands in each run's
+     `work/`.
+   - **Image plumbing only: docker.** `docker build -t marq .` and leave
+     `--marq-cmd` at its default. Use this to confirm the _container_ behaves,
+     not to sweep models. If you do, watch `docker ps` for orphans.
 2. Start `llama-server` with a tool-capable model (see
    [`llama.cpp/README.md`](llama.cpp/README.md) for ready-to-run commands):
    ```bash
@@ -42,8 +53,9 @@ serve` per task with a fresh `/work`).
 ## Run
 
 ```bash
-# Sweep models, both skills-on and skills-off, all tasks:
+# Sweep models, both skills-on and skills-off, all tasks (bare-binary path):
 python3 scripts/eval/harness.py \
+    --marq-cmd '/tmp/marq-eval serve' \
     --models qwen2.5-7b-instruct,llama-3.1-8b-instruct,mistral-nemo \
     --skills both
 
