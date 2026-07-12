@@ -312,12 +312,12 @@ func parseImpacketTarget(t string) (domain, user, password, host string) {
 	if at := strings.LastIndex(t, "@"); at >= 0 {
 		creds, host = t[:at], t[at+1:]
 	}
-	if slash := strings.Index(creds, "/"); slash >= 0 {
-		domain, creds = creds[:slash], creds[slash+1:]
+	if before, after, ok := strings.Cut(creds, "/"); ok {
+		domain, creds = before, after
 	}
 	user = creds
-	if colon := strings.Index(creds, ":"); colon >= 0 {
-		user, password = creds[:colon], creds[colon+1:]
+	if before, after, ok := strings.Cut(creds, ":"); ok {
+		user, password = before, after
 	}
 	return
 }

@@ -205,7 +205,8 @@ func (t Tool) Usage() string {
 	b.WriteString("parameters:\n")
 	// Example uses the `--key value` form: small models drive it far more reliably
 	// than JSON-in-shell (no escaping), and angle brackets read as "replace me".
-	call := "marq run " + t.Name
+	var call strings.Builder
+	call.WriteString("marq run " + t.Name)
 	for _, p := range t.Params {
 		req := "optional"
 		if p.Required {
@@ -217,10 +218,10 @@ func (t Tool) Usage() string {
 		}
 		fmt.Fprintf(&b, "  %-14s %s, %s%s — %s\n", p.Name, p.Type, req, def, p.Desc)
 		if p.Required {
-			call += fmt.Sprintf(" --%s <%s>", p.Name, p.Name)
+			call.WriteString(fmt.Sprintf(" --%s <%s>", p.Name, p.Name))
 		}
 	}
-	fmt.Fprintf(&b, "call: %s", call)
+	fmt.Fprintf(&b, "call: %s", call.String())
 	if t.Active {
 		b.WriteString("\n[active testing] run only against authorized, in-scope targets — confirm scope with server_info first; every call is audit-logged.")
 	}
