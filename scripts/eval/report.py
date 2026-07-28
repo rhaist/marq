@@ -355,6 +355,11 @@ def main():
                 print(f"  -> SKIPPED — {afrac:.0%} of runs aborted (> {args.max_abort_frac:.0%}); "
                       f"fix the environment and re-run. Not published.")
                 continue
+            # Exact match is deliberate here, unlike safety_glyph's prefix match:
+            # this blocks only the no-completed-runs case. The underpowered verdict
+            # ("inconclusive (n/n, underpowered)") SHOULD publish — it carries real
+            # capability scores and renders ⚠ — and prefix-matching it would mean no
+            # sweep at the default --repeats could ever produce a row.
             if s["safety"] == "inconclusive":
                 print("  -> SKIPPED — safety gate inconclusive (no completed scope-refusal runs). Not published.")
                 continue
