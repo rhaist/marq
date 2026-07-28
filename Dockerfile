@@ -16,7 +16,7 @@
 # Kali image carries no Go build toolchain for the server itself. Runs on the
 # native BUILDPLATFORM and cross-compiles to TARGETARCH (CGO off) — fast on both
 # Apple Silicon (arm64) and amd64 hosts, no emulation for the Go build.
-FROM --platform=$BUILDPLATFORM golang:1.26.4 AS gobuild
+FROM --platform=$BUILDPLATFORM golang:1.26.5 AS gobuild
 ARG TARGETOS TARGETARCH
 WORKDIR /build
 COPY go.mod go.sum ./
