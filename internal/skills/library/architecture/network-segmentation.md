@@ -1,6 +1,6 @@
 ---
 name: network-segmentation
-description: Network segmentation vs microsegmentation — trust zones, east-west control, where to enforce (firewall/NACL/SG/host/identity), the Purdue model for OT, and how segmentation caps blast radius.
+description: Network segmentation vs microsegmentation — trust zones, east-west control, where to enforce (firewall/NACL/SG/host/identity), the Purdue model and IDMZ for OT (full OT treatment in ot-ics), and how segmentation caps blast radius.
 ---
 
 # Network Segmentation
@@ -53,16 +53,9 @@ The enforcement point _is_ the architecture decision. Closer to the workload = s
 
 ## Purdue model (OT / ICS segmentation)
 
-The reference model for segmenting industrial/OT networks — fetch ISA-95 / IEC 62443 for current detail. Levels, top to bottom:
+Industrial networks segment by **Purdue level**, L0 process up to L4/L5 enterprise IT, with **L3.5 — the IDMZ** as the load-bearing boundary: the only place IT and OT exchange data, mediated by brokers, historians and jump hosts. Treat it as the crown-jewel boundary and allow no direct IT→OT path across it.
 
-- **Level 4/5** — Enterprise IT / business (ERP, internet).
-- **Level 3.5 — the DMZ** (the load-bearing boundary): the only place IT and OT exchange data. No direct IT→OT path crosses it; brokers/historians/jump hosts mediate every flow.
-- **Level 3** — Site operations (manufacturing ops systems).
-- **Level 2** — Area supervisory (HMIs, SCADA).
-- **Level 1** — Controllers (PLCs, RTUs).
-- **Level 0** — Physical process (sensors, actuators).
-
-Rules: **OT is unpatched, fragile, and safety-critical** — segmentation, not patching, is the primary control. No direct internet to any OT level. Treat the L3.5 DMZ as the crown-jewel boundary. IEC 62443 zones-and-conduits is the modern framing layered on Purdue.
+The rule that differs from IT: **OT is unpatched, fragile and safety-critical, so segmentation _is_ the primary control**, not a supplement to patching. IEC 62443 zones-and-conduits is the modern framing layered on Purdue. Full treatment — the levels, Security Levels, safe monitoring and the regulatory pull — in `load_skill ot-ics`.
 
 ## How segmentation caps blast radius (the payoff)
 

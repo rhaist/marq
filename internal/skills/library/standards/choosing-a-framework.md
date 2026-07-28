@@ -27,6 +27,9 @@ Most companies end up with a **stack**: one program framework (CSF or ISO) + wha
 | US federal data / want a control catalog under CSF                                                          | **NIST 800-53**             | The control set CSF subcategories map into                               |
 | Small/mid org, no mandate, "just get secure" cheaply                                                        | **CIS Controls v8.1 (IG1)** | Prioritized, concrete, free; good starting baseline                      |
 | Need a common language across exec + technical, gap assessment                                              | **NIST CSF 2.0**            | Outcome-based lens; maps to ISO/800-53/CIS                               |
+| You build, sell, or deploy AI in the EU (incl. HR/recruitment tooling)                                      | **EU AI Act**               | EU regulation; extraterritorial, binds per system — provider vs deployer |
+| Customers ask you to prove AI governance                                                                    | **ISO/IEC 42001**           | The certifiable AI management system; ISO 27001-shaped                   |
+| You ship a product with digital elements into the EU                                                        | **EU CRA**                  | EU regulation; per-product CE marking + vulnerability handling           |
 
 ## How they relate (avoid double-work)
 
@@ -37,14 +40,15 @@ Most companies end up with a **stack**: one program framework (CSF or ISO) + wha
 
 ## Region quick-cut
 
-- **EU/UK**: GDPR always (if personal data). + NIS2 if critical sector, + DORA if finance. ISO 27001 is the procurement cert of choice.
+- **EU/UK**: GDPR always (if personal data). + NIS2 if critical sector, + DORA if finance, + **CRA** if you ship products with digital elements, + **AI Act** if AI is in the product or in HR. ISO 27001 is the procurement cert of choice. These stack — a connected industrial product sold by an EU manufacturer can be in all of them at once.
 - **US**: SOC 2 for B2B SaaS; HIPAA for health; sector laws (GLBA finance, state privacy e.g. CCPA — verify current). PCI everywhere cards are taken.
 - **Global SaaS**: SOC 2 (US buyers) + ISO 27001 (everyone else) + GDPR (EU users) is the common trio.
 - **APAC**: no single regime — ISO 27001 is again the procurement cert of choice, but privacy/transfer law is per-country and a common EU/US blind spot: **China PIPL** (data localization + a mandatory cross-border transfer route), **India DPDP Act** (rules notified Nov 2025, phasing in), **Singapore PDPA**, **Japan APPI**, **Australia Privacy Act** (+ **APRA CPS 234** info-security for regulated finance). GDPR compliance does not cover them — verify per country.
 
 ## Next steps
 
-- Deep-dive a specific regime: `load_skill iso27001`, `soc2`, `pci-dss`, `nist-csf`, `privacy-eu` (GDPR), `nis2-dora`, `eu-cra`, `privacy-us`, `us-sectoral-regs`.
+- Deep-dive a specific regime: `load_skill iso27001`, `soc2`, `pci-dss`, `nist-csf`, `privacy-eu` (GDPR), `nis2-dora`, `eu-cra`, `eu-ai-act`, `privacy-us`, `us-sectoral-regs`.
+- **Plants and machine builders**: `load_skill ot-compliance` (which regimes bind a factory or a shipped machine) and `load_skill ot-ics` (the engineering).
 - Confirmed which apply → run a **gap analysis** against the chosen framework: `load_skill gap-analysis`.
 - Then map controls once, satisfy many: `load_skill control-mapping`.
-- For the canonical current text of any framework below, web-fetch the source named in its skill — versions and dates move.
+- For the canonical current text of any framework named above, web-fetch the source named in its skill — versions and dates move.

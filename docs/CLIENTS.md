@@ -1,6 +1,6 @@
 # Driving marq — pick the brain for the job
 
-marq is **tools + knowledge**: ~80 wrapped Kali tools and ~74 skill playbooks
+marq is **tools + knowledge**: ~80 wrapped Kali tools and ~80 skill playbooks
 across 14 domains (pentest, malware, threat-intel, sec-ops, architecture, GRC,
 standards, CISO, resilience, human factors, …). It does **not** bring a model.
 Your client does. So the question is which **brain** you point at it — and that
@@ -117,7 +117,7 @@ where nothing leaves the box.
   before diving in. The skills carry the current-standards detail and the right
   tool order — they're what make a smaller model competent and keep a frontier
   model from guessing at stale facts.
-- **Load only the skill you need.** There are ~74; pulling the one relevant
+- **Load only the skill you need.** There are ~80; pulling the one relevant
   playbook keeps context tight. `marq run load_skill '{}'` (or the `load_skill`
   tool) lists the index.
 - **Scope gates active testing, not advice.** GRC/architecture/standards

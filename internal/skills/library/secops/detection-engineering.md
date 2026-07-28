@@ -56,6 +56,11 @@ but tune each to your environment before trusting it.
   Use them as the authoring blueprint. v19 also split Defense Evasion into Stealth
   (TA0005) + Defense Impairment (TA0112) — re-tag affected rules.
   verify: https://attack.mitre.org/resources/updates/updates-april-2026/
+- **If you defend a plant, Enterprise ATT&CK is the wrong matrix.** ATT&CK for ICS
+  is separate and carries two tactics with no Enterprise equivalent — **Impair
+  Process Control (TA0106)** and **Inhibit Response Function (TA0107)**, the
+  safety-blinding one. Coverage measured only against Enterprise reports green
+  while both are unmonitored. `load_skill ot-threat-landscape`.
 - Chase coverage _gaps that match your threat model_ (sector, actors, exposed
   tech), not raw technique count. 100% of the matrix is neither achievable nor the
   goal; high-fidelity coverage of likely TTPs is.

@@ -1,6 +1,6 @@
 ---
 name: endpoint-security
-description: Endpoint architecture decisions — EDR vs XDR vs MDR, CIS hardening, app allowlisting, mobile (MDM/MAM/BYOD), and IoT/OT with the Purdue model and IEC 62443.
+description: Endpoint architecture decisions — EDR vs XDR vs MDR, CIS hardening, app allowlisting, mobile (MDM/MAM/BYOD), and IoT hardening; OT/ICS splits out to the ot-ics skill.
 ---
 
 # Endpoint & device security architecture
@@ -77,34 +77,15 @@ survive a silenced or absent endpoint agent.
 
 ## IoT / OT — different physics, different rules
 
-IT security instincts get people hurt in OT. Here **availability and safety
-outrank confidentiality** (inverted CIA), uptime is measured in years, and you
-can't just patch or reboot a turbine.
-
-- **Purdue model** — the reference segmentation for ICS. Know the levels:
-  - L0 field devices (sensors/actuators) · L1 controllers (PLC/RTU) · L2 supervisory
-    (SCADA/HMI) · L3 site operations/historian · **L3.5 DMZ** (the IT/OT boundary —
-    the most important zone you'll design) · L4/L5 enterprise IT.
-  - The hard rule: **no direct L4->L1 path.** All IT/OT traffic brokered through the
-    L3.5 DMZ (jump hosts, data diodes, replicated historian). Verify model details:
-    https://www.sentinelone.com/cybersecurity-101/cybersecurity/what-is-the-purdue-model/
-- **ICS constraints that change the playbook:**
-  - Legacy/insecure-by-design protocols (Modbus, DNP3, no auth/encryption) — you
-    can't fix the protocol; you isolate it.
-  - Fragile devices — an active vuln scan can crash a PLC. Use **passive/OT-aware**
-    monitoring (Nozomi, Dragos, Claroty), not your IT Nessus scan against L1.
-  - Can't patch on IT cadence — **compensating controls** (segmentation, allowlisting,
-    monitoring) are the primary defense, not patching.
-- **IEC 62443 / ISA 62443** — the OT security standard. Purdue says _how to segment_;
-  62443 says _what security each zone requires_ (verify current parts):
-  - **Zones & conduits** — group assets by security need (zones), control the comms
-    paths between them (conduits). This is segmentation as a formal model.
-  - **Security Levels SL 1-4** — SL1 (casual/accidental) -> SL4 (nation-state). Assign
-    a **target SL** per zone by consequence, then meet 62443-3-3 system requirements
-    for that SL. Don't gold-plate L0 to SL4. https://www.dragos.com/blog/isa-iec-62443-concepts
-  - 62443-2-1 = OT security program/management; 62443-4-2 = component requirements
-    for procurement ("our PLC vendor must meet SL-C 2").
-- Decision: for any OT engagement, segment to Purdue + L3.5 DMZ first, monitor
-  passively, assign 62443 target SLs by safety consequence, and treat the OT
-  incident plan as separate from IT — recovery means safe physical state, not just
-  clean disks (`load_skill incident-response-leadership`).
+- **IoT** (the endpoint problem): devices you cannot install an agent on. Treat
+  them as untrusted — own VLAN, no lateral path to user or server segments,
+  default creds changed, firmware inventoried, and monitored at the network
+  layer since you cannot instrument the host.
+- **OT/ICS** (a different discipline, not an endpoint variant): safety and
+  availability outrank confidentiality, an active scan can crash a PLC, and
+  patching is not the primary control. **`load_skill ot-ics`** for the Purdue
+  model, the L3.5 DMZ, IEC 62443 zones/conduits and Security Levels, and the
+  regimes (NIS2 manufacturing, CRA, NERC CIP/TSA) that catch a plant.
+- Decision: if the asset moves something physical, stop applying this skill and
+  load `ot-ics` — the IT playbook (scan, patch, isolate, reimage) is unsafe below
+  the IT/OT boundary.
