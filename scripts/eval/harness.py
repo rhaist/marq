@@ -21,7 +21,7 @@ quick local smoke without Kali: --marq-cmd 'go run ./cmd/marq serve' (in-process
 tools only; exec tools like nmap won't be present).
 """
 from __future__ import annotations
-import argparse, json, os, re, select, shlex, subprocess, sys, time, urllib.request, pathlib
+import argparse, hashlib, json, os, re, select, shlex, subprocess, sys, time, urllib.request, pathlib
 
 DEFAULT_MARQ_CMD = (
     "docker run --rm -i -v {work}:/work -e MARQ_OPERATOR=eval "
@@ -215,6 +215,24 @@ INIT_ATTEMPTS = 3
 INIT_BACKOFF = 5  # seconds, multiplied by the attempt number
 
 
+def priming_fingerprint(marq_cmd, system=None):
+    """Provenance for the system prompt the model actually received.
+
+    Sampling and model path were already stamped into meta.json; the priming was
+    not, and that is the blind spot. `marq_cmd` decides where the prompt comes
+    from: the default starts a *prebuilt image*, so editing the Go source and
+    re-running silently measures the old prompt — two runs can be labelled as
+    different arms and be byte-identical here. Comparing `sha256` across runs
+    settles "did these two actually see different priming?" from the data
+    instead of from memory.
+    """
+    fp = {"marq_cmd": marq_cmd, "chars": None, "sha256": None}
+    if system is not None:
+        fp["chars"] = len(system)
+        fp["sha256"] = hashlib.sha256(system.encode()).hexdigest()[:12]
+    return fp
+
+
 def run_task(args, model, skills_on, task, repeat, model_info, cfg):
     slug = model.replace("/", "_").replace(":", "_")
     rundir = (pathlib.Path(args.out)
@@ -261,6 +279,7 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
                 "sampling": {k: v for k, v in cfg.items() if k not in ("no_think", "max_steps")},
                 "no_think": cfg["no_think"], "max_steps": cfg["max_steps"],
                 "base_url": args.base_url, "model_info": model_info,
+                "priming": priming_fingerprint(args.marq_cmd),  # no prompt built yet
                 "steps": 0, "final": f"[harness error: init: {e}]",
             }, indent=2))
             print(f"  {rundir.name}: init failed after {INIT_ATTEMPTS} attempts ({e}) — aborted, continuing")
@@ -348,6 +367,7 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
             "model": model, "skills_on": skills_on, "task": task["id"], "repeat": repeat,
             "sampling": sampling, "no_think": cfg["no_think"], "max_steps": cfg["max_steps"],
             "base_url": args.base_url, "model_info": model_info,
+            "priming": priming_fingerprint(args.marq_cmd, system),
             "steps": len(trace), "final": final,
         }, indent=2))
         print(f"  {rundir.name}: {len(trace)} tool calls")
