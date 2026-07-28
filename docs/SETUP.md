@@ -201,13 +201,20 @@ point `BASE` at it instead.)
 {
   "defaultProvider": "llama-cpp",
   "defaultModel": "llama-cpp/gemma-local",
-  "skills": ["/path/to/marq/pi"]
+  "skills": ["~/.pi/skills"]
 }
 ```
 
-Pi discovers any directory containing a `SKILL.md` (recursively), so pointing
-`skills` at the repo's [`pi/`](../pi/) dir registers [`pi/SKILL.md`](../pi/SKILL.md)
-as the `marq` skill — kept in sync with the repo, no copy.
+Pi discovers any directory containing a `SKILL.md` (recursively), so give it one
+from the image — no checkout required, and it tracks the marq you actually run:
+
+```bash
+mkdir -p ~/.pi/skills/marq
+marq prompt skill > ~/.pi/skills/marq/SKILL.md
+```
+
+From a checkout instead, skip the copy and point `skills` straight at the repo's
+[`pi/`](../pi/) dir, which registers [`pi/SKILL.md`](../pi/SKILL.md) in place.
 
 **Recommended model:** [`google/gemma-4-12B-it-qat-q4_0-gguf`](https://huggingface.co/google/gemma-4-12B-it-qat-q4_0-gguf)
 — Google's official quantization-aware-trained release. Tool-capable, natively

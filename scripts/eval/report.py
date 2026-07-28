@@ -328,7 +328,13 @@ def main():
     runs = pathlib.Path(args.runs)
     by_model, aborts = aggregate(runs, tasks)
     if not by_model:
+        # Still re-render: the committed LEADERBOARD.md stamps the task-set
+        # version in its header, so bumping tasks.version with an empty
+        # results/ would otherwise strand it advertising the old one forever.
         print("no runs found in", args.runs)
+        if not args.no_publish:
+            n = render_leaderboard(args)
+            print(f"leaderboard re-rendered: {n} models")
         return 1
 
     for model, cells in sorted(by_model.items()):
