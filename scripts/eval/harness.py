@@ -191,6 +191,30 @@ def spawn_marq(marq_cmd, work):
     )
 
 
+def shutdown_marq(proc):
+    """Close stdin first: `marq serve` exits on EOF, so a `docker run -i` container
+    stops itself and `--rm` reaps it. terminate()-ing only the docker *client* can
+    orphan the container; orphans starve later runs until the sweep wedges at init."""
+    try:
+        if proc.stdin:
+            proc.stdin.close()
+    except Exception:
+        pass
+    proc.terminate()
+    try:
+        proc.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+
+
+# A wedged init is transient (a prior run's container may still be reaping), but an
+# aborted run is unusable data — and report.py refuses to publish a sweep whose
+# abort fraction exceeds --max-abort-frac, so a cluster of them sinks the whole
+# sweep. Retrying with a fresh process costs seconds; not retrying costs a re-run.
+INIT_ATTEMPTS = 3
+INIT_BACKOFF = 5  # seconds, multiplied by the attempt number
+
+
 def run_task(args, model, skills_on, task, repeat, model_info, cfg):
     slug = model.replace("/", "_").replace(":", "_")
     rundir = (pathlib.Path(args.out)
@@ -215,13 +239,21 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
     work = rundir / "work"
     work.mkdir(parents=True, exist_ok=True)
 
-    proc = spawn_marq(args.marq_cmd, work.resolve())
-    try:
+    # A wedged handshake is usually transient, so retry with a fresh process; only a
+    # persistent one aborts THIS run, and never the sweep.
+    for attempt in range(1, INIT_ATTEMPTS + 1):
+        proc = spawn_marq(args.marq_cmd, work.resolve())
         mcp = MCP(proc)
-        try:  # a slow/wedged container handshake aborts THIS run, never the sweep
+        try:
             init = mcp.initialize()
             tools = mcp.list_tools()
+            break
         except Exception as e:
+            shutdown_marq(proc)
+            if attempt < INIT_ATTEMPTS:
+                print(f"  {rundir.name}: init failed ({e}) — retrying ({attempt}/{INIT_ATTEMPTS - 1})")
+                time.sleep(INIT_BACKOFF * attempt)
+                continue
             (rundir / "trace.jsonl").write_text("")
             (rundir / "responses.jsonl").write_text("")
             (rundir / "meta.json").write_text(json.dumps({
@@ -231,8 +263,10 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
                 "base_url": args.base_url, "model_info": model_info,
                 "steps": 0, "final": f"[harness error: init: {e}]",
             }, indent=2))
-            print(f"  {rundir.name}: init failed ({e}) — aborted, continuing")
+            print(f"  {rundir.name}: init failed after {INIT_ATTEMPTS} attempts ({e}) — aborted, continuing")
             return rundir
+
+    try:
         if not skills_on:
             tools = [t for t in tools if t["name"] != "load_skill"]
             # NOTE (known confound): this bare prompt differs from the skills-on
@@ -319,20 +353,7 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
         print(f"  {rundir.name}: {len(trace)} tool calls")
         return rundir
     finally:
-        # Close stdin first: `marq serve` exits on EOF, so a `docker run -i`
-        # container stops itself and `--rm` reaps it. terminate()-ing only the
-        # docker *client* can orphan the container; orphans starve later runs
-        # until the whole sweep wedges at init (every run hits the 120s timeout).
-        try:
-            if proc.stdin:
-                proc.stdin.close()
-        except Exception:
-            pass
-        proc.terminate()
-        try:
-            proc.wait(timeout=10)
-        except subprocess.TimeoutExpired:
-            proc.kill()
+        shutdown_marq(proc)
 
 
 # A safety task needs enough COMPLETED (non-aborted) runs to mean anything. Below

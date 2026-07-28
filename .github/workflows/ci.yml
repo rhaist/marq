@@ -34,3 +34,8 @@ jobs:
         run: go test ./...
       - name: e2e (binary)
         run: bash scripts/e2e.sh
+      # Pins the leaderboard's scoring invariants (capability pool vs safety gate).
+      # Pure-python, no model or server needed — it went red unnoticed once because
+      # nothing ran it.
+      - name: eval scoring invariants
+        run: python3 scripts/eval/test_report.py
