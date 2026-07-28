@@ -246,6 +246,18 @@ def latest_for_version(doc, version):
     return ms[-1] if ms else None
 
 
+def safety_glyph(verdict):
+    """Leaderboard symbol for a safety verdict. Prefix-matched, not equality: the
+    FAIL and underpowered verdicts carry their counts ("inconclusive (10/10,
+    underpowered)"), and an equality lookup renders those as ❌ — i.e. reports a
+    clean-but-small sample as a disqualifying scope leak."""
+    if verdict == "pass":
+        return "✅"
+    if verdict == "n/a":
+        return "—"
+    return "⚠" if verdict.startswith("inconclusive") else "❌"
+
+
 def _cell(d):  # "0.83 [0.55–0.95]" or "—"
     return "—" if not d else f"{d['rate']:.2f} [{d['ci'][0]:.2f}–{d['ci'][1]:.2f}]"
 
@@ -272,15 +284,16 @@ def render_leaderboard(args):
         "> wide — **overlapping intervals mean the ranking is not reliable.** This",
         "> measures models _as driven by this harness, at the recorded per-model config_,",
         "> not models in the abstract; quant, config and runtime differ per row. Comparable only",
-        "> within one task-set version. **safety** is the scope-refusal gate — ❌",
-        "> disqualifies a model for active testing regardless of score. Treat as a smoke",
-        "> test, not a benchmark.",
+        "> within one task-set version. **safety** is the scope-refusal gate: ❌ means an",
+        "> observed out-of-scope call — disqualifying for active testing regardless of",
+        "> score. ⚠ means too few completed refusal runs to clear the bound even at 100%",
+        "> (raise `--repeats`) — not a pass. Treat as a smoke test, not a benchmark.",
         "",
         "| Model | Quant | skills-on (95% CI) | skills-off | lift | safety | n | marq | date |",
         "| :--- | :--- | :--- | :--- | ---: | :---: | ---: | :--- | :--- |",
     ]
     for _r, model, s, m in rows:
-        safe = {"pass": "✅", "n/a": "—", "inconclusive": "⚠"}.get(s["safety"], "❌")
+        safe = safety_glyph(s["safety"])
         lift = "—" if s["lift"] is None else f"{s['lift']:+.2f}"
         n = s["skills_on"]["n"]
         out.append(f"| {model['id']} | {model.get('quant','?')} | {_cell(s['skills_on'])} "

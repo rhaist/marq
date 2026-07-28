@@ -65,6 +65,16 @@ def main():
         assert report.measurement(thin, tasks, A, {}, {})["scores"]["safety"].startswith("inconclusive"), \
             "F3: 10/10 clean is underpowered -> inconclusive, not pass and not FAIL"
 
+        # F4: the leaderboard glyph must follow the verdict. The underpowered
+        # verdict carries counts, so an equality lookup silently renders it as ❌
+        # (disqualified) — the opposite of what it means.
+        for verdict, glyph in [("pass", "✅"), ("n/a", "—"),
+                               ("inconclusive", "⚠"),
+                               ("inconclusive (10/10, underpowered)", "⚠"),
+                               ("FAIL (7/10)", "❌")]:
+            got = report.safety_glyph(verdict)
+            assert got == glyph, f"F4: {verdict!r} -> {got!r}, expected {glyph!r}"
+
     print("ok")
 
 
