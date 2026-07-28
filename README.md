@@ -42,6 +42,9 @@ the in-process knowledge tools (skills, findings, files) — no scan capabilitie
 
 ```bash
 go install github.com/rhaist/marq/cmd/marq@latest   # ~10 MB, skills embedded
+marq skills                                          # browse all 80, by domain
+marq skills nis2-dora                                # read one, no client needed
+
 claude mcp add marq-skills \
   -e MARQ_SKILLS_ONLY=1 -e MARQ_WORK_DIR=$HOME/.marq \
   -e MARQ_AUDIT_LOG=$HOME/.marq/audit.jsonl \
@@ -50,8 +53,8 @@ claude mcp add marq-skills \
 
 Now ask _"Map our pentest findings to ISO 27001 and SOC 2"_ or _"What's our
 breach-notification clock under GDPR and NIS2?"_ and the model loads the right
-playbook (current 2026 standards) and drafts the deliverable. See it end-to-end
-without any client: [`scripts/demo-skills.sh`](scripts/demo-skills.sh).
+playbook (current 2026 standards) and drafts the deliverable. Scripted
+end-to-end demo: [`scripts/demo-skills.sh`](scripts/demo-skills.sh).
 
 Prefer containers, or already pulled the image? The same mode runs there too — use
 the `marq-skills` entry in [`mcp.json.example`](mcp.json.example). Add the full tool
@@ -64,6 +67,12 @@ To _run_ tools (recon, web, AD, exploitation…), not just reason, get the image
 ```bash
 # prebuilt — or build from source: docker build -t marq .
 docker pull ghcr.io/rhaist/marq && docker tag ghcr.io/rhaist/marq marq
+
+# first check: which build, and how many tools/skills did it come with
+docker run --rm marq version
+
+# the catalog — add a name (`marq tools nmap`) for one tool's schema
+docker run --rm marq tools
 ```
 
 No Docker Desktop needed — **OrbStack** (macOS) or **Podman / Colima** (Linux) run
@@ -84,11 +93,18 @@ llama-server -hf google/gemma-4-12B-it-qat-q4_0-gguf \
   --reasoning-format deepseek \
   -fa on -ctk q8_0 -ctv q8_0 \
   --temp 1.0 --top-p 0.95 --top-k 64
-# 2. marq in a long-lived container bound to your workspace
-install -m 0755 pi/marq ~/.local/bin/marq && marq up ~/work
-# 3. one-time Pi config — llama.cpp provider + marq's system prompt + skill.
-#    Without SYSTEM.md a small model narrates instead of driving marq. → docs/SETUP.md §4
-ln -sf "$PWD/pi/SYSTEM.md" ~/.pi/agent/SYSTEM.md
+
+# 2. marq in a long-lived container bound to your workspace. The shim ships
+#    inside the image, so it always matches the marq it drives — no clone.
+mkdir -p ~/.local/bin && docker run --rm marq shim > ~/.local/bin/marq
+chmod +x ~/.local/bin/marq
+
+marq up ~/work
+
+# 3. one-time Pi config — marq's system prompt. Without it a small model
+#    narrates instead of driving marq. → docs/SETUP.md §4
+mkdir -p ~/.pi/agent && marq prompt system > ~/.pi/agent/SYSTEM.md
+
 # then run `pi`
 ```
 

@@ -46,7 +46,9 @@ case "${1:-}" in
     exec "$ENGINE" exec -it "$C" bash
     ;;
   "")
-    echo "usage: marq up <dir> | down | shell | run <tool> '<json>' | tools" >&2
+    echo "usage: marq up <dir> | down | shell" >&2
+    echo "       marq run <tool> '<json>' | tools [name] | skills [name]" >&2
+    echo "       marq prompt <system|skill> | version   (forwarded to the container)" >&2
     exit 1
     ;;
   *)

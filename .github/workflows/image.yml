@@ -4,8 +4,10 @@
 # building. Expensive, so it only triggers when something that ends up IN the
 # image changes: the image definition/scripts, or the Go sources + go:embed'd
 # skills the `marq` binary is built from (cmd/**, internal/**, go.mod/go.sum).
-# Host-side files (pi/, docs/) are not in the image. Run on demand via the
-# Actions tab (workflow_dispatch).
+# pi/** counts too: the shim and prompts are go:embed'd so `marq shim` / `marq
+# prompt` can emit them from the image, so editing one without a rebuild would
+# ship a stale copy. docs/ is not in the image. Run on demand via the Actions
+# tab (workflow_dispatch).
 name: image
 
 on:
@@ -17,6 +19,7 @@ on:
       - scripts/e2e-image.sh
       - cmd/**
       - internal/**
+      - pi/** # go:embed'd into the binary — see the header note
       - go.mod
       - go.sum
   pull_request:

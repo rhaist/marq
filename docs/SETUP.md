@@ -133,14 +133,23 @@ container over `docker exec`.
 # Put the shim on your PATH in a user-owned dir (don't pollute Homebrew's prefix
 # or need sudo). ~/.local/bin is ideal — ensure it's on PATH:
 mkdir -p ~/.local/bin
-install -m 0755 pi/marq ~/.local/bin/marq     # copy; or, to track the repo:
-# ln -sf "$PWD/pi/marq" ~/.local/bin/marq      # symlink — updates with the repo
+
+# From the image — no checkout needed, and the shim always matches the marq it
+# drives (a shim cloned from main can outrun the image tag you pulled):
+docker run --rm marq shim > ~/.local/bin/marq && chmod +x ~/.local/bin/marq
+
+# From a checkout instead:
+# install -m 0755 pi/marq ~/.local/bin/marq   # copy
+# ln -sf "$PWD/pi/marq" ~/.local/bin/marq     # symlink — updates with the repo
 
 # Start ONE long-lived container, bound to a workspace dir (whatever you're
 # working on — a research folder, a sample dir, a compliance project, a test):
 marq up ~/marq/work               # docker run -d … sleep infinity
-marq tools                        # list every tool (sanity check)
+
+# Sanity checks
+marq tools                        # list every tool
 marq run server_info '{}'         # what marq covers + current authorization state
+
 marq down                         # tear down when finished
 ```
 
@@ -270,7 +279,9 @@ output quality.
 **2b. Replace Pi's system prompt with marq's** (important for smaller models):
 
 ```bash
-ln -sf "$PWD/pi/SYSTEM.md" ~/.pi/agent/SYSTEM.md   # tracks the repo
+mkdir -p ~/.pi/agent
+marq prompt system > ~/.pi/agent/SYSTEM.md         # from the image, via the shim
+# ln -sf "$PWD/pi/SYSTEM.md" ~/.pi/agent/SYSTEM.md # from a checkout; tracks the repo
 ```
 
 Pi's default prompt frames the model as a general coding assistant, so a small

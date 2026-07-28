@@ -96,6 +96,23 @@ for t in server_info set_engagement load_skill report_finding render_report; do
 done
 run no_such_tool '{}' >/dev/null; [[ $? -ne 0 ]]; check "unknown tool exits non-zero" $?
 
+# The CLI-only browse commands — a first-run user reaches these before any client.
+# Capture before grepping: under `pipefail` a `grep -q` early-exits and SIGPIPEs
+# marq mid-listing, so the pipeline reports 141 on a match.
+lib="$("$BIN" skills)"
+grep -q '^  ot-ics ' <<<"$lib"; check "skills catalog lists ot-ics" $?
+grep -q '^ARCHITECTURE$' <<<"$lib"; check "skills catalog groups by domain" $?
+grep -qi 'purdue' <<<"$("$BIN" skills ot-ics)"; check "skills <name> prints the playbook" $?
+"$BIN" skills no_such_skill >/dev/null 2>&1; [[ $? -ne 0 ]]; check "unknown skill exits non-zero" $?
+grep -qE '^[0-9]+ tools, [0-9]+ skills$' <<<"$("$BIN" version)"; check "version reports counts" $?
+
+# The host-side files are embedded so the image needs no git clone beside it.
+# Byte-identical to the repo copies, or the embed has drifted from the source.
+diff -q <("$BIN" shim) "$ROOT/pi/marq" >/dev/null; check "shim matches pi/marq" $?
+diff -q <("$BIN" prompt system) "$ROOT/pi/SYSTEM.md" >/dev/null; check "prompt system matches pi/SYSTEM.md" $?
+diff -q <("$BIN" prompt skill) "$ROOT/pi/SKILL.md" >/dev/null; check "prompt skill matches pi/SKILL.md" $?
+"$BIN" prompt >/dev/null 2>&1; [[ $? -ne 0 ]]; check "prompt without a name exits non-zero" $?
+
 echo "# 7. skills-only mode (MARQ_SKILLS_ONLY — knowledge server, no Kali binaries)"
 lite="$(MARQ_SKILLS_ONLY=1 "$BIN" tools)"
 grep -q '^load_skill ' <<<"$lite"; check "skills-only keeps load_skill" $?

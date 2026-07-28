@@ -99,8 +99,12 @@ The fully-local path — no cloud, on-box execution. See
 [`SETUP.md`](SETUP.md#4-run-with-a-local-model-pi--the-marq-skill):
 
 ```bash
-install -m 0755 pi/marq ~/.local/bin/marq         # user-owned dir on PATH
+# The shim comes out of the image (or `install -m 0755 pi/marq …` from a checkout)
+docker run --rm marq shim > ~/.local/bin/marq     # user-owned dir on PATH
+chmod +x ~/.local/bin/marq
+
 marq up ~/marq/work                               # long-lived container, any workspace
+
 # start llama-server, add a llama.cpp provider extension + register the marq
 # skill in ~/.pi/agent/settings.json, then run `pi` — full steps in SETUP.md
 ```

@@ -35,6 +35,8 @@ docker run --rm -it --entrypoint /bin/bash marq
 go build ./... && go vet ./... && go test ./...     # build + sanity gate
 go run ./cmd/marq serve                            # stdio MCP server locally
 go run ./cmd/marq run <tool> '<json-args>'        # invoke one tool directly
+go run ./cmd/marq skills [name]                   # browse the playbook library / print one
+go run ./cmd/marq version                         # build rev + tool/skill counts
 ```
 
 The sanity gate is **`go test ./...`** — `internal/registry/registry_test.go` asserts no duplicate tool names, that every tool has exactly one of Build/Handler, and that the generated input schemas are well-formed. `go vet ./...` + `go build ./...` are the quick syntax/type gate. Test surface beyond the unit gate:
@@ -59,7 +61,7 @@ both : registry.Tool.Call -> runner.Run -> os/exec
                                   |-> internal/audit (JSON-lines, fsync'd, start+end per call)
 ```
 
-- **`cmd/marq/main.go`** — CLI entry: subcommands `serve` (default) / `run <tool> [json]` / `tools` (catalog).
+- **`cmd/marq/main.go`** — CLI entry: subcommands `serve` (default) / `run <tool> [json]` / `tools` (catalog) / `skills [name]` (the knowledge-side twin of `tools`) / `version` (build rev + counts, which also surfaces an unintended `MARQ_SKILLS_ONLY`).
 - **`internal/mcpserver`** — adapts `registry.All()` onto an MCP stdio server using the official `github.com/modelcontextprotocol/go-sdk`. Each tool is added via the low-level `Server.AddTool(&mcp.Tool{InputSchema: t.InputSchema()}, handler)` with a raw-args handler that calls `t.Call`. Exposes the `marq://authorization`, `marq://methodology` and `marq://skills[/<name>]` resources and the `server_info` tool (the model should call `server_info` first to confirm scope).
 - **`pi/`** — the terminal-agent integration (not Go). `pi/SKILL.md` is a portable markdown skill: scope-first instructions, the `marq run <tool> '<json>'` calling convention, tool discovery via `marq tools`, and a small-model working style + few-shot. `pi/marq` is the host shim that `docker exec`s into a long-lived container so the model can call `marq` from bash. This replaces the old in-binary TUI/agent loop — Pi (or any client) owns the loop + model runtime; marq owns the audited tools.
 - **`internal/config`** — all config is env-driven (`MARQ_*`), resolved once into the package-level `config.C`. Adding a knob = add a field + env read in `Load()`. `MARQ_OPERATOR` (the audit attribution anchor) is env-set only. Engagement/scope default from `MARQ_ENGAGEMENT`/`MARQ_SCOPE` but are meant to be set at runtime by the model via the `set_engagement` tool → `config.SetEngagement`, which persists `{engagement,scope}` to `$MARQ_WORK_DIR/.marq-context`; `Load()` overlays that file so the values survive across the process-per-call `marq run` path (each call re-`Load()`s). The `pi/marq` shim passes operator + keys through with `--env-file`.

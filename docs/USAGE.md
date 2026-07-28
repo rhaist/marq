@@ -44,12 +44,29 @@ running container later, re-run e.g. `nuclei -update-templates` or
 
 ## 2. Smoke-test the image
 
-Run a one-off tool to confirm the image works:
+Start with the binary's own self-report — no target, no capabilities, no client:
+
+```bash
+# build revision + tool/skill counts
+docker run --rm marq version
+
+# the catalog — add a name (`marq tools nmap`) for that tool's schema
+docker run --rm marq tools
+
+# the playbook library, grouped by domain — add a name to print one
+docker run --rm marq skills
+```
+
+A wrong count here is the fastest way to spot a stale image or an unintended
+`MARQ_SKILLS_ONLY=1` (which drops the suite to the ~10 in-process tools).
+
+Then run a one-off tool to confirm the wrapped binaries work:
 
 ```bash
 # nmap/masscan/naabu carry file capabilities (cap_net_admin) that a bare
 # container won't exec — pass the caps for those:
 docker run --rm --cap-add NET_RAW --cap-add NET_ADMIN marq nmap --version
+
 # tools without special capabilities run with a plain docker run:
 docker run --rm marq searchsploit --help
 ```
@@ -92,12 +109,15 @@ forwards each call into a long-lived container over `docker exec`.
 
 ```bash
 # Install the shim
-cp pi/marq /usr/local/bin/marq && chmod +x /usr/local/bin/marq
+docker run --rm marq shim > ~/.local/bin/marq && chmod +x ~/.local/bin/marq
 
 # Start ONE long-lived container, bound to your engagement dir
 marq up ~/engagements/acme        # docker run -d … sleep infinity
+
+# Sanity checks through the shim
 marq tools                        # list every tool
 marq run server_info '{}'         # confirm scope
+
 marq down                         # tear down when finished
 ```
 
