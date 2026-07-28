@@ -15,7 +15,7 @@ don't reassess per-standard, and so one fix can close N audit line items.
    secure development).
 2. Anchor on the CWE the finding already carries — it's your pivot into framework controls.
 3. Pull the equivalent control id in each in-scope framework. Versions change ids and
-   wording: `load_skill` the standards domain and web-fetch the current text; the table
+   wording: `load_skill control-frameworks` for the current catalogues and web-fetch the current text; the table
    below is a starting pointer, confirm the live id before you cite it in a deliverable.
 4. Write the mapping row. One fix recommendation, tagged with every framework id it satisfies.
 

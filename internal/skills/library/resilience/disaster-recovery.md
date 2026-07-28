@@ -53,11 +53,11 @@ system on nightly backups. Tier per-activity, not one tier for the whole estate.
 
 ## DR test types (escalating rigor — NIST 800-34 TT&E)
 
-| Type                   | What it proves                                            | Disruptive? |
-| ---------------------- | --------------------------------------------------------- | ----------- |
-| Tabletop / walkthrough | People know roles, runbook, decisions (see crisis-mgmt)   | no          |
-| Parallel / simulation  | DR stood up & validated _alongside_ live prod; no cutover | no          |
-| Full interruption      | Real failover — prod off, run on DR, then failback        | yes (risk)  |
+| Type                   | What it proves                                                | Disruptive? |
+| ---------------------- | ------------------------------------------------------------- | ----------- |
+| Tabletop / walkthrough | People know roles, runbook, decisions (see crisis-management) | no          |
+| Parallel / simulation  | DR stood up & validated _alongside_ live prod; no cutover     | no          |
+| Full interruption      | Real failover — prod off, run on DR, then failback            | yes (risk)  |
 
 - Test ≥ annually, more for high-impact systems. A backup/DR you haven't _restored_ is
   a hypothesis, not a control — measure achieved RTO/RPO against target each test.

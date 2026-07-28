@@ -80,9 +80,9 @@ often fail; recovery from backups is the real plan.
   reboot, before reimage. Reimaging destroys the case.
 - Hash everything on collection (sha256), record chain of custody (who/when/where)
   in the timeline. Untracked evidence is inadmissible.
-- For triage of a captured sample or suspicious binary, `load_skill` the malware
-  domain — marq wraps forensic/triage tooling; analyse the _copy_, never the only
-  copy, and on an isolated host. Pivot IOCs with `load_skill ioc-pivoting`.
+- For triage of a captured sample or suspicious binary, `load_skill malware-triage` — marq wraps
+  forensic/triage tooling; analyse the _copy_, never the only copy, and on an
+  isolated host. Pivot IOCs with `load_skill ioc-pivoting`.
 - Store artifacts and the timeline under `/work`; `report_finding` each confirmed
   TTP with its ATT&CK id so the post-incident report writes itself via `render_report`.
 

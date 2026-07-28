@@ -7,7 +7,7 @@ description: Take one indicator (IP/domain/hash/URL) and pivot it into context, 
 
 Turn a single indicator into a cluster: who/what it is, when it was active, and
 what else shares its infrastructure. Pivot outward, then verdict (see
-`indicator-enrichment`). Sources: `load_skill {"name":"security-apis"}`.
+`indicator-enrichment`). Sources: `load_skill security-apis`.
 
 ## First move — always
 

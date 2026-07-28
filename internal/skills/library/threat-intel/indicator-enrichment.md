@@ -8,7 +8,7 @@ description: Enrich and triage an indicator (IP/domain/hash/URL/CVE) with free n
 Given an indicator, gather context from free sources and reach a verdict:
 **malicious / suspicious / benign / unknown** with the evidence behind it. For
 deeper pivots use `ioc-pivoting`; for sources use
-`load_skill {"name":"security-apis"}`.
+`load_skill security-apis`.
 
 ## Enrich by type (free, no-login)
 

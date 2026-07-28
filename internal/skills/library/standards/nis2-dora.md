@@ -74,17 +74,32 @@ EIOPA. These cite RTS that get revised — verify exact figures before relying.
 ## Key dates
 
 - **NIS2:** member-state **transposition deadline was 17 Oct 2024**, widely
-  missed — as of mid-2026, **22 of 27 states have adopted transposing law**;
-  **France, Ireland, Luxembourg, the Netherlands and Spain** are still in
-  legislative procedure, with Commission infringement proceedings open. Check
-  the specific national law that actually binds you (entry-into-force dates,
-  competent authorities and penalties differ). Verify:
+  missed — as of **Jul 2026, 23 of 27** states have notified full transposition
+  (Germany in force 6 Dec 2025, Poland 3 Apr 2026, Luxembourg ~May 2026).
+  **Ireland, Spain, France and the Netherlands** are still outstanding, and on
+  **8 Jul 2026 the Commission referred all four to the CJEU** seeking financial
+  sanctions (NL law enters into force 15 Aug 2026). Check the specific national
+  law that actually binds you — entry-into-force dates, competent authorities
+  and penalties differ. Verify:
   https://digital-strategy.ec.europa.eu/en/policies/nis-transposition
-- **DORA:** **applies from 17 Jan 2025.**
-- **Pending change:** the Commission's **Digital Omnibus** (proposed Nov 2025)
-  would route NIS2/DORA/GDPR/eIDAS/CER incident reports through a **single
-  entry point** run by ENISA — **proposal only, not yet law as of mid-2026**;
-  the per-regime clocks above still apply.
+- **DORA:** **applies from 17 Jan 2025.** Machinery is live: the ESAs
+  **designated 19 critical ICT third-party providers on 18 Nov 2025** (AWS,
+  Microsoft, Google Cloud, IBM, Oracle, SAP, Equinix, TCS et al.), each with a
+  Lead Overseer + Joint Examination Team. The **register-of-information** filing
+  recurs annually (2026 cycle: reference date 31 Dec 2025, ESA deadline 31 Mar
+  2026 — national windows opened earlier). TLPT RTS = **CDR (EU) 2025/1190** (in
+  force 8 Jul 2025); TLPT cadence is ≥ every 3 years.
+- **Pending changes (proposals — the clocks above still apply):**
+  - **Digital Omnibus** (COM(2025)837, Nov 2025) would route NIS2/DORA/GDPR/
+    eIDAS/CER incident reports through a **single entry point** run by ENISA.
+    **Still a proposal and stalled** — the Council failed to reach QMV in late
+    Jun 2026; work resumes under the Irish Presidency from ~Sep 2026. (The
+    _AI_ half of the omnibus package split off and _was_ adopted — see
+    `load_skill eu-ai-act` — so "the omnibus passed" is ambiguous; ask which.)
+  - **NIS2 amendment + Cybersecurity Act revision** proposed **20 Jan 2026**
+    (clearer sector thresholds, a "small midcap" category, certification as
+    compliance evidence, standardised supply-chain questionnaires, ransomware-
+    payment reporting). First reading; agreement targeted 2027.
 
 ## Penalties (orders of magnitude — NIS2 set in national law, verify)
 

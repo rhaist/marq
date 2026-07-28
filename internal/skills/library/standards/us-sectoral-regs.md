@@ -30,12 +30,13 @@ There is no general US cyber law; obligations attach by **what you do** (public 
 - **National-security/public-safety delay**: only if the **US Attorney General** notifies the SEC; initial delay up to 30 days (extendable). https://www.sec.gov/rules/final/2023/33-11216.pdf
 - **Status hedge:** industry petitioned in 2025 to rescind/narrow Item 1.05 (joint petition filed May 2025) and the Commission majority shifted, but **the rule remains in effect as of mid-2026** — no rescission or amendment has been adopted. **Verify current status** before advising: https://www.sec.gov/rules-regulations/2025/05/joint-petition-rulemaking-amend-sec-cybersecurity-risk-management-strategy-governance-incident
 - Practitioner trap: a **ransom payment or extortion** is not automatically a 1.05 trigger — the test is **materiality**, and many filers over-disclosed early. Document the materiality analysis.
+- **What filers actually do:** voluntary **Item 8.01** disclosure now outnumbers Item 1.05 (roughly 50 vs 29 filings two years in). Filing under 8.01 avoids asserting materiality — but it is not a way to dodge 1.05 once you have determined the incident _is_ material.
 
 ## HIPAA Security Rule (health)
 
 - Applies to **covered entities + business associates**. Requires **administrative, physical, technical safeguards** for ePHI (risk analysis is the keystone control).
 - **Breach Notification Rule**: notify affected individuals **and HHS without unreasonable delay, ≤60 days**; **≥500 individuals** = notify HHS and **prominent media** promptly (≤60 days); **<500** = annual log to HHS. https://www.hhs.gov/hipaa/for-professionals/breach-notification/index.html
-- **2025 Security Rule NPRM** proposes to **modernize/strengthen** safeguards (mandatory MFA, encryption, asset inventory, faster restoration objectives). Comment period closed Mar 2025; **still not finalized as of mid-2026** (OCR reviewing ~4,700 comments; industry has pressed for withdrawal) — **verify status/effective date:** https://www.hhs.gov/hipaa/for-professionals/security/hipaa-security-rule-nprm/index.html
+- **2025 Security Rule NPRM** proposes to **modernize/strengthen** safeguards (mandatory MFA, encryption, asset inventory, faster restoration objectives). Comment period closed Mar 2025 (~4,700 comments). **Not finalized and not withdrawn as of Jul 2026** — the rule has been demoted to the Unified Agenda's **"long-term actions"** with final action targeted **2027**, after 100+ industry organisations demanded withdrawal in Dec 2025. Treat it as **not a 2026 compliance driver**, but don't tell a client it's dead. **Verify status/effective date:** https://www.hhs.gov/hipaa/for-professionals/security/hipaa-security-rule-nprm/index.html
 
 ## GLBA Safeguards Rule (nonbank financial — FTC)
 
@@ -52,18 +53,18 @@ There is no general US cyber law; obligations attach by **what you do** (public 
 ## CMMC 2.0 / FedRAMP / FISMA / 800-171 (federal & defense)
 
 - **CMMC 2.0** — DoD contractors handling **FCI/CUI**. Final **48 CFR** acquisition rule **effective Nov 10 2025**, triggering a **4-phase rollout** (verify, dates have moved before):
-  - **Phase 1 — Nov 10 2025** (the current phase as of mid-2026): L1/L2 **self-assessment** required in new contracts.
-  - **Phase 2 — Nov 10 2026**: L2 **third-party (C3PAO) certification** (assessor capacity is the known bottleneck).
-  - **Phase 3 — Nov 10 2027**: L3.
-  - **Phase 4 — Nov 10 2028**: full implementation across applicable contracts.
-  - https://www.federalregister.gov / https://dodcio.defense.gov/cmmc/ — **verify current phase.** Underlying control set: **NIST SP 800-171** (Level 2). DFARS 252.204-7012 still requires **72-hour** incident reporting to DC3 + DIBNet.
+  - **Phase 1 — Nov 10 2025** (the current phase): L1/L2 **self-assessment** required in new contracts.
+  - **Phase 2 — was Nov 10 2026**: L2 **third-party (C3PAO) certification**. ⚠️ **SUSPENDED 13 Jul 2026** by DoD/DoW pending a 60-day CMMC reform-task-force review (reporting ~11 Sep 2026). This was a **policy announcement, not a Federal Register action** — 32 CFR 170 and the DFARS clause are untouched, so **do not stand down**: Phase 1 self-assessment, SPRS posting, annual affirmation by an Affirming Official and subcontractor flowdown all remain in force. Re-verify before advising anyone.
+  - **Phase 3 — Nov 10 2027**: L3. **Phase 4 — Nov 10 2028**: full implementation.
+  - https://www.federalregister.gov / https://dodcio.defense.gov/cmmc/ — **verify current phase.** Contract clause is **DFARS 252.204-7021**; DFARS 252.204-7012 still requires **72-hour** incident reporting to DC3 + DIBNet.
 - **FedRAMP** — standardized authorization for **cloud services sold to federal agencies** (Low/Moderate/High baselines, built on **NIST 800-53**). FedRAMP has been modernizing toward "**20x**" automation — verify program state: https://www.fedramp.gov/
 - **FISMA** — governs **federal agencies** (and their contractors operating systems on their behalf); implemented via **NIST 800-53** controls and agency ATOs.
-- **NIST SP 800-171** — the **110-control** CUI baseline (now **Rev 3**) for non-federal systems; contractors self-score into **SPRS**. This is the shared substrate under CMMC L2.
+- **NIST SP 800-171** — the **110-control** CUI baseline for non-federal systems; contractors self-score into **SPRS**. This is the shared substrate under CMMC L2. **Mind the revision:** **Rev 3** is final (May 2024), but **CMMC L2 assessments still run against Rev 2** — don't score a defense contractor against Rev 3 because it's newer. Separately, the proposed **FAR CUI rule** (recast in 2026 under the FAR Overhaul, moving CUI to a new FAR Part 40) would raise the civilian-agency baseline to **Rev 3** and relax incident reporting from 8 to 72 hours — **still a proposal, not final**.
 
 ## Critical infrastructure / utilities (high level)
 
-- **CIRCIA** (Cyber Incident Reporting for Critical Infrastructure Act) — will require **covered entities** to report covered incidents to **CISA within 72 hours** and ransom payments within 24 hours, **once the final rule is in effect — still NOT enforceable as of mid-2026**: CISA missed the statutory Oct 2025 deadline, targeted May 2026, and slipped again (rulemaking town halls restarted June 2026 after the DHS appropriations lapse). **Verify status:** https://www.cisa.gov/topics/cyber-threats-and-advisories/information-sharing/cyber-incident-reporting-critical-infrastructure-act-2022-circia
+- **CIRCIA** (Cyber Incident Reporting for Critical Infrastructure Act) — will require **covered entities** to report covered incidents to **CISA within 72 hours** and ransom payments within 24 hours, **once the final rule is in effect — still NOT enforceable as of mid-2026**: CISA missed the statutory Oct 2025 deadline, targeted May 2026 and missed that too; town halls ran Jun 2026 (after the DHS appropriations lapse) on narrowing scope/burden, and the **current Unified Agenda target for the final rule is Sep 2026**. Until it lands **no entity owes a CIRCIA report** — the obligation attaches only at the final rule's effective date. **Verify status:** https://www.cisa.gov/topics/cyber-threats-and-advisories/information-sharing/cyber-incident-reporting-critical-infrastructure-act-2022-circia
+- **Cybersecurity Information Sharing Act of 2015** — the liability/antitrust protection for sharing indicators with the government. It **lapsed for ~6 weeks (1 Oct – 12 Nov 2025)**, was restored retroactively-uncertain, and **currently expires again 30 Sep 2026**. If your threat-sharing programme leans on those protections, diary the date and check before assuming cover.
 - Sector-specific: **NERC CIP** (bulk electric system), **TSA Security Directives** (pipelines, rail, aviation), **EPA/AWIA** (water), **NRC** (nuclear). Plus state PUC/utility-commission rules. Treat these as additional, not substitutes.
 
 ## US vs EU framing

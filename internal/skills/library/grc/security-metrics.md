@@ -48,11 +48,12 @@ risk appetite** (green/amber/red), not an arbitrary round number.
 | **Vuln backlog aging**            | KRI/lead | Age of oldest open critical; backlog trend                    | Backlog growing faster than burn-down → capacity problem               |
 
 Set **MFA/EDR/patch SLAs to your appetite**, then benchmark against current authority,
-don't hard-code memory. KEV deadlines: US federal **BOD 22-01**'s flat 14-day KEV clock was
-**superseded by BOD 26-04 (June 2026)** — risk-based tiers (**3 / 14 / 60 days**) keyed to
-asset exposure, KEV status, exploit automation, and post-exploit impact, not one clock. Model
-your KEV-window KRI on that, and verify the live directive + catalog:
-https://www.cisa.gov/known-exploited-vulnerabilities-catalog . Industry phishing/MTTR
+don't hard-code memory. KEV deadlines: US federal **BOD 22-01**'s flat 14/21-day KEV clock was
+**revoked by BOD 26-04 (issued 10 Jun 2026)** — an SSVC-informed remediation table keyed to
+KEV status, public exposure and technical impact, shortest tier **3 days + forensic triage**,
+not one clock. So a single "days open" KEV KRI now under-reports: split it by exposure tier, or
+you will report green while a publicly-exposed KEV sits past its 3-day window. Verify the live
+directive + catalog: https://www.cisa.gov/known-exploited-vulnerabilities-catalog . Industry phishing/MTTR
 benchmarks drift yearly — cite the current Verizon DBIR / vendor report, don't assert a stale %.
 
 ## Spotting vanity metrics
