@@ -464,6 +464,14 @@ def main():
             proc.terminate()
         return 0
 
+    # Keep the two tiers' run dirs apart. Smoke uses the same naming as a sweep
+    # (model__skills-on__task__rN), so sharing --out would let the sweep's resume
+    # logic adopt smoke runs as sweep data and report.py pool them into a
+    # published row — whose recorded `repeats` would then not match its own n.
+    # An explicit --out still wins, so you can point both tiers anywhere.
+    if args.smoke and args.out == p.get_default("out"):
+        args.out = str(pathlib.Path(args.out) / "_smoke")
+
     profiles = json.loads(pathlib.Path(args.profiles).read_text()) if pathlib.Path(args.profiles).is_file() else {}
     models = [m.strip() for m in args.models.split(",") if m.strip()]
     if not models:
