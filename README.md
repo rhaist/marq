@@ -79,11 +79,11 @@ host — the recommended setup for hands-on offensive work. Drive marq from
 ```bash
 # 1. the model — full flags matter: --reasoning-format keeps chain-of-thought
 #    out of the reply, --jinja makes tool calls parse (see docs/SETUP.md §2a)
-llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
+llama-server -hf google/gemma-4-12B-it-qat-q4_0-gguf \
   --host 127.0.0.1 --port 8080 -ngl 99 --ctx-size 65536 --jinja \
   --reasoning-format deepseek \
   -fa on -ctk q8_0 -ctv q8_0 \
-  --temp 0.6 --top-p 0.9 --top-k 64 --min-p 0.05 --repeat-penalty 1.1
+  --temp 1.0 --top-p 0.95 --top-k 64
 # 2. marq in a long-lived container bound to your workspace
 install -m 0755 pi/marq ~/.local/bin/marq && marq up ~/work
 # 3. one-time Pi config — llama.cpp provider + marq's system prompt + skill.

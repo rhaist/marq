@@ -41,7 +41,7 @@ plain text won't drive the loop.
 2. Start `llama-server` with a tool-capable model (see
    [`llama.cpp/README.md`](llama.cpp/README.md) for ready-to-run commands):
    ```bash
-   llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
+   llama-server -hf google/gemma-4-12B-it-qat-q4_0-gguf \
        --host 127.0.0.1 --port 8080 --ctx-size 65536 --jinja -ngl 99
    ```
 3. Smoke the marq side (no model needed):

@@ -6,14 +6,14 @@ carry the same context-size / `temperature` / `top_p` / `top_k` / `min_p` /
 The harness then talks to
 `http://localhost:8080/v1`.
 
-## Uncensored "Balanced" (recommended)
+## Official Gemma 4 QAT (default)
 
-HauhauCS Gemma-4-12B QAT Uncensored "Balanced" (Q4_K_M), its card's preset:
+Google's `gemma-4-12B-it-qat-q4_0-gguf`, with Google's own sampling preset:
 
 ```bash
-llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
+llama-server -hf google/gemma-4-12B-it-qat-q4_0-gguf \
     --host 127.0.0.1 --port 8080 --ctx-size 65536 --jinja -fa on \
-    --temp 0.6 --top-p 0.9 --top-k 64 --min-p 0.05 --repeat-penalty 1.1
+    --temp 1.0 --top-p 0.95 --top-k 64
 ```
 
 ## Stock Google Gemma-4-12B-IT (QAT Q4_0)

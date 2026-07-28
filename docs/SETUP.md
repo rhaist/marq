@@ -200,10 +200,19 @@ Pi discovers any directory containing a `SKILL.md` (recursively), so pointing
 `skills` at the repo's [`pi/`](../pi/) dir registers [`pi/SKILL.md`](../pi/SKILL.md)
 as the `marq` skill — kept in sync with the repo, no copy.
 
-**Recommended model:** [`Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced`](https://huggingface.co/HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced)
-(Q4_K_M). It runs offensive work without refusals, is tool-capable, and fits
-a 12–16 GB GPU at a long context. Launch it with the flags below; without them it
-leaks reasoning tokens into its answers and (without SYSTEM.md) bypasses marq.
+**Recommended model:** [`google/gemma-4-12B-it-qat-q4_0-gguf`](https://huggingface.co/google/gemma-4-12B-it-qat-q4_0-gguf)
+— Google's official quantization-aware-trained release. Tool-capable, natively
+q4_0, and fits a 12–16 GB GPU at a long context. Launch it with the flags below;
+without them it leaks reasoning tokens into its answers and (without SYSTEM.md)
+bypasses marq.
+
+> **Not yet on the leaderboard.** This is the default on provenance grounds —
+> official weights, no third-party fine-tune in the trust path — not because it
+> measured better. Its one sweep to date was voided by a harness fault (see
+> `scripts/eval/`), so treat it as unmeasured until a clean run publishes.
+> A stock instruction-tuned model may also refuse some legitimate authorized
+> testing; if that blocks you on an engagement, evaluate alternatives with the
+> harness rather than swapping blind.
 
 **2a. Start `llama-server` for Gemma.** Install it once — macOS: `brew install
 llama.cpp` (builds with **Metal** on Apple Silicon; CPU on Intel Macs). Linux:
@@ -217,11 +226,11 @@ in [`scripts/eval/llama.cpp/`](../scripts/eval/llama.cpp/)):
 
 ```bash
 # "Balanced" build (the default above). -hf pulls the GGUF from HF.
-llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
+llama-server -hf google/gemma-4-12B-it-qat-q4_0-gguf \
   --host 127.0.0.1 --port 8080 -ngl 99 --ctx-size 65536 --jinja \
   --reasoning-format deepseek \
   -fa on -ctk q8_0 -ctv q8_0 \
-  --temp 0.6 --top-p 0.9 --top-k 64 --min-p 0.05 --repeat-penalty 1.1
+  --temp 1.0 --top-p 0.95 --top-k 64
 ```
 
 - **`--host 127.0.0.1`** binds loopback only — the Pi extension connects there,
@@ -246,10 +255,10 @@ llama-server -hf HauhauCS/Gemma4-12B-QAT-Uncensored-HauhauCS-Balanced:Q4_K_M \
   CPU-only Linux run but are slow for a 12B — drop `-ngl -fa -ctk -ctv` there.
 - **`--ctx-size`** as high as VRAM allows (Gemma is 262 K native). Tool outputs
   (nuclei/katana dumps) are large; a short window truncates them.
-- **Sampling** — the flags above are the HauhauCS _"Balanced"_ preset. For the
-  **stock** Google `-it` model use Google's official set instead (`--temp 1.0
---top-p 0.95 --top-k 64`). Either is fine — it's the smallest lever (see impact
-  order). `-ngl 99` offloads all layers to the GPU.
+- **Sampling** — the flags above are Google's official set for the `-it` model
+  (`--temp 1.0 --top-p 0.95 --top-k 64`). Community fine-tunes usually ship
+  their own preset on the model card; use theirs, not these. Either way it's the
+  smallest lever (see impact order). `-ngl 99` offloads all layers to the GPU.
 - Flaky small model emitting malformed tool JSON? llama.cpp can **constrain
   decoding** to a grammar/JSON schema (`--grammar-file`, or `json_schema` in the
   request) — the reliability lever GUI wrappers don't expose.
