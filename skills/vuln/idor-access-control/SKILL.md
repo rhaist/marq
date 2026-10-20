@@ -38,3 +38,4 @@ manual comparison.
   authorization checks per object, deny-by-default, unpredictable ids are not a fix.
 - CWE-639 / CWE-284; OWASP A01:2025 Broken Access Control — still #1, and in the
   2025 Top 10 it also absorbs SSRF (CWE-918); path traversal was already in A01.
+- To map this finding to IEC 62443 / CRA / NIS2 obligations, `load_skill finding-control-crosswalk`.

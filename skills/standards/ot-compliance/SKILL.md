@@ -141,3 +141,4 @@ you and when.
 - `load_skill ot-ics` (the engineering), `load_skill nis2-dora`,
   `load_skill eu-cra`, `load_skill us-sectoral-regs`,
   `load_skill choosing-a-framework`.
+- To map this finding to IEC 62443 / CRA / NIS2 obligations, `load_skill finding-control-crosswalk`.

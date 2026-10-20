@@ -122,3 +122,4 @@ EIOPA. These cite RTS that get revised — verify exact figures before relying.
   `load_skill choosing-a-framework` (which regimes apply to you).
 - Implementing the controls: `load_skill control-mapping`, `load_skill gap-analysis`,
   `load_skill incident-response-leadership` (the reporting-clock decisions).
+- To map this finding to IEC 62443 / CRA / NIS2 obligations, `load_skill finding-control-crosswalk`.

@@ -34,3 +34,4 @@ metadata:
   store uploads outside webroot, validate content not just extension.
 - CWE-22 / CWE-98 / CWE-434; OWASP 2025 maps them to A01 Broken Access Control
   (CWE-22), A05 Injection (CWE-98) and A06 Insecure Design (CWE-434).
+- To map this finding to IEC 62443 / CRA / NIS2 obligations, `load_skill finding-control-crosswalk`.

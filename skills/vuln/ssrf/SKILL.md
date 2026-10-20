@@ -39,3 +39,4 @@ metadata:
 - CWE-918; OWASP A01:2025 Broken Access Control — SSRF was folded into A01 in the
   2025 Top 10 (it's an access-control failure: the server reaches a resource the
   user shouldn't), no longer the standalone A10:2021 category.
+- To map this finding to IEC 62443 / CRA / NIS2 obligations, `load_skill finding-control-crosswalk`.

@@ -11,6 +11,9 @@ metadata:
 A finding implicates the same control under every framework. Map it once so you
 don't reassess per-standard, and so one fix can close N audit line items.
 
+This skill is framework↔framework. To map a finding to the regulatory/OT obligations
+it touches (IEC 62443-3-3 SRs, EU CRA Annex I, NIS2 Art. 21(2)), `load_skill finding-control-crosswalk`.
+
 ## Workflow
 
 1. Take the finding: `read_file /work/findings.md` (or a single `report_finding` entry).

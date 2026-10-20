@@ -40,3 +40,4 @@ metadata:
   the request it authorized. Recommend strong server-side verification, pinned
   algorithm, rotated high-entropy secrets, short expiry.
 - CWE-287 / CWE-345 / CWE-347; OWASP A07:2025 Authentication Failures.
+- To map this finding to IEC 62443 / CRA / NIS2 obligations, `load_skill finding-control-crosswalk`.

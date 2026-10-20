@@ -38,3 +38,4 @@ metadata:
   the differential responses, and a recommendation: parameterized queries /
   prepared statements, least-privilege DB user.
 - CWE-89; OWASP A05:2025 Injection (dropped from A03:2021). Provide a CVSS vector if you can.
+- To map this finding to IEC 62443 / CRA / NIS2 obligations, `load_skill finding-control-crosswalk`.

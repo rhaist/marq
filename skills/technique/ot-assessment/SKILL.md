@@ -124,3 +124,4 @@ it when "prove it's exploitable" is the wrong question.
   `load_skill ot-compliance`.
 - `load_skill network-enumeration` (the IT-side habits to _unlearn_ here),
   `load_skill red-teaming` (rules of engagement discipline).
+- To map this finding to IEC 62443 / CRA / NIS2 obligations, `load_skill finding-control-crosswalk`.

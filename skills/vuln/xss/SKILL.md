@@ -40,3 +40,4 @@ still need to discover endpoints/params.
   worse), `target` = URL+param+context, `evidence` = the dalfox PoC or the
   reflected payload that executed. Recommend context-aware output encoding + CSP.
 - CWE-79; OWASP A05:2025 Injection (XSS stays under Injection, now ranked A05).
+- To map this finding to IEC 62443 / CRA / NIS2 obligations, `load_skill finding-control-crosswalk`.

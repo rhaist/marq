@@ -61,6 +61,7 @@ Rank gaps by: gap size x risk x (low) effort. Quick decision rule:
 
 - Include a one-line coverage summary: X of Y controls at/above target (% compliant).
 - Note explicitly-out-of-scope or not-applicable controls with a reason — silence reads as a miss.
+- For the "Evidence/finding ref" column, map each finding to IEC 62443 / CRA / NIS2 obligations with `load_skill finding-control-crosswalk`.
 
 ## Anti-patterns
 

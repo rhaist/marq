@@ -37,3 +37,4 @@ metadata:
   `evidence` = the rendered math result and/or the command output. Recommend
   sandboxed/logic-less templates, no user input as template source, allowlist.
 - CWE-1336 (SSTI) / CWE-94 (code injection); OWASP A05:2025 Injection.
+- To map this finding to IEC 62443 / CRA / NIS2 obligations, `load_skill finding-control-crosswalk`.
