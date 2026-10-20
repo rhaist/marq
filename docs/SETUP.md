@@ -103,7 +103,7 @@ docker run --rm -i \
   --cap-add NET_RAW --cap-add NET_ADMIN --cap-add NET_BIND_SERVICE \
   -v marq-audit:/var/log/marq \
   -v marq-work:/work \
-  -e MARQ_OPERATOR=marq \
+  -e MARQ_OPERATOR="$USER" \
   marq
 ```
 
@@ -319,9 +319,10 @@ would kill them.
 
 Shim env vars: `MARQ_CONTAINER` (default `marq`), `MARQ_IMAGE` (default
 `marq:latest`), `MARQ_ENGINE` (container CLI, default `docker`; set `podman` to
-run daemonless without Docker Desktop), `MARQ_ENV_FILE` (optional env-file for
-`MARQ_OPERATOR` plus API keys, passed as `--env-file` — copy `.env.example` to
-`.env` for a template; engagement + scope are set at runtime via `set_engagement`).
+run daemonless without Docker Desktop), `MARQ_ENV_FILE` (default
+`~/.config/marq/env`, loaded if present). Nothing is required: `MARQ_OPERATOR`
+defaults to your `$USER`, and any API key exported in your shell is forwarded
+(keys: `docs/USAGE.md`); engagement + scope are set at runtime via `set_engagement`.
 
 ---
 

@@ -52,7 +52,7 @@ project; drop it for project-local). Uses the hardened docker args from
 claude mcp add marq --scope user -- docker run --rm -i \
   --security-opt no-new-privileges:true --cap-drop ALL \
   --cap-add NET_RAW --cap-add NET_ADMIN --cap-add NET_BIND_SERVICE \
-  -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR=marq marq
+  -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR="$USER" marq
 
 claude mcp list                    # confirm "marq … ✔ Connected"
 ```
@@ -76,7 +76,7 @@ thinking; marq supplies current frameworks and the evidence tools.
 ```bash
 codex mcp add marq -- docker run --rm -i \
   --cap-drop ALL --cap-add NET_RAW --cap-add NET_ADMIN \
-  -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR marq
+  -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR="$USER" marq
 ```
 
 Or add it to `~/.codex/config.toml` (TOML, not JSON):
@@ -87,8 +87,7 @@ command = "docker"
 args = ["run", "--rm", "-i", "--cap-drop", "ALL",
         "--cap-add", "NET_RAW", "--cap-add", "NET_ADMIN",
         "-v", "marq-audit:/var/log/marq", "-v", "marq-work:/work",
-        "-e", "MARQ_OPERATOR", "marq"]
-env_vars = { MARQ_OPERATOR = "marq" }
+        "-e", "MARQ_OPERATOR=you", "marq"]
 ```
 
 Same uses as Claude Code. Docs: [Codex MCP](https://developers.openai.com/codex/mcp).

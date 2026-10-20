@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"net/url"
 	"strconv"
 
 	"github.com/rhaist/marq/internal/shellword"
@@ -62,14 +63,17 @@ func osint() []Tool {
 		},
 		{
 			Name: "shodan_host",
-			Desc: "Look up an IP on Shodan: open ports, services, banners, vulns. Requires SHODAN_API_KEY " +
-				"in the container environment.",
+			Desc: "Look up an IP on Shodan: open ports, services, banners, vulns. Works without a key " +
+				"via Shodan's free InternetDB (ports, CPEs, known CVEs, hostnames, tags as JSON); " +
+				"SHODAN_API_KEY adds full service banners.",
 			Params: []Param{
 				{Name: "ip", Type: StringParam, Desc: "IP address", Required: true},
 			},
 			Build: func(a Args) Invocation {
-				cmd := `if [ -n "$SHODAN_API_KEY" ]; then shodan init "$SHODAN_API_KEY" >/dev/null 2>&1; fi; ` +
-					"shodan host " + shellword.Quote(a.S("ip"))
+				cmd := `if [ -n "$SHODAN_API_KEY" ]; then shodan init "$SHODAN_API_KEY" >/dev/null 2>&1 && ` +
+					"shodan host " + shellword.Quote(a.S("ip")) + "; else " +
+					"echo '(keyless InternetDB lookup; set SHODAN_API_KEY for full banners)'; " +
+					"curl -sS --max-time 30 " + shellword.Quote("https://internetdb.shodan.io/"+url.PathEscape(a.S("ip"))) + "; fi"
 				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("ip")}
 			},
 		},
@@ -77,14 +81,15 @@ func osint() []Tool {
 			Name: "shodan_search",
 			Desc: "Search Shodan for exposed assets, e.g. 'org:\"Acme Corp\"' or " +
 				"'ssl.cert.subject.cn:example.com'. Returns ip/port/org/product/hostnames. Requires " +
-				"SHODAN_API_KEY in the container environment.",
+				"SHODAN_API_KEY with query credits; for a single IP use shodan_host, which works keyless.",
 			Params: []Param{
 				{Name: "query", Type: StringParam, Desc: "Shodan search query", Required: true},
 				{Name: "limit", Type: IntParam, Desc: "result limit", Default: 100},
 			},
 			Build: func(a Args) Invocation {
 				fields := "ip_str,port,org,hostnames,product"
-				cmd := `if [ -n "$SHODAN_API_KEY" ]; then shodan init "$SHODAN_API_KEY" >/dev/null 2>&1; fi; ` +
+				cmd := `[ -n "$SHODAN_API_KEY" ] || { echo "shodan_search needs SHODAN_API_KEY; for a single IP use shodan_host (keyless)" >&2; exit 2; }; ` +
+					`shodan init "$SHODAN_API_KEY" >/dev/null 2>&1; ` +
 					"shodan search --fields " + fields + " --limit " + strconv.Itoa(a.I("limit")) + " " + shellword.Quote(a.S("query"))
 				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("query")}
 			},

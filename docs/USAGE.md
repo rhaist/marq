@@ -133,9 +133,10 @@ would kill them.
 
 Shim env vars: `MARQ_CONTAINER` (default `marq`), `MARQ_IMAGE` (default
 `marq:latest`), `MARQ_ENGINE` (container CLI, default `docker`; or `podman`),
-`MARQ_ENV_FILE` (optional env-file for `MARQ_OPERATOR` plus API keys, passed as
-`--env-file` — copy `.env.example` to `.env` for a template;
-engagement + scope are set at runtime via `set_engagement`).
+`MARQ_ENV_FILE` (default `~/.config/marq/env`, loaded if present). Nothing is
+required: `MARQ_OPERATOR` defaults to your `$USER`, and any API key exported in
+your shell is forwarded (see _API keys_ below); engagement + scope are set at
+runtime via `set_engagement`.
 
 ## Available tools
 
@@ -171,7 +172,7 @@ engagement + scope are set at runtime via `set_engagement`).
 | `theharvester`  | theHarvester | Emails, employees, hosts, subdomains                                |
 | `spiderfoot`    | spiderfoot   | Broad automated OSINT footprint (background; poll with `read_file`) |
 | `exif_metadata` | exiftool     | Metadata from a staged file/dir                                     |
-| `shodan_host`   | shodan       | Exposed ports/services for an IP †                                  |
+| `shodan_host`   | shodan       | Exposed ports/services/CVEs for an IP (keyless via InternetDB)      |
 | `shodan_search` | shodan       | Search exposed assets (e.g. `org:`) †                               |
 | `gitleaks`      | gitleaks     | Secrets in a local git repo/dir                                     |
 | `trufflehog`    | trufflehog   | Verified leaked secrets (git/GitHub) ‡                              |
@@ -297,14 +298,15 @@ scan finishes. Check progress with `list_jobs` / `job_status` (or `read_file` /
 
 ## API keys for OSINT sources
 
-Several information-gathering tools return far richer data with API keys. Pass
-them into the container via the `env` block in `mcp.json` (and add matching
-`-e VAR` passthrough args). All are optional — without them the tools fall back
-to keyless sources or return limited results.
+All optional: every tool runs without them (keyless sources or reduced detail),
+so skip this on first run. To add one, export it in your shell — the `pi/marq`
+shim forwards it, and the `-e VAR` args in `mcp.json.example` pass it to MCP
+clients that inherit your environment — or put `KEY=value` lines in
+`~/.config/marq/env` (shim) / an `"env": {...}` block (Claude Desktop).
 
 | Variable                              | Used by                        |
 | ------------------------------------- | ------------------------------ |
-| `SHODAN_API_KEY`                      | `shodan_host`, `shodan_search` |
+| `SHODAN_API_KEY`                      | `shodan_search`; full banners in `shodan_host` (keyless: InternetDB) |
 | `CENSYS_API_TOKEN` (+ `CENSYS_ORG_ID`) | `censys_view`                 |
 | `GITHUB_TOKEN`                        | `trufflehog` (GitHub scans)    |
 | `NUMVERIFY_API_KEY`                   | `phoneinfoga`                  |

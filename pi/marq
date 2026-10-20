@@ -20,17 +20,27 @@ IMG="${MARQ_IMAGE:-marq:latest}"
 # Container engine. Default `docker` (OrbStack/Colima expose the same CLI);
 # set MARQ_ENGINE=podman to run rootless/daemonless with no Docker Desktop.
 ENGINE="${MARQ_ENGINE:-docker}"
+# Optional API keys / opt-ins, forwarded only when exported in your shell.
+PASS="SHODAN_API_KEY CENSYS_API_TOKEN CENSYS_ORG_ID GITHUB_TOKEN NUMVERIFY_API_KEY WPSCAN_API_TOKEN MARQ_ALLOW_RAW_SHELL"
+# Or keep them in a KEY=value file; loaded automatically if present.
+CFG="${MARQ_ENV_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/marq/env}"
 
 case "${1:-}" in
   up)
     work="${2:?usage: marq up <workspace-dir>}"
     mkdir -p "$work"
     "$ENGINE" rm -f "$C" >/dev/null 2>&1 || true
-    # caps: nmap/masscan/naabu SYN scans. env-file (optional, see .env.example): API keys.
+    envargs=()
+    [ -f "$CFG" ] && envargs+=(--env-file "$CFG")
+    for k in $PASS; do [ -n "${!k:-}" ] && envargs+=(-e "$k"); done
+    # Audit attribution: your shell's MARQ_OPERATOR, else the env file's, else $USER.
+    if [ -n "${MARQ_OPERATOR:-}" ]; then envargs+=(-e MARQ_OPERATOR)
+    elif ! { [ -f "$CFG" ] && grep -q '^MARQ_OPERATOR=' "$CFG"; }; then envargs+=(-e "MARQ_OPERATOR=${USER:-marq}"); fi
+    # caps: nmap/masscan/naabu SYN scans.
     "$ENGINE" run -d --name "$C" \
       --cap-add NET_ADMIN --cap-add NET_RAW \
       -v "$(cd "$work" && pwd):/work" \
-      ${MARQ_ENV_FILE:+--env-file "$MARQ_ENV_FILE"} \
+      "${envargs[@]}" \
       "$IMG" sleep infinity >/dev/null
     # Per-container jwt_tool keypair. The entrypoint only regenerates it on the
     # serve path; the shim starts `sleep infinity` (exec'd verbatim, skipping

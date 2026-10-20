@@ -121,12 +121,12 @@ client at marq instead:
 claude mcp add marq -- docker run --rm -i \
   --security-opt no-new-privileges:true --cap-drop ALL \
   --cap-add NET_RAW --cap-add NET_ADMIN --cap-add NET_BIND_SERVICE \
-  -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR=marq marq
+  -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR="$USER" marq
 ```
 
 Any MCP client works (Codex, Claude Desktop) → [`docs/CLIENTS.md`](docs/CLIENTS.md).
-(The caps are only what SYN scans need; full config incl. API keys in
-[`mcp.json.example`](mcp.json.example).)
+(The caps are only what SYN scans need. No keys or config required; optional
+API keys in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-sources).)
 
 > **Authorized use.** Advisory/knowledge is open; scanning & exploitation are
 > authorized-only and audit-logged — [`docs/SECURITY.md`](docs/SECURITY.md).

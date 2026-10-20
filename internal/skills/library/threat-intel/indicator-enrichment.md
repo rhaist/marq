@@ -12,8 +12,8 @@ deeper pivots use `ioc-pivoting`; for sources use
 
 ## Enrich by type (free, no-login)
 
-- **IP** → Shodan InternetDB (ports/CPEs/CVEs), IPinfo (ASN/org/geo — cloud vs
-  residential vs hosting), `shodan_host` if a key is set. Reverse-DNS via
+- **IP** → `shodan_host` (keyless InternetDB: ports/CPEs/CVEs; full banners with
+  a key), IPinfo (ASN/org/geo — cloud vs residential vs hosting). Reverse-DNS via
   HackerTarget. ORKL search for prior reporting.
 - **Domain** → crt.sh (cert age/SANs), `whois_lookup` (registration date — newly
   registered is suspicious), `dns_lookup`/`dnsx` (resolves? parked? sinkholed?),
