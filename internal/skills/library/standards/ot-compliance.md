@@ -89,7 +89,10 @@ you and when.
     Order No. 907 (Jun 2025); compliance lands **1 Oct 2028** for control
     centres, with medium-impact systems with external routable connectivity at
     non-control-centre assets getting a further two years (**2030**). CIP-015-2
-    is filed and pending. Treat INSM as a budget-cycle item, not a 2026 problem.
+    extends INSM to **EACMS and PACS** (the Order 907 directive); NERC Board
+    adopted it 17 Jun 2026, FERC approval reported Aug 2026 — confirm on FERC
+    eLibrary and check its implementation plan for dates. Treat INSM as a
+    budget-cycle item, not a 2026 problem.
   - A large virtualization package (CIP-002-7/-8, CIP-005-8, CIP-010-5 and
     others) was FERC-approved Mar 2026 and is **effective 1 Jul 2028**.
 - **TSA Security Directives** — surface transport cyber runs through the SD
