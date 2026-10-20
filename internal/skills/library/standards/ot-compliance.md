@@ -86,13 +86,20 @@ you and when.
   config/vuln management, **CIP-013-2 supply-chain risk** (since Oct 2022), and
   **CIP-012-2 control-centre communications (new, 1 Jul 2026)**.
   - **CIP-015-1 internal network security monitoring is NOT in effect.** FERC
-    Order No. 907 (Jun 2025); compliance lands **1 Oct 2028** for control
-    centres, with medium-impact systems with external routable connectivity at
-    non-control-centre assets getting a further two years (**2030**). CIP-015-2
-    extends INSM to **EACMS and PACS** (the Order 907 directive); NERC Board
-    adopted it 17 Jun 2026, **FERC approved it 10 Aug 2026**, and it is
-    **effective 1 Oct 2029**. Treat INSM as a budget-cycle item, not a 2026
-    problem.
+    Order No. 907 (Jun 2025) approved it and directed **CIP-015-2**, which
+    extends INSM to **EACMS and PACS** (FERC-approved 10 Aug 2026; it retires
+    CIP-015-1 when it takes effect). The phase-in, per the CIP-015-2
+    implementation plan:
+    - **1 Oct 2028**: CIP-015-1 is in effect for high-impact and medium-impact
+      with external routable connectivity (ERC) BES Cyber Systems and their
+      PCA at control centres and backup control centres.
+    - **1 Oct 2029**: CIP-015-2 is in effect, and adds the EACMS/PACS for
+      those control centres.
+    - **1 Oct 2030**: medium-impact BCS with ERC at all other assets.
+    - **1 Oct 2031**: the EACMS/PACS for those other assets.
+
+    Treat INSM as a budget-cycle item, not a 2026 problem. Verify:
+    https://www.nerc.com/standards/reliability-standards/cip/cip-015-2
   - A large virtualization package (CIP-002-7/-8, CIP-005-8, CIP-010-5 and
     others) was FERC-approved Mar 2026 and is **effective 1 Jul 2028**.
 - **TSA Security Directives** — surface transport cyber runs through the SD
