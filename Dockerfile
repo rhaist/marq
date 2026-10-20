@@ -73,12 +73,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         # credentials / hashes (mesa-opencl-icd gives hashcat a CPU OpenCL device;
         # name-that-hash → nth replaces the unmaintained hashid)
         john hashcat mesa-opencl-icd ocl-icd-libopencl1 name-that-hash \
-        # wordlists
-        wordlists \
+        # wordlists (dirb supplies /usr/share/wordlists/dirb/common.txt, the ffuf/
+        # gobuster default; `wordlists` alone no longer pulls it in)
+        wordlists dirb \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Go-built tools not packaged in Kali apt: active crawler + archive harvesters
-# + OOB/ASN/CDN helpers. Installed system-wide (GOBIN -> /usr/local/bin) so the
+# + OOB/CDN helpers. Installed system-wide (GOBIN -> /usr/local/bin) so the
 # dropped-privilege user can run them. golang-go is a *build-time only* dep, so
 # it is installed, used, and purged within this single layer — it never persists
 # in the image (a separate layer can't shrink an earlier one).
@@ -88,7 +89,6 @@ RUN apt-get update \
     && go install github.com/projectdiscovery/katana/cmd/katana@latest \
     && go install github.com/lc/gau/v2/cmd/gau@latest \
     && go install github.com/projectdiscovery/interactsh/cmd/interactsh-client@latest \
-    && go install github.com/projectdiscovery/asnmap/cmd/asnmap@latest \
     && go install github.com/projectdiscovery/cdncheck/cmd/cdncheck@latest \
     && apt-get purge -y --auto-remove golang-go \
     && apt-get clean \

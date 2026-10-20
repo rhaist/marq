@@ -117,7 +117,7 @@ TESTS: dict[str, tuple[str, dict]] = {
     "netexec":              (LOCAL, {"protocol": "smb", "target": LOOPBACK}),
     "certipy_find":         (KEY, {"target": "test/test:test@127.0.0.1"}),
     "bloodhound_collect":   (KEY, {"target": "test/test:test@127.0.0.1"}),
-    "evil_winrm":           (KEY, {"target": "127.0.0.1:5985", "options": "-u test -p test"}),
+    "evil_winrm":           (KEY, {"target": "127.0.0.1", "options": "-u test -p test"}),
     "enum4linux":           (LOCAL, {"target": LOOPBACK}),
     "smb_enum":             (LOCAL, {"target": LOOPBACK}),
     "ldap_search":          (LOCAL, {"target": "ldap://127.0.0.1", "filter": "(objectclass=*)"}),

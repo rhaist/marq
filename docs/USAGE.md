@@ -162,7 +162,7 @@ runtime via `set_engagement`.
 | `snmp_brute`     | onesixtyone    | SNMP community-string bruteforce  |
 | `smtp_user_enum` | smtp-user-enum | SMTP VRFY/EXPN user enum          |
 | `smtp_test`      | swaks          | SMTP relay/injection testing      |
-| `asnmap`         | asnmap         | ASN ↔ CIDR ↔ IP mapping           |
+| `asnmap`         | whois + curl   | IP/domain → ASN, ASN → CIDRs      |
 | `cdncheck`       | cdncheck       | CDN/cloud/WAF IP detection        |
 
 ### Information gathering — company & domain footprint

@@ -8,7 +8,8 @@ import (
 )
 
 // harvesterKeyless are theHarvester sources that work with zero configuration.
-const harvesterKeyless = "crtsh,duckduckgo,bing,otx,rapiddns,hackertarget,certspotter,anubis,threatminer"
+// (theHarvester 4.11 dropped anubis, bing and threatminer; an unknown source fails the whole run.)
+const harvesterKeyless = "crtsh,duckduckgo,otx,rapiddns,hackertarget,certspotter,urlscan,subdomaincenter"
 
 // osint returns company/domain footprint & information-gathering tools.
 func osint() []Tool {

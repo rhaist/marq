@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"net"
 	"strconv"
 	"strings"
 
@@ -254,17 +255,36 @@ func recon() []Tool {
 		},
 		{
 			Name: "asnmap",
-			Desc: "Map ASN to CIDR ranges / IP to ASN / organization to network ranges with asnmap (ProjectDiscovery). " +
-				"`target` is an IP, ASN (e.g. AS12345), or org name. Returns CIDR blocks.",
+			Desc: "Map IPs and domains to their ASN, and an ASN to its announced CIDR ranges — keyless " +
+				"(Team Cymru whois + RIPEstat). `target` is an IP (→ ASN, BGP prefix, country, AS " +
+				"name), a domain (resolved, then the same per IP) or an ASN like AS13335 (→ AS " +
+				"name + announced prefixes). Org names aren't supported: search " +
+				"https://bgp.he.net/search?search[search]=<org> with your web fetch to find the ASN first.",
 			Params: []Param{
-				{Name: "target", Type: StringParam, Desc: "IP, ASN or org name", Required: true},
-				{Name: "options", Type: StringParam, Desc: "extra asnmap flags", Default: ""},
+				{Name: "target", Type: StringParam, Desc: "IP, domain or ASN (AS12345)", Required: true},
 			},
 			Build: func(a Args) Invocation {
-				argv := []string{"asnmap", "-silent"}
-				argv = append(argv, shellword.Split(a.S("options"))...)
-				argv = append(argv, a.S("target"))
-				return Invocation{Argv: argv, Target: a.S("target")}
+				// asnmap itself now needs a ProjectDiscovery cloud key and prompts
+				// on a TTY, so this keeps the name with keyless sources instead.
+				t := strings.TrimSpace(a.S("target"))
+				cymru := func(q string) string { return "whois -h whois.cymru.com " + shellword.Quote(" -v "+q) }
+				var cmd string
+				if n, err := strconv.ParseUint(strings.TrimPrefix(strings.ToUpper(t), "AS"), 10, 32); err == nil {
+					asn := "AS" + strconv.FormatUint(n, 10)
+					cmd = cymru(asn) + "; echo; echo '# announced prefixes (RIPEstat)'; " +
+						"curl -sS --max-time 30 " + shellword.Quote("https://stat.ripe.net/data/announced-prefixes/data.json?resource="+asn) +
+						` | python3 -I -c 'import json,sys; [print(p["prefix"]) for p in json.load(sys.stdin)["data"]["prefixes"]]'`
+				} else if net.ParseIP(t) != nil {
+					cmd = cymru(t)
+				} else if strings.Contains(t, ".") && !strings.ContainsAny(t, " /") {
+					cmd = "ips=$({ dig +short A " + shellword.Quote(t) + "; dig +short AAAA " + shellword.Quote(t) + "; } | grep -E '^[0-9a-fA-F:.]+$'); " +
+						`[ -n "$ips" ] || { echo "no A/AAAA records" >&2; exit 1; }; ` +
+						`echo 'AS | IP | BGP Prefix | CC | Registry | Allocated | AS Name'; ` +
+						`for ip in $ips; do whois -h whois.cymru.com " -v $ip" | tail -n +2; done`
+				} else {
+					cmd = `echo "asnmap: target must be an IP, domain or ASN (AS12345); for an org name, search bgp.he.net with your web fetch" >&2; exit 2`
+				}
+				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: t}
 			},
 		},
 		{

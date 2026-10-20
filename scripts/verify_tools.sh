@@ -93,7 +93,7 @@ TOOLS=(
   "snmp_brute@@onesixtyone -c <wordlist> <host>@@onesixtyone -h"
   "smtp_user_enum@@smtp-user-enum -M <method> -U <users> -t <host>@@smtp-user-enum -h"
   "smtp_test@@swaks --server <target> <options>@@swaks --help"
-  "asnmap@@asnmap -silent <target>@@asnmap -h"
+  "asnmap@@whois -h whois.cymru.com \" -v <ip>\"@@whois --version"
   "cdncheck@@cdncheck -silent (stdin IPs)@@cdncheck -h"
   "censys_view@@censys view <assets> -O json --no-spinner --no-color@@censys view --help"
   "impacket_secretsdump@@impacket-secretsdump <options> <target>@@impacket-secretsdump -h"
