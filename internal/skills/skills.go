@@ -7,23 +7,26 @@
 package skills
 
 import (
-	"embed"
 	"fmt"
 	"io/fs"
 	"path"
 	"regexp"
 	"sort"
 	"strings"
+	"time"
+
+	"github.com/rhaist/marq"
 )
 
-//go:embed library
-var library embed.FS
+// library is the Agent Skills pack: skills/<category>/<name>/SKILL.md.
+var library = marq.Skills
 
 // Meta is a skill's listing entry (from its YAML frontmatter).
 type Meta struct {
 	Name        string
 	Category    string
 	Description string
+	Verified    string // metadata.verified: date of the last review sweep (YYYY-MM-DD)
 }
 
 type skill struct {
@@ -33,11 +36,13 @@ type skill struct {
 
 var frontmatter = regexp.MustCompile(`(?s)^---\s*\n(.*?)\n---\s*\n`)
 
-// parse splits name/description frontmatter from the markdown body.
-func parse(raw string) (name, desc, body string) {
+// parse splits name/description/verified frontmatter from the markdown body.
+// Line-based on purpose: `verified` sits under `metadata:`, and trimming the
+// indent is all the YAML this flat frontmatter needs.
+func parse(raw string) (name, desc, verified, body string) {
 	m := frontmatter.FindStringSubmatch(raw)
 	if m == nil {
-		return "", "", strings.TrimSpace(raw)
+		return "", "", "", strings.TrimSpace(raw)
 	}
 	for line := range strings.SplitSeq(m[1], "\n") {
 		k, v, ok := strings.Cut(line, ":")
@@ -49,9 +54,11 @@ func parse(raw string) (name, desc, body string) {
 			name = strings.Trim(strings.TrimSpace(v), `"'`)
 		case "description":
 			desc = strings.Trim(strings.TrimSpace(v), `"'`)
+		case "verified":
+			verified = strings.Trim(strings.TrimSpace(v), `"'`)
 		}
 	}
-	return name, desc, strings.TrimSpace(raw[len(m[0]):])
+	return name, desc, verified, strings.TrimSpace(raw[len(m[0]):])
 }
 
 // index is built once from the embedded library at startup.
@@ -60,18 +67,19 @@ var index = build()
 func build() map[string]skill {
 	out := map[string]skill{}
 	_ = fs.WalkDir(library, ".", func(p string, d fs.DirEntry, err error) error {
-		if err != nil || d.IsDir() || !strings.HasSuffix(p, ".md") {
+		if err != nil || d.IsDir() || d.Name() != "SKILL.md" {
 			return nil
 		}
 		raw, rerr := library.ReadFile(p)
 		if rerr != nil {
 			return nil
 		}
-		name, desc, body := parse(string(raw))
+		dir := path.Dir(p) // skills/<category>/<name>
+		name, desc, verified, body := parse(string(raw))
 		if name == "" {
-			name = strings.TrimSuffix(d.Name(), ".md")
+			name = path.Base(dir)
 		}
-		out[name] = skill{Meta: Meta{Name: name, Category: path.Base(path.Dir(p)), Description: desc}, Body: body}
+		out[name] = skill{Meta: Meta{Name: name, Category: path.Base(path.Dir(dir)), Description: desc, Verified: verified}, Body: body}
 		return nil
 	})
 	return out
@@ -134,4 +142,17 @@ func LoadMany(names string) string {
 		fmt.Fprintf(&b, "## skill: %s\n\n%s\n\n", n, body)
 	}
 	return strings.TrimSpace(b.String())
+}
+
+// Stale returns the skills whose last review sweep is older than maxAge at now,
+// or whose verified date is missing or unparsable — the refresh to-do list.
+func Stale(now time.Time, maxAge time.Duration) []Meta {
+	var out []Meta
+	for _, m := range List() {
+		d, err := time.Parse(time.DateOnly, m.Verified)
+		if err != nil || now.Sub(d) > maxAge {
+			out = append(out, m)
+		}
+	}
+	return out
 }

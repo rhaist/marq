@@ -14,6 +14,7 @@
 //	marq run <tool> [json]   invoke one tool directly (the host shim / Pi skill uses this)
 //	marq tools               list every tool with a one-line description
 //	marq skills [name]       browse the embedded playbook library, or print one
+//	marq skills --stale [w]  list skills not reviewed in w weeks (default 8); exit 1 if any
 //	marq shim                emit the pi/marq host shim (no git clone needed)
 //	marq prompt <which>      emit pi/SYSTEM.md or pi/SKILL.md
 //	marq version             build identity (which binary/image am I running?)
@@ -24,13 +25,16 @@
 package main
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"runtime"
 	"runtime/debug"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -183,6 +187,26 @@ func listTools(argv []string) {
 // `marq run load_skill`. Grouped by category so the 14 domains are visible at a
 // glance; with a name it prints the playbook itself (pipe it to a pager).
 func listSkills(argv []string) {
+	if len(argv) > 0 && argv[0] == "--stale" {
+		weeks := 8 // the pack's refresh cadence is 6-8 weeks
+		if len(argv) > 1 {
+			w, err := strconv.Atoi(argv[1])
+			if err != nil || w <= 0 {
+				fmt.Fprintln(os.Stderr, "usage: marq skills --stale [weeks]  (weeks: a positive integer)")
+				os.Exit(2)
+			}
+			weeks = w
+		}
+		stale := skills.Stale(time.Now(), time.Duration(weeks)*7*24*time.Hour)
+		for _, m := range stale {
+			fmt.Printf("  %-28s verified %s\n", m.Name, cmp.Or(m.Verified, "never"))
+		}
+		fmt.Printf("%d of %d skills not reviewed in the last %d weeks\n", len(stale), len(skills.List()), weeks)
+		if len(stale) > 0 {
+			os.Exit(1)
+		}
+		return
+	}
 	if len(argv) > 0 {
 		body, err := skills.Load(argv[0])
 		if err != nil {
@@ -251,6 +275,7 @@ usage:
   marq run <tool> [json]  invoke one tool directly (omit json to see its parameters)
   marq tools [name]       list every tool, or show one tool's parameter schema
   marq skills [name]      list every skill by domain, or print one playbook
+  marq skills --stale [w] skills not reviewed in w weeks (default 8); exit 1 if any
   marq shim               print the host shim script (chmod +x it; drives this image)
   marq prompt <system|skill>  print the host-side agent prompt / portable skill
   marq version            build revision, tool and skill counts

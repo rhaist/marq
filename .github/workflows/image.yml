@@ -3,7 +3,8 @@
 # jwt keys), and — on main — publishes it to GHCR so users can pull instead of
 # building. Expensive, so it only triggers when something that ends up IN the
 # image changes: the image definition/scripts, or the Go sources + go:embed'd
-# skills the `marq` binary is built from (cmd/**, internal/**, go.mod/go.sum).
+# skills the `marq` binary is built from (cmd/**, internal/**, skills/** via the
+# root skills.go, go.mod/go.sum).
 # pi/** counts too: the shim and prompts are go:embed'd so `marq shim` / `marq
 # prompt` can emit them from the image, so editing one without a rebuild would
 # ship a stale copy. docs/ is not in the image. Run on demand via the Actions
@@ -20,6 +21,8 @@ on:
       - cmd/**
       - internal/**
       - pi/** # go:embed'd into the binary — see the header note
+      - skills/** # the skills pack, go:embed'd via skills.go
+      - skills.go
       - go.mod
       - go.sum
   pull_request:

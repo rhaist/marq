@@ -1,6 +1,9 @@
 ---
 name: marq
 description: "marq is an all-round cyber assistant — pentest/OSINT, malware research, threat intel, GRC, standards & regulations, and CISO advisory. Load this for any security task: scanning, web/AD testing, sample analysis, IOC pivoting, risk/gap assessment, framework mapping, or leadership decisions."
+# internal: host-side driver for the marq container (marq prompt skill), not part of the skills/ pack
+metadata:
+  internal: true
 ---
 
 # marq — cyber assistant

@@ -45,7 +45,7 @@ grep -q 'engagement : e2e-2026' <<<"$fresh"; check "engagement survives across p
 grep -q 'scope note : \*.e2e.test' <<<"$fresh"; check "scope survives across processes" $?
 
 echo "# 2. skills library (load_skill)"
-names="$(grep -rh '^name:' "$ROOT/internal/skills/library" --include='*.md' | sed 's/name: *//' | tr -d '\r')"
+names="$(grep -rh '^name:' "$ROOT/skills" --include='SKILL.md' | sed 's/name: *//' | tr -d '\r')"
 total="$(wc -l <<<"$names" | tr -d ' ')"
 bad=0
 while IFS= read -r n; do

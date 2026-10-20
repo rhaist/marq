@@ -1,0 +1,11 @@
+{
+  "name": "marq",
+  "version": "2026.10.20",
+  "description": "Security, GRC and OT/ICS playbooks for EU+US manufacturers: offensive, malware, threat intel, secops, architecture, ISO 27001/NIST CSF/IEC 62443, EU CRA/NIS2/DORA/AI Act, US regulation, CISO. Each skill carries the date of its last review sweep.",
+  "author": { "name": "Robert Haist" },
+  "homepage": "https://github.com/rhaist/marq",
+  "repository": "https://github.com/rhaist/marq",
+  "license": "Apache-2.0",
+  "keywords": ["security", "grc", "compliance", "ot", "ics", "iec-62443", "cra", "nis2", "pentest", "threat-intel"],
+  "skills": ["./architecture/", "./ciso/", "./enablers/", "./grc/", "./malware/", "./offensive/", "./physical-human/", "./reference/", "./resilience/", "./secops/", "./standards/", "./technique/", "./threat-intel/", "./vuln/"]
+}

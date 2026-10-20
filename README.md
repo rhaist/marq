@@ -29,11 +29,29 @@ Pick your path — start simple, add a layer only when you need it:
 
 | I want…                                      | Path            | Setup                       |
 | :------------------------------------------- | :-------------- | :-------------------------- |
-| **cyber expertise inside my LLM**            | skills only     | one `go install`, no Docker |
+| **cyber expertise inside my agent**          | skills pack     | one install command         |
+| **…the same, over MCP for any client**       | skills server   | one `go install`, no Docker |
 | **…plus the ~85-tool suite to _run_ things** | full MCP server | build/pull the image        |
 | **…driven by a local model**                 | full + Pi       | image + Pi + llama.cpp      |
 
-### Just the skills — cyber expertise for your LLM (no Docker)
+### The skills pack — install into your agent (no server, no Docker)
+
+The ~80 playbooks are a standard [Agent Skills](https://agentskills.io) pack under
+[`skills/`](skills/), so agents that read `SKILL.md` load them natively:
+
+```bash
+# Claude Code
+claude plugin marketplace add rhaist/marq && claude plugin install marq@marq
+
+# Codex, Cursor, Copilot, Gemini CLI, Pi and ~40 other agents
+npx skills add rhaist/marq
+```
+
+Each skill carries `metadata.verified`, the date of its last review sweep. The
+pack is re-verified against primary sources every 6–8 weeks; `marq skills --stale`
+lists anything overdue.
+
+### Just the skills over MCP — for any MCP client (no Docker)
 
 The lowest-friction way in: add the **skills library + advisory tools** to any MCP
 client and skip the offensive tool suite entirely. `MARQ_SKILLS_ONLY=1` loads only
@@ -214,4 +232,6 @@ point for audit logging, timeouts, and output truncation.
 
 **GNU AGPLv3** — see [`LICENSE`](LICENSE). © 2026 marq contributors. Free software;
 run a modified version as a network service and you must offer users its source.
+The skills pack under [`skills/`](skills/) is **Apache-2.0** ([`skills/LICENSE`](skills/LICENSE)),
+so you can install and adapt the playbooks in any agent, including internal ones.
 For authorized security testing and education, **no warranty** — use responsibly.

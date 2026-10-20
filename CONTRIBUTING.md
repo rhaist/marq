@@ -72,9 +72,14 @@ These are load-bearing — breaking them silently defeats marq's safety model:
 
 ## Adding a skill
 
-Drop a markdown file with `name` / `description` frontmatter into
-`internal/skills/library/<category>/`. It's embedded at build time and exposed
-via the `load_skill` tool and the `marq://skills/<name>` MCP resource.
+Create `skills/<category>/<name>/SKILL.md` with `name` (equal to the directory
+name), `description` and `metadata.verified` (the date you checked it) in its
+frontmatter — see the [Agent Skills spec](https://agentskills.io/specification);
+`go test ./internal/skills/` enforces it. A new category also needs adding to
+`skills` in `skills/.claude-plugin/plugin.json`. The pack is embedded in the
+binary (`load_skill`, `marq://skills/<name>`) and installs natively via the
+Claude Code plugin or `npx skills add rhaist/marq`. The periodic review sweep is
+the `/refresh-skills` command.
 
 ## Commits and PRs
 
