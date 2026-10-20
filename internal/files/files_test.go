@@ -109,3 +109,32 @@ func TestSandboxAllowsWorkDir(t *testing.T) {
 		}
 	}
 }
+
+// TestSandboxRefusesAuditLog: the audit log may sit inside MARQ_WORK_DIR (bare
+// install), but write_file/read_file must never touch it.
+func TestSandboxRefusesAuditLog(t *testing.T) {
+	work, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	origRoots, origWork, origLog := allowedRoots, config.C.WorkDir, config.C.AuditLog
+	allowedRoots, config.C.WorkDir, config.C.AuditLog = []string{"/nonexistent-root"}, work, filepath.Join(work, "audit.jsonl")
+	t.Cleanup(func() { allowedRoots, config.C.WorkDir, config.C.AuditLog = origRoots, origWork, origLog })
+	// audited() writes the start record before resolve(), so the log always exists.
+	if err := os.WriteFile(config.C.AuditLog, nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := resolve(filepath.Join(work, "audit.jsonl")); err == nil {
+		t.Fatal("audit log path was allowed")
+	}
+	if err := os.Symlink(filepath.Join(work, "audit.jsonl"), filepath.Join(work, "alias")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := resolve(filepath.Join(work, "alias")); err == nil {
+		t.Fatal("symlink to the audit log was allowed")
+	}
+	if _, err := resolve(filepath.Join(work, "findings.md")); err != nil {
+		t.Errorf("ordinary work file refused: %v", err)
+	}
+}

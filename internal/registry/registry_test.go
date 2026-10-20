@@ -65,3 +65,50 @@ func TestArgValidation(t *testing.T) {
 		t.Errorf("clean call should not warn: %q", got)
 	}
 }
+
+func toolNamed(t *testing.T, name string) Tool {
+	for _, tool := range All() {
+		if tool.Name == name {
+			return tool
+		}
+	}
+	t.Fatalf("tool %q not registered", name)
+	return Tool{}
+}
+
+// TestAsnmapRouting pins asnmap's input classification: each kind of target
+// takes its own branch, and anything else (org names, dig-option lookalikes,
+// shell metacharacters) never reaches a lookup.
+func TestAsnmapRouting(t *testing.T) {
+	asnmap := toolNamed(t, "asnmap")
+	for target, want := range map[string]string{
+		"AS13335":         "announced-prefixes",
+		"as3320":          "resource=AS3320",
+		"13335":           "resource=AS13335",
+		"1.1.1.1":         "' -v 1.1.1.1'",
+		"2606:4700::1111": "' -v 2606:4700::1111'",
+		"example.com":     "dig +short A example.com",
+		"Acme Corp":       "must be an IP, domain or ASN",
+		"@evil.example":   "must be an IP, domain or ASN",
+		"-f.x":            "must be an IP, domain or ASN",
+		"1.1.1.1; id":     "must be an IP, domain or ASN",
+	} {
+		cmd := asnmap.Build(Args{"target": target}).Argv[2]
+		if !strings.Contains(cmd, want) {
+			t.Errorf("asnmap %q: want %q in %q", target, want, cmd)
+		}
+	}
+	// metacharacters in a domain stay inside single quotes
+	if cmd := asnmap.Build(Args{"target": "$(id).x"}).Argv[2]; !strings.Contains(cmd, "dig +short A '$(id).x'") {
+		t.Errorf("domain not quoted: %q", cmd)
+	}
+}
+
+// TestCensysAssetsAfterDoubleDash: a model-supplied "-i /path" must be an
+// asset, not cencli's --input-file (which would upload the file to Censys).
+func TestCensysAssetsAfterDoubleDash(t *testing.T) {
+	cmd := toolNamed(t, "censys_view").Build(Args{"assets": "-i /work/creds.txt"}).Argv[2]
+	if !strings.HasSuffix(cmd, "-- '-i /work/creds.txt'") {
+		t.Errorf("assets not after --: %q", cmd)
+	}
+}

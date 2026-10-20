@@ -273,11 +273,14 @@ func recon() []Tool {
 					asn := "AS" + strconv.FormatUint(n, 10)
 					cmd = cymru(asn) + "; echo; echo '# announced prefixes (RIPEstat)'; " +
 						"curl -sS --max-time 30 " + shellword.Quote("https://stat.ripe.net/data/announced-prefixes/data.json?resource="+asn) +
-						` | python3 -I -c 'import json,sys; [print(p["prefix"]) for p in json.load(sys.stdin)["data"]["prefixes"]]'`
+						` | python3 -I -c 'import json,sys
+try: ps=[p["prefix"] for p in json.load(sys.stdin)["data"]["prefixes"]]
+except Exception as e: sys.exit("RIPEstat lookup failed: %r" % e)
+print("\n".join(ps) or "(no announced prefixes)")'`
 				} else if net.ParseIP(t) != nil {
 					cmd = cymru(t)
-				} else if strings.Contains(t, ".") && !strings.ContainsAny(t, " /") {
-					cmd = "ips=$({ dig +short A " + shellword.Quote(t) + "; dig +short AAAA " + shellword.Quote(t) + "; } | grep -E '^[0-9a-fA-F:.]+$'); " +
+				} else if strings.Contains(t, ".") && !strings.ContainsAny(t, " /") && !strings.ContainsAny(t[:1], "-+@") { // no dig options
+					cmd = "ips=$({ dig +short A " + shellword.Quote(t) + "; dig +short AAAA " + shellword.Quote(t) + "; } | grep -v '\\.$' | grep -E '^[0-9a-fA-F:.]+$'); " +
 						`[ -n "$ips" ] || { echo "no A/AAAA records" >&2; exit 1; }; ` +
 						`echo 'AS | IP | BGP Prefix | CC | Registry | Allocated | AS Name'; ` +
 						`for ip in $ips; do whois -h whois.cymru.com " -v $ip" | tail -n +2; done`
@@ -312,11 +315,13 @@ func recon() []Tool {
 			Build: func(a Args) Invocation {
 				// cencli has no token env var, only a stored config; a per-call
 				// throwaway CENCLI_DATA_DIR keeps tokens from piling up and picks
-				// up a rotated token every time.
+				// up a rotated token every time. It lives in $HOME, outside the
+				// read_file roots, so a SIGKILLed call can't leave the token readable.
+				// `--` keeps a model-supplied "-i <file>" from uploading a local file.
 				cmd := `[ -n "$CENSYS_API_TOKEN" ] || { echo "CENSYS_API_TOKEN not set" >&2; exit 2; }; ` +
-					`export CENCLI_DATA_DIR="$(mktemp -d)"; trap 'rm -rf "$CENCLI_DATA_DIR"' EXIT; ` +
+					`export CENCLI_DATA_DIR="$(mktemp -d -p "$HOME")"; trap 'rm -rf "$CENCLI_DATA_DIR"' EXIT; ` +
 					`printf %s "$CENSYS_API_TOKEN" | censys config auth add --value-file - --name marq -q >/dev/null || exit 1; ` +
-					`censys view ` + shellword.Quote(a.S("assets")) + ` -O json --no-spinner --no-color ${CENSYS_ORG_ID:+-o "$CENSYS_ORG_ID"}`
+					`censys view -O json --no-spinner --no-color ${CENSYS_ORG_ID:+-o "$CENSYS_ORG_ID"} -- ` + shellword.Quote(a.S("assets"))
 				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("assets")}
 			},
 		},

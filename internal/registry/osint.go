@@ -71,7 +71,7 @@ func osint() []Tool {
 				{Name: "ip", Type: StringParam, Desc: "IP address", Required: true},
 			},
 			Build: func(a Args) Invocation {
-				cmd := `if [ -n "$SHODAN_API_KEY" ]; then shodan init "$SHODAN_API_KEY" >/dev/null 2>&1 && ` +
+				cmd := `if [ -n "$SHODAN_API_KEY" ]; then shodan init "$SHODAN_API_KEY" >/dev/null 2>&1; ` +
 					"shodan host " + shellword.Quote(a.S("ip")) + "; else " +
 					"echo '(keyless InternetDB lookup; set SHODAN_API_KEY for full banners)'; " +
 					"curl -sS --max-time 30 " + shellword.Quote("https://internetdb.shodan.io/"+url.PathEscape(a.S("ip"))) + "; fi"

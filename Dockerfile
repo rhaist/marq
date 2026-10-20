@@ -132,6 +132,9 @@ RUN gunzip -f /usr/share/wordlists/rockyou.txt.gz 2>/dev/null || true
 # -z` cover strings).
 RUN python3 -m venv --system-site-packages "$VIRTUAL_ENV" \
     && pip install --no-cache-dir maigret user-scanner==1.5.2.3 \
+    # user-scanner would check PyPI and prompt for updates on every call
+    && sed -i 's/"auto_update_status": true/"auto_update_status": false/' \
+        "$VIRTUAL_ENV"/lib/python3*/site-packages/user_scanner/config.json \
     # shodan CLI imports pkg_resources, removed in setuptools 82 (Kali dropped
     # python3-pkg-resources), so it lives here with an older setuptools.
     # --ignore-installed: apt pulls python3-shodan in as a dependency, and pip

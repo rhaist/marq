@@ -64,6 +64,11 @@ func resolve(path string) (string, error) {
 		return "", err
 	}
 	real := realpath(abs)
+	// The audit log is the tamper-evidence control; on a bare install it sits
+	// inside MARQ_WORK_DIR, so refuse the file itself rather than the dir.
+	if a, err := filepath.Abs(config.C.AuditLog); config.C.AuditLog != "" && err == nil && real == realpath(a) {
+		return "", fmt.Errorf("path %q is the audit log, which is off-limits", path)
+	}
 	rs := roots()
 	for _, root := range rs {
 		if real == root || strings.HasPrefix(real, root+string(os.PathSeparator)) {
