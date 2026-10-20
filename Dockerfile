@@ -132,9 +132,11 @@ RUN gunzip -f /usr/share/wordlists/rockyou.txt.gz 2>/dev/null || true
 # -z` cover strings).
 RUN python3 -m venv --system-site-packages "$VIRTUAL_ENV" \
     && pip install --no-cache-dir maigret user-scanner==1.5.2.3 \
-        # shodan CLI imports pkg_resources, removed in setuptools 82 (Kali dropped
-        # python3-pkg-resources), so it lives here with an older setuptools.
-        shodan 'setuptools<82'
+    # shodan CLI imports pkg_resources, removed in setuptools 82 (Kali dropped
+    # python3-pkg-resources), so it lives here with an older setuptools.
+    # --ignore-installed: apt pulls python3-shodan in as a dependency, and pip
+    # would otherwise skip it and leave the broken /usr/bin/shodan on PATH.
+    && pip install --no-cache-dir --ignore-installed shodan 'setuptools<82'
 
 # capa (FLARE) static-capability analysis — official standalone binary, picked by
 # arch (ships linux-arm64 + linux x86_64). The standalone bundles its rule set.
