@@ -154,9 +154,9 @@ Any MCP client works (Codex, Claude Desktop) → [`docs/CLIENTS.md`](docs/CLIENT
 
 | Category                              | Tools                                                                                                                                                                                                                                                                            |
 | :------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Recon / network**                   | `nmap` · `masscan` · `naabu` · `dnsx` · `dnsrecon` · `subfinder` · `httpx_probe` · `dns_lookup` · `whois_lookup` · `ssh_audit` · `fping_sweep` · `snmp_walk` · `snmp_check` · `snmp_brute` · `smtp_user_enum` · `smtp_test` · `asnmap` · `cdncheck` · `censys_search`            |
+| **Recon / network**                   | `nmap` · `masscan` · `naabu` · `dnsx` · `dnsrecon` · `subfinder` · `httpx_probe` · `dns_lookup` · `whois_lookup` · `ssh_audit` · `fping_sweep` · `snmp_walk` · `snmp_check` · `snmp_brute` · `smtp_user_enum` · `smtp_test` · `asnmap` · `cdncheck` · `censys_view`              |
 | **OSINT — org/domain**                | `theharvester` · `spiderfoot` · `shodan_host` · `shodan_search` · `gitleaks` · `trufflehog` · `gau_urls` · `exif_metadata`                                                                                                                                                       |
-| **OSINT — people**                    | `sherlock` · `maigret_username` · `holehe_email` · `h8mail_breach` · `phoneinfoga`                                                                                                                                                                                               |
+| **OSINT — people**                    | `sherlock` · `maigret_username` · `email_accounts` · `h8mail_breach` · `phoneinfoga`                                                                                                                                                                                               |
 | **Web app**                           | `nuclei` · `nikto` · `feroxbuster` · `katana` · `ffuf` · `gobuster_dir` · `arjun` · `whatweb` · `wafw00f` · `cmseek` · `wpscan` · `testssl` · `dalfox` · `sqlmap` · `jwt_tool` · `trivy` · `interactsh` · `paramspider` · `sstimap`                                              |
 | **Exploitation**                      | `donut` · `hydra` · `searchsploit`                                                                                                                                                                                                                                               |
 | **AD / internal network**             | `impacket_secretsdump` · `impacket_kerberoast` · `impacket_asreproast` · `impacket_psexec` · `impacket_wmiexec` · `impacket_ntlmrelayx` · `netexec` · `certipy_find` · `bloodhound_collect` · `evil_winrm` · `enum4linux` · `smb_enum` · `ldap_search` · `responder` · `nbtscan` |
@@ -180,7 +180,7 @@ terminal agent (Pi) ──bash──▶  pi/marq shim ─┤   both hit the same
                               registry.All() ── one Tool list
                                 ├─ recon     nmap, naabu, dnsx, masscan…
                                 ├─ osint     theHarvester, spiderfoot, shodan, gitleaks…
-                                ├─ people    sherlock, maigret, holehe, phoneinfoga…
+                                ├─ people    sherlock, maigret, user-scanner, phoneinfoga…
                                 ├─ web       nuclei, katana, feroxbuster, sqlmap…
                                 ├─ exploit   donut, hydra, searchsploit
                                 ├─ internal  impacket, netexec, certipy, bloodhound, enum4linux…

@@ -23,7 +23,7 @@ cross-border misstep.
   endpoints and params without touching the live target.
 - `spiderfoot` — broad automated sweep (background job; poll with `job_status`).
 - People: `sherlock` / `maigret_username` (a username across sites),
-  `holehe_email` (email → accounts), `phoneinfoga` (phone numbers).
+  `email_accounts` (email → accounts), `phoneinfoga` (phone numbers).
 - Secrets/exposure: `gitleaks` / `trufflehog` on any retrieved repos.
 
 ## 2. Resolve & find what's live

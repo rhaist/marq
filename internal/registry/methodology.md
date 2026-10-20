@@ -38,8 +38,8 @@ record results with `report_finding`, then `render_report` at the end.
 
 - `server_info` — confirm operator, engagement and scope.
 - Company/domain footprint: `theharvester`, `subfinder`, `dnsx`, `gau_urls`,
-  `whois_lookup`, `dns_lookup`, `asnmap` (ASN mapping), `censys_search`.
-  People: `sherlock`, `holehe_email`.
+  `whois_lookup`, `dns_lookup`, `asnmap` (ASN mapping), `censys_view`.
+  People: `sherlock`, `email_accounts`.
 - Broad automated sweep: `spiderfoot` (runs in the background — poll with
   `job_status` / `list_jobs`, do not block waiting on it).
 - Subdomain bruteforce: `dnsx` (-w wordlist). Takeover check: `nuclei --tags takeover`.

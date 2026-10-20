@@ -176,7 +176,7 @@ engagement + scope are set at runtime via `set_engagement`).
 | `gitleaks`      | gitleaks     | Secrets in a local git repo/dir                                     |
 | `trufflehog`    | trufflehog   | Verified leaked secrets (git/GitHub) ‡                              |
 | `gau_urls`      | gau          | Known URLs from Wayback/CommonCrawl/OTX/URLScan (background)        |
-| `censys_search` | censys       | Search Censys for exposed assets †                                  |
+| `censys_view`   | cencli       | Censys host/web/cert lookup (search is paid-only) †                 |
 
 ### Information gathering — people footprint
 
@@ -184,7 +184,7 @@ engagement + scope are set at runtime via `set_engagement`).
 | ------------------ | ----------- | ----------------------------------- |
 | `sherlock`         | sherlock    | Username across ~400 sites          |
 | `maigret_username` | maigret     | Deep username sweep (~2500 sites)   |
-| `holehe_email`     | holehe      | Sites where an email has an account |
+| `email_accounts`   | user-scanner | Sites where an email has an account |
 | `h8mail_breach`    | h8mail      | Email breach/leak exposure †        |
 | `phoneinfoga`      | phoneinfoga | Phone number OSINT                  |
 
@@ -305,10 +305,10 @@ to keyless sources or return limited results.
 | Variable                              | Used by                        |
 | ------------------------------------- | ------------------------------ |
 | `SHODAN_API_KEY`                      | `shodan_host`, `shodan_search` |
-| `CENSYS_API_ID` / `CENSYS_API_SECRET` | `censys_search`                |
+| `CENSYS_API_TOKEN` (+ `CENSYS_ORG_ID`) | `censys_view`                 |
 | `GITHUB_TOKEN`                        | `trufflehog` (GitHub scans)    |
 | `NUMVERIFY_API_KEY`                   | `phoneinfoga`                  |
-| `GOOGLE_API_KEY` / `GOOGLECSE_CX`     | `phoneinfoga` (Google CSE)     |
+| `GOOGLE_API_KEY` / `GOOGLECSE_CX`     | `phoneinfoga` (Google CSE, ends 2027-01-01) |
 | `WPSCAN_API_TOKEN`                    | `wpscan` (vuln data)           |
 
 theHarvester and h8mail read their own config files (`~/.theHarvester/api-keys.yaml`,

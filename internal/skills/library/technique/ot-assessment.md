@@ -42,7 +42,7 @@ Engineering context: `load_skill ot-ics`. Adversary context:
 
 | Tool                                     | L4/IT & IDMZ       | Below the IDMZ (L0–L3)                                                            |
 | :--------------------------------------- | :----------------- | :-------------------------------------------------------------------------------- |
-| `shodan_search`, `censys_search`         | safe               | **safe — the preferred first move** (third-party data, zero packets to the plant) |
+| `shodan_search`, `censys_view`           | safe               | **safe — the preferred first move** (third-party data, zero packets to the plant) |
 | `whois_lookup`, `dns_lookup`, `asnmap`   | safe               | safe (passive)                                                                    |
 | `nmap`, `masscan`, `naabu`               | normal care        | **do not run** — crash / DoS of critical services                                 |
 | `nuclei`, `nikto`, `ffuf`, `feroxbuster` | IT web apps only   | **do not run** against an HMI or embedded web server                              |
@@ -57,8 +57,8 @@ capture on the plant side and analyse the artefacts through the `files` tools.
 
 ## Method — passive first, outside-in
 
-1. **External exposure, without touching the plant.** `shodan_search` /
-   `censys_search` against your own ranges and org. CISA's exposure-reduction
+1. **External exposure, without touching the plant.** `shodan_search`
+   against your own ranges and org, `censys_view` on specific hosts. CISA's exposure-reduction
    guidance names exactly this class of platform for self-discovery. Useful
    pivots: `port:502` (Modbus), `port:102` (S7comm), `port:44818` (EtherNet/IP),
    `port:20000` (DNP3), `port:47808` (BACnet), `port:8001`/`9001`/`10001`

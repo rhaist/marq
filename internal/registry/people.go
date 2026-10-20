@@ -42,17 +42,19 @@ func people() []Tool {
 			},
 		},
 		{
-			Name: "holehe_email",
-			Desc: "Discover which sites have an account registered to an EMAIL address (holehe), via " +
-				"silent password-reset/registration probes — it does not alert the account owner. Only " +
-				"prints sites where the email is in use. (Note: holehe is unmaintained upstream as of " +
-				"2026 — some site modules may be stale/false-negative.)",
+			Name: "email_accounts",
+			Desc: "Discover which sites have an account registered to an EMAIL address (user-scanner), " +
+				"via silent registration/login probes. Modules that could send the owner a " +
+				"password-reset email are skipped, so it does not alert the account owner. Prints " +
+				"sites where the email is registered; a few sites may be unreachable (rate limits).",
 			Params: []Param{
 				{Name: "email", Type: StringParam, Desc: "email address", Required: true},
 			},
 			Build: func(a Args) Invocation {
-				argv := []string{"holehe", "--only-used", "--no-color", a.S("email")}
-				return Invocation{Argv: argv, Target: a.S("email")}
+				// Drop skipped-module lines and the upstream proxy-affiliate ad.
+				cmd := "set -o pipefail; user-scanner -e " + shellword.Quote(a.S("email")) +
+					` </dev/null | grep -v -e '\[~\]' -e 'partner=' -e 'Tip: Route'`
+				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("email")}
 			},
 		},
 		{
@@ -73,10 +75,10 @@ func people() []Tool {
 		},
 		{
 			Name: "phoneinfoga",
-			Desc: "OSINT on a PHONE NUMBER (phoneinfoga): carrier, line type, country and footprint " +
-				"search links. Pass an E.164 number, e.g. '+15554441212'. Optional NUMVERIFY_API_KEY / " +
-				"GOOGLE_API_KEY+GOOGLECSE_CX enrich results. (Note: phoneinfoga upstream self-declares " +
-				"unmaintained as of 2026 — still functional.)",
+			Desc: "OSINT on a PHONE NUMBER (phoneinfoga). Pass an E.164 number, e.g. '+15554441212'. " +
+				"Keyless it gives an offline parse (country, E.164/national format) plus Google dork " +
+				"URLs to run yourself; NUMVERIFY_API_KEY adds carrier/line type. (Google CSE " +
+				"enrichment ends 2027-01-01; phoneinfoga upstream is unmaintained but functional.)",
 			Params: []Param{
 				{Name: "number", Type: StringParam, Desc: "E.164 phone number", Required: true},
 			},

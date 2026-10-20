@@ -280,21 +280,24 @@ func recon() []Tool {
 			},
 		},
 		{
-			Name: "censys_search",
-			Desc: "Search Censys for exposed assets. Requires CENSYS_API_ID and CENSYS_API_SECRET env vars.",
+			Name: "censys_view",
+			Desc: "Look up hosts, web properties or certificates on Censys (Platform API via cencli): " +
+				"services, software, TLS, location. `assets` is comma-separated IPs, host:port, " +
+				"domains (port 443 default) or cert SHA-256s. Requires CENSYS_API_TOKEN (a Personal " +
+				"Access Token); CENSYS_ORG_ID is optional. Free accounts get lookups only, 100 " +
+				"credits/month at 1 per asset — Censys *search* is paid-only, use shodan_search.",
 			Params: []Param{
-				{Name: "query", Type: StringParam, Desc: "Censys query", Required: true},
-				{Name: "index", Type: StringParam, Desc: "hosts or certificates", Default: "hosts"},
-				{Name: "options", Type: StringParam, Desc: "extra censys flags", Default: ""},
+				{Name: "assets", Type: StringParam, Desc: "comma-separated IPs/host:port/domains/cert hashes", Required: true},
 			},
 			Build: func(a Args) Invocation {
-				// Direct argv — no shell. The CENSYS_API_* env vars are inherited by
-				// the child process (runner doesn't override cmd.Env), so the old
-				// `/bin/bash -c` export dance was redundant and let `index`/`options`
-				// inject shell commands. query/index are discrete args now.
-				argv := []string{"censys", "search", a.S("query"), "--index-type", a.S("index")}
-				argv = append(argv, shellword.Split(a.S("options"))...)
-				return Invocation{Argv: argv, Target: a.S("query")}
+				// cencli has no token env var, only a stored config; a per-call
+				// throwaway CENCLI_DATA_DIR keeps tokens from piling up and picks
+				// up a rotated token every time.
+				cmd := `[ -n "$CENSYS_API_TOKEN" ] || { echo "CENSYS_API_TOKEN not set" >&2; exit 2; }; ` +
+					`export CENCLI_DATA_DIR="$(mktemp -d)"; trap 'rm -rf "$CENCLI_DATA_DIR"' EXIT; ` +
+					`printf %s "$CENSYS_API_TOKEN" | censys config auth add --value-file - --name marq -q >/dev/null || exit 1; ` +
+					`censys view ` + shellword.Quote(a.S("assets")) + ` -O json --no-spinner --no-color ${CENSYS_ORG_ID:+-o "$CENSYS_ORG_ID"}`
+				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("assets")}
 			},
 		},
 	}

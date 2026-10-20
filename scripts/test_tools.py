@@ -84,7 +84,7 @@ TESTS: dict[str, tuple[str, dict]] = {
     "smtp_test":      (LOCAL, {"target": "127.0.0.1:25"}),
     "asnmap":         (EXTERNAL, {"target": "1.1.1.1"}),
     "cdncheck":       (LOCAL, {"targets": "127.0.0.1"}),
-    "censys_search":  (KEY, {"query": "8.8.8.8", "index": "hosts"}),
+    "censys_view":    (KEY, {"assets": "8.8.8.8"}),
     # web — loopback (connection refused is fine; the binary ran)
     "nuclei":        (LOCAL, {"target": LOOPBACK_URL, "severity": "info"}),
     "nikto":         (LOCAL, {"target": LOOPBACK_URL}),
@@ -150,7 +150,7 @@ TESTS: dict[str, tuple[str, dict]] = {
     "spiderfoot":    (EXTERNAL, {"target": EX_DOMAIN, "use_case": "passive"}),
     "sherlock":      (EXTERNAL, {"username": "octocat", "timeout": 15}),
     "maigret_username": (EXTERNAL, {"username": "octocat", "timeout": 15, "top_sites": 20}),
-    "holehe_email":  (EXTERNAL, {"email": "test@example.com"}),
+    "email_accounts": (EXTERNAL, {"email": "test@example.com"}),
     "phoneinfoga":   (EXTERNAL, {"number": "+12025550123"}),
     "trufflehog":    (EXTERNAL, {"source": "git https://github.com/trufflesecurity/test_keys"}),
     # key-gated — run if reachable; "needs key" is an acceptable outcome
@@ -159,7 +159,7 @@ TESTS: dict[str, tuple[str, dict]] = {
     "shodan_search": (KEY, {"query": "org:\"Example\"", "limit": 5}),
 }
 
-FORWARD_KEYS = ["SHODAN_API_KEY", "CENSYS_API_ID", "CENSYS_API_SECRET", "GITHUB_TOKEN", "NUMVERIFY_API_KEY",
+FORWARD_KEYS = ["SHODAN_API_KEY", "CENSYS_API_TOKEN", "CENSYS_ORG_ID", "GITHUB_TOKEN", "NUMVERIFY_API_KEY",
                 "GOOGLE_API_KEY", "GOOGLECSE_CX", "WPSCAN_API_TOKEN"]
 
 

@@ -2,7 +2,7 @@
 
 This project bundles **active, offensive security tooling** (netexec, impacket,
 hydra, sqlmap, hashcat, masscan, …) plus **OSINT / footprinting tooling** that profiles
-people and organisations (theHarvester, spiderfoot, sherlock, holehe, h8mail,
+people and organisations (theHarvester, spiderfoot, sherlock, user-scanner, h8mail,
 phoneinfoga, …), and exposes it all to an LLM through MCP. That is powerful and
 inherently dual-use. Read this before you run anything.
 

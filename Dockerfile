@@ -58,7 +58,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         trivy \
         # osint / information gathering — company & domain footprint
         theharvester spiderfoot recon-ng libimage-exiftool-perl \
-        python3-censys gitleaks trufflehog \
+        gitleaks trufflehog \
         # osint — people footprint
         sherlock h8mail \
         # exploitation (metasploit removed — searchsploit + hydra + donut cover the gap)
@@ -68,11 +68,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         bloodhound.py evil-winrm ldap-utils responder python3-netifaces \
         # payload generation (replaces msfvenom — 4.5 MB vs 1.8 GB)
         golang-github-binject-go-donut \
-        # malware research — static analysis (capa binary + oletools via pip below)
-        yara radare2 \
+        # malware research — static analysis (capa is a release binary below)
+        yara radare2 oletools \
         # credentials / hashes (mesa-opencl-icd gives hashcat a CPU OpenCL device;
-        # name-that-hash installed via pip below — replaces the unmaintained hashid)
-        john hashcat mesa-opencl-icd ocl-icd-libopencl1 \
+        # name-that-hash → nth replaces the unmaintained hashid)
+        john hashcat mesa-opencl-icd ocl-icd-libopencl1 name-that-hash \
         # wordlists
         wordlists \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -107,6 +107,13 @@ RUN case "${TARGETARCH:-amd64}" in \
         | tar -xz -C /usr/local/bin phoneinfoga \
     && chmod +x /usr/local/bin/phoneinfoga
 
+# cencli (the `censys` CLI for the Censys Platform API; Legacy Search, which the
+# python3-censys CLI used, was decommissioned 30 Sep 2026). Asset names match
+# TARGETARCH directly.
+RUN curl -fsSL "https://github.com/censys/cencli/releases/download/v1.2.1/cencli_1.2.1_linux_${TARGETARCH:-amd64}.tar.gz" \
+        | tar -xz -C /usr/local/bin censys \
+    && chmod +x /usr/local/bin/censys
+
 # Allow unprivileged SYN scans (nmap/masscan/naabu) without running as root.
 RUN setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip /usr/bin/nmap || true \
     && setcap cap_net_raw,cap_net_admin+eip /usr/bin/masscan || true \
@@ -117,15 +124,14 @@ RUN setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip /usr/bin/nmap || t
 RUN gunzip -f /usr/share/wordlists/rockyou.txt.gz 2>/dev/null || true
 
 # --- Python OSINT + malware tools (no MCP SDK — the server is the Go binary) -
-# venv holds pip-only tools: OSINT (maigret, holehe, shodan), maldoc analysis
-# (oletools → olevba), and hash-ID (name-that-hash → nth, the maintained
-# replacement for the unmaintained hashid). capa is installed as a standalone
+# venv holds pip-only tools: OSINT (maigret, user-scanner, shodan). user-scanner
+# is pinned — a fast-moving single-maintainer project. capa is installed as a standalone
 # binary below instead of pip — flare-capa hard-pins PyYAML==6.0.1, which has no
 # Python-3.13 wheel and won't build from sdist (Cython-3 bug). floss is dropped:
 # no linux-arm64 build, and it pulls flare-capa transitively (capa + `bin_headers
 # -z` cover strings).
 RUN python3 -m venv --system-site-packages "$VIRTUAL_ENV" \
-    && pip install --no-cache-dir maigret holehe oletools name-that-hash \
+    && pip install --no-cache-dir maigret user-scanner==1.5.2.3 \
         # shodan CLI imports pkg_resources, removed in setuptools 82 (Kali dropped
         # python3-pkg-resources), so it lives here with an older setuptools.
         shodan 'setuptools<82'

@@ -90,7 +90,7 @@ The serve transport is **synchronous, one-shot, stateless, no interactivity** (`
 2. apt installs the bulk of the suite (explicit package list, not `kali-linux-everything`, for auditability).
 3. Go-built tools not in Kali apt (`katana`, `gau`, `interactsh-client`, `asnmap`, `cdncheck`) — `go install`ed system-wide to `/usr/local/bin` with a throwaway apt `golang-go` purged in the same layer; `phoneinfoga` is a pinned prebuilt release binary (it can't be `go install`ed).
 4. `setcap` grants `nmap`/`masscan`/`naabu` SYN-scan caps so they run non-root.
-5. venv at `/opt/venv` (on PATH) holds the pip-only tools (`maigret`, `holehe`, `shodan` + `setuptools<82` for its `pkg_resources` import, `oletools`, `name-that-hash`, `jwt_tool`'s deps) — **no MCP SDK** (the server is the Go binary). `capa` is the pinned standalone release binary and `jwt_tool` a git clone; the `marq` binary is copied from stage 1.
+5. venv at `/opt/venv` (on PATH) holds the pip-only tools (`maigret`, `user-scanner` (pinned), `shodan` + `setuptools<82` for its `pkg_resources` import, `jwt_tool`'s deps) — **no MCP SDK** (the server is the Go binary). `capa` and `censys` (cencli) are pinned standalone release binaries and `jwt_tool` a git clone; the `marq` binary is copied from stage 1.
 6. Drops to the unprivileged `marq` user, **then** runs the build-time warm-up.
 
 **Build-time warm-up runs AS `marq`** (after the `USER` switch) on purpose: tools that cache data in `$HOME` (nuclei templates, wpscan DB, trivy DB) must populate `/home/marq`, not `/root`. Each warm-up step is `|| true` so a build-host network hiccup falls back to the tool's first-run download instead of failing the image. rockyou is gunzipped to the canonical `/usr/share/wordlists/rockyou.txt`.

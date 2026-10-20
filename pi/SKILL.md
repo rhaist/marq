@@ -104,7 +104,7 @@ Typical first moves by phase (run `marq tools` for the full set):
 
 - **Recon / network**: `nmap`, `naabu`, `subfinder`, `dnsx`, `httpx_probe`, `asnmap`, `fping_sweep`
 - **Web app**: `nuclei`, `ffuf`, `nikto`, `sqlmap`, `wpscan`, `whatweb`, `jwt_tool`, `paramspider`
-- **OSINT / footprint**: `theharvester`, `spiderfoot`, `holehe_email`, `maigret_username`, `shodan_host`, `censys_search`
+- **OSINT / footprint**: `theharvester`, `spiderfoot`, `email_accounts`, `maigret_username`, `shodan_host`, `censys_view`
 - **Internal / AD**: `enum4linux`, `smb_enum`, `netexec`, `impacket_secretsdump`, `bloodhound_collect`, `certipy_find`
 - **Creds / hashes**: `hydra`, `john`, `hashcat`
 - **Report**: `report_finding`, `render_report`

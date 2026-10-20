@@ -20,7 +20,7 @@ keys: https://github.com/jaegeral/security-apis
 ## How to query
 
 - **Already wrapped — use the tool, not the raw API:** Shodan (`shodan_host`,
-  `shodan_search`), Censys (`censys_search`), subdomains (`subfinder`), ASN
+  `shodan_search`), Censys lookups (`censys_view`), subdomains (`subfinder`), ASN
   (`asnmap`). The APIs below add what those don't.
 - **Otherwise:** fetch the URL — the client's web-fetch, or keep it audited and
   on the container's network with `run_shell` → `curl -s '<url>'`.
