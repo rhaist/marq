@@ -34,7 +34,8 @@ Canonical text (web-fetch for current wording): eur-lex Regulation (EU) 2016/679
   (see `load_skill legal-contractual`).
 - **Pending change:** the EU **Digital Omnibus** proposal (Nov 2025) would raise
   the Art. 33 trigger to _high risk_ and extend the clock to **96 hours** via a
-  single EU reporting entry point — **proposal only, not law as of mid-2026**;
+  single EU reporting entry point — **proposal only, not law as of Oct 2026**
+  (no Council mandate or Parliament position yet);
   the 72-hour regime above still applies. Web-verify before relying.
 
 ## Data-subject rights & DPIAs

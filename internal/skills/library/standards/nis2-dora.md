@@ -74,12 +74,14 @@ EIOPA. These cite RTS that get revised — verify exact figures before relying.
 ## Key dates
 
 - **NIS2:** member-state **transposition deadline was 17 Oct 2024**, widely
-  missed — as of **Jul 2026, 23 of 27** states have notified full transposition
-  (Germany in force 6 Dec 2025, Poland 3 Apr 2026, Luxembourg ~May 2026).
-  **Ireland, Spain, France and the Netherlands** are still outstanding, and on
-  **8 Jul 2026 the Commission referred all four to the CJEU** seeking financial
-  sanctions (NL Cyberbeveiligingswet in force since 15 Aug 2026; Ireland's bill
-  still unpublished as of Oct 2026, notification promised by end-2026). Check the specific national
+  missed — as of **Oct 2026, 24 of 27** states have a transposition law in force
+  (Germany 6 Dec 2025, Poland 3 Apr 2026, Luxembourg ~May 2026, Netherlands
+  Cyberbeveiligingswet 15 Aug 2026; tracker count — the Commission only counts
+  a state once its secondary legislation is complete too). **Ireland, Spain
+  and France** are still outstanding; on **8 Jul 2026 the Commission referred
+  them (and NL) to the CJEU** seeking financial sanctions. France's bill is
+  still in Assemblée first reading (Oct 2026), Spain's has not reached the
+  Cortes, Ireland's is unpublished (notification promised by end-2026). Check the specific national
   law that actually binds you — entry-into-force dates, competent authorities
   and penalties differ. Verify:
   https://digital-strategy.ec.europa.eu/en/policies/nis-transposition
@@ -94,7 +96,8 @@ EIOPA. These cite RTS that get revised — verify exact figures before relying.
   - **Digital Omnibus** (COM(2025)837, Nov 2025) would route NIS2/DORA/GDPR/
     eIDAS/CER incident reports through a **single entry point** run by ENISA.
     **Still a proposal and stalled** — the Council failed to reach QMV in late
-    Jun 2026; work resumes under the Irish Presidency from ~Sep 2026. (The
+    Jun 2026, and Coreper votes on the Irish Presidency's mandate were pulled
+    again on 7 and 11 Oct 2026 — no Council mandate and no EP position yet. (The
     _AI_ half of the omnibus package split off and _was_ adopted — see
     `load_skill eu-ai-act` — so "the omnibus passed" is ambiguous; ask which.)
   - **NIS2 amendment + Cybersecurity Act revision** proposed **20 Jan 2026**
