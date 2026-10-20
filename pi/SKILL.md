@@ -159,6 +159,8 @@ marq run render_report '{}'      # writes /work/findings.md + findings.csv
   state only what a tool actually returned _this session_. If you haven't run the
   tool, run it; do not answer a scan/lookup from prior knowledge (even for
   well-known hosts). No tool output ⇒ no finding.
+- **Web search is yours, not marq's.** marq has no search-engine tool; run
+  dorks and lookups with your own web search/fetch. If you have none, if you have none, tell the user to add a web-search skill or MCP server to their client rather than guessing results.
 
 ## Worked example
 

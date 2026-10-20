@@ -24,6 +24,8 @@ keys: https://github.com/jaegeral/security-apis
   (`asnmap`). The APIs below add what those don't.
 - **Otherwise:** fetch the URL — the client's web-fetch, or keep it audited and
   on the container's network with `run_shell` → `curl -s '<url>'`.
+- **Search-engine queries/dorks** use the client's web search (marq wraps none;
+  Google's Custom Search API closes 2027-01-01). If you have none, tell the user to add a web-search skill or MCP server to their client rather than guessing results.
 - These are free _because_ they're rate-limited (HackerTarget ~50/day per IP,
   IPinfo / ORKL per-IP throttling). Query specific targets, don't bulk-loop them.
 

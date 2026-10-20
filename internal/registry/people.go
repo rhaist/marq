@@ -76,9 +76,10 @@ func people() []Tool {
 		{
 			Name: "phoneinfoga",
 			Desc: "OSINT on a PHONE NUMBER (phoneinfoga). Pass an E.164 number, e.g. '+15554441212'. " +
-				"Keyless it gives an offline parse (country, E.164/national format) plus Google dork " +
-				"URLs to run yourself; NUMVERIFY_API_KEY adds carrier/line type. (Google CSE " +
-				"enrichment ends 2027-01-01; phoneinfoga upstream is unmaintained but functional.)",
+				"Keyless it gives an offline parse (country, E.164/national format) plus search dorks; " +
+				"NUMVERIFY_API_KEY adds carrier/line type. marq runs no search engine: run the dorks " +
+				"with your client's web search — if you have none, tell the user to add a web-search " +
+				"skill or MCP server. (phoneinfoga upstream is unmaintained but functional.)",
 			Params: []Param{
 				{Name: "number", Type: StringParam, Desc: "E.164 phone number", Required: true},
 			},

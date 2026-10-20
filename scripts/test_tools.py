@@ -160,7 +160,7 @@ TESTS: dict[str, tuple[str, dict]] = {
 }
 
 FORWARD_KEYS = ["SHODAN_API_KEY", "CENSYS_API_TOKEN", "CENSYS_ORG_ID", "GITHUB_TOKEN", "NUMVERIFY_API_KEY",
-                "GOOGLE_API_KEY", "GOOGLECSE_CX", "WPSCAN_API_TOKEN"]
+                "WPSCAN_API_TOKEN"]
 
 
 class MCP:

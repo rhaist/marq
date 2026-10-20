@@ -39,7 +39,9 @@ record results with `report_finding`, then `render_report` at the end.
 - `server_info` — confirm operator, engagement and scope.
 - Company/domain footprint: `theharvester`, `subfinder`, `dnsx`, `gau_urls`,
   `whois_lookup`, `dns_lookup`, `asnmap` (ASN mapping), `censys_view`.
-  People: `sherlock`, `email_accounts`.
+  People: `sherlock`, `email_accounts`, `phoneinfoga`.
+- Search-engine dorks: marq has no search tool — use your client's web search;
+  if you have none, tell the user to add a web-search skill or MCP server to their client rather than guessing results.
 - Broad automated sweep: `spiderfoot` (runs in the background — poll with
   `job_status` / `list_jobs`, do not block waiting on it).
 - Subdomain bruteforce: `dnsx` (-w wordlist). Takeover check: `nuclei --tags takeover`.

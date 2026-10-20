@@ -308,7 +308,6 @@ to keyless sources or return limited results.
 | `CENSYS_API_TOKEN` (+ `CENSYS_ORG_ID`) | `censys_view`                 |
 | `GITHUB_TOKEN`                        | `trufflehog` (GitHub scans)    |
 | `NUMVERIFY_API_KEY`                   | `phoneinfoga`                  |
-| `GOOGLE_API_KEY` / `GOOGLECSE_CX`     | `phoneinfoga` (Google CSE, ends 2027-01-01) |
 | `WPSCAN_API_TOKEN`                    | `wpscan` (vuln data)           |
 
 theHarvester and h8mail read their own config files (`~/.theHarvester/api-keys.yaml`,
