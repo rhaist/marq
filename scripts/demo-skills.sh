@@ -23,7 +23,7 @@ run()  { "$BIN" run "$@" 2>/dev/null; }
 step "marq run server_info   # knowledge-only mode — no tool suite loaded"
 run server_info '{}'
 
-step "marq run load_skill control-mapping   # 1 of ~73 expert playbooks"
+step "marq run load_skill control-mapping   # 1 of ~80 expert playbooks"
 run load_skill '{"name":"control-mapping"}' | head -18
 
 step 'marq run report_finding "Missing MFA on admin console"   # advisory, no scan needed'

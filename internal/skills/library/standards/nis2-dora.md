@@ -78,7 +78,8 @@ EIOPA. These cite RTS that get revised — verify exact figures before relying.
   (Germany in force 6 Dec 2025, Poland 3 Apr 2026, Luxembourg ~May 2026).
   **Ireland, Spain, France and the Netherlands** are still outstanding, and on
   **8 Jul 2026 the Commission referred all four to the CJEU** seeking financial
-  sanctions (NL law enters into force 15 Aug 2026). Check the specific national
+  sanctions (NL Cyberbeveiligingswet in force since 15 Aug 2026; Ireland's bill
+  still unpublished as of Oct 2026, notification promised by end-2026). Check the specific national
   law that actually binds you — entry-into-force dates, competent authorities
   and penalties differ. Verify:
   https://digital-strategy.ec.europa.eu/en/policies/nis-transposition

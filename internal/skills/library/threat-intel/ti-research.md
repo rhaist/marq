@@ -45,11 +45,11 @@ the ones on-topic. Good, stable, free feeds:
 | :------------------------------------------------------ | :------------------------------------------------------------------------------ |
 | CISA advisories (all)                                   | `https://www.cisa.gov/cybersecurity-advisories/all.xml`                         |
 | The DFIR Report (intrusion walk-throughs, full TTP+IOC) | `https://thedfirreport.com/feed/`                                               |
-| Google TAG / Mandiant / GTIG blog                       | `https://blog.google/threat-analysis-group/rss/`                                |
+| Google Threat Intelligence (GTIG / Mandiant) blog       | `https://feeds.feedburner.com/threatintelligence/pvexyqv7v0v`                   |
 | Microsoft Threat Intelligence                           | `https://www.microsoft.com/en-us/security/blog/topic/threat-intelligence/feed/` |
 | Cisco Talos                                             | `https://blog.talosintelligence.com/rss/`                                       |
 | Unit 42 (Palo Alto)                                     | `https://unit42.paloaltonetworks.com/feed/`                                     |
-| Volexity                                                | `https://www.volexity.com/blog/feed/`                                           |
+| Volexity                                                | `https://www.volexity.com/feed/`                                                |
 | SANS ISC daily diary                                    | `https://isc.sans.edu/rssfeed_full.xml`                                         |
 | Krebs on Security                                       | `https://krebsonsecurity.com/feed/`                                             |
 | BleepingComputer                                        | `https://www.bleepingcomputer.com/feed/`                                        |

@@ -20,7 +20,7 @@ still need to discover endpoints/params.
 - `dalfox` is the workhorse: run it on a URL with a parameter. It tests
   reflected/stored/DOM vectors and verifies execution, so a positive is
   high-confidence. Pass headers/cookies via `options` for auth'd pages
-  (e.g. `options="--cookie 'session=...'"`); add `--deep-domxss` for SPA/DOM sinks.
+  (e.g. `options="--cookies 'session=...'"`).
 - Triage context: HTML body vs attribute vs JS string vs URL — the working
   payload and the fix differ by context.
 

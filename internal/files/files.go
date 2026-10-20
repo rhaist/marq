@@ -1,6 +1,6 @@
 // Package files provides sandboxed file access for the engagement working area.
 // The MCP transport carries only strings, so these ops let the model stage tool
-// inputs and read back tool outputs — confined to /work and /tmp so it can never
+// inputs and read back tool outputs — confined to /work, /tmp and MARQ_WORK_DIR so it can never
 // read or clobber the rest of the container. Every op is audit-logged through
 // the same audit module as tool runs.
 package files
@@ -16,8 +16,31 @@ import (
 	"github.com/rhaist/marq/internal/config"
 )
 
-// allowedRoots are the only directories the model may touch.
+// allowedRoots are the only directories the model may touch, plus MARQ_WORK_DIR
+// (see roots) so findings/jobs written there on a bare install stay readable.
 var allowedRoots = []string{"/work", "/tmp"}
+
+// Roots are realpath'd so they match resolve()'s output (macOS /tmp -> /private/tmp).
+// A MARQ_WORK_DIR that is / or contains $HOME is ignored: it would expose
+// ~/.ssh, ~/.aws etc. to read_file/write_file.
+func roots() []string {
+	rs := make([]string, 0, len(allowedRoots)+1)
+	for _, r := range allowedRoots {
+		rs = append(rs, realpath(r))
+	}
+	if config.C.WorkDir == "" {
+		return rs
+	}
+	w, err := filepath.Abs(config.C.WorkDir)
+	if err != nil {
+		return rs
+	}
+	w = realpath(w)
+	if home, err := os.UserHomeDir(); w == "/" || (err == nil && (realpath(home) == w || strings.HasPrefix(realpath(home), w+string(os.PathSeparator)))) {
+		return rs
+	}
+	return append(rs, w)
+}
 
 // realpath resolves symlinks for the longest existing prefix of p, then appends
 // the remainder — mirroring Python os.path.realpath, which works even when p (or
@@ -41,12 +64,13 @@ func resolve(path string) (string, error) {
 		return "", err
 	}
 	real := realpath(abs)
-	for _, root := range allowedRoots {
+	rs := roots()
+	for _, root := range rs {
 		if real == root || strings.HasPrefix(real, root+string(os.PathSeparator)) {
 			return real, nil
 		}
 	}
-	return "", fmt.Errorf("path %q is outside the allowed area (%s)", path, strings.Join(allowedRoots, ", "))
+	return "", fmt.Errorf("path %q is outside the allowed area (%s)", path, strings.Join(rs, ", "))
 }
 
 // audited runs fn with the same start/end audit envelope as tool runs, and

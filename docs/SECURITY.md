@@ -28,9 +28,11 @@ inherently dual-use. Read this before you run anything.
 
 This build uses **logging-only** guardrails (an explicit operator choice). That
 means: nothing is blocked on **scope** grounds (scope is recorded, not enforced),
-but **every invocation is audit-logged** as JSON lines, before and after it runs
-— and a tool whose start record can't be persisted is refused (fail-closed), so
-the log can't be silently skipped. Each record carries:
+but **every exec-tool invocation is audit-logged** as JSON lines, before and after
+it runs — and an exec or file tool whose start record can't be persisted is
+refused (fail-closed), so the log can't be silently skipped. In-process tools
+(`server_info`, `load_skill`, `list_jobs`, `job_status`) are not logged;
+`set_engagement` and the findings tools log but don't fail closed. Each record carries:
 
 - a correlation id, UTC timestamps and duration
 - the logical tool name and the **full argument vector**
@@ -60,8 +62,9 @@ The container hardening below is for the **full** Docker tool suite. The
 registers none of the exec tools — it runs **no external binaries at all**, only
 in-process handlers over embedded markdown and the `/work` file tools. So the
 offensive-tooling threat model (scanning, exploitation, raw shell) simply doesn't
-apply, and it needs no container to be safe. It's still audit-logged, and the file
-sandbox still bounds `read_file`/`write_file` to `MARQ_WORK_DIR` and `/tmp`. The
+apply, and it needs no container to be safe. File, findings and engagement calls
+are still audit-logged, and the file sandbox still bounds `read_file`/`write_file`
+to `/work`, `/tmp` and `MARQ_WORK_DIR` (ignored if it is `/` or contains `$HOME`). The
 one thing it doesn't get natively is the container's process/network isolation —
 run it where you'd run any small local service.
 
@@ -72,8 +75,10 @@ Applies to the full Docker tool suite (skills-only above needs none of it):
 - **Non-root**: the server runs as the unprivileged `marq` user.
 - **Capabilities dropped**: `cap_drop: ALL`, re-adding only `NET_RAW`,
   `NET_ADMIN`, `NET_BIND_SERVICE` (needed for SYN scans). `nmap`/`masscan`/`naabu`
-  get exactly those file capabilities via `setcap`, so no root is required.
-- **`no-new-privileges`** is set in the sample run configs. Note the tradeoff:
+  get `cap_net_raw,cap_net_admin` file capabilities via `setcap` (nmap also
+  `cap_net_bind_service`), so no root is required. The `pi/marq` shim's `up`
+  only adds `NET_ADMIN`/`NET_RAW` — no `cap_drop: ALL`.
+- **`no-new-privileges`** is set in the sample MCP run configs (not the `pi/marq` shim). Note the tradeoff:
   the kernel does not apply file capabilities across `execve` under
   `no_new_privs`, so with it set the `setcap` grant above is inert — `masscan`/
   `naabu` fail and `nmap -sS` degrades to a TCP-connect scan. Keep it for the
@@ -92,7 +97,7 @@ Applies to the full Docker tool suite (skills-only above needs none of it):
   to the wrapped tool set.
 - **File access is sandboxed — for the file tools.** The
   `read_file`/`write_file`/`list_dir` tools resolve real paths (defeating symlink
-  and `..` escapes) and refuse anything outside `/work` and `/tmp`, so the model
+  and `..` escapes) and refuse anything outside `/work`, `/tmp` and `MARQ_WORK_DIR`, so the model
   can exchange working files without reading or clobbering the rest of the
   container. This bounds **those tools**, not tool _execution_: an exec tool with
   an output flag (e.g. `nmap -oN …`) can still write anywhere the `marq` user can,

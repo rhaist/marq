@@ -170,13 +170,13 @@ func web() []Tool {
 			Name:   "dalfox",
 			Active: true,
 			Desc: "Scan a URL for XSS with dalfox. Tests reflected/stored/DOM vectors and verifies " +
-				"findings. Add raw flags via `options` (e.g. a custom header or '--deep-domxss').",
+				"findings. Add raw flags via `options` (e.g. `-H 'Authorization: ...'` or `--cookies 'session=...'`; dalfox v3 flags).",
 			Params: []Param{
 				{Name: "url", Type: StringParam, Desc: "target URL", Required: true},
 				{Name: "options", Type: StringParam, Desc: "extra raw flags", Default: ""},
 			},
 			Build: func(a Args) Invocation {
-				argv := []string{"dalfox", "url", a.S("url"), "--silence", "--no-color", "--no-spinner"}
+				argv := []string{"dalfox", "scan", a.S("url"), "--silence", "--no-color"}
 				argv = append(argv, shellword.Split(a.S("options"))...)
 				return Invocation{Argv: argv, Target: a.S("url")}
 			},

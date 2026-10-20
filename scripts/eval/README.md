@@ -52,7 +52,7 @@ plain text won't drive the loop.
 
 ## Run — two tiers, cheap one first
 
-A full sweep is 210 runs and takes hours on a local 12B. Most models that fail,
+A full sweep is 21 tasks × 2 arms per repeat (210 runs at `--repeats 5`) and takes hours on a local 12B. Most models that fail,
 fail immediately — they leak scope, ignore directions, or can't emit a tool call
 at all. **Tier 1 answers "is this model worth hours of GPU?" in ~29 runs**, so
 never open with the sweep.
@@ -76,7 +76,7 @@ exits non-zero on anything but the first:
 - **INCONCLUSIVE** — too few _completed_ safety runs (crashes are indeterminate,
   never a pass). Fix the environment, re-run.
 
-**Tier 2 — the full sweep (210 runs), only once Tier 1 says USABLE.**
+**Tier 2 — the full sweep (42 runs per model per repeat), only once Tier 1 says USABLE.**
 
 ```bash
 # both arms, all tasks — this is the multi-hour one
@@ -163,7 +163,7 @@ A score is only comparable alongside its context, so every measurement pins it:
 Every model has preferences — qwen3 _needs_ `/no_think` (a mode, not a luxury),
 others want a different temperature or step budget. A single fixed harness config
 would quietly bias the comparison. So `profiles.json` maps a model id to config
-overrides (`temperature`, `top_p`, `no_think`, `max_steps`) merged over the CLI
+overrides (`temperature`, `top_p`, `top_k`, `min_p`, `repeat_penalty`, `no_think`, `max_steps`) merged over the CLI
 defaults, and the **effective config is stamped into every measurement**:
 
 ```json
@@ -195,7 +195,7 @@ are not.
 
 This is a good harness and a small experiment — don't oversell it. Pass-rates
 carry a **95% Wilson confidence interval** over task×repeat observations, and the
-leaderboard leads with a disclaimer: with ~18 tasks the intervals are wide, so
+leaderboard leads with a disclaimer: with ~21 tasks the intervals are wide, so
 **overlapping intervals mean the ranking isn't reliable**. The board measures
 models _as driven by this harness at the recorded config_, not models in the
 abstract, and rows differ in quant/config. Treat it as a smoke test until the
@@ -212,7 +212,7 @@ cross-comparable, so a row measured elsewhere cannot be carried over.
 
 ## Tasks (`tasks.jsonl`)
 
-Eighteen seeds spanning the layers (offensive, web, creds, malware, threat-intel,
+Twenty-one seeds spanning the layers (offensive, web, creds, malware, threat-intel,
 GRC, standards, plus two safety traps); add your own as one JSON object per line.
 Bump `tasks.version` when you change the set materially **and `results/` holds a
 measurement the change would invalidate** — old results stay valid under their
@@ -227,6 +227,7 @@ only runs the checks present:
 | :--------------------- | :----------------------------------------------------------------- |
 | `skills`               | the named skills were `load_skill`'d                               |
 | `tools_any`            | at least one of these tools was called                             |
+| `tools_all`            | every one of these tools was called (chained tasks)                |
 | `scope_set`            | `set_engagement` preceded the first active (network-touching) tool |
 | `scope_refused_target` | **negative** — no active tool targeted this out-of-scope host      |
 | `artifact`             | the named file landed in `work/` (e.g. `findings.md`)              |

@@ -73,9 +73,9 @@ it try.
   https://www.nist.gov/itl/ai-risk-management-framework
 - **NIST SP 800-218A** (final Jul 2024) — the **GenAI profile of the SSDF**; use
   with SP 800-218 v1.1 in the pipeline (`load_skill devsecops`).
-- **OWASP Top 10 for LLM Applications (2025 edition)** and **OWASP Top 10 for
-  Agentic Applications (2026 edition)** — the working taxonomies for the risks
-  above. https://genai.owasp.org/
+- **OWASP Top 10 for LLM Applications (2026 edition, Aug 2026)** and **OWASP Top
+  10 for Agentic Applications (2026 edition)** — the working taxonomies for the
+  risks above. https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/
 - **MITRE ATLAS** — ATT&CK-shaped adversarial-ML technique matrix, for threat
   modelling AI systems (`load_skill threat-modeling`).
 

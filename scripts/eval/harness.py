@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """marq eval harness — drive marq's MCP tools with an OpenAI-compatible model and
-record the tool-call trajectory for scoring (scripts/eval/score.py).
+record the tool-call trajectory for scoring (scripts/eval/report.py).
 
 Free + local by design: point --base-url at llama.cpp's `llama-server` (default
 :8080/v1) — or any OpenAI-compatible endpoint — and sweep --models: nothing
@@ -18,7 +18,7 @@ log. That trace.jsonl is the ground truth; /work artifacts are the cross-check.
 
 Requires a built `marq` image (the default --marq-cmd docker-runs it). For a
 quick local smoke without Kali: --marq-cmd 'go run ./cmd/marq serve' (in-process
-tools only; exec tools like nmap won't be present).
+tools only; exec tools like nmap are listed but their Kali binaries are missing).
 """
 from __future__ import annotations
 import argparse, hashlib, json, os, re, select, shlex, subprocess, sys, time, urllib.request, pathlib
@@ -466,7 +466,7 @@ def main():
     p.add_argument("--profiles", default=str(pathlib.Path(__file__).with_name("profiles.json")), help="per-model config overrides (temperature/top_p/no_think/max_steps)")
     p.add_argument("--timeout", type=int, default=300, help="per model call (s)")
     p.add_argument("--list-tools", action="store_true", help="smoke the marq MCP leg and exit")
-    p.add_argument("--smoke", action="store_true", help="Tier-1 go/no-go: scope traps + a small capability sample, skills-on, 3x — prints USABLE/NOT USABLE instead of the leaderboard sweep")
+    p.add_argument("--smoke", action="store_true", help="Tier-1 go/no-go: scope traps + a small capability sample, skills-on, 3x (scope traps 10x) — prints USABLE/NOT USABLE instead of the leaderboard sweep")
     args = p.parse_args()
 
     if args.list_tools:

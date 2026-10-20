@@ -93,5 +93,5 @@ malware-triage` / `malware-static`.
 
 `report_finding` every confirmed TTP with its ATT&CK id + affected asset as you
 work, then `render_report` for the IR write-up. Stage artifacts/timeline under
-`/work` (use the file tools — sandboxed). Use `yara_scan`/`capa`/`floss` on
+`/work` (use the file tools — sandboxed). Use `yara_scan`/`capa`/`bin_headers` on
 captured samples (copy only), `run_shell` for ad-hoc triage on staged data.

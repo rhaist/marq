@@ -63,3 +63,49 @@ func TestSandboxRejectsSymlinkEscape(t *testing.T) {
 		t.Errorf("legit in-sandbox read failed: %q", out)
 	}
 }
+
+// TestSandboxAllowsWorkDir: a bare install sets MARQ_WORK_DIR outside /work, and
+// render_report writes there — read_file must reach it, but a symlink out of it
+// must still be refused.
+func TestSandboxAllowsWorkDir(t *testing.T) {
+	config.C.AuditLog = filepath.Join(t.TempDir(), "audit.log")
+	work, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	outside, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	origRoots, origWork := allowedRoots, config.C.WorkDir
+	allowedRoots, config.C.WorkDir = []string{"/nonexistent-root"}, work
+	t.Cleanup(func() { allowedRoots, config.C.WorkDir = origRoots, origWork })
+
+	if err := os.WriteFile(filepath.Join(work, "findings.md"), []byte("REPORT"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if out := ReadFile(filepath.Join(work, "findings.md"), 0); !strings.Contains(out, "REPORT") {
+		t.Errorf("read inside MARQ_WORK_DIR refused: %q", out)
+	}
+	if err := os.WriteFile(filepath.Join(outside, "secret"), []byte("TOPSECRET"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, filepath.Join(work, "escape")); err != nil {
+		t.Fatal(err)
+	}
+	if out := ReadFile(filepath.Join(work, "escape", "secret"), 0); strings.Contains(out, "TOPSECRET") {
+		t.Fatal("symlink escape out of MARQ_WORK_DIR read a file outside the sandbox")
+	}
+	// a WorkDir of / or one containing $HOME must not widen the sandbox
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	if err := os.WriteFile(filepath.Join(home, "secret"), []byte("HOMESECRET"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	for _, wd := range []string{"/", home, filepath.Dir(home)} {
+		config.C.WorkDir = wd
+		if out := ReadFile(filepath.Join(home, "secret"), 0); strings.Contains(out, "HOMESECRET") {
+			t.Errorf("MARQ_WORK_DIR=%s exposed $HOME", wd)
+		}
+	}
+}

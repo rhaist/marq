@@ -46,16 +46,17 @@ command lines, LOLBin abuse > a single hash/IP (pyramid of pain — behaviour
 detections survive, atomic IOCs churn). Import SigmaHQ's ~3000 rules as candidates,
 but tune each to your environment before trusting it.
 
-## ATT&CK coverage mapping (v19)
+## ATT&CK coverage mapping (v20)
 
 - Tag every detection with its technique id; aggregate into a heatmap (ATT&CK
   Navigator) to see covered vs blind techniques.
-- ATT&CK v19 (Apr 2026) is current; the **Detection Strategies + Analytics** model
+- ATT&CK v20 (Oct 2026) is current; the **Detection Strategies + Analytics** model
   that replaced Detections/Data Sources in v18 (Oct 2025) still holds — each
   Analytic names the platform-specific log source/data component to operationalize.
-  Use them as the authoring blueprint. v19 also split Defense Evasion into Stealth
-  (TA0005) + Defense Impairment (TA0112) — re-tag affected rules.
-  verify: https://attack.mitre.org/resources/updates/updates-april-2026/
+  Use them as the authoring blueprint. v19 (Apr 2026) split Defense Evasion into
+  Stealth (TA0005) + Defense Impairment (TA0112) — re-tag affected rules. v20 adds
+  AI-focused/AI-enabled Enterprise techniques (e.g. prompt injection).
+  verify: https://attack.mitre.org/resources/updates/updates-october-2026/
 - **If you defend a plant, Enterprise ATT&CK is the wrong matrix.** ATT&CK for ICS
   is separate and carries two tactics with no Enterprise equivalent — **Impair
   Process Control (TA0106)** and **Inhibit Response Function (TA0107)**, the

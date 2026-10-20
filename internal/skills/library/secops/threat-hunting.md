@@ -36,13 +36,13 @@ actor-ttp-attribution` to turn an actor into testable TTPs).
    - Found nothing → record the hunt, data coverage, and queries so it's
      repeatable and counts as assurance.
 
-## Anchor to ATT&CK (v19)
+## Anchor to ATT&CK (v20)
 
 - Map every hypothesis to a technique id; it makes hunts comparable, communicable,
-  and feeds a coverage heatmap. v19 (Apr 2026, current) carries the Detection
+  and feeds a coverage heatmap. v20 (Oct 2026, current) carries the Detection
   Strategies + Analytics model that replaced Data Sources in v18 (Oct 2025) — read
   the technique's Analytics for the exact log sources/data components to query.
-  v19 also split Defense Evasion into Stealth (TA0005) + Defense Impairment
+  v19 (Apr 2026) split Defense Evasion into Stealth (TA0005) + Defense Impairment
   (TA0112), so re-map any older evasion hypotheses.
   verify: https://attack.mitre.org/matrices/enterprise/
 - Prioritize techniques in your threat model (sector, actors, exposed tech), not

@@ -43,7 +43,7 @@ done
 CAPS=(--cap-add NET_RAW --cap-add NET_ADMIN --cap-add NET_BIND_SERVICE)
 
 # name @@ wrapper-invocation (flags the wrapper passes) @@ help command
-# Keep this in sync with server/tools/*.py — the point is to diff the two.
+# Keep this in sync with internal/registry/*.go — the point is to diff the two.
 TOOLS=(
   "nmap@@nmap <options:-sV -T4> <target>@@nmap -h"
   "masscan@@masscan <target> -p <ports> --rate <rate>@@masscan --help"
@@ -57,10 +57,10 @@ TOOLS=(
   "theharvester@@theHarvester -d <domain> -b <sources> -l <limit>@@theHarvester -h"
   "spiderfoot@@spiderfoot -s <target> -u <use_case> -o json   (run in background)@@spiderfoot -h"
   "exif_metadata@@exiftool -r <path>@@exiftool -ver"
-  "shodan@@shodan host <ip>  /  shodan search --fields ... --limit <n> <query>@@shodan --help"
+  "shodan_host@@shodan host <ip>@@shodan host --help"
+  "shodan_search@@shodan search --fields ... --limit <n> <query>@@shodan search --help"
   "gitleaks@@gitleaks dir <path> --report-format json --report-path /dev/stdout@@gitleaks dir --help"
   "trufflehog@@trufflehog <source...> --results=verified --json@@trufflehog --help"
-  "wayback_urls@@echo <domain> | waybackurls [-no-subs]@@waybackurls -h"
   "gau_urls@@echo <domain> | gau --subs --providers wayback,commoncrawl,otx,urlscan@@gau --help"
   "sherlock@@sherlock --print-found --no-color --timeout <t> <username>@@sherlock --help"
   "maigret_username@@maigret <username> --no-color --no-progressbar --timeout <t> --top-sites <n>@@maigret --help"
@@ -77,7 +77,7 @@ TOOLS=(
   "katana@@katana -u <url> -silent -d <depth> [-jc]@@katana -h"
   "feroxbuster@@feroxbuster -u <url> -w <wordlist> --silent --no-state@@feroxbuster --help"
   "arjun@@arjun -u <url> -m <GET|POST|JSON|XML>@@arjun -h"
-  "dalfox@@dalfox url <url> --silence --no-color --no-spinner@@dalfox url --help"
+  "dalfox@@dalfox scan <url> --silence --no-color@@dalfox scan --help"
   "wafw00f@@wafw00f -a <target>@@wafw00f -h"
   "testssl@@testssl --quiet --color 0 <host>@@testssl --help"
   "cmseek@@cmseek --batch --follow-redirect -u <url>@@cmseek --help"
@@ -85,7 +85,7 @@ TOOLS=(
   "hydra@@hydra <options> <target> <service>@@hydra -h"
   "john@@john <options> <hash_file>@@john --help"
   "hashcat@@hashcat -m <mode> --force <options> <hash_file> <wordlist>@@hashcat --version"
-  "hash_identify@@hashid <hash>@@hashid -h"
+  "hash_identify@@nth --no-banner -t <hash>@@nth --help"
   "ssh_audit@@ssh-audit -p <port> <host>@@ssh-audit -h"
   "fping_sweep@@fping -a -q -g <target>@@fping -h"
   "snmp_walk@@snmpwalk -v 2c -c <community> <host>@@snmpwalk -h"
@@ -111,10 +111,16 @@ TOOLS=(
   "ldap_search@@ldapsearch -H <target> <options> <filter>@@ldapsearch -h"
   "responder@@responder <options> (background)@@responder -h"
   "nbtscan@@nbtscan <target>@@nbtscan -h"
-  "subjack@@subjack <options> <target>@@subjack -h"
   "paramspider@@paramspider -d <domain> <options>@@paramspider -h"
   "sstimap@@sstimap -u <url> <options>@@sstimap -h"
   "donut@@go-donut -i <input> -o <output> <options>@@go-donut -h"
+  "jwt_tool@@jwt_tool <token> <options>@@jwt_tool -h"
+  "trivy@@trivy <mode> --quiet --scanners vuln,secret,misconfig <target>@@trivy --help"
+  "interactsh@@interactsh-client -v [-server <s>]   (run in background)@@interactsh-client -h"
+  "capa@@capa <options> <file>@@capa --help"
+  "yara_scan@@yara <options> <rules> <target>@@yara --help"
+  "olevba@@olevba <options> <file>@@olevba --help"
+  "bin_headers@@rabin2 <options> <file>@@rabin2 -h"
 )
 
 dump_help() {

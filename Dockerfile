@@ -16,7 +16,7 @@
 # Kali image carries no Go build toolchain for the server itself. Runs on the
 # native BUILDPLATFORM and cross-compiles to TARGETARCH (CGO off) — fast on both
 # Apple Silicon (arm64) and amd64 hosts, no emulation for the Go build.
-FROM --platform=$BUILDPLATFORM golang:1.26.5 AS gobuild
+FROM --platform=$BUILDPLATFORM golang:1.27.3 AS gobuild
 ARG TARGETOS TARGETARCH
 WORKDIR /build
 COPY go.mod go.sum ./
@@ -51,15 +51,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         snmp snmpcheck onesixtyone braa \
         smtp-user-enum swaks \
         smbmap smbclient enum4linux-ng nbtscan \
-        # web app  (dalfox is not in apt — installed via go below)
+        # web app
         nikto ffuf gobuster whatweb wpscan sqlmap \
         feroxbuster arjun wafw00f cmseek testssl.sh sslscan gospider \
-        paramspider sstimap \
+        paramspider sstimap dalfox \
         trivy \
         # osint / information gathering — company & domain footprint
-        # (python3-pkg-resources: shodan CLI imports pkg_resources at runtime)
         theharvester spiderfoot recon-ng libimage-exiftool-perl \
-        python3-shodan python3-censys python3-pkg-resources gitleaks trufflehog \
+        python3-censys gitleaks trufflehog \
         # osint — people footprint
         sherlock h8mail \
         # exploitation (metasploit removed — searchsploit + hydra + donut cover the gap)
@@ -69,7 +68,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         bloodhound.py evil-winrm ldap-utils responder python3-netifaces \
         # payload generation (replaces msfvenom — 4.5 MB vs 1.8 GB)
         golang-github-binject-go-donut \
-        # malware research — static analysis (capa/floss/oletools come via pip below)
+        # malware research — static analysis (capa binary + oletools via pip below)
         yara radare2 \
         # credentials / hashes (mesa-opencl-icd gives hashcat a CPU OpenCL device;
         # name-that-hash installed via pip below — replaces the unmaintained hashid)
@@ -79,7 +78,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Go-built tools not packaged in Kali apt: active crawler + archive harvesters
-# + XSS scanner. Installed system-wide (GOBIN -> /usr/local/bin) so the
+# + OOB/ASN/CDN helpers. Installed system-wide (GOBIN -> /usr/local/bin) so the
 # dropped-privilege user can run them. golang-go is a *build-time only* dep, so
 # it is installed, used, and purged within this single layer — it never persists
 # in the image (a separate layer can't shrink an earlier one).
@@ -88,7 +87,6 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends golang-go \
     && go install github.com/projectdiscovery/katana/cmd/katana@latest \
     && go install github.com/lc/gau/v2/cmd/gau@latest \
-    && go install github.com/hahwul/dalfox/v2@latest \
     && go install github.com/projectdiscovery/interactsh/cmd/interactsh-client@latest \
     && go install github.com/projectdiscovery/asnmap/cmd/asnmap@latest \
     && go install github.com/projectdiscovery/cdncheck/cmd/cdncheck@latest \
@@ -119,7 +117,7 @@ RUN setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip /usr/bin/nmap || t
 RUN gunzip -f /usr/share/wordlists/rockyou.txt.gz 2>/dev/null || true
 
 # --- Python OSINT + malware tools (no MCP SDK — the server is the Go binary) -
-# venv holds pip-only tools: OSINT (maigret, holehe), maldoc analysis
+# venv holds pip-only tools: OSINT (maigret, holehe, shodan), maldoc analysis
 # (oletools → olevba), and hash-ID (name-that-hash → nth, the maintained
 # replacement for the unmaintained hashid). capa is installed as a standalone
 # binary below instead of pip — flare-capa hard-pins PyYAML==6.0.1, which has no
@@ -127,12 +125,15 @@ RUN gunzip -f /usr/share/wordlists/rockyou.txt.gz 2>/dev/null || true
 # no linux-arm64 build, and it pulls flare-capa transitively (capa + `bin_headers
 # -z` cover strings).
 RUN python3 -m venv --system-site-packages "$VIRTUAL_ENV" \
-    && pip install --no-cache-dir maigret holehe oletools name-that-hash
+    && pip install --no-cache-dir maigret holehe oletools name-that-hash \
+        # shodan CLI imports pkg_resources, removed in setuptools 82 (Kali dropped
+        # python3-pkg-resources), so it lives here with an older setuptools.
+        shodan 'setuptools<82'
 
 # capa (FLARE) static-capability analysis — official standalone binary, picked by
 # arch (ships linux-arm64 + linux x86_64). The standalone bundles its rule set.
 ARG TARGETARCH
-RUN CAPA_VER=v9.4.0 \
+RUN CAPA_VER=v10.0.0 \
     && case "$TARGETARCH" in \
          arm64) CAPA_ZIP="capa-${CAPA_VER}-linux-arm64.zip" ;; \
          *)     CAPA_ZIP="capa-${CAPA_VER}-linux.zip" ;; \

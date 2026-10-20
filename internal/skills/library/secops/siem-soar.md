@@ -37,8 +37,8 @@ compliance). Normalize to a schema (OCSF/ASIM/ECS) so detections are portable.
 - Prefer behaviour over atomic IOC matches (pyramid of pain — TTP detections
   survive; hash/IP rules churn). ATT&CK's Detection Strategies + Analytics model
   (introduced v18, Oct 2025, replacing the old Detections/Data Sources; current
-  release v19, Apr 2026) — use it to anchor coverage.
-  verify: https://attack.mitre.org/resources/updates/updates-april-2026/
+  release v20, Oct 2026) — use it to anchor coverage.
+  verify: https://attack.mitre.org/resources/updates/updates-october-2026/
 - Every detection needs: a documented hypothesis, ATT&CK id, expected FP sources,
   data-source dependency, and a triage runbook. No runbook = don't ship it.
 - Track coverage as an ATT&CK heatmap; chase _gaps that match your threat model_,

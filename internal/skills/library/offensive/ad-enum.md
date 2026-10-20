@@ -26,8 +26,9 @@ Store and process loot in-region unless the ROE says otherwise.
 - `netexec` (protocol `smb`) to spray null/guest and map signing — flags hosts
   where SMB signing is off (relay targets).
 - `ldap_search` for anonymous binds; `certipy_find` to enumerate AD CS templates
-  (look for ESC1-ESC16 misconfigurations — Certipy v5 covers the full ESC1-16 set,
-  incl. ESC16's global szOID_NTDS_CA_SECURITY_EXT bypass).
+  (look for ESC1-ESC17 misconfigurations — Certipy v5 covers ESC1-16, incl.
+  ESC16's global szOID_NTDS_CA_SECURITY_EXT bypass; 5.1+ adds ESC17: a
+  server-auth template with enrollee-supplied SAN, abusable to spoof WSUS).
 
 ## 3. Get a first credential
 

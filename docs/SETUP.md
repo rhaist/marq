@@ -84,8 +84,8 @@ shim.)
 
 ```bash
 # Pull the prebuilt image (published from CI) and tag it `marq` so the rest of
-# these docs work unchanged. NOTE: it's amd64 — on M-series it runs under
-# emulation (slower); build from source below for a native arm64 image.
+# these docs work unchanged. Multi-arch (amd64 + arm64), so it's native on
+# M-series too.
 docker pull ghcr.io/rhaist/marq && docker tag ghcr.io/rhaist/marq marq
 
 # …or build from source (native arch):

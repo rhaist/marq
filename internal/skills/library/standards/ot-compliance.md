@@ -43,7 +43,7 @@ you and when.
 ## What you ship — CRA and the Machinery Regulation both apply
 
 - **EU CRA** (Reg. (EU) 2024/2847) — product cybersecurity. **Art. 14 reporting
-  of actively exploited vulnerabilities starts 11 Sep 2026**; full application
+  of actively exploited vulnerabilities applies since 11 Sep 2026**; full application
   **11 Dec 2027**. `load_skill eu-cra`.
 - **EU Machinery Regulation** (Reg. (EU) 2023/1230) — **applies 14 Jan 2027**,
   repealing Directive 2006/42/EC. Cyber-relevant essential requirements:
@@ -107,8 +107,8 @@ you and when.
 
 - Separate "we operate plants" from "we ship machines" before quoting any
   deadline — they are different regimes with different regulators.
-- **The first CRA-adjacent date is 11 Sep 2026** (vulnerability reporting), not
-  the 2027 full-application date most planning decks show.
+- **CRA vulnerability reporting has applied since 11 Sep 2026** — it is live
+  now, not deferred to the 2027 full-application date most planning decks show.
 - For NIS2 in a factory, build the Art. 6(1)(b) coverage argument into the scope
   document up front.
 - Certification claims are about products; regulators ask about your plant. Map

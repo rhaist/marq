@@ -132,8 +132,9 @@ ntlmrelayx) detach inside it and are polled later, so a per-call `docker run`
 would kill them.
 
 Shim env vars: `MARQ_CONTAINER` (default `marq`), `MARQ_IMAGE` (default
-`marq:latest`), `MARQ_ENV_FILE` (optional env-file for `MARQ_OPERATOR` plus API
-keys, passed as `--env-file` — copy `.env.example` to `.env` for a template;
+`marq:latest`), `MARQ_ENGINE` (container CLI, default `docker`; or `podman`),
+`MARQ_ENV_FILE` (optional env-file for `MARQ_OPERATOR` plus API keys, passed as
+`--env-file` — copy `.env.example` to `.env` for a template;
 engagement + scope are set at runtime via `set_engagement`).
 
 ## Available tools
@@ -143,6 +144,7 @@ engagement + scope are set at runtime via `set_engagement`).
 | Tool             | Wraps          | Purpose                           |
 | ---------------- | -------------- | --------------------------------- |
 | `server_info`    | —              | Show authorization banner + scope |
+| `set_engagement` | —              | Record engagement + scope         |
 | `nmap`           | nmap           | Port/service scanning             |
 | `masscan`        | masscan        | Fast port sweeps                  |
 | `naabu`          | naabu          | Fast modern port scan (top-ports) |
@@ -262,7 +264,7 @@ uploads bytes). All static/offline — safe to run on untrusted samples.
 | `read_file`  | Read back output a tool wrote to disk (cmseek JSON, `nuclei -o`) |
 | `write_file` | Stage an input file (a hash for `john`, a target list, …)        |
 
-These are sandboxed to `/work` and `/tmp` — the model cannot read or write
+These are sandboxed to `/work`, `/tmp` and `MARQ_WORK_DIR` — the model cannot read or write
 anywhere else. They are what make the file-driven tools usable: the model can
 `write_file` a captured hash then `john` it, or `read_file` a result another
 tool dropped on disk. Mount `/work` from the host (`-v ./work:/work`, as the

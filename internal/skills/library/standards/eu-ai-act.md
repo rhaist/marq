@@ -63,7 +63,7 @@ once, map with `load_skill control-mapping`; for AI-specific threats see
 - **2 Aug 2025** — GPAI obligations. In effect. GPAI **Code of Practice** has
   been the presumption-of-adequacy route since 1 Aug 2025.
 - **2 Aug 2026** — **general application**, including Art. 50 transparency and
-  Commission enforcement powers over GPAI. **This date survived the omnibus.**
+  Commission enforcement powers over GPAI. In effect. **This date survived the omnibus.**
 - **2 Dec 2026** — grace ends for Art. 50(2) machine-readable marking; new Art. 5
   prohibition on AI-generated NCII/CSAM starts.
 - **2 Aug 2027** — national regulatory sandboxes (moved from 2 Aug 2026).

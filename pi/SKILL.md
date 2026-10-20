@@ -52,14 +52,15 @@ marq tools                                              # the executable catalog
 ```
 
 ~80 skills across 14 domains — run `marq run load_skill '{}'` for the full index.
-The domains: **offensive** (`vuln/*`, `technique/*`), **malware**,
+The domains: **offensive** (AD, red/purple, bug-bounty, exploit-dev), **vuln** +
+**technique** (per-vuln-class / per-technique playbooks), **malware**,
 **threat-intel**, **secops** (SIEM/SOAR, hunting, IR, forensics, vuln-mgmt,
 detection-engineering), **architecture** (zero-trust, cloud, appsec,
 threat-modeling, IAM, data, endpoint, crypto), **grc** (risk, governance, audit,
 metrics, vendor), **standards** (frameworks + EU & US regulation), **ciso**
-(leadership decisions), **adversarial** (red/purple/bug-bounty/exploit-dev),
+(leadership decisions),
 **resilience** (BCP/DR/crisis/backup), **physical-human**, **enablers**
-(GRC-automation, privacy-eng, DevSecOps, legal), and **`security-apis`**.
+(GRC-automation, privacy-eng, DevSecOps, legal), and **reference** (`security-apis`).
 
 ## How to call a tool
 

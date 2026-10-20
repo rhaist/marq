@@ -28,7 +28,7 @@ docker build -t marq .
 
 ## Quality gates
 
-Run these before opening a PR — CI enforces the first two on every push/PR:
+Run these before opening a PR — CI enforces the first two on every push/PR, and the image e2e when image paths change:
 
 | Gate              | Command                                             | What it checks                                                                                                                                                   |
 | ----------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -100,7 +100,9 @@ TESTS: dict[str, tuple[str, dict]] = {
     "dalfox":        (LOCAL, {"url": "http://127.0.0.1/?q=1"}),
     "sqlmap":        (LOCAL, {"url": "http://127.0.0.1/?id=1", "options": "--batch --flush-session --disable-coloring"}),
     "wpscan":        (LOCAL, {"url": LOOPBACK_URL}),
-    "subjack":        (LOCAL, {"target": "http://127.0.0.1", "options": "-t 1"}),
+    "jwt_tool":       (LOCAL, {"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ4In0.x"}),
+    "trivy":          (LOCAL, {"mode": "fs", "target": STAGE}),
+    "interactsh":     (EXTERNAL, {}),
     "paramspider":    (EXTERNAL, {"domain": EX_DOMAIN}),
     "sstimap":        (LOCAL, {"url": LOOPBACK_URL}),
     "donut":          (LOCAL, {"input": f"{STAGE}/donut_test.py", "output": f"{STAGE}/donut.bin"}),
@@ -119,6 +121,19 @@ TESTS: dict[str, tuple[str, dict]] = {
     "enum4linux":           (LOCAL, {"target": LOOPBACK}),
     "smb_enum":             (LOCAL, {"target": LOOPBACK}),
     "ldap_search":          (LOCAL, {"target": "ldap://127.0.0.1", "filter": "(objectclass=*)"}),
+    "responder":            (LOCAL, {"options": "-I lo -A"}),
+    # malware research — static, on staged files (an "unsupported file" error is fine; the binary ran)
+    "capa":          (LOCAL, {"file": f"{STAGE}/meta.txt"}),
+    "yara_scan":     (LOCAL, {"rules": f"{STAGE}/rules.yar", "target": f"{STAGE}/meta.txt"}),
+    "olevba":        (LOCAL, {"file": f"{STAGE}/meta.txt"}),
+    "bin_headers":   (LOCAL, {"file": f"{STAGE}/meta.txt"}),
+    # in-process: engagement, knowledge, findings, jobs
+    "set_engagement": (LOCAL, {"engagement": "smoke", "scope": "127.0.0.1 (smoke test)"}),
+    "load_skill":    (LOCAL, {}),
+    "report_finding": (LOCAL, {"title": "smoke", "severity": "info", "target": LOOPBACK}),
+    "render_report": (LOCAL, {}),
+    "list_jobs":     (LOCAL, {}),
+    "job_status":    (LOCAL, {"job": "no-such-job"}),
     "hash_identify": (LOCAL, {"hash_value": "5f4dcc3b5aa765d61d8327deb882cf99"}),
     "exif_metadata": (LOCAL, {"path": f"{STAGE}/meta.txt"}),
     "gitleaks":      (LOCAL, {"path": STAGE}),
@@ -132,7 +147,6 @@ TESTS: dict[str, tuple[str, dict]] = {
     "subfinder":     (EXTERNAL, {"domain": EX_DOMAIN}),
     "theharvester":  (EXTERNAL, {"domain": EX_DOMAIN, "limit": 50}),
     "gau_urls":      (EXTERNAL, {"domain": EX_DOMAIN}),
-    "wayback_urls":  (EXTERNAL, {"domain": EX_DOMAIN}),
     "spiderfoot":    (EXTERNAL, {"target": EX_DOMAIN, "use_case": "passive"}),
     "sherlock":      (EXTERNAL, {"username": "octocat", "timeout": 15}),
     "maigret_username": (EXTERNAL, {"username": "octocat", "timeout": 15, "top_sites": 20}),
@@ -145,7 +159,8 @@ TESTS: dict[str, tuple[str, dict]] = {
     "shodan_search": (KEY, {"query": "org:\"Example\"", "limit": 5}),
 }
 
-FORWARD_KEYS = ["SHODAN_API_KEY", "CENSYS_API_ID", "CENSYS_API_SECRET", "GITHUB_TOKEN", "NUMVERIFY_API_KEY"]
+FORWARD_KEYS = ["SHODAN_API_KEY", "CENSYS_API_ID", "CENSYS_API_SECRET", "GITHUB_TOKEN", "NUMVERIFY_API_KEY",
+                "GOOGLE_API_KEY", "GOOGLECSE_CX", "WPSCAN_API_TOKEN"]
 
 
 class MCP:
@@ -251,6 +266,7 @@ def stage_files(mcp: MCP, timeout: float) -> None:
         f"{STAGE}/snmp_comm.txt": "public\nprivate\ncommunity\n",
         f"{STAGE}/donut_test.py": "import socket\nprint('donut smoke test')\n",
         f"{STAGE}/ntds.txt": ":::\n",
+        f"{STAGE}/rules.yar": "rule smoke { strings: $a = \"smoke\" condition: $a }\n",
     }
     for path, content in staged.items():
         mcp.call("tools/call", {"name": "write_file", "arguments": {"path": path, "content": content}}, timeout)

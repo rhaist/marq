@@ -8,7 +8,8 @@
 # scope/engagement, skills, findings, audit, file sandbox, catalog. They need
 # NO Kali image, so this runs in seconds. The image-dependent promises (the ~80
 # wrapped binaries actually executing, /work bind-mount + jwt-key uniqueness
-# across containers) are covered by scripts/verify_tools.sh against a built image.
+# across containers) are covered by scripts/e2e-image.sh (and the wrapped binaries by
+# scripts/verify_tools.sh) against a built image.
 #
 # Usage:  scripts/e2e.sh
 set -uo pipefail
