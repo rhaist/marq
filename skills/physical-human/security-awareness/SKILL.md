@@ -1,6 +1,6 @@
 ---
 name: security-awareness
-description: Build a behavior-change awareness program (not an annual checkbox) — role-based training, ethical phishing simulation, report-rate-first metrics, positive reinforcement, and just-in-time nudges.
+description: Covers building a behavior-change awareness program rather than an annual checkbox — role-based training, ethical phishing simulation, report-rate-first metrics, positive reinforcement, and just-in-time nudges. Use when the user asks how to run security awareness training, design phishing simulations, measure awareness effectiveness, or improve the human-risk program.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

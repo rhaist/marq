@@ -1,6 +1,6 @@
 ---
 name: iso27001
-description: How ISO/IEC 27001:2022 and its Annex A (93 controls in 4 themes) are structured, plus a certification implementation path — cite by clause, don't reproduce control text.
+description: Covers how ISO/IEC 27001:2022 and its Annex A (93 controls in 4 themes) are structured, plus a certification implementation path; cites by clause rather than reproducing control text. Use when the user asks about ISO 27001 clauses or Annex A controls, ISMS implementation, the 2013-to-2022 transition, or how to get certified.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

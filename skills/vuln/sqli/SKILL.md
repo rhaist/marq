@@ -1,6 +1,6 @@
 ---
 name: sqli
-description: Find and confirm SQL injection, then report with proof.
+description: Guides finding and confirming SQL injection — locating candidate parameters (katana, arjun), confirming with sqlmap, manual checks when sqlmap is blocked, and reporting with proof. Use when the user suspects SQL injection, asks to test parameters or forms for SQLi, run sqlmap, or bypass a WAF on an authorized target.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

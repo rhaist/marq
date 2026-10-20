@@ -1,6 +1,6 @@
 ---
 name: red-teaming
-description: Run an objective-driven adversary-emulation engagement — assumed-breach scoping, ATT&CK emulation plans, C2 OPSEC, deconfliction, and regulated TLPT frameworks (TIBER-EU/CBEST/FedRAMP).
+description: Guides an objective-driven adversary-emulation engagement — pentest vs red team, assumed-breach scoping, ATT&CK emulation plans, C2 and OPSEC, rules of engagement and deconfliction, and regulated TLPT frameworks (TIBER-EU, DORA TLPT, CBEST, FedRAMP). Use when the user asks to plan or scope a red team, build an emulation plan for a threat actor, or run threat-led penetration testing.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

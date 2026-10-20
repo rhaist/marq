@@ -1,6 +1,6 @@
 ---
 name: bug-bounty-disclosure
-description: Run or participate in bug bounty + coordinated vulnerability disclosure — ISO 29147/30111 process, safe-harbor/legal, triage, severity/dedup, timelines, and the CVE/CNA path.
+description: Covers running or participating in bug bounty and coordinated vulnerability disclosure — the ISO/IEC 29147 and 30111 process, safe harbor and legal, triage, severity and dedup, disclosure timelines, and the CVE/CNA path. Use when the user asks how to set up a VDP or bug bounty program, report a vulnerability to a vendor, write a security.txt or disclosure policy, or request a CVE.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

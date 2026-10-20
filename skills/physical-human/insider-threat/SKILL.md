@@ -1,6 +1,6 @@
 ---
 name: insider-threat
-description: Insider-threat program design — malicious/negligent/compromised types, behavioral & technical indicators, UEBA, the privacy/legal/ethics guardrails, and cross-functional HR/Legal/Sec governance.
+description: Covers insider-threat program design — malicious, negligent and compromised insider types, behavioral and technical indicators, UEBA, the privacy/legal/ethics guardrails, and cross-functional HR/Legal/Security governance. Use when the user asks how to build an insider-threat program, detect data theft by employees or departing staff, deploy UEBA lawfully, or respond to a suspected insider.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

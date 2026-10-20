@@ -1,6 +1,6 @@
 ---
 name: threat-modeling
-description: Threat modeling — STRIDE, attack trees, PASTA, LINDDUN (privacy); the data-flow-diagram method, when to model, turning threats into requirements/tests, and a worked mini-example.
+description: Covers threat modeling — the data-flow-diagram method, STRIDE, attack trees, PASTA, LINDDUN (privacy), when to model, turning threats into requirements and tests, and a worked mini-example. Use when the user asks to threat model a system, feature, API or architecture, wants a STRIDE analysis or DFD, needs privacy threat analysis, or asks how to fold threat modeling into design reviews.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

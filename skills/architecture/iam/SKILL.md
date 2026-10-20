@@ -1,6 +1,6 @@
 ---
 name: iam
-description: Identity architecture decisions — IAM vs PAM vs IGA scope, SAML vs OIDC, the phishing-resistance ladder, joiner-mover-leaver, JIT/least-privilege, and break-glass.
+description: Covers identity architecture decisions — IAM vs PAM vs IGA scope, SAML vs OIDC/OAuth2, the phishing-resistance ladder (passkeys, FIDO2), joiner-mover-leaver, JIT and least privilege, and break-glass accounts. Use when the user asks about SSO and federation, choosing MFA, rolling out passkeys, privileged access management, access reviews and identity governance, or emergency admin accounts.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

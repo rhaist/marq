@@ -1,6 +1,6 @@
 ---
 name: ot-threat-landscape
-description: OT/ICS adversaries and malware — the ICS Cyber Kill Chain, ATT&CK for ICS tactics, the named ICS malware families, Dragos threat groups, why ransomware is the real plant risk, and why CVSS fails for ICS.
+description: Covers OT/ICS adversaries and malware — the ICS Cyber Kill Chain, MITRE ATT&CK for ICS, named ICS malware families (Stuxnet, Industroyer, TRITON, PIPEDREAM and others), Dragos threat groups, why ransomware is the real plant risk, and why CVSS fails for ICS. Use when the user asks about threats to industrial systems, ICS-targeting actors or malware, or how to rate OT vulnerabilities.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

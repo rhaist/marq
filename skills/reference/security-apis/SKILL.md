@@ -1,6 +1,6 @@
 ---
 name: security-apis
-description: Enrich recon with free, no-login security APIs (cert transparency, exposed ports/CVEs, DNS/host/ASN, EPSS, file-hash and threat-intel lookups) via web fetch, alongside the wrapped Kali tools.
+description: Lists free, no-login security APIs to enrich recon via web fetch alongside the wrapped Kali tools — certificate transparency (crt.sh), exposed ports/CVEs (Shodan InternetDB), DNS/host/ASN, EPSS, file-hash and threat-intel lookups — with opsec notes. Use when a task needs data no wrapped tool provides, when looking up a CVE's EPSS, an IP's exposure, a hash's reputation or subdomains from CT logs without API keys.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

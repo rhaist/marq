@@ -1,6 +1,6 @@
 ---
 name: network-segmentation
-description: Network segmentation vs microsegmentation — trust zones, east-west control, where to enforce (firewall/NACL/SG/host/identity), the Purdue model and IDMZ for OT (full OT treatment in ot-ics), and how segmentation caps blast radius.
+description: "Covers network segmentation vs microsegmentation — trust zones, east-west control, where to enforce (firewall, NACL, security group, host, identity), the Purdue model and IDMZ for OT, and how segmentation caps blast radius. Use when the user asks how to segment a network, VLAN or zone design, microsegmentation products, limiting lateral movement or ransomware spread, or separating IT from OT. (Full OT treatment: ot-ics.)"
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

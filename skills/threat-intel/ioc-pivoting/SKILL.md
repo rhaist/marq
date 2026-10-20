@@ -1,6 +1,6 @@
 ---
 name: ioc-pivoting
-description: Take one indicator (IP/domain/hash/URL) and pivot it into context, history, and related infrastructure using free sources.
+description: "Guides pivoting one indicator (IP, domain, hash or URL) into context, history and related infrastructure using free sources — Shodan, TLS certs, WHOIS/DNS, JARM and favicon hashes, ranked by clustering signal. Use when the user asks to find related domains or infrastructure, expand an IOC into a campaign, or map attacker infrastructure. (Single-indicator verdict: indicator-enrichment.)"
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

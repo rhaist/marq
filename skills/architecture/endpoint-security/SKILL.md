@@ -1,6 +1,6 @@
 ---
 name: endpoint-security
-description: Endpoint architecture decisions — EDR vs XDR vs MDR, CIS hardening, app allowlisting, mobile (MDM/MAM/BYOD), and IoT hardening; OT/ICS splits out to the ot-ics skill.
+description: "Covers endpoint architecture decisions — EDR vs XDR vs MDR, CIS Benchmark hardening, application allowlisting, mobile (MDM/MAM/BYOD), and IoT hardening. Use when the user asks which endpoint protection to buy, what XDR or MDR really means, how to harden Windows/Linux/macOS, app control (WDAC/AppLocker), or managing phones and BYOD. (OT/ICS devices: ot-ics.)"
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

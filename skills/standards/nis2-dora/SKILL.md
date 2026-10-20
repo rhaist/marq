@@ -1,6 +1,6 @@
 ---
 name: nis2-dora
-description: EU NIS2 + DORA — who's in scope, the incident-notification clocks, security obligations, supervision/penalties, and the DORA-supersedes-NIS2 overlap for financial entities.
+description: Covers EU NIS2 and DORA — who is in scope (essential/important entities, financial entities), the 24h/72h incident-notification clocks, security obligations, supervision and penalties, ICT third-party risk, and the DORA-over-NIS2 precedence for financial entities. Use when the user asks whether NIS2 or DORA applies, incident reporting deadlines, management liability, or how the two overlap.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

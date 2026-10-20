@@ -1,6 +1,6 @@
 ---
 name: control-mapping
-description: Map one finding/control across ISO/NIST/SOC2/CIS so you assess once and satisfy many.
+description: Guides mapping one finding or control across ISO 27001, NIST CSF/800-53, SOC 2 and CIS Controls so it is assessed once and satisfies many. Use when the user asks how a control or finding maps between frameworks, wants a crosswalk, or needs to report one assessment against several standards.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

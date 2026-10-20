@@ -1,6 +1,6 @@
 ---
 name: board-metrics-reporting
-description: "Report cyber risk upward to a board/exec — translate technical posture into business-risk language, what belongs on a board deck, reporting cadence, and the questions directors actually ask. (Designing the metric set itself: security-metrics.)"
+description: "Guides reporting cyber risk upward to a board or executives — translating technical posture into business-risk language, what belongs on a board deck, reporting cadence, and the questions directors ask. Use when the user needs to prepare a board or exec briefing, a quarterly cyber risk report, or present security posture to non-technical leaders. (Designing the metric set itself: security-metrics.)"
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

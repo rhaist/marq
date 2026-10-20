@@ -1,6 +1,6 @@
 ---
 name: appsec-sdlc
-description: Secure SDLC architecture — pipeline gates, SAST vs DAST vs IAST vs SCA (what each finds and misses, where), OWASP SAMM/ASVS, and software supply chain (SBOM, SLSA, signing).
+description: "Covers secure SDLC architecture — pipeline gates, SAST vs DAST vs IAST vs SCA (what each finds and misses, where), OWASP SAMM and ASVS, and software supply chain (SBOM, SLSA, signing). Use when the user asks which application-security testing to adopt, how to build a secure development lifecycle, how to measure AppSec maturity with SAMM, verify against ASVS, or secure third-party code and dependencies. (Rolling it out in CI/CD: devsecops.)"
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

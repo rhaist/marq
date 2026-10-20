@@ -1,6 +1,6 @@
 ---
 name: soc2
-description: How an AICPA SOC 2 examination is structured — Type I vs II, the five Trust Services Criteria, scoping, report anatomy, and the pitfalls that produce qualified opinions.
+description: Covers how an AICPA SOC 2 examination is structured — Type I vs Type II, the five Trust Services Criteria, scoping, report anatomy, and the pitfalls that produce qualified opinions. Use when the user asks how to get a SOC 2 report, which criteria to include, Type I vs Type II, how to read a vendor's SOC 2, or audit-window and carve-out questions.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

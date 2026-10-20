@@ -1,6 +1,6 @@
 ---
 name: devsecops
-description: "Operationalize AppSec in CI/CD without breaking delivery — gating strategy (block vs warn), IaC + secrets scanning, policy-as-code, and rolling out supply-chain controls (SBOM/SLSA/signing). (Choosing among scanner types SAST/DAST/SCA and program maturity: appsec-sdlc.)"
+description: "Covers operationalizing AppSec in CI/CD without breaking delivery — block vs warn gating, IaC and secrets scanning, policy-as-code, and rolling out supply-chain controls (SBOM, SLSA, Sigstore/cosign signing). Use when the user asks how to add security scanning to a pipeline, gate builds, catch leaked secrets, sign artifacts, or adopt OPA-style policy-as-code. (Choosing scanner types and program maturity: appsec-sdlc.)"
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

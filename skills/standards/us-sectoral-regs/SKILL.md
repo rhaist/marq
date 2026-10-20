@@ -1,6 +1,6 @@
 ---
 name: us-sectoral-regs
-description: The US security/compliance regimes a security team actually meets — SEC cyber disclosure, HIPAA Security Rule, GLBA Safeguards, NYDFS 500, CMMC/FedRAMP/FISMA/800-171 — with a "who must comply with what" decision table.
+description: Covers the US security regimes teams actually meet — SEC cyber disclosure (8-K), HIPAA Security Rule, GLBA Safeguards, NYDFS 23 NYCRR 500, CMMC/FedRAMP/FISMA/NIST 800-171 — with a who-must-comply-with-what decision table. Practitioner orientation, not legal advice. Use when the user asks which US regulation applies, SEC material incident disclosure, HIPAA or CMMC requirements, or selling to the US government.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

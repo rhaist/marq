@@ -1,6 +1,6 @@
 ---
 name: third-party-risk
-description: Score vendor/supply-chain risk — what to ask, how to tier, what evidence to demand.
+description: Guides scoring vendor and supply-chain risk — tiering vendors, what to ask, how to score and weight answers, and what evidence (SOC 2, ISO certificates, pentest reports) to demand and retain. Use when the user asks to assess a vendor or supplier, build a security questionnaire, run a TPRM program, or decide whether a third party is acceptable.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

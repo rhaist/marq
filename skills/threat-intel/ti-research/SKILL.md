@@ -1,6 +1,6 @@
 ---
 name: ti-research
-description: Proactive threat-intel research and current awareness — where to look (feeds, RSS, KEV, advisories, ORKL) and how to turn scattered reporting into a tracked, cited picture of an actor, campaign, or sector threat.
+description: Guides proactive threat-intel research and current awareness — where to look (feeds, RSS, CISA KEV, advisories, CERTs, ORKL) and how to turn scattered reporting into a tracked, cited picture of an actor, campaign or sector threat. Use when the user asks what is new on a threat, for a threat briefing or landscape for their sector, recent activity of an actor, or which intel sources to follow.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

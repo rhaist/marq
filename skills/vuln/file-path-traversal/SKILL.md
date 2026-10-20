@@ -1,6 +1,6 @@
 ---
 name: file-path-traversal
-description: Path traversal, local file include, and unsafe upload.
+description: Guides finding path traversal, local file inclusion (LFI) and unsafe file upload on a web app, confirming impact, and reporting. Use when the user is testing file, path, include or download parameters, suspects ../ traversal or LFI, or tests an upload feature for web shells or type bypass on an authorized target.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

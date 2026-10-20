@@ -1,6 +1,6 @@
 ---
 name: legal-contractual
-description: The security-relevant contract surface — DPAs, the clauses that matter, cyber insurance, and regulatory-vs-contractual breach duties (practitioner orientation, not legal advice).
+description: Covers the security-relevant contract surface — DPAs, the clauses that matter (audit rights, breach notice, liability, subprocessors), cyber insurance, and regulatory vs contractual breach duties. Practitioner orientation, not legal advice. Use when the user is reviewing a vendor or customer contract, data processing agreement, security addendum or cyber insurance policy, or asks who must be notified of a breach under contract.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

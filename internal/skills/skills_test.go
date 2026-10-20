@@ -85,6 +85,11 @@ func TestAgentSkillsSpec(t *testing.T) {
 			!strings.HasPrefix(line[1], `"`) && strings.Contains(line[1], ": ") {
 			t.Errorf("%s: description contains \": \" and must be double-quoted for strict YAML", p)
 		}
+		// Agents pick a skill from its description alone (Anthropic skill-authoring
+		// best practices): say what it covers, then when to use it.
+		if !strings.Contains(desc, "Use when") {
+			t.Errorf("%s: description needs a \"Use when ...\" trigger clause", p)
+		}
 		if desc == "" || len(desc) > 1024 {
 			t.Errorf("%s: description must be 1-1024 chars (got %d)", p, len(desc))
 		}

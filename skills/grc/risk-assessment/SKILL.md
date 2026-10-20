@@ -1,6 +1,6 @@
 ---
 name: risk-assessment
-description: Run a structured asset-threat-likelihood-impact risk assessment and emit a risk register.
+description: Guides a structured asset-threat-likelihood-impact risk assessment with 5x5 scoring and treatment choice, emitting a risk register. Use when the user asks to run a cyber or information-security risk assessment, build or update a risk register, score risks, or choose risk treatment (mitigate, transfer, accept, avoid).
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

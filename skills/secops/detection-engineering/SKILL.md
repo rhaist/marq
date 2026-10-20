@@ -1,6 +1,6 @@
 ---
 name: detection-engineering
-description: Build detections as code — Sigma rules, ATT&CK coverage mapping, testing with Atomic Red Team / CALDERA, and the detect-tune lifecycle that controls false positives.
+description: Covers detections as code — writing Sigma rules, MITRE ATT&CK coverage mapping, testing with Atomic Red Team and CALDERA, and the detect-tune lifecycle that controls false positives. Use when the user asks to write or convert a detection rule, build a Sigma rule, map SIEM content to ATT&CK, test whether detections fire, or reduce false positives.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

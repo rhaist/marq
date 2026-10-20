@@ -1,6 +1,6 @@
 ---
 name: zero-trust
-description: Zero Trust architecture per NIST SP 800-207 — the seven tenets, PDP/PEP placement, identity-centric vs network-centric, the CISA maturity model, and a pragmatic adoption order.
+description: Covers Zero Trust architecture per NIST SP 800-207 — the seven tenets, PDP/PEP placement, identity-centric vs network-centric approaches, the CISA Zero Trust Maturity Model, and a pragmatic adoption order. Use when the user asks what zero trust actually means, how to plan or assess a ZTA program, replace VPN with ZTNA, assess maturity, or cut through zero-trust vendor claims.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

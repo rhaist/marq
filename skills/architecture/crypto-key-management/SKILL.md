@@ -1,6 +1,6 @@
 ---
 name: crypto-key-management
-description: Cryptography & key management — choosing algorithms, PKI, HSM/KMS, secrets management, and the post-quantum migration.
+description: Covers cryptography and key management — choosing algorithms (the 2026 floor), PKI and certificates, HSM/KMS, secrets management, and the post-quantum migration (ML-KEM/ML-DSA). Use when the user asks which cipher, hash or key size to use, how to run a PKI or rotate certificates, HSM vs cloud KMS, where to store secrets, crypto-agility, or how to plan a PQC migration.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

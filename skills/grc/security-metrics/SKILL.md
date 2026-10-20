@@ -1,6 +1,6 @@
 ---
 name: security-metrics
-description: Design security metrics that drive decisions — KPI vs KRI vs metric, leading vs lagging, a concrete starter set with the action each triggers, and how to kill vanity metrics.
+description: "Covers designing security metrics that drive decisions — KPI vs KRI vs metric, leading vs lagging, a concrete starter set with the action each triggers, and how to kill vanity metrics. Use when the user asks what to measure in a security program, wants KPIs or KRIs, or asks whether existing metrics are useful. (Presenting them to a board: board-metrics-reporting.)"
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

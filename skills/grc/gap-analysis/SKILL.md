@@ -1,6 +1,6 @@
 ---
 name: gap-analysis
-description: Compare current state against a target framework and produce a prioritised gap list.
+description: Guides comparing current state against a target framework (ISO 27001, NIST CSF, SOC 2, etc.), scoring control maturity, and producing a prioritized gap list. Use when the user asks for a gap analysis, readiness assessment or maturity assessment, or wants to know how far they are from compliance with a standard.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

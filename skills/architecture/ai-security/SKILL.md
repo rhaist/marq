@@ -1,6 +1,6 @@
 ---
 name: ai-security
-description: Securing AI/LLM systems — the AI-specific attack surface (prompt injection, RAG poisoning, agent tool abuse), model supply chain, and the governance anchors ISO 42001 / NIST AI RMF / OWASP LLM+Agentic Top 10.
+description: Covers securing AI/LLM systems — the AI-specific attack surface (prompt injection, RAG poisoning, agent tool abuse), model supply chain, controls that hold, and the governance anchors ISO 42001, NIST AI RMF and the OWASP LLM and Agentic Top 10. Use when the user asks how to secure an LLM app, chatbot, RAG pipeline or AI agent, about prompt injection or jailbreak risk, model/weights provenance, or AI security governance.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

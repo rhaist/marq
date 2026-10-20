@@ -1,6 +1,6 @@
 ---
 name: grc-automation
-description: GRC tooling categories, what to automate first, control-to-evidence mapping, and the current compliance-automation landscape (verify — it shifts fast).
+description: Covers GRC tooling categories, what to automate first, control-to-evidence mapping, and the current compliance-automation landscape (verify, it shifts fast). Use when the user asks about GRC or compliance-automation platforms, continuous control monitoring, automating audit evidence collection for SOC 2 or ISO 27001, or which GRC tool to choose.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

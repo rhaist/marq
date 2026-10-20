@@ -1,6 +1,6 @@
 ---
 name: password-cracking
-description: Offline hash identification and cracking workflow.
+description: Guides offline hash identification and cracking — identifying hash types with hash_identify, staging hash files, cracking with hashcat or john using wordlists and rules, and reporting weak credentials. Use when the user has password hashes (NTLM, Kerberos tickets, bcrypt, /etc/shadow, etc.) to identify or crack, or asks to audit password strength from a dump.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

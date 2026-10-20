@@ -1,6 +1,6 @@
 ---
 name: social-engineering-defense
-description: Defend against phishing/vishing/smishing/pretexting/BEC — out-of-band verification for money and credentials, identity verification, reporting culture, and DMARC/SPF/DKIM/MFA backstops.
+description: Covers defending against phishing, vishing, smishing, pretexting and BEC — out-of-band verification for payments and credentials, caller identity verification, reporting culture, and DMARC/SPF/DKIM and MFA backstops. Use when the user asks how to stop CEO fraud or invoice fraud, verify help-desk callers, prevent deepfake voice scams, or harden against social engineering.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

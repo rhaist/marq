@@ -1,6 +1,6 @@
 ---
 name: idor-access-control
-description: Find broken object-level/function access control (IDOR, BOLA).
+description: Guides finding broken object-level and function-level access control (IDOR, BOLA, privilege escalation) using multiple accounts, crawling with katana, and swapping IDs and roles. Use when the user is testing whether one user can read or modify another's data, API authorization, admin functions reachable by low-privilege users, on an authorized target.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

@@ -1,6 +1,6 @@
 ---
 name: compliance-audit
-description: Run a compliance audit/assessment as a process — evidence collection, control-testing methods, SoA, audit readiness, internal vs external/certification audits, and managing findings via CAPs.
+description: Guides running a compliance audit or assessment as a process — audit types, control-testing methods, evidence collection, the Statement of Applicability, audit readiness, internal vs external/certification audits, and managing findings via corrective action plans. Use when the user is preparing for an ISO 27001, SOC 2 or other audit, conducting an internal audit, building an SoA, or handling nonconformities.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

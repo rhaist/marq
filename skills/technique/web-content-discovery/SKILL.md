@@ -1,6 +1,6 @@
 ---
 name: web-content-discovery
-description: Find hidden paths, endpoints, and parameters on a web app.
+description: Guides finding hidden paths, endpoints and parameters on a web app — crawling with katana, brute forcing with ffuf, feroxbuster or gobuster, parameter discovery with arjun, nikto known-issue scans, and CMS-aware scanning (wpscan, cmseek). Use when the user asks to enumerate directories or files, find API endpoints or Swagger specs, discover hidden parameters, or scan a WordPress or other CMS site.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

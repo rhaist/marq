@@ -1,6 +1,6 @@
 ---
 name: eu-ai-act
-description: EU AI Act (Regulation (EU) 2024/1689) — risk tiers, who is provider vs deployer, the GPAI track, the phased dates as amended by the 2026 AI Omnibus, and penalties.
+description: Covers the EU AI Act (Regulation (EU) 2024/1689) — provider vs deployer roles, risk tiers and prohibited practices, high-risk obligations, the GPAI track, phased dates as amended by the 2026 AI Omnibus, and penalties. Use when the user asks whether an AI system is high-risk, what obligations apply to building or using AI in the EU, GPAI model duties, or AI Act deadlines.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

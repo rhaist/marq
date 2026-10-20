@@ -1,6 +1,6 @@
 ---
 name: ot-ics
-description: OT/ICS security engineering — inverted CIA, the Purdue model and IT/OT DMZ, IEC 62443 (SL-T/SL-C/SL-A, the 7 foundational requirements, which parts are real), NIST SP 800-82r3, safe monitoring and OT incident response.
+description: Covers OT/ICS security engineering — inverted CIA, the Purdue model and IT/OT DMZ, IEC 62443 (SL-T/SL-C/SL-A, the 7 foundational requirements, which parts matter), NIST SP 800-82r3, safe passive monitoring, and OT incident response. Use when the user asks about securing a plant, factory, SCADA, PLCs or industrial networks, IEC 62443 zones and conduits or security levels, OT monitoring, or responding to an incident on the plant floor.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

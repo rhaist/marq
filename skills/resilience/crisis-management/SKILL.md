@@ -1,6 +1,6 @@
 ---
 name: crisis-management
-description: Stand up a crisis team, decide under uncertainty, run internal/external/regulator comms, and take the handoff from technical incident to business crisis.
+description: Guides standing up a crisis team, deciding under uncertainty, running internal, external and regulator communications, taking the handoff from technical incident to business crisis, and designing tabletop exercises. Use when the user asks about crisis management, executive crisis comms after a breach, or how to run a cyber tabletop exercise.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

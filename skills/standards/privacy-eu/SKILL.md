@@ -1,6 +1,6 @@
 ---
 name: privacy-eu
-description: EU GDPR essentials for a security team — what creates the obligation, the 72-hour breach clock, fines, and how it differs from US privacy.
+description: Covers EU GDPR essentials for a security team — what creates the obligation, the 72-hour breach notification clock, data-subject rights and DPIAs, fines, international transfers (Chapter V), and differences from US privacy. Use when the user asks whether GDPR applies, whether and when to notify a breach to a supervisory authority, about DPIAs, or about transferring personal data outside the EU.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

@@ -1,6 +1,6 @@
 ---
 name: digital-forensics
-description: DFIR across host/memory/network/mobile/cloud — order of volatility, sound acquisition and chain of custody, and the current open-source tool stack.
+description: Covers DFIR across host, memory, network, mobile and cloud — order of volatility, sound acquisition and chain of custody, and the current open-source stack (Volatility 3, Plaso, tshark and others). Use when the user asks to acquire or analyze a disk image, memory dump, PCAP, phone or cloud logs, build a timeline, or preserve evidence for legal use.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

@@ -1,6 +1,6 @@
 ---
 name: threat-hunting
-description: Hypothesis-driven, ATT&CK-anchored threat hunting — the hunt loop, pyramid-of-pain hunt value, data prerequisites, and turning a hunt into a detection.
+description: Covers hypothesis-driven, MITRE ATT&CK-anchored threat hunting — the hunt loop, pyramid of pain, data prerequisites, and turning a hunt into a detection. Use when the user asks to plan or run a threat hunt, write hunt hypotheses, search for an adversary technique in their telemetry, or mature a hunting program.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

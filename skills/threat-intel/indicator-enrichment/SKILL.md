@@ -1,6 +1,6 @@
 ---
 name: indicator-enrichment
-description: Enrich and triage an indicator (IP/domain/hash/URL/CVE) with free no-login sources and decide malicious vs benign vs unknown.
+description: "Guides enriching and triaging a single indicator (IP, domain, hash, URL or CVE) with free no-login sources and deciding malicious vs benign vs unknown. Use when the user asks whether an IP, domain, file hash or URL is malicious, wants reputation or context for an IOC, or needs a quick verdict on an alert's indicator. (Expanding into related infrastructure: ioc-pivoting.)"
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

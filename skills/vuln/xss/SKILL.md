@@ -1,6 +1,6 @@
 ---
 name: xss
-description: Find reflected/stored/DOM XSS and confirm execution.
+description: Guides finding reflected, stored and DOM-based XSS and confirming execution — locating parameters with katana and arjun, scanning with dalfox, manual payload checks, and reporting with proof. Use when the user is testing a web app for cross-site scripting, needs a payload that bypasses filters or CSP, or wants to confirm an XSS finding on an authorized target.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

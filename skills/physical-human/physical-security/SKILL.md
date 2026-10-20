@@ -1,6 +1,6 @@
 ---
 name: physical-security
-description: Layered physical controls for facilities and data centers — tailgating defense, badge/visitor/CPTED, environmental resilience, and where physical access becomes cyber compromise.
+description: Covers layered physical controls for facilities and data centers — concentric zones, tailgating defense, badge and visitor management, CPTED, environmental resilience, and where physical access becomes cyber compromise. Use when the user asks how to secure an office, plant or data center, prevent tailgating, design visitor or badge processes, or assess physical-to-cyber risk.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

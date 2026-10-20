@@ -1,6 +1,6 @@
 ---
 name: pci-dss
-description: PCI DSS v4.0.1 at a glance — scope/CDE rules, SAQ types, the 12 requirements, and the scoping mistakes that blow up an assessment.
+description: Covers PCI DSS v4.0.1 — the version timeline, CDE scoping rules, SAQ types, the 12 requirements, and the scoping mistakes that blow up an assessment. Use when the user handles payment card data, asks which SAQ applies, how to reduce PCI scope, what changed in v4.0, or how to prepare for a QSA assessment.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

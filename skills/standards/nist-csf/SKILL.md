@@ -1,6 +1,6 @@
 ---
 name: nist-csf
-description: NIST CSF 2.0 — the six functions (Govern/Identify/Protect/Detect/Respond/Recover), how to use it as an assessment lens with Tiers and Profiles, and its relationship to NIST 800-53.
+description: Covers NIST CSF 2.0 — the six functions (Govern, Identify, Protect, Detect, Respond, Recover), what changed from 1.1, using it as an assessment lens with Tiers and Profiles, and its relationship to NIST 800-53. Use when the user asks about the NIST Cybersecurity Framework, a CSF assessment or current/target profile, or the new Govern function.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

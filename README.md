@@ -40,8 +40,9 @@ The ~80 playbooks are a standard [Agent Skills](https://agentskills.io) pack und
 [`skills/`](skills/), so agents that read `SKILL.md` load them natively:
 
 ```bash
-# Claude Code
-claude plugin marketplace add rhaist/marq && claude plugin install marq@marq
+# Claude Code (v2.1.292+; on older versions: claude plugin marketplace add
+# rhaist/marq && claude plugin install marq@marq)
+claude plugin install marq --marketplace rhaist/marq
 
 # Codex, Cursor, Copilot, Gemini CLI, Pi and ~40 other agents
 npx skills add rhaist/marq

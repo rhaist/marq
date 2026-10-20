@@ -1,6 +1,6 @@
 ---
 name: privacy-us
-description: The US privacy patchwork — no single federal law, the growing set of state comprehensive laws, sectoral federal laws, FTC Act §5 as de-facto enforcer, and 50-state breach notification — plus how it differs from GDPR.
+description: Covers the US privacy patchwork — no single federal law, state comprehensive laws (CCPA/CPRA and others), sectoral federal laws, FTC Act section 5 as de-facto enforcer, and 50-state breach notification, plus how it differs from GDPR. Practitioner orientation, not legal advice. Use when the user asks which US privacy laws apply, CCPA obligations, US breach notification rules, or US vs EU privacy.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

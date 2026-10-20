@@ -1,6 +1,6 @@
 ---
 name: security-program-roadmap
-description: Stand up or mature a security program on a budget — what to do first, a 30/60/90 + 12-month shape, quick wins vs foundations.
+description: Guides standing up or maturing a security program on a budget — the first 90 days in order, quick wins vs foundations, a 30/60/90 plus 12-month shape, and budget heuristics. Use when the user is a new CISO or security lead, asks where to start, wants a security roadmap or strategy, or must prioritize limited security spend.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

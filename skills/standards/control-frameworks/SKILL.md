@@ -1,6 +1,6 @@
 ---
 name: control-frameworks
-description: NIST SP 800-53, CIS Controls v8.1, and COBIT 2019 — what each is for, when to pick which, and how they map to ISO 27001 / NIST CSF.
+description: Covers NIST SP 800-53, CIS Controls v8.1 and COBIT 2019 — what each is for, when to pick which, and how they map to ISO 27001 and NIST CSF. Use when the user asks about 800-53 control families or baselines, CIS Implementation Groups, COBIT IT governance, or choosing a control catalog.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

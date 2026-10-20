@@ -1,6 +1,6 @@
 ---
 name: actor-ttp-attribution
-description: Go from observed behaviour or IOCs to a candidate threat actor and concrete MITRE ATT&CK TTPs, with calibrated confidence.
+description: Guides going from observed behavior or IOCs to a candidate threat actor and concrete MITRE ATT&CK technique IDs with calibrated confidence, starting from ORKL report search. Use when the user asks who is behind an attack, which APT or group matches observed TTPs, to map behavior to ATT&CK, or how confident an attribution is.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

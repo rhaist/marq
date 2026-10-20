@@ -1,6 +1,6 @@
 ---
 name: business-continuity
-description: Run a Business Impact Analysis, derive RTO/RPO/MTPD, and structure a BCP aligned to ISO 22301.
+description: Guides running a Business Impact Analysis, deriving RTO/RPO/MTPD, and structuring a business continuity plan aligned to ISO 22301. Use when the user asks to write a BCP, perform a BIA, set recovery objectives, align with ISO 22301, or plan continuity for a cyber outage.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

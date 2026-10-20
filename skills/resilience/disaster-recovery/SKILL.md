@@ -1,6 +1,6 @@
 ---
 name: disaster-recovery
-description: Pick a DR strategy tier against RTO/RPO and cost, design cloud failover/failback, and run the right DR test type.
+description: Guides picking a DR strategy tier against RTO/RPO and cost, designing cloud failover and failback, and running the right DR test type (NIST 800-34). Use when the user asks to design or choose a disaster recovery strategy, hot/warm/cold or pilot-light setups, multi-region failover, or how to test a DR plan.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

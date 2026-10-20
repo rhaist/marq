@@ -1,6 +1,6 @@
 ---
 name: incident-response-leadership
-description: Run a security incident as the decision-maker — phases, the notify/contain/escalate decisions, comms, and evidence preservation.
+description: "Guides running a security incident as the decision-maker — the first 60 minutes, severity-based escalation, the notify/contain/escalate decisions, comms discipline, and evidence preservation. Use when the user is leading or commanding an incident (ransomware, breach, compromise), must decide whether to notify regulators or pay, or needs an incident-commander checklist. (Hands-on handling: incident-response.)"
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

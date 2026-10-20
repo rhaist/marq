@@ -1,6 +1,6 @@
 ---
 name: cloud-security
-description: Cloud security architecture — shared responsibility by service model, the CSPM/CWPP/CIEM/CNAPP/KSPM/DSPM acronym soup defined precisely, IaC scanning, control-plane vs data-plane, and multi-cloud pitfalls.
+description: Covers cloud security architecture — shared responsibility by service model (IaaS/PaaS/SaaS), CSPM/CWPP/CIEM/CNAPP/KSPM/DSPM defined precisely, IaC scanning, control plane vs data plane, and multi-cloud pitfalls. Use when the user asks about securing AWS, Azure or GCP, what a CNAPP or CSPM actually does, who is responsible for what in the cloud, cloud IAM as the perimeter, or Terraform/IaC misconfiguration scanning.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

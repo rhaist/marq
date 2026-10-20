@@ -1,6 +1,6 @@
 ---
 name: ot-compliance
-description: Which regimes actually bind a plant or machine builder — NIS2 for manufacturing (NACE C26–C30), EU CRA + Machinery Regulation for what you ship, NERC CIP and TSA directives for US infrastructure, and how they stack.
+description: Covers which regimes bind a plant or machine builder — NIS2 for manufacturing (NACE C26-C30), the EU CRA plus Machinery Regulation for what is shipped, NERC CIP and TSA directives for US infrastructure, and how they stack. Use when the user asks which regulations apply to a factory, OEM or industrial product, whether NIS2 catches manufacturing, or about Machinery Regulation cybersecurity requirements.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

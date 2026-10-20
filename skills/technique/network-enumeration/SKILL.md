@@ -1,6 +1,6 @@
 ---
 name: network-enumeration
-description: Port/service enumeration and TLS review on hosts in scope.
+description: Guides port and service enumeration and TLS review on in-scope hosts — host discovery with naabu, masscan and nmap, per-service follow-up, searchsploit lookups, DNS and zone-transfer checks, and testssl. Use when the user asks to scan hosts or a subnet, find open ports and services, check versions against exploits, test TLS configuration, or enumerate DNS on an authorized target.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

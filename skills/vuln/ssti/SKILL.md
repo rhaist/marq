@@ -1,6 +1,6 @@
 ---
 name: ssti
-description: Find server-side template injection and confirm code execution.
+description: Guides finding server-side template injection and confirming code execution — locating reflected inputs, math-probe confirmation, engine identification, sstimap, and careful in-scope escalation. Use when the user suspects template injection (Jinja2, Twig, Freemarker and others), sees {{7*7}} evaluate, or tests template-rendered inputs on an authorized target.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

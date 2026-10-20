@@ -79,7 +79,7 @@ frontmatter — see the [Agent Skills spec](https://agentskills.io/specification
 `skills` in `skills/.claude-plugin/plugin.json`. The pack is embedded in the
 binary (`load_skill`, `marq://skills/<name>`) and installs natively via the
 Claude Code plugin or `npx skills add rhaist/marq`. The periodic review sweep is
-the `/refresh-skills` command.
+the `/refresh-skills` skill (`.claude/skills/refresh-skills/`).
 
 ## Commits and PRs
 

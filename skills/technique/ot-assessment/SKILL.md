@@ -1,6 +1,6 @@
 ---
 name: ot-assessment
-description: Safely assessing an OT/ICS environment — why standard scanning is a hazard, which marq tools are safe below the IT/OT boundary, passive-first method, per-activity authorization, and where to do active testing instead.
+description: Guides safely assessing an OT/ICS environment — why standard scanning is a hazard, which marq tools are safe below the IT/OT boundary, passive-first method, per-activity authorization, and where to test actively instead (labs, consequence-driven methods). Use when the user asks to scan, pentest or assess a plant, SCADA, PLC or industrial network, or whether nmap or nuclei is safe against OT devices.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

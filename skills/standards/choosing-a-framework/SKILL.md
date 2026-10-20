@@ -1,6 +1,6 @@
 ---
 name: choosing-a-framework
-description: Decision guide mapping a company's drivers (sector, customers, region, data type) to the security/privacy frameworks that actually apply — ISO 27001, SOC 2, NIST CSF/800-53, CIS, PCI DSS, HIPAA, GDPR, NIS2, DORA.
+description: Maps a company's drivers (sector, customers, region, data type) to the security and privacy frameworks that actually apply — ISO 27001, SOC 2, NIST CSF/800-53, CIS, PCI DSS, HIPAA, GDPR, NIS2, DORA — and how they relate. Use when the user asks which framework or certification to pursue, whether a regulation applies to them, or how to avoid duplicate compliance work.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

@@ -1,6 +1,6 @@
 ---
 name: eu-cra
-description: EU Cyber Resilience Act (Regulation (EU) 2024/2847) — scope, manufacturer obligations, conformity assessment/CE marking, and the load-bearing phased application timeline (web-verify the dates).
+description: Covers the EU Cyber Resilience Act (Regulation (EU) 2024/2847) — scope of products with digital elements, manufacturer obligations (secure by design, SBOM, vulnerability handling, ENISA reporting), conformity assessment and CE marking, and the phased timeline (web-verify dates). Use when the user asks about CRA obligations, CE marking for software or connected products, vulnerability reporting to ENISA, or SBOM duties for products sold in the EU.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

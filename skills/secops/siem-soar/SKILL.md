@@ -1,6 +1,6 @@
 ---
 name: siem-soar
-description: Stand up and run a SIEM/SOAR pipeline — log-source priorities, detection content vs noise, SOAR playbook patterns, and alert tuning to kill fatigue.
+description: Guides standing up and running a SIEM/SOAR pipeline — log-source priorities, detection content vs noise, SOAR playbook patterns, alert triage and tuning against fatigue, and the current vendor landscape. Use when the user asks which logs to collect, how to build or tune a SIEM (Splunk, Sentinel, Elastic and others), automate SOC response, or fix alert fatigue.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

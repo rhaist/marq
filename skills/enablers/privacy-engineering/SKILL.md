@@ -1,6 +1,6 @@
 ---
 name: privacy-engineering
-description: The engineering side of privacy — privacy-by-design pragmatically, data minimization, the DPIA process, when to reach for which PET, and the NIST Privacy Framework.
+description: Covers the engineering side of privacy — privacy by design pragmatically, data minimization, the DPIA/PIA process, when to reach for which privacy-enhancing technology (pseudonymization, differential privacy, etc.), and the NIST Privacy Framework. Use when the user asks how to build privacy into a product, run a DPIA, minimize or de-identify personal data, or choose a PET.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

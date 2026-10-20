@@ -1,6 +1,6 @@
 ---
 name: purple-teaming
-description: Run the collaborative red+blue detect-improve loop — execute ATT&CK techniques, measure detection coverage, and turn every gap into a tested detection.
+description: Guides running the collaborative red plus blue detect-improve loop — executing MITRE ATT&CK techniques, measuring detection coverage, and turning every gap into a tested detection. Use when the user asks to plan a purple team exercise, validate SOC detections with adversary emulation (Atomic Red Team, CALDERA), or measure ATT&CK coverage.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

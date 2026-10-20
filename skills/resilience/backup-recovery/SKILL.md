@@ -1,6 +1,6 @@
 ---
 name: backup-recovery
-description: Design ransomware-resilient backups with the 3-2-1-1-0 rule, immutable/air-gapped copies, restore-test discipline, and recovery prioritization.
+description: Covers designing ransomware-resilient backups — the 3-2-1-1-0 rule, immutable and air-gapped copies, protecting the backup system itself, restore-test discipline, and recovery prioritization. Use when the user asks how to design or assess a backup strategy, survive ransomware, make backups immutable, or test and sequence restores.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

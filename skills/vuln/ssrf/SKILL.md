@@ -1,6 +1,6 @@
 ---
 name: ssrf
-description: Find server-side request forgery and prove out-of-band reach.
+description: Guides finding server-side request forgery and proving out-of-band reach with interactsh — locating URL-fetching parameters, confirming callbacks, carefully escalating to internal services or cloud metadata in scope, and reporting. Use when the user is testing URL, webhook, import or image-fetch features, or suspects SSRF on an authorized target.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

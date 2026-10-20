@@ -1,6 +1,6 @@
 ---
 name: incident-response
-description: Hands-on incident handling through the NIST SP 800-61r3 / SANS PICERL phases — detect, contain, eradicate, recover, learn — with containment trade-offs and evidence handling.
+description: "Guides hands-on incident handling through the NIST SP 800-61r3 and SANS PICERL phases — identification and scoping, containment trade-offs, evidence handling, eradication, recovery and lessons learned. Use when the user is handling an active compromise, ransomware or malware outbreak, needs containment steps, or wants an IR playbook. (Decision-maker view: incident-response-leadership.)"
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

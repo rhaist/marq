@@ -1,6 +1,6 @@
 ---
 name: recon-footprint
-description: Opening recon — map a domain's external footprint passively first.
+description: Guides opening recon on a domain or organization — passive footprint first (whois, DNS, subfinder, theHarvester, spiderfoot, leaked secrets), then resolving live hosts, active enumeration and web fingerprinting. Use when the user asks to recon a target, map an attack surface or external footprint, find subdomains, or start an authorized pentest or OSINT investigation.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

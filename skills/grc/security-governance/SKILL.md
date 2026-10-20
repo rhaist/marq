@@ -1,6 +1,6 @@
 ---
 name: security-governance
-description: Structure a security governance program — policy/standard/procedure/guideline hierarchy, charter, operating model, RACI, committee cadence, and the policy lifecycle with exceptions.
+description: Covers structuring a security governance program — the policy/standard/procedure/guideline hierarchy, security charter, operating model and RACI, committee cadence, and the policy lifecycle with exceptions. Use when the user asks how to write or organize security policies, set up a security steering committee, define security roles and responsibilities, or manage policy exceptions.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

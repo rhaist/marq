@@ -1,6 +1,6 @@
 ---
 name: auth-jwt
-description: Attack authentication and session handling — credential brute/spray, default creds, broken logout/session fixation, and JWT flaws (alg=none / alg-confusion, weak secret, unverified signature).
+description: Guides attacking authentication and session handling — online credential brute force and spraying (hydra), default credentials, broken logout and session fixation, and JWT flaws (alg=none, algorithm confusion, weak secret, unverified signature). Use when the user is testing a login form, session cookies or tokens, asks to crack a JWT secret, or audits auth on an authorized web target.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

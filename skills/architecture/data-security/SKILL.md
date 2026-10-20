@@ -1,6 +1,6 @@
 ---
 name: data-security
-description: Data-centric security architecture — a usable classification scheme, DLP and its limits, encryption at-rest/in-transit/in-use, tokenization vs encryption, key separation, and retention.
+description: Covers data-centric security architecture — a classification scheme people actually use, DLP and its limits, encryption at rest/in transit/in use, tokenization vs encryption, key separation, retention, and APAC data-localization pitfalls. Use when the user asks how to classify or protect sensitive data, whether DLP will work, tokenize vs encrypt (e.g. card or PII data), design data retention, or handle data residency.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"

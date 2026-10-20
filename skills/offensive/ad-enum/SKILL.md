@@ -1,6 +1,6 @@
 ---
 name: ad-enum
-description: Active Directory & internal-network enumeration and attack path — from unauthenticated discovery through credential attacks to lateral movement, using marq's AD tool suite.
+description: Guides Active Directory and internal-network enumeration and attack paths — from unauthenticated discovery (nmap, smb_enum, enum4linux, ldap_search) through credential attacks (responder, Kerberoasting, AS-REP roasting) to BloodHound, ADCS (certipy) and lateral movement (netexec, impacket, evil_winrm). Use when the user is on an authorized internal pentest, asks how to attack or enumerate a Windows domain, or wants an AD privilege-escalation path.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"
