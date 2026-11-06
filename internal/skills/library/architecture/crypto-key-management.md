@@ -36,10 +36,13 @@ the math — they're key management, stale algorithms, and rolled-your-own.
   Kyber)** for key exchange, **FIPS 204 (ML-DSA / Dilithium)** and **FIPS 205
   (SLH-DSA / SPHINCS+)** for signatures; **HQC** selected (Mar 2025) as a KEM
   backup, draft FIPS expected 2026. verify: https://csrc.nist.gov/projects/post-quantum-cryptography
-- Migration deadline is set: NIST's transition roadmap (**IR 8547**, draft)
-  deprecates quantum-vulnerable RSA/ECC/DH **by 2030** and disallows them
-  **after 2035** — that's the planning horizon for the inventory below.
-  verify: https://csrc.nist.gov/pubs/ir/8547/ipd
+- Migration deadline is set: NIST's transition roadmap (**IR 8547**, final
+  27 Oct 2026) deprecates quantum-vulnerable RSA/ECC/DH **after 2030** and
+  disallows them **after 2035** — that's the planning horizon for the inventory
+  below. US federal
+  high-value/high-impact systems move sooner (EO 14412, Jun 2026): PQC key
+  establishment by **end-2030**, PQC signatures by **end-2031**.
+  verify: https://nvlpubs.nist.gov/nistpubs/ir/2026/NIST.IR.8547.pdf
 - Threat is **harvest-now-decrypt-later** — long-lived secrets are at risk today.
 - Act now: build a **crypto inventory** (where keys/algorithms live), demand
   **crypto-agility** (algorithms swappable, not hard-coded), and deploy **hybrid**

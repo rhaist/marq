@@ -45,7 +45,7 @@ Move security checks into the pipeline **without turning the pipeline into a wal
 ## Signing (Sigstore / cosign)
 
 - **Sign artifacts + attestations** so consumers verify origin. **Sigstore cosign** keyless signing is the default path: OIDC identity → short-lived **Fulcio** cert → signature logged in **Rekor** transparency log; no long-lived keys to manage.
-- Current state: **Cosign v3** (keyless on by default), **Rekor v2** GA ~Oct 2025; major registries adopted Sigstore attestations (PyPI, Maven Central, Homebrew). verify: https://blog.sigstore.dev/cosign-3-0-available/
+- Current state: **Cosign v3** (Sigstore bundle format + trusted-root/signing-config on by default; keyless has been default since v2.0), **Rekor v2** GA Oct 2025 but opt-in — the public-good instance keeps Rekor v1 as default (Jun 2026, https://blog.sigstore.dev/rekor-evolution/); major registries adopted Sigstore attestations (PyPI, Maven Central, Homebrew). verify: https://blog.sigstore.dev/cosign-3-0-available/
 - **Verify at admission/deploy** (policy-controller / Kyverno verifyImages) — signing is pointless if nothing checks the signature. Bind verification to an expected identity, not just "is signed."
 
 ## Policy-as-code

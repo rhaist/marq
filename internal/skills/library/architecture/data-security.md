@@ -8,8 +8,7 @@ description: Data-centric security architecture — a usable classification sche
 Protect the data, not just the perimeter around it — because the perimeter is
 gone (SaaS, BYOD, third-party processors). Everything here depends on one thing
 you must do first: **know what data you have and where it flows** (data discovery
-
-- a data map / RoPA). You cannot classify or protect what you can't see.
+and a data map / RoPA). You cannot classify or protect what you can't see.
 
 ## Classification scheme that people actually use
 
@@ -29,7 +28,7 @@ Rules that make it stick:
 - Classify by the **most sensitive element** in a dataset; one SSN makes the table Restricted.
 - Map tier -> _handling matrix_ (storage, transit, sharing, retention) — the tier
   is useless without the "so therefore you must" actions next to it.
-- Auto-classify where possible (DLP/cloud-native classifiers, MS Pur), but the data
+- Auto-classify where possible (DLP/cloud-native classifiers, Microsoft Purview), but the data
   _owner_ accepts the label. Labels drive DLP policy and encryption automatically.
 - Regulated categories ride on top: cross-link `load_skill privacy-eu` — GDPR
   "special category" data and PCI cardholder data force the Restricted handling

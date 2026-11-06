@@ -68,8 +68,9 @@ and TOTP are a transition state, not a destination.
   hardware authenticator, which consumer-synced passkeys fail.
 - Verify current normative text — NIST SP 800-63B-4 finalized July 2025 and now
   bakes phishing-resistance + syncable authenticators into AAL2/AAL3:
-  fetch https://pages.nist.gov/800-63-4/sp800-63b.html and the syncable supplement
-  https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63Bsup1.pdf
+  fetch https://csrc.nist.gov/pubs/sp/800/63/b/4/final and its syncable-authenticator
+  section https://pages.nist.gov/800-63-4/sp800-63b/syncable (the separate
+  800-63Bsup1 supplement was withdrawn Aug 2025, superseded by 63B-4)
 - Microsoft Entra "passkey profiles" (per-group device-bound vs synced policy
   via `passkeyType`) hit GA March 2026, with existing FIDO2 tenants auto-migrated —
   the enforcement lever exists now; verify tenant state before you promise it:

@@ -15,7 +15,7 @@ backstops in `load_skill social-engineering-defense`.
 
 - **Continuous > annual**: short, frequent touches (monthly micro-learning,
   in-context nudges) beat one long yearly dump. Twelve months of continuous
-  training cut global phish-prone rate ~33% → ~5% (an ~86% drop) in industry data.
+  training cut global phish-prone rate ~33% → ~4% (an ~87% drop) in industry data (KnowBe4 2026).
   verify: https://www.knowbe4.com/resources/reports/phishing-by-industry-benchmarking-report
 - **Role-based**: tailor content to risk surface. Finance/AP → BEC & payment
   fraud; execs/admins → spear-phish & credential theft; devs → secrets, supply
@@ -34,8 +34,10 @@ backstops in `load_skill social-engineering-defense`.
   - Failure = a teachable moment (just-in-time landing page), never discipline.
   - Simulation results are **separate from HR performance evaluation**.
   - Never weaponize sensitive personal data; lures use only fair, plausible pretexts.
-  - Avoid cruel themes (fake bonuses, layoff notices, bereavement) — NDSS 2025
-    research shows severe-consequence/incentive lures cause backlash, not learning.
+  - Avoid cruel themes (fake bonuses, layoff notices, bereavement) — real bonus-lure
+    campaigns have drawn public backlash, and a USEC 2025 (NDSS) study found harsh
+    consequences for clicking cut employee acceptance while prior consent raised it.
+    verify: https://ndss-symposium.org/wp-content/uploads/usec25-10.pdf
 - **Privacy/legal**: in EU/works-council contexts, engage the works council
   early, run a DPIA / Legitimate Interests Assessment, pseudonymize, short
   retention, transparent notice. Track cohorts, not individuals, for reporting.

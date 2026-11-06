@@ -16,9 +16,9 @@ program/culture side see `load_skill security-awareness`.
 
 - **Phishing** — mass email lure → credentials/malware/payment.
 - **Spear-phishing / whaling** — targeted, recon-driven, often impersonating an exec.
-- **Vishing** — phone/voice, now with cloned-voice deepfakes; ~40% of orgs report a
-  deepfake-plus-social-engineering audio call (Gartner 2026); ~62% a deepfake incident of any kind.
-  verify: https://keepnetlabs.com/blog/deepfake-statistics-and-trends
+- **Vishing** — phone/voice, now with cloned-voice deepfakes; 41% of CISOs report a
+  deepfake social-engineering incident on an employee audio call, 36% on video, in the past year (Gartner, Sep 2026).
+  verify: https://www.gartner.com/en/newsroom/press-releases/2026-09-22-gartner-survey-finds-41-percent-of-cisos-reported-at-least-one-social-engineering-incident-involving-a-deepfake-in-the-past-12-months
 - **Smishing** — SMS/iMessage/WhatsApp lures, often "package"/"toll"/"boss needs you."
 - **Pretexting** — fabricated scenario to extract info or access (IT support, auditor, new vendor).
 - **BEC** — compromised or look-alike business email → fraudulent wire/payroll/invoice change.
