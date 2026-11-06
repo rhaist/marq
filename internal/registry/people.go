@@ -51,9 +51,9 @@ func people() []Tool {
 				{Name: "email", Type: StringParam, Desc: "email address", Required: true},
 			},
 			Build: func(a Args) Invocation {
-				// Drop skipped-module lines and the upstream proxy-affiliate ad.
+				// Drop skipped-module lines and the upstream proxy-affiliate and web-app ads.
 				cmd := "set -o pipefail; user-scanner -e " + shellword.Quote(a.S("email")) +
-					` </dev/null | grep -v -e '\[~\]' -e 'partner=' -e 'Tip: Route'`
+					` </dev/null | grep -v -e '\[~\]' -e 'partner=' -e 'Tip: Route' -e 'user-scanner\.app'`
 				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("email")}
 			},
 		},

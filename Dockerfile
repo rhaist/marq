@@ -131,7 +131,7 @@ RUN gunzip -f /usr/share/wordlists/rockyou.txt.gz 2>/dev/null || true
 # no linux-arm64 build, and it pulls flare-capa transitively (capa + `bin_headers
 # -z` cover strings).
 RUN python3 -m venv --system-site-packages "$VIRTUAL_ENV" \
-    && pip install --no-cache-dir maigret user-scanner==1.5.2.3 \
+    && pip install --no-cache-dir maigret user-scanner==1.5.2.5 \
     # user-scanner would check PyPI and prompt for updates on every call
     && sed -i 's/"auto_update_status": true/"auto_update_status": false/' \
         "$VIRTUAL_ENV"/lib/python3*/site-packages/user_scanner/config.json \
@@ -156,8 +156,7 @@ RUN CAPA_VER=v10.0.0 \
 
 # jwt_tool: not in Kali apt or on PyPI — it's a standalone script. Clone it, pull
 # its deps into the venv, and drop a `jwt_tool` launcher on PATH.
-# ponytail: pinned to latest (no upstream release tags); pin a commit if repro matters.
-RUN git clone --depth 1 https://github.com/ticarpi/jwt_tool /opt/jwt_tool \
+RUN git clone --depth 1 --branch v2.3.0 https://github.com/ticarpi/jwt_tool /opt/jwt_tool \
     && pip install --no-cache-dir -r /opt/jwt_tool/requirements.txt \
     && printf '#!/bin/sh\nexec python3 /opt/jwt_tool/jwt_tool.py "$@"\n' > /usr/local/bin/jwt_tool \
     && chmod +x /usr/local/bin/jwt_tool
