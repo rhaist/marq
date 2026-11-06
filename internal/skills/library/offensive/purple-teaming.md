@@ -47,7 +47,7 @@ That tight execute→observe→tune→re-test cycle is the whole value; a one-sh
 - Track every technique's outcome on an **ATT&CK Navigator layer**: green =
   alerting, yellow = logged-only, red = blind. This heatmap is the executive
   artifact and the trend line across exercises.
-- Report the three-tier metric per technique — **prevented / detected (alert) /
+- Report the four-tier metric per technique — **prevented / detected (alert) /
   logged-only / no-visibility** — not a single pass/fail. "We have the logs but
   no rule" is a different fix than "we have no logs."
 - Don't claim coverage from one passing atomic — a technique has many

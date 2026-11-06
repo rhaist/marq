@@ -21,6 +21,10 @@ safe harbor and is just unauthorized access. This skill covers both sides:
 - Baseline obligations they encode: a **published, advertised contact**
   (security.txt / VDP page), **meaningful acknowledgement within ~7 days**, and
   a defined handling process. Stand these up before launching a program.
+- **EU CRA** (manufacturers): since **11 Sep 2026**, actively exploited vulns go to
+  the CSIRT + ENISA via the CRA Single Reporting Platform (24h / 72h / 14 days);
+  the Annex I CVD-policy duties apply from 11 Dec 2027 — `load_skill eu-cra`.
+  https://digital-strategy.ec.europa.eu/en/policies/cra-reporting
 
 ## 2. Safe harbor & legal (researcher and program)
 
@@ -88,7 +92,8 @@ safe harbor and is just unauthorized access. This skill covers both sides:
 
 - A **CVE ID** is the public identifier; issued by a **CNA** (CVE Numbering
   Authority) — usually the affected vendor if they're a CNA, else a root/CNA-LR
-  (e.g. MITRE) or a third-party CNA for that product.
+  (e.g. MITRE) or a third-party CNA for that product. Since Nov 2025 ENISA is
+  also a Root (EU authorities, EU CSIRTs-network members, its cooperative partners).
 - To request an ID: find the right CNA at
   https://www.cve.org/PartnerInformation/ListofPartners; if none applies, use
   MITRE's webform https://cveform.mitre.org/. CNAs must respond to assignment

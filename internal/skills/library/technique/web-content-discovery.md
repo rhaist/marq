@@ -14,7 +14,8 @@ description: Find hidden paths, endpoints, and parameters on a web app.
 
 - `feroxbuster` — fast recursive directory/content discovery (preferred default).
 - `ffuf` — fuzz with the `FUZZ` keyword anywhere in the URL (paths, vhosts,
-  extensions): `url="https://host/FUZZ"`. Add `-x php,txt,bak` via `options`.
+  extensions): `url="https://host/FUZZ"`. Add `-e .php,.txt,.bak` via `options`
+  (in ffuf `-x` is the proxy flag).
 - `gobuster_dir` — simple directory brute force alternative.
 - Pick a wordlist appropriate to the stack; raise extensions for the tech
   `whatweb` reported. Watch for backup/config files (`.git`, `.env`, `.bak`,

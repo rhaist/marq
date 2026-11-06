@@ -32,7 +32,8 @@ cross-border misstep.
   `httpx_probe` to find live HTTP services (status, title, tech).
 - `cdncheck` to flag hosts behind a CDN/WAF (you may be hitting the edge, not the
   origin). For subdomain takeover on resolved subdomains (dangling CNAMEs), run
-  `nuclei` with the takeover templates (`--tags takeover`).
+  `nuclei` with `templates="http/takeovers/"` (the wrapper passes `-t`; it has no
+  tags option).
 
 ## 3. Enumerate hosts (active)
 

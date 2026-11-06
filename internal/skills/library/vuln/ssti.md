@@ -24,8 +24,9 @@ description: Find server-side template injection and confirm code execution.
 ## Escalate (carefully, in scope)
 
 - Engine-specific RCE gadgets (e.g. Jinja2 `{{ ''.__class__... }}`, Freemarker
-  `freemarker.template.utility.Execute`). `sstimap --os-shell` for an interactive
-  command channel once confirmed. Stay within authorized scope.
+  `freemarker.template.utility.Execute`). `sstimap` with `options="--os-cmd 'id'"`
+  runs one command once confirmed (`--os-shell` is interactive and hangs here).
+  Stay within authorized scope.
 
 ## Report
 

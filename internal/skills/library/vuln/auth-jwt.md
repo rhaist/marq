@@ -19,12 +19,14 @@ description: Attack authentication and session handling — credential brute/spr
 
 ## JWT specifically
 
-- Decode header/payload (base64url) with `run_shell`. Look for:
-  - `alg: none` accepted → forge an unsigned token.
+- Decode header/payload with `jwt_tool` (token only = decode + expiry check).
+  Look for:
+  - `alg: none` accepted → forge an unsigned token (`jwt_tool` `options="-X a"`).
   - HS256 verified with a weak/guessable secret → crack the signature offline
-    with `john` (format `HMAC-SHA256`) or `hashcat` (`mode=16500`) against a
-    wordlist; if it cracks you can mint arbitrary claims.
-  - RS256→HS256 confusion → sign with the public key as HMAC secret.
+    with `john` (format `HMAC-SHA256`), `hashcat` (`mode=16500`) or `jwt_tool`
+    (`-C -d <wordlist>`); if it cracks you can mint arbitrary claims.
+  - RS256→HS256 confusion → sign with the public key as HMAC secret
+    (`jwt_tool` `-X k -pk <pubkey.pem>`).
   - Unverified claims: tamper `sub`/`role`/`admin` and replay.
 
 ## Report

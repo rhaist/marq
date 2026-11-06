@@ -9,7 +9,7 @@ Authorized engagements only. Confirm scope first: call `server_info` and read
 `marq://authorization`. A red team simulates a _named threat actor against
 specific objectives_ ("flags") to test detection + response — not a pentest's
 breadth-first vuln sweep. If the goal is coverage/patch-list, you want a
-pentest; reach for `methodology` and the `vuln/*` skills instead.
+pentest; reach for `marq://methodology` and the `vuln/*` skills instead.
 
 ## 1. Pentest vs red team — pick the right job
 
@@ -103,9 +103,11 @@ pentest; reach for `methodology` and the `vuln/*` skills instead.
 - **FedRAMP Rev 5** — control **CA-8(2)** mandates an **annual red team
   exercise** for CSPs (test plan + report, 3PAO-validated), distinct from the
   standard pentest: it tests people/process/tech detection+response, not just
-  "can it be breached." Still current mid-2026, but the **FedRAMP 20x** transition
-  is underway (pilot authorizations began March 2026; broader submission pipeline
-  opening ~Q4 FY26) — check which regime the CSP is under before citing. verify:
+  "can it be breached." Rev5 is now "legacy" under FedRAMP's **Consolidated Rules
+  for 2026** (mandatory 1 Jan 2027): **20x** Class A applications opened 3 Aug 2026,
+  Class B/C 31 Aug 2026, and no new Rev5 certifications are accepted after 11 Jun
+  2027 — check which regime the CSP is under before citing.
+  https://www.fedramp.gov/2026/timeline/ verify:
   https://help.fedramp.gov/hc/en-us/articles/28907820003227-CA-8-2-requires-Red-Team-exercises
 - Common thread: independent threat intel drives the scenario, a control group
   oversees, and the deliverable is resilience evidence — not a bug list.

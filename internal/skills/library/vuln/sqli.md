@@ -16,7 +16,8 @@ description: Find and confirm SQL injection, then report with proof.
 
 - Run `sqlmap` against a specific URL/parameter. Start safe and non-interactive:
   `sqlmap` with `options="--batch --level=2 --risk=1 -p <param>"`.
-- For POST/JSON bodies pass `--data` / `--json` via `options`; for auth'd areas
+- For POST/JSON bodies pass `--data` via `options` (sqlmap detects a JSON body;
+  it has no `--json` flag); for auth'd areas
   pass `--cookie` or `--headers`.
 - Escalate only as needed: raise `--level`/`--risk`, add `--dbs`, `--tables`,
   `--dump` once injection is proven. Dumping data is high-impact — stay in scope.

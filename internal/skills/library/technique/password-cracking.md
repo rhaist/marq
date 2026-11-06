@@ -28,7 +28,9 @@ exporting them to a home-region cracking rig can breach data-residency law.
   OpenCL device is bundled (`--force` is auto-added) — fine for weak/fast hashes;
   real cracking wants `--gpus all` at `docker run`.
 - Common modes: 0=MD5, 100=SHA1, 1400=SHA256, 1800=sha512crypt, 3200=bcrypt,
-  16500=JWT(HS256), 22000=WPA. Rules (`-r best64.rule`) and masks for tougher sets.
+  16500=JWT(HS256), 22000=WPA. Rules (`-r /usr/share/hashcat/rules/best66.rule`
+  on hashcat 7+, which renamed it; `best64.rule` on 6.x — `list_dir` the rules
+  dir if unsure) and masks for tougher sets.
 
 ## 4. Report
 
