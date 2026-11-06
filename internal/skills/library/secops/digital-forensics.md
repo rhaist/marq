@@ -42,7 +42,7 @@ incident-response`); a found binary goes to `load_skill malware-triage` /
 
 - Acquire RAM _before_ disk: WinPMEM/DumpIt (Win), AVML/LiME (Linux), `osxpmem`
   (macOS). A page file + hibernation file complement it.
-- Analyze with **Volatility 3** (v2.28, Apr 2026; the v2.26 parity release
+- Analyze with **Volatility 3** (v2.28.2, Sep 2026; the v2.26 parity release
   deprecated + archived Vol2 in May 2025 — verify
   https://github.com/volatilityfoundation/volatility3). Symbol tables auto-resolve
   most modern OSes. High-value plugins: `pslist`/`pstree`/`psscan` (hidden procs),

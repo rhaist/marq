@@ -8,7 +8,7 @@ description: Stand up or mature a security program on a budget — what to do fi
 The new-CISO failure mode is buying tools before knowing the assets. Spend the
 first month learning, not procuring. Anchor to a framework for structure (NIST CSF
 2.0 functions: Govern, Identify, Protect, Detect, Respond, Recover; or CIS
-Controls v8 IG1 for a budget-constrained prioritized list) — but the framework is
+Controls v8.1 IG1 for a budget-constrained prioritized list) — but the framework is
 the map, not the plan.
 
 ## First 90 days (opinionated, in order)
