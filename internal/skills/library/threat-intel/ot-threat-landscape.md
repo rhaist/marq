@@ -71,6 +71,14 @@ because they define what is demonstrably possible:
   Reusable capability rather than a one-target weapon.
 - **FrostyGoop** (2024) — used **Modbus TCP** directly to disrupt heating to
   civilian buildings in Ukraine. Notable for needing no OT-specific implant.
+- **Fuxnet** (2024) — the Ukraine-aligned Blackjack group's malware against
+  Moscow's Moscollector sensor network: bricked sensor gateways and flooded their
+  Meter-Bus serial links.
+- **IOCONTROL** (2024, CyberAv3ngers) — Linux implant for IoT/OT devices (PLCs,
+  HMIs, routers, fuel-management systems); in ATT&CK for ICS since v20.
+- **ZionSiphon** (2026) — Israeli water/desalination-themed, but Dragos assessed
+  it **not a credible ICS threat** (broken, likely LLM-generated logic). A name in
+  the news is not a capability.
 
 ## Threat groups — OT naming is its own namespace
 
@@ -101,10 +109,10 @@ tracks **26 groups, 11 active during 2025**, including three new ones:
 - **KAMACITE** — the access enabler for ELECTRUM; ran sustained reconnaissance of
   US industrial devices Mar–Jul 2025, systematically scanning **entire control
   loops** — HMIs, variable-frequency drives, metering modules, cellular gateways.
-- **BAUXITE** — hacktivist-presenting, deployed wipers in 2025. Representative of
-  the broader shift: hacktivists hitting **internet-exposed HMIs, misconfigured
-  engineering workstations and open Modbus/TCP and DNP3**, which needs no
-  sophistication at all.
+- **BAUXITE** (overlaps CyberAv3ngers) — hacktivist-presenting, deployed wipers
+  in 2025. Representative of the broader shift: hacktivists hitting
+  **internet-exposed HMIs, misconfigured engineering workstations and open
+  Modbus/TCP and DNP3**, which needs no sophistication at all.
 
 ## The unglamorous reality: ransomware
 

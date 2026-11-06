@@ -67,8 +67,8 @@ Availability.
 **Which parts are actually current** (cite these, not the series in general):
 
 - **2-1 (2024)** asset-owner security programme — fully rewritten, the ISMS
-  analogue. **2-2 (2025, TR)** protection-scheme rating. **2-4 (2018)** service
-  providers. **2-3 (2015, TR)** patch management.
+  analogue. **2-2 (2025, PAS)** security protection scheme and its rating.
+  **2-4 (2023, Ed 2)** service providers. **2-3 (2015, TR)** patch management.
 - **3-2 (2020)** risk assessment → zones, conduits and SL-T. **3-3 (2013)**
   system requirements — still normative despite its age, so expect its
   requirements to predate the tech in front of you.
@@ -90,8 +90,9 @@ from the 800-53B baselines with OT-specific tailoring. If you already run
 800-53, this is the bridge — `load_skill control-frameworks`.
 
 Two gotchas: its CSF mapping is against **CSF v1.1**, not CSF 2.0 (r3 predates
-it), so don't expect Govern-function alignment. And **Rev 4 is only at pre-draft**
-(call for comments closed Feb 2026) — nothing citable yet.
+it), so don't expect Govern-function alignment. **Rev 4 is an initial public
+draft** (Sept 2026, comments close 30 Nov 2026), restructured around CSF 2.0 — r3
+stays the citable final until r4 is.
 https://csrc.nist.gov/pubs/sp/800/82/r3/final
 
 ## Constraints that change the playbook

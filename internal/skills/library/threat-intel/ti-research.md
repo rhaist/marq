@@ -56,7 +56,7 @@ the ones on-topic. Good, stable, free feeds:
 
 For an actor/campaign deep-dive, ORKL library search beats scraping feeds. For
 "what's new this week", start with ORKL news (`base_score`-ranked, one call);
-drop to the raw vendor feeds below when you need a source ORKL doesn't aggregate
+drop to the raw vendor feeds above when you need a source ORKL doesn't aggregate
 or the item is fresher than the news index.
 
 ### Sector / regional CERTs (coverage gaps)
