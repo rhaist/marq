@@ -20,7 +20,7 @@ answer it — on whatever model you choose, local or frontier.
 "Build the ransomware incident runbook."               → IR + resilience
 ```
 
-**~80 security tools + ~100 expert playbooks (current 2026 standards), in one
+**~85 security tools + ~100 expert playbooks (current 2026 standards), in one
 auditable binary.** You bring the model; marq brings the tools and the knowledge.
 
 ## Start
@@ -30,7 +30,7 @@ Pick your path — start simple, add a layer only when you need it:
 | I want…                                      | Path            | Setup                       |
 | :------------------------------------------- | :-------------- | :-------------------------- |
 | **cyber expertise inside my LLM**            | skills only     | one `go install`, no Docker |
-| **…plus the ~80-tool suite to _run_ things** | full MCP server | build/pull the image        |
+| **…plus the ~85-tool suite to _run_ things** | full MCP server | build/pull the image        |
 | **…driven by a local model**                 | full + Pi       | image + Pi + llama.cpp      |
 
 ### Just the skills — cyber expertise for your LLM (no Docker)
@@ -135,7 +135,7 @@ API keys in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-sources).)
 
 ## What you get
 
-- **Execution** — ~80 wrapped Kali tools (recon, web, AD/internal, exploitation,
+- **Execution** — ~85 wrapped Kali tools (recon, web, AD/internal, exploitation,
   cred cracking, malware static analysis, OSINT), each audit-logged and sandboxed;
   findings render to `findings.md` / `.csv` (with optional CVSS + CWE).
 - **Knowledge** — ~100 `load_skill` playbooks across 14 domains, web-researched to
@@ -150,7 +150,7 @@ API keys in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-sources).)
   recommended run args also drop all Linux capabilities + `no-new-privileges`).
 
 <details>
-<summary><b>Full tool suite</b> — ~80 tools on a Kali base (click to expand)</summary>
+<summary><b>Full tool suite</b> — ~85 tools on a Kali base (click to expand)</summary>
 
 | Category                              | Tools                                                                                                                                                                                                                                                                            |
 | :------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

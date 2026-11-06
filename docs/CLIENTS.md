@@ -1,6 +1,6 @@
 # Driving marq — pick the brain for the job
 
-marq is **tools + knowledge**: ~80 wrapped Kali tools and ~100 skill playbooks
+marq is **tools + knowledge**: ~85 wrapped Kali tools and ~100 skill playbooks
 across 14 domains (pentest, malware, threat-intel, sec-ops, architecture, GRC,
 standards, CISO, resilience, human factors, …). It does **not** bring a model.
 Your client does. So the question is which **brain** you point at it — and that
@@ -25,7 +25,7 @@ findings/files tools — `go install github.com/rhaist/marq/cmd/marq@latest` wit
 `MARQ_SKILLS_ONLY=1`, a ~10 MB native binary, **no Docker** (see
 [`SETUP.md`](SETUP.md#skills-only--no-docker)). Reach for it when the work is
 advisory — architecture, GRC, standards, threat-intel research. The **full** build
-is the Docker image that adds the ~80-tool suite for when you need to _run_ things.
+is the Docker image that adds the ~85-tool suite for when you need to _run_ things.
 
 **Two transports** (both builds use the same `marq serve` stdio server):
 
