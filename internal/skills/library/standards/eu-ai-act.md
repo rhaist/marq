@@ -71,10 +71,12 @@ once, map with `load_skill control-mapping`; for AI-specific threats see
   Reg (EU) 2026/1744 (a ~16-month deferral; do not quote the old date).
 - **2 Aug 2028** — Annex I embedded high-risk (moved from 2 Aug 2027).
 
-**No harmonised standard (CEN-CENELEC JTC21) has been cited in the OJ**, so
-there is **no presumption of conformity** yet — high-risk conformity work is
-currently against the Regulation's text plus Commission guidance (final Art. 50
-transparency guidelines adopted 20 Jul 2026).
+**Only one harmonised standard is cited in the OJ: EN 18286:2026**
+(quality-management system, Art. 17; Implementing Decision (EU) 2026/2274,
+OJ 14 Oct 2026) — presumption of conformity for the QMS only. Everything else
+(risk management, data, oversight, robustness, cybersecurity) is still against
+the Regulation's text plus Commission guidance (final Art. 50 transparency
+guidelines adopted 20 Jul 2026).
 
 ## Penalties (Art. 99 — tiers unchanged by the omnibus; verify before citing)
 

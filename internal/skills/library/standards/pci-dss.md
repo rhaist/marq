@@ -12,7 +12,7 @@ Canonical source: PCI SSC `PCI DSS v4.0 / v4.0.1` document library — `pcisecur
 ## Version timeline (get this right)
 
 - **v4.0** released Mar 2022; **v3.2.1 retired 31 Mar 2024**.
-- **v4.0.1** (minor clarifying revision) published mid-2024 — use it as current.
+- **v4.0.1** (minor clarifying revision) published Jun 2024 — still current (Nov 2026). PCI SSC ran an RFC on v4.0.1 (3 Jun–20 Jul 2026) to plan a possible revision; no successor draft is published.
 - A large block of **future-dated requirements became mandatory 31 Mar 2025** (e.g. anti-phishing, automated log review, client-side script integrity 6.4.3 / 11.6.1, MFA refinements). After that date they are **required, not best-practice** — verify the exact list against the current standard.
 - New in v4.0: the **Customized Approach** (meet the objective your own way, with a **Targeted Risk Analysis** + assessor validation) alongside the traditional **Defined Approach**.
 
@@ -25,7 +25,7 @@ Canonical source: PCI SSC `PCI DSS v4.0 / v4.0.1` document library — `pcisecur
 
 Validation level depends on how you handle cards. Pick wrong and you under/over-scope:
 
-- **SAQ A** — fully outsourced e-commerce/MOTO, _no_ CHD touches your systems (e.g. fully hosted/redirect or iframe). Smallest scope. v4.0 added script/HTTP-header requirements even here.
+- **SAQ A** — fully outsourced e-commerce/MOTO, _no_ CHD touches your systems (e.g. fully hosted/redirect or iframe). Smallest scope. Since the **Jan 2025 SAQ A revision**, 6.4.3/11.6.1 (and 12.3.1) are **no longer SAQ A line items** — replaced by an **eligibility criterion**: confirm your site isn't susceptible to script attacks that could affect the e-commerce system (iframe pages: 6.4.3/11.6.1-style techniques, or your PSP's confirmation its embed includes script protection). The requirements stay in the standard (A-EP, D, RoC).
 - **SAQ A-EP** — e-commerce that _partially_ outsources but your site delivers payment-page elements (direct-post / JS that touches the payment form). Much larger than A — commonly confused with A.
 - **SAQ B** — imprint machines / standalone dial-out terminals, no electronic storage.
 - **SAQ B-IP** — standalone IP-connected PTS terminals, no storage.

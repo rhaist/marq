@@ -95,9 +95,10 @@ EIOPA. These cite RTS that get revised — verify exact figures before relying.
 - **Pending changes (proposals — the clocks above still apply):**
   - **Digital Omnibus** (COM(2025)837, Nov 2025) would route NIS2/DORA/GDPR/
     eIDAS/CER incident reports through a **single entry point** run by ENISA.
-    **Still a proposal and stalled** — the Council failed to reach QMV in late
-    Jun 2026, and Coreper votes on the Irish Presidency's mandate were pulled
-    again on 7 and 11 Oct 2026 — no Council mandate and no EP position yet. (The
+    **Still a proposal** — after failed attempts (late Jun, 7 and 11 Oct 2026)
+    the **Council agreed its mandate on 21 Oct 2026**, replacing the single EU
+    entry point with a **national entry point per member state**; no EP
+    position yet, so no trilogues. (The
     _AI_ half of the omnibus package split off and _was_ adopted — see
     `load_skill eu-ai-act` — so "the omnibus passed" is ambiguous; ask which.)
   - **NIS2 amendment + Cybersecurity Act revision** proposed **20 Jan 2026**
