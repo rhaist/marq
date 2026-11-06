@@ -252,13 +252,19 @@ func web() []Tool {
 			Desc: "Scan for vulnerabilities, exposed secrets and misconfigurations with Trivy. `mode` " +
 				"selects the target type: fs (a filesystem path, stage it under /work), image (a " +
 				"container image ref), repo (a git URL), or config (IaC / Dockerfiles). `target` is the " +
-				"path/image/URL. Reports CVEs by severity.",
+				"path/image/URL. config mode scans misconfigurations only. Reports CVEs by severity.",
 			Params: []Param{
 				{Name: "mode", Type: StringParam, Desc: "fs/image/repo/config", Default: "fs"},
 				{Name: "target", Type: StringParam, Desc: "path / image ref / repo URL", Required: true},
 			},
 			Build: func(a Args) Invocation {
-				argv := []string{"trivy", a.S("mode"), "--quiet", "--scanners", "vuln,secret,misconfig", a.S("target")}
+				argv := []string{"trivy", a.S("mode"), "--quiet"}
+				// `trivy config` is an alias for --scanners misconfig and rejects
+				// a --scanners flag; the other modes take the full scanner set.
+				if a.S("mode") != "config" {
+					argv = append(argv, "--scanners", "vuln,secret,misconfig")
+				}
+				argv = append(argv, a.S("target"))
 				return Invocation{Argv: argv, Target: a.S("target")}
 			},
 		},

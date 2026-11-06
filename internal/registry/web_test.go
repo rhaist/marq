@@ -31,3 +31,26 @@ func TestNucleiTagsFlag(t *testing.T) {
 		}
 	}
 }
+
+// `trivy config` is an alias for --scanners misconfig and rejects a --scanners
+// flag, so the wrapper must omit it in config mode but keep it for fs/image/repo.
+func TestTrivyConfigModeOmitsScanners(t *testing.T) {
+	var trivy Tool
+	for _, tool := range web() {
+		if tool.Name == "trivy" {
+			trivy = tool
+		}
+	}
+	if trivy.Build == nil {
+		t.Fatal("trivy tool not found")
+	}
+	build := func(mode string) []string {
+		return trivy.Build(Resolve(trivy.Params, map[string]any{"mode": mode, "target": "/work/x"})).Argv
+	}
+	if slices.Contains(build("config"), "--scanners") {
+		t.Errorf("config mode must not pass --scanners: %v", build("config"))
+	}
+	if !slices.Contains(build("fs"), "--scanners") {
+		t.Errorf("fs mode must pass --scanners: %v", build("fs"))
+	}
+}

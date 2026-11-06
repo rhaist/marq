@@ -109,11 +109,12 @@ func osint() []Tool {
 		},
 		{
 			Name: "trufflehog",
-			Desc: "Find (and verify) leaked secrets with trufflehog. `source` is a git URL or " +
-				"'github --org=<org>'-style target passed through as raw args. Provide a GITHUB_TOKEN env " +
-				"for GitHub org/repo scans. Defaults to only verified secrets to cut noise.",
+			Desc: "Find (and verify) leaked secrets with trufflehog. `source` must start with the " +
+				"trufflehog subcommand — a bare URL fails. Use 'git <https-url>', 'github --org=<org>', " +
+				"'github --repo=<url>' or 'filesystem <path>'; it is passed through as raw args. Provide a " +
+				"GITHUB_TOKEN env for GitHub org/repo scans. Defaults to only verified secrets to cut noise.",
 			Params: []Param{
-				{Name: "source", Type: StringParam, Desc: "git URL or raw trufflehog target args", Required: true},
+				{Name: "source", Type: StringParam, Desc: "subcommand + target, e.g. 'git https://github.com/org/repo'", Required: true},
 				{Name: "options", Type: StringParam, Desc: "extra raw flags", Default: "--results=verified"},
 			},
 			Build: func(a Args) Invocation {
