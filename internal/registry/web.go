@@ -14,17 +14,22 @@ func web() []Tool {
 		{
 			Name:   "nuclei",
 			Active: true,
-			Desc: "Run nuclei vulnerability templates against a URL/host. Optionally restrict to " +
-				"`templates` (a tag or path) and/or `severity` (e.g. \"medium,high,critical\").",
+			Desc: "Run nuclei vulnerability templates against a URL/host. Optionally restrict by " +
+				"`templates` (a template path, e.g. \"http/takeovers/\"), `tags` (a comma-separated " +
+				"tag filter, e.g. \"cve,takeover\"), and/or `severity` (e.g. \"medium,high,critical\").",
 			Params: []Param{
 				{Name: "target", Type: StringParam, Desc: "URL or host", Required: true},
-				{Name: "templates", Type: StringParam, Desc: "template tag or path", Default: ""},
+				{Name: "templates", Type: StringParam, Desc: "template path (-t)", Default: ""},
+				{Name: "tags", Type: StringParam, Desc: "comma-separated tag filter (-tags)", Default: ""},
 				{Name: "severity", Type: StringParam, Desc: "severity filter", Default: ""},
 			},
 			Build: func(a Args) Invocation {
 				argv := []string{"nuclei", "-silent", "-u", a.S("target")}
 				if a.S("templates") != "" {
 					argv = append(argv, "-t", a.S("templates"))
+				}
+				if a.S("tags") != "" {
+					argv = append(argv, "-tags", a.S("tags"))
 				}
 				if a.S("severity") != "" {
 					argv = append(argv, "-severity", a.S("severity"))
@@ -227,10 +232,11 @@ func web() []Tool {
 		{
 			Name: "jwt_tool",
 			Desc: "Analyse or attack a JSON Web Token with jwt_tool. `token` is the raw JWT. With no " +
-				"`options` it decodes the header/claims and flags known weaknesses (alg:none, key " +
-				"confusion, weak/expired signature). Add raw flags via `options`: '-X a' forges an " +
-				"alg:none token, '-C -d <wordlist>' brute-forces the HMAC signing key, '-T' tampers " +
-				"interactively (don't — no TTY). Operates on the token string only; no network.",
+				"`options` it only decodes the header/claims and checks expiry — it does NOT run the " +
+				"attack checks on a bare run. For weakness scanning add '-M pb' (playbook) or a specific " +
+				"exploit via `options`: '-X a' forges an alg:none token, '-X k -pk <pubkey.pem>' does " +
+				"RS256->HS256 key confusion, '-C -d <wordlist>' brute-forces the HMAC signing key, '-T' " +
+				"tampers interactively (don't — no TTY). Operates on the token string only; no network.",
 			Params: []Param{
 				{Name: "token", Type: StringParam, Desc: "raw JWT", Required: true},
 				{Name: "options", Type: StringParam, Desc: "extra raw flags", Default: ""},
@@ -295,8 +301,11 @@ func web() []Tool {
 			Name:   "sstimap",
 			Active: true,
 			Desc: "Detect and exploit Server-Side Template Injection (SSTI) with sstimap. `url` " +
-				"is the target URL. Use `options` for method, parameters, and template engine " +
-				"hints (e.g. -d data.txt -m POST -p name).",
+				"is the target URL (passed as -u). Use `options` for request shape and a one-shot " +
+				"command: -d 'name=val' sets POST data (a string, NOT a file) and implies POST, " +
+				"--data-params picks which params to test, -e <engine> hints the template engine, " +
+				"and -S 'id' (--os-cmd) runs a single command once SSTI is confirmed. Do NOT use " +
+				"-s/--os-shell — it is interactive and hangs this transport.",
 			Params: []Param{
 				{Name: "url", Type: StringParam, Desc: "target URL", Required: true},
 				{Name: "options", Type: StringParam, Desc: "extra sstimap flags", Default: ""},

@@ -35,11 +35,14 @@ func internal() []Tool {
 			Active: true,
 			Desc: "Kerberoasting with impacket-GetUserSPNs: request TGS tickets for SPN " +
 				"accounts in a domain and extract hashcat/john-crackable hashes. " +
-				"Provide `target` as 'domain/user:password@host'. High impact — " +
-				"authorized targets only.",
+				"`target` is 'domain/user:password' (credentials only — NO @host; it is " +
+				"not a network target here), with the DC passed as '-dc-ip <IP>' via " +
+				"`options`. Pass '-request' to output crackable hashes; without it the " +
+				"tool only lists SPN accounts. Crack the output with hashcat -m 13100 " +
+				"(RC4) or -m 19700 (AES). High impact — authorized targets only.",
 			Params: []Param{
-				{Name: "target", Type: StringParam, Desc: "domain/user:pass@DC", Required: true},
-				{Name: "options", Type: StringParam, Desc: "extra flags (e.g. -request-user svcacct)", Default: ""},
+				{Name: "target", Type: StringParam, Desc: "domain/user:pass (no @host)", Required: true},
+				{Name: "options", Type: StringParam, Desc: "e.g. -request -dc-ip 10.0.0.1", Default: ""},
 			},
 			Build: func(a Args) Invocation {
 				argv := []string{"impacket-GetUserSPNs"}
@@ -53,11 +56,13 @@ func internal() []Tool {
 			Active: true,
 			Desc: "AS-REP roasting with impacket-GetNPUsers: request AS-REP hashes for " +
 				"accounts with 'Do not require Kerberos preauthentication' set. " +
-				"Provide `target` as 'domain/user:password@host'. Pass a user list via " +
-				"`options` (e.g. -usersfile /work/users.txt). High impact.",
+				"`target` is 'domain/user:password' (credentials only — NO @host), with " +
+				"the DC as '-dc-ip <IP>' via `options`; or unauthenticated against a user " +
+				"list: target 'domain/' plus '-no-pass -usersfile /work/users.txt'. Pass " +
+				"'-request' to output hashes. Crack with hashcat -m 18200. High impact.",
 			Params: []Param{
-				{Name: "target", Type: StringParam, Desc: "domain/user:pass@DC", Required: true},
-				{Name: "options", Type: StringParam, Desc: "extra flags (e.g. -usersfile path)", Default: ""},
+				{Name: "target", Type: StringParam, Desc: "domain/user:pass or domain/ (no @host)", Required: true},
+				{Name: "options", Type: StringParam, Desc: "e.g. -request -dc-ip 10.0.0.1 -usersfile path", Default: ""},
 			},
 			Build: func(a Args) Invocation {
 				argv := []string{"impacket-GetNPUsers"}
@@ -169,9 +174,11 @@ func internal() []Tool {
 		{
 			Name:   "bloodhound_collect",
 			Active: true,
-			Desc: "Collect Active Directory attack-path data with bloodhound-python. " +
-				"Outputs JSON files for ingestion by BloodHound. `target` is " +
-				"'domain/user:password@DC'. `collection` selects the data to gather " +
+			Desc: "Collect Active Directory attack-path data with the legacy " +
+				"bloodhound-python collector. Outputs JSON for ingestion by BloodHound " +
+				"4.2/4.3 (the legacy schema — NOT BloodHound CE, which needs " +
+				"bloodhound-ce-python). `target` is 'domain/user:password@DC'. " +
+				"`collection` selects the data to gather " +
 				"(All/Group/Users/Computers/LocalAdmins/ACLs/DCOM/RDP/PSRemote/Session). " +
 				"Requires DNS resolution to the DC — pass `-ns <DC-IP>` via options.",
 			Params: []Param{
@@ -280,7 +287,7 @@ func internal() []Tool {
 				"container must be run with the needed capabilities/host networking or it " +
 				"binds nothing and captures nothing. High impact — authorized networks only.",
 			Params: []Param{
-				{Name: "options", Type: StringParam, Desc: "raw responder flags (e.g. -I eth0 -rdw)", Default: ""},
+				{Name: "options", Type: StringParam, Desc: "raw responder flags; -I <iface> is required. Start with '-I eth0 -A' (analyze, no poisoning); add -w (WPAD) / -d (DHCP) to actively poison. There is no -r in current Responder.", Default: ""},
 			},
 			Build: func(a Args) Invocation {
 				argv := []string{"responder"}
