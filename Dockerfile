@@ -70,9 +70,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         golang-github-binject-go-donut \
         # malware research — static analysis (capa is a release binary below)
         yara radare2 oletools \
-        # credentials / hashes (mesa-opencl-icd gives hashcat a CPU OpenCL device;
-        # name-that-hash → nth replaces the unmaintained hashid)
-        john hashcat mesa-opencl-icd ocl-icd-libopencl1 name-that-hash \
+        # credentials / hashes (pocl-opencl-icd gives hashcat a CPU OpenCL device —
+        # Mesa dropped Clover in 25.2 and its Rusticl exposes no device by default;
+        # e2e-image.sh checks `hashcat -I`. name-that-hash → nth replaces hashid)
+        john hashcat pocl-opencl-icd ocl-icd-libopencl1 name-that-hash \
         # wordlists (dirb supplies /usr/share/wordlists/dirb/common.txt, the ffuf/
         # gobuster default; `wordlists` alone no longer pulls it in)
         wordlists dirb \

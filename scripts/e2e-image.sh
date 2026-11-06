@@ -8,6 +8,9 @@
 #   2. jwt_tool keys are unique per container — the deliberate per-container
 #      keypair regeneration (so marq-driven JWT tests carry a detectable, unique
 #      IOC rather than a baked-in shared key).
+#   3. hashcat has an OpenCL CPU device — the image runs GPU-less, so cracking
+#      depends on the PoCL runtime; a Mesa/ICD packaging change once removed it
+#      silently.
 #
 # Needs a built image. Build it yourself (`docker build -t marq .`) or pass
 # --build. The wrapped-binary plumbing is covered separately by verify_tools.sh.
@@ -75,6 +78,12 @@ keyhash() { # poll until the generated keypair exists, then hash the .pem files
 h1="$(keyhash "$C1")"; h2="$(keyhash "$C2")"
 [[ "$h1" != TIMEOUT-* && "$h1" != "" ]]; check "container 1 generated jwt keys ($h1)" $?
 [[ "$h1" != "$h2" ]]; check "two containers have different jwt key material" $?
+
+echo "# 3. hashcat sees an OpenCL CPU device"
+# `hashcat -I` lists backend devices; with no runtime it reports none and every
+# crack fails with "No devices found/left".
+devices="$(docker run --rm "$IMAGE" hashcat -I --force 2>&1)"  # --force as the wrapper passes it (PoCL is flagged unsupported otherwise)
+grep -qiE 'Type[. ]*: *CPU' <<<"$devices"; check "hashcat -I lists a CPU device" $?
 
 echo
 echo "# result: $pass passed, $fail failed"
