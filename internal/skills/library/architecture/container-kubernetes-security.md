@@ -29,7 +29,7 @@ Related skills: CNAPP/KSPM categories in `load_skill cloud-security`; CI gates, 
 - **Sign, then verify at admission** (cosign + Kyverno/policy-controller; `load_skill devsecops`). A signature that nothing checks protects nothing.
 - **Your scanner is supply chain too.** On 19 Mar 2026 attackers published a malicious Trivy **v0.69.4** binary and images and force-pushed 76 of 77 `trivy-action` tags. Malicious v0.69.5–v0.69.6 images followed on Docker Hub. Tracked as GHSA-69fq-xp46-6x23 / CVE-2026-33634.
   - Pin CI actions to a commit SHA and scanner images by digest, and verify their signatures. The scanner runs with your CI secrets in reach.
-  - Current release is v0.76.2 (5 Nov 2026). verify: https://github.com/aquasecurity/trivy/security/advisories/GHSA-69fq-xp46-6x23
+  - Current release is v0.76.2 (5 Nov 2026). marq's image installs Kali's trivy 0.76.0, outside the compromised range. verify: https://github.com/aquasecurity/trivy/security/advisories/GHSA-69fq-xp46-6x23
 
 ## Admission & pod security
 

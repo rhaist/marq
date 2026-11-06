@@ -35,7 +35,8 @@ the math — they're key management, stale algorithms, and rolled-your-own.
 - NIST finalized the first PQC standards in Aug 2024: **FIPS 203 (ML-KEM /
   Kyber)** for key exchange, **FIPS 204 (ML-DSA / Dilithium)** and **FIPS 205
   (SLH-DSA / SPHINCS+)** for signatures; **HQC** selected (Mar 2025) as a KEM
-  backup, draft FIPS expected 2026. verify: https://csrc.nist.gov/projects/post-quantum-cryptography
+  backup and **Falcon (FN-DSA)** as a signature — both still "underway" at NIST
+  with no draft FIPS published as of Nov 2026. verify: https://csrc.nist.gov/projects/post-quantum-cryptography
 - Migration deadline is set: NIST's transition roadmap (**IR 8547**, final
   27 Oct 2026) deprecates quantum-vulnerable RSA/ECC/DH **after 2030** and
   disallows them **after 2035** — that's the planning horizon for the inventory

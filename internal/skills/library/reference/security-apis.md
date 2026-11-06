@@ -11,10 +11,10 @@ ports/CVEs per IP, exploit-likelihood scores, file-hash and threat-intel lookups
 for `httpx_probe` / `nuclei`, and to triage findings.
 
 Every endpoint below was probed and confirmed to return data with **no key and
-no login** (the source list's auth column is unreliable — several "apiKey"
-entries are actually open, and several "free" ones now demand an account, so
-each was tested). Login-gated services (VirusTotal, GreyNoise, OTX, URLhaus,
-EmailRep, …) are deliberately excluded. Full catalogue if you bring your own
+no login** (last re-probed 6 Nov 2026; the source list's auth column is
+unreliable — several "apiKey" entries are actually open, and several "free"
+ones now demand an account, so each was tested). Login-gated services
+(VirusTotal, OTX, URLhaus/abuse.ch, EmailRep, …) are deliberately excluded. Full catalogue if you bring your own
 keys: https://github.com/jaegeral/security-apis
 
 ## How to query
@@ -42,6 +42,14 @@ keys: https://github.com/jaegeral/security-apis
 | **CIRCL hashlookup**         | is a file hash known-good (NSRL) / known                                   | `curl -s https://hashlookup.circl.lu/lookup/sha256/<sha256>`              |
 | **ORKL**                     | search threat-intel reports by keyword, actor, or **IOC** (domain/IP/hash) | `curl -s 'https://orkl.eu/api/v1/library/search?query=avsvmcloud.com'`    |
 | **urlscan.io** (search only) | historical scans, screenshots, linked domains                              | `curl -s 'https://urlscan.io/api/v1/search/?q=domain:example.com'`        |
+| **GreyNoise Community**      | is an IP internet-background noise / a known benign service (RIOT)?        | `curl -s https://api.greynoise.io/v3/community/8.8.8.8`                   |
+
+- **crt.sh** is frequently overloaded (502s and timeouts were seen on the last
+  probe). Retry once after a pause; if it stays down, `subfinder` already pulls
+  certificate-transparency sources among others.
+- **GreyNoise Community** answers keyless with a small daily quota. A **404 with
+  `"IP not observed scanning the internet"`** is a valid answer (not noise), not
+  an error.
 
 Highest-value: `crt.sh` + `internetdb` to expand the surface; `CIRCL CVE` +
 `EPSS` together to detail and prioritise a CVE; `hashlookup` to clear known-good

@@ -39,7 +39,9 @@ query what you need, don't bulk-loop.
 ### RSS / Atom feeds (current awareness)
 
 Fetch the feed XML and read the latest `<item>`/`<entry>` titles + links; open
-the ones on-topic. Good, stable, free feeds:
+the ones on-topic. Good, stable, free feeds (CISA's advisory feed has refused
+scripted `curl` with 403 from some networks — if so, read it with the client's
+web fetch, and use the KEV JSON above for exploited-vuln news):
 
 | Source                                                  | Feed URL                                                                        |
 | :------------------------------------------------------ | :------------------------------------------------------------------------------ |

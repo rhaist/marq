@@ -46,7 +46,7 @@ A cloud buyer cannot audit AWS, Azure or a SaaS vendor directly, so assurance ar
 
 ## FedRAMP (summary — detail in `load_skill us-sectoral-regs`)
 
-- Under the **Consolidated Rules for 2026** (mandatory for new certifications **1 Jan 2027**; valid to 31 Dec 2028) FedRAMP speaks of **certification classes A–C**: **20x** applications opened 3 Aug 2026 (Class A, 20x-only) and 31 Aug 2026 (B/C); a temporary Rev5 pipeline for B/C opened 10 Aug 2026; **no new Rev5 applications after 11 Jun 2027**. Existing Rev5 holders' adoption date moved from 1 Jan to **1 Jul 2027** per the changelog — the launch blog still says 1 Jan; verify: https://www.fedramp.gov/2026/timeline/
+- Under the **Consolidated Rules for 2026** (mandatory for all stakeholders **1 Jan 2027**, with area-specific dates; existing providers must follow them over the following year to keep certification) FedRAMP certifies by **Class A–D**, from minimal to significant assurance: **20x** applications opened 3 Aug 2026 (Class A) and 31 Aug 2026 (B/C); a temporary Rev5 pipeline for B/C opened 10 Aug 2026; **no new Rev5 certifications after 11 Jun 2027**. verify: https://www.fedramp.gov/2026/timeline/ and https://www.fedramp.gov/2026/definitions/
 - 20x leans on **machine-readable, automated validation** (key security indicators, OSCAL) rather than narrative SSPs — `load_skill grc-automation`. Red-team expectations: `load_skill red-teaming`.
 - DoD contractors: a CSP holding CUI must be FedRAMP Moderate (or DoD-defined equivalent) — `load_skill cmmc-800-171`.
 
