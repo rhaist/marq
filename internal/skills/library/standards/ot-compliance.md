@@ -45,8 +45,9 @@ you and when.
 - **EU CRA** (Reg. (EU) 2024/2847) — product cybersecurity. **Art. 14 reporting
   of actively exploited vulnerabilities applies since 11 Sep 2026**; full application
   **11 Dec 2027**. `load_skill eu-cra`.
-- **EU Machinery Regulation** (Reg. (EU) 2023/1230) — **applies 14 Jan 2027**,
-  repealing Directive 2006/42/EC. Cyber-relevant essential requirements:
+- **EU Machinery Regulation** (Reg. (EU) 2023/1230) — **applies 20 Jan 2027**
+  (the 4 Jul 2023 corrigendum fixed the original "14 Jan"), repealing Directive
+  2006/42/EC. Cyber-relevant essential requirements:
   - **Annex III 1.1.9 Protection against corruption** — connecting a device must
     not create a hazard; hardware carrying safety signals protected against
     **accidental _and intentional_** corruption; evidence of legitimate and
@@ -61,8 +62,10 @@ you and when.
   - **Annex I Part A.5/A.6** — safety components with fully or partially
     **self-evolving (ML) behaviour**, and machinery embedding them, take the
     mandatory **notified-body** route. If you are putting ML in a safety
-    function, that is a conformity-assessment decision, not a product decision
-    (`load_skill eu-ai-act` for the parallel AI Act analysis).
+    function, that is a conformity-assessment decision, not a product decision.
+    Since Reg. (EU) 2026/1744 moved machinery to AI Act Annex I **Section B**,
+    the AI Act's high-risk requirements reach machinery through MR delegated
+    acts applying from **2 Aug 2028**, not directly (`load_skill eu-ai-act`).
 - **They do not substitute for each other.** A machine builder in scope of both
   meets **both** requirement sets and runs **both** conformity assessments; CRA
   compliance may _facilitate_ 1.1.9/1.2.1 but the synergy must be **demonstrated,
@@ -100,8 +103,10 @@ you and when.
 
     Treat INSM as a budget-cycle item, not a 2026 problem. Verify:
     https://www.nerc.com/standards/reliability-standards/cip/cip-015-2
+
   - A large virtualization package (CIP-002-7/-8, CIP-005-8, CIP-010-5 and
     others) was FERC-approved Mar 2026 and is **effective 1 Jul 2028**.
+
 - **TSA Security Directives** — surface transport cyber runs through the SD
   series for **pipeline, freight rail and passenger rail** (aviation cyber is
   handled through separate security-programme instruments, so don't cite the
