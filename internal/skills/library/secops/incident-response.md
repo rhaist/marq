@@ -23,7 +23,9 @@ loops you back to identification.
 - Tooling staged: EDR, IR collection scripts, jump kit, out-of-band comms.
 - Know your assets + crown jewels and what "normal" looks like (you can't spot
   evil without a baseline). Logging coverage validated (`load_skill siem-soar`).
-- Runbooks for top scenarios (ransomware, BEC, web compromise, stolen creds).
+- Runbooks for top scenarios (ransomware, BEC, web compromise, stolen creds):
+  `load_skill ransomware-response`, `load_skill bec-email-investigation`,
+  `load_skill cloud-incident-response`.
 
 ## Identification (confirm + scope)
 

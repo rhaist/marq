@@ -40,14 +40,14 @@ Most companies end up with a **stack**: one program framework (CSF or ISO) + wha
 
 ## Region quick-cut
 
-- **EU/UK**: GDPR always (if personal data). + NIS2 if critical sector, + DORA if finance, + **CRA** if you ship products with digital elements, + **AI Act** if AI is in the product or in HR. ISO 27001 is the procurement cert of choice. These stack — a connected industrial product sold by an EU manufacturer can be in all of them at once.
+- **EU/UK**: GDPR always (if personal data). + NIS2 if critical sector, + DORA if finance, + **CRA** if you ship products with digital elements, + **AI Act** if AI is in the product or in HR. ISO 27001 is the procurement cert of choice. These stack — a connected industrial product sold by an EU manufacturer can be in all of them at once. UK specifics (NIS Regs + the Cyber Security and Resilience Bill, DUA Act, CAF, Cyber Essentials, PSTI): `load_skill uk-cyber-regs`.
 - **US**: SOC 2 for B2B SaaS; HIPAA for health; sector laws (GLBA finance, state privacy e.g. CCPA — verify current). PCI everywhere cards are taken.
 - **Global SaaS**: SOC 2 (US buyers) + ISO 27001 (everyone else) + GDPR (EU users) is the common trio.
-- **APAC**: no single regime — ISO 27001 is again the procurement cert of choice, but privacy/transfer law is per-country and a common EU/US blind spot: **China PIPL** (data localization + a mandatory cross-border transfer route), **India DPDP Act** (rules notified Nov 2025, phasing in), **Singapore PDPA**, **Japan APPI**, **Australia Privacy Act** (+ **APRA CPS 234** info-security for regulated finance). GDPR compliance does not cover them — verify per country.
+- **APAC**: no single regime — ISO 27001 is again the procurement cert of choice, but privacy/transfer law is per-country and a common EU/US blind spot: **China PIPL** (data localization + a mandatory cross-border transfer route), **India DPDP Act** (rules notified Nov 2025, phasing in), **Singapore PDPA**, **Japan APPI**, **Australia Privacy Act** (+ **APRA CPS 234** info-security for regulated finance). GDPR compliance does not cover them — verify per country. Per-country detail and breach clocks: `load_skill privacy-apac`.
 
 ## Next steps
 
-- Deep-dive a specific regime: `load_skill iso27001`, `soc2`, `pci-dss`, `nist-csf`, `privacy-eu` (GDPR), `nis2-dora`, `eu-cra`, `eu-ai-act`, `privacy-us`, `us-sectoral-regs`.
+- Deep-dive a specific regime: `load_skill iso27001`, `soc2`, `pci-dss`, `nist-csf`, `privacy-eu` (GDPR), `nis2-dora`, `eu-cra`, `eu-ai-act`, `privacy-us`, `us-sectoral-regs`, `uk-cyber-regs`, `privacy-apac`, `cloud-assurance`, `cmmc-800-171`, `ai-governance`.
 - **Plants and machine builders**: `load_skill ot-compliance` (which regimes bind a factory or a shipped machine) and `load_skill ot-ics` (the engineering).
 - Confirmed which apply → run a **gap analysis** against the chosen framework: `load_skill gap-analysis`.
 - Then map controls once, satisfy many: `load_skill control-mapping`.

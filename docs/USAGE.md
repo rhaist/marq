@@ -1,7 +1,7 @@
 # Usage
 
 How to build, smoke-test and drive marq — your universal cyber assistant (~80
-tools + ~80 skill playbooks across 14 domains). For choosing a client and model
+tools + ~100 skill playbooks across 14 domains). For choosing a client and model
 for the job (Claude Code / Codex as the expert, Pi for local work, LM
 Studio for testing) see [`CLIENTS.md`](CLIENTS.md); for a guided per-OS install
 see [`SETUP.md`](SETUP.md); for the safety model see [`SECURITY.md`](SECURITY.md).
@@ -181,13 +181,13 @@ runtime via `set_engagement`.
 
 ### Information gathering — people footprint
 
-| Tool               | Wraps       | Purpose                             |
-| ------------------ | ----------- | ----------------------------------- |
-| `sherlock`         | sherlock    | Username across ~400 sites          |
-| `maigret_username` | maigret     | Deep username sweep (~2500 sites)   |
+| Tool               | Wraps        | Purpose                             |
+| ------------------ | ------------ | ----------------------------------- |
+| `sherlock`         | sherlock     | Username across ~400 sites          |
+| `maigret_username` | maigret      | Deep username sweep (~2500 sites)   |
 | `email_accounts`   | user-scanner | Sites where an email has an account |
-| `h8mail_breach`    | h8mail      | Email breach/leak exposure †        |
-| `phoneinfoga`      | phoneinfoga | Phone number OSINT                  |
+| `h8mail_breach`    | h8mail       | Email breach/leak exposure †        |
+| `phoneinfoga`      | phoneinfoga  | Phone number OSINT                  |
 
 ### Web application
 
@@ -304,13 +304,13 @@ shim forwards it, and the `-e VAR` args in `mcp.json.example` pass it to MCP
 clients that inherit your environment — or put `KEY=value` lines in
 `~/.config/marq/env` (shim) / an `"env": {...}` block (Claude Desktop).
 
-| Variable                              | Used by                        |
-| ------------------------------------- | ------------------------------ |
-| `SHODAN_API_KEY`                      | `shodan_search`; full banners in `shodan_host` (keyless: InternetDB) |
-| `CENSYS_API_TOKEN` (+ `CENSYS_ORG_ID`) | `censys_view`                 |
-| `GITHUB_TOKEN`                        | `trufflehog` (GitHub scans)    |
-| `NUMVERIFY_API_KEY`                   | `phoneinfoga`                  |
-| `WPSCAN_API_TOKEN`                    | `wpscan` (vuln data)           |
+| Variable                               | Used by                                                              |
+| -------------------------------------- | -------------------------------------------------------------------- |
+| `SHODAN_API_KEY`                       | `shodan_search`; full banners in `shodan_host` (keyless: InternetDB) |
+| `CENSYS_API_TOKEN` (+ `CENSYS_ORG_ID`) | `censys_view`                                                        |
+| `GITHUB_TOKEN`                         | `trufflehog` (GitHub scans)                                          |
+| `NUMVERIFY_API_KEY`                    | `phoneinfoga`                                                        |
+| `WPSCAN_API_TOKEN`                     | `wpscan` (vuln data)                                                 |
 
 theHarvester and h8mail read their own config files (`~/.theHarvester/api-keys.yaml`,
 an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.

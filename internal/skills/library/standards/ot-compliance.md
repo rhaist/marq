@@ -113,7 +113,9 @@ you and when.
   surface SDs at an airline). They are **renewed annually**, so always check the
   current letter suffix and expiry; the pipeline and rail directives currently
   run on Jan and May renewal cycles into 2027 (pipeline: **SD Pipeline-2021-02G**,
-  3 May 2026 – 2 May 2027, a no-substantive-change renewal of 02F). The surface-cyber rulemaking
+  3 May 2026 – 2 May 2027, a no-substantive-change renewal of 02F). Incident
+  reporting to CISA was cut from 24h to **72h** in the late-2025 renewals (verify
+  the current letter). The surface-cyber rulemaking
   (RIN 1652-AA74) was proposed Nov 2024 but has been **demoted to long-term
   actions with no final-rule date** — the directives, not a rule, bind you.
 - **CIRCIA** will add incident reporting once final; **it is not yet

@@ -7,7 +7,7 @@ index, then load the playbook(s) for the work in front of you:
 | Domain                      | When                                              | Example skills                                                                                                                                                 |
 | --------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **offensive**               | pentest, recon, web, AD                           | the phases below + `vuln/*`, `technique/*`                                                                                                                     |
-| **malware**                 | analyze a sample / maldoc                         | `malware-triage`, `malware-static`, `malware-maldoc`, `malware-yara`                                                                                           |
+| **malware**                 | analyze a sample / maldoc                         | `malware-triage`, `malware-static`, `malware-maldoc`, `malware-scripts`, `malware-dynamic`, `malware-yara`                                                     |
 | **threat-intel**            | IOC pivot, attribution, enrichment, TI research   | `ioc-pivoting`, `actor-ttp-attribution`, `indicator-enrichment`, `ti-research`                                                                                 |
 | **secops**                  | SOC, hunting, IR, forensics, vuln mgmt, detection | `siem-soar`, `threat-hunting`, `incident-response`, `digital-forensics`, `vulnerability-management`, `detection-engineering`                                   |
 | **architecture**            | design & engineering                              | `zero-trust`, `network-segmentation`, `cloud-security`, `appsec-sdlc`, `threat-modeling`, `iam`, `data-security`, `endpoint-security`, `crypto-key-management` |
@@ -61,7 +61,9 @@ record results with `report_finding`, then `render_report` at the end.
 
 - Web: `nuclei` (templates), `nikto`, content discovery (`ffuf` / `feroxbuster` /
   `gobuster_dir`), params (`arjun`), injection (`sqlmap`), XSS (`dalfox`), TLS
-  (`testssl`), CMS (`wpscan` / `cmseek`).
+  (`testssl`), CMS (`wpscan` / `cmseek`). APIs/GraphQL: `load_skill api-security`;
+  OAuth/OIDC login flows: `load_skill oauth-oidc`; cloud/K8s exposure:
+  `load_skill cloud-k8s-assessment`.
 - Known exploits: `searchsploit` against discovered product/versions.
 - Secrets: `gitleaks` / `trufflehog` on retrieved code.
 

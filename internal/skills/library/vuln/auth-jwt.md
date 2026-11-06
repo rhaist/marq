@@ -16,6 +16,7 @@ description: Attack authentication and session handling — credential brute/spr
 
 - Capture a token (cookie/JWT) via `run_shell` + curl on login. Check: secure,
   httponly, samesite flags; token entropy; does logout invalidate server-side.
+- OAuth 2.0 / OIDC flows (redirect_uri, state/PKCE, ID-token audience): `load_skill oauth-oidc`.
 
 ## JWT specifically
 

@@ -59,7 +59,9 @@ There is no general US cyber law; obligations attach by **what you do** (public 
   - https://www.federalregister.gov / https://dodcio.defense.gov/cmmc/ — **verify current phase.** Contract clause is **DFARS 252.204-7021**; DFARS 252.204-7012 still requires **72-hour** incident reporting to DC3 + DIBNet.
 - **FedRAMP** — standardized authorization for **cloud services sold to federal agencies** (Low/Moderate/High baselines, built on **NIST 800-53**). FedRAMP has been modernizing toward "**20x**" automation — verify program state: https://www.fedramp.gov/
 - **FISMA** — governs **federal agencies** (and their contractors operating systems on their behalf); implemented via **NIST 800-53** controls and agency ATOs.
+- FedRAMP read against other cloud attestations (STAR, C5, 27017/27018): `load_skill cloud-assurance`.
 - **NIST SP 800-171** — the **110-control** CUI baseline for non-federal systems; contractors self-score into **SPRS**. This is the shared substrate under CMMC L2. **Mind the revision:** **Rev 3** is final (May 2024), but **CMMC L2 assessments still run against Rev 2** — don't score a defense contractor against Rev 3 because it's newer. Separately, the proposed **FAR CUI rule** (recast in 2026 under the FAR Overhaul, moving CUI to a new FAR Part 40) would raise the civilian-agency baseline to **Rev 3** and relax incident reporting from 8 to 72 hours — **still a proposal, not final**.
+  Assessor-level scoring, 170.19 scoping and 170.21 POA&M rules: `load_skill cmmc-800-171`.
 
 ## Critical infrastructure / utilities (high level)
 

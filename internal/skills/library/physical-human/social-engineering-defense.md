@@ -62,13 +62,16 @@ not judgment:
 - Close the loop: reports feed triage/IR; tell reporters what happened so the
   behavior reinforces. Silence kills reporting.
 - Wire reports to the SOC → `load_skill incident-response-leadership` on confirmed compromise.
+  Triage a reported message with `load_skill phishing-email-analysis`; a confirmed
+  mailbox/BEC takeover goes to `load_skill bec-email-investigation`.
 
 ## Technical backstops
 
 - **DMARC at p=reject** (with aligned SPF + DKIM) — stops domain spoofing and
   look-alike-from-your-domain. CISA BOD 18-01 mandates p=reject for US federal
   domains; PCI DSS v4.0.1 req. 5.4.1 makes anti-phishing controls (DMARC/SPF/DKIM
-  named) mandatory for card-data orgs since Mar 31, 2025.
+  named) mandatory for card-data orgs since Mar 31, 2025. Rollout to p=reject and
+  the Gmail/Yahoo/Microsoft bulk-sender rules: `load_skill email-security`.
   Limit: DMARC does **not** stop a _real compromised account_ or display-name
   spoofing from a different domain — layer the rest.
   verify: https://dmarcreport.com/blog/business-email-compromise-bec-scams-take-new-dimension-with-multi-stage-attacks/

@@ -62,6 +62,7 @@ Adjacent (don't confuse): **SSPM** = SaaS posture (Salesforce/M365/Workday confi
 - Control-plane identity hardening is the cloud face of `load_skill zero-trust`.
 - App-layer (code/deps/pipeline) is out of scope here — `load_skill appsec-sdlc`.
 - Map cloud findings to controls with `load_skill control-mapping`; feed residual risk to `load_skill risk-assessment`.
+- Container/K8s hardening: `load_skill container-kubernetes-security`; authorized exposure testing: `load_skill cloud-k8s-assessment`; provider attestations (STAR/C5/FedRAMP): `load_skill cloud-assurance`.
 
 ## Rules
 

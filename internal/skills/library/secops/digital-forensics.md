@@ -74,6 +74,8 @@ ioc-pivoting`. Carve transferred files with Zeek `files.log` / NetworkMiner.
 - Acquire: control-plane audit logs, EBS/disk snapshots, serial console, IAM/role/
   key activity, object-store access logs. Beware ephemeral compute — snapshot
   before the instance is terminated.
+- Full cloud/identity-plane IR playbook (revocation order, federation/app abuse,
+  log retention): `load_skill cloud-incident-response`.
 - Watch identity abuse: new keys, role assumption, federation/OAuth grants,
   CloudTrail tampering. Map to ATT&CK Cloud matrix.
 

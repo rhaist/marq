@@ -25,6 +25,7 @@ manual comparison.
 - Call admin-only endpoints (from `katana`/JS) with a low-priv token. Try
   forced browsing to admin paths (`web-content-discovery` skill). Method
   tampering (GET vs POST), and removing/forging role params.
+- APIs (REST/GraphQL, BOLA/BFLA across verbs, mass assignment): `load_skill api-security`.
 
 ## Report
 

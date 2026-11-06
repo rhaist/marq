@@ -58,7 +58,8 @@ of truth, shared with IR — don't fork the narrative.
   (EU essential/important entities) **24h early-warning → 72h notification → 1-month final
   report**; SEC material cyber **8-K within 4 business days**; sector rules (HIPAA, PCI, DORA
   in EU financial). **APAC clocks differ and rarely match GDPR's 72h** — e.g. Singapore PDPA
-  ~3 days to the PDPC, Australia OAIC ~30 days, Japan APPI prompt-then-~30-day, often needing a
+  ~3 days to the PDPC, Australia NDB a ~30-day assessment window then notify the OAIC and
+  individuals as soon as practicable (not a 30-day filing deadline), Japan APPI prompt-then-~30-day, often needing a
   **local-language filing** to the local regulator; a EU/US playbook that assumes GDPR covers
   everyone under-notifies. If a notifiable event is _plausible_, tell Legal now; under-notifying
   is the costly error. (Decision rules detailed in `load_skill incident-response-leadership`.)

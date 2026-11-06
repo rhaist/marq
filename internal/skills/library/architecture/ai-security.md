@@ -69,7 +69,9 @@ it try.
   (requirements for certification bodies). Sits alongside, not inside, an ISMS —
   `load_skill iso27001`.
 - **NIST AI RMF (AI 100-1)** — voluntary US anchor: **Govern, Map, Measure,
-  Manage**, plus a Generative AI Profile (AI 600-1). Verify current status:
+  Manage**, plus a Generative AI Profile (AI 600-1). A revision is under way
+  under the 2025 AI Action Plan; no draft was out as of Nov 2026. Running the
+  management system around it: `load_skill ai-governance`. Verify current status:
   https://www.nist.gov/itl/ai-risk-management-framework
 - **NIST SP 800-218A** (final Jul 2024) — the **GenAI profile of the SSDF**; use
   with SP 800-218 v1.1 in the pipeline (`load_skill devsecops`).

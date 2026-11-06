@@ -72,7 +72,9 @@ MITRE ATT&CK so handoffs are unambiguous.
 
 **Pay a ransom?** Not your call alone — Legal + exec + insurer. Check OFAC
 sanctions exposure (paying a sanctioned actor is itself illegal). Decryptors
-often fail; recovery from backups is the real plan.
+often fail; recovery from backups is the real plan. Full playbook and the
+payment-duty table: `load_skill ransomware-response`. Every notification clock
+side by side: `load_skill breach-notification-matrix`.
 
 ## Evidence preservation (do this before eradicating)
 

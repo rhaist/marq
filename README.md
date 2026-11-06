@@ -20,7 +20,7 @@ answer it — on whatever model you choose, local or frontier.
 "Build the ransomware incident runbook."               → IR + resilience
 ```
 
-**~80 security tools + ~80 expert playbooks (current 2026 standards), in one
+**~80 security tools + ~100 expert playbooks (current 2026 standards), in one
 auditable binary.** You bring the model; marq brings the tools and the knowledge.
 
 ## Start
@@ -138,7 +138,7 @@ API keys in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-sources).)
 - **Execution** — ~80 wrapped Kali tools (recon, web, AD/internal, exploitation,
   cred cracking, malware static analysis, OSINT), each audit-logged and sandboxed;
   findings render to `findings.md` / `.csv` (with optional CVSS + CWE).
-- **Knowledge** — ~80 `load_skill` playbooks across 14 domains, web-researched to
+- **Knowledge** — ~100 `load_skill` playbooks across 14 domains, web-researched to
   current (2026) standards, telling the model _how_ to use the tools and _what_ to
   do where there's no tool: offensive, malware, threat-intel, sec-ops, architecture,
   GRC, standards & EU/US regulation, CISO, red/purple, resilience, human factors,
@@ -156,7 +156,7 @@ API keys in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-sources).)
 | :------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Recon / network**                   | `nmap` · `masscan` · `naabu` · `dnsx` · `dnsrecon` · `subfinder` · `httpx_probe` · `dns_lookup` · `whois_lookup` · `ssh_audit` · `fping_sweep` · `snmp_walk` · `snmp_check` · `snmp_brute` · `smtp_user_enum` · `smtp_test` · `asnmap` · `cdncheck` · `censys_view`              |
 | **OSINT — org/domain**                | `theharvester` · `spiderfoot` · `shodan_host` · `shodan_search` · `gitleaks` · `trufflehog` · `gau_urls` · `exif_metadata`                                                                                                                                                       |
-| **OSINT — people**                    | `sherlock` · `maigret_username` · `email_accounts` · `h8mail_breach` · `phoneinfoga`                                                                                                                                                                                               |
+| **OSINT — people**                    | `sherlock` · `maigret_username` · `email_accounts` · `h8mail_breach` · `phoneinfoga`                                                                                                                                                                                             |
 | **Web app**                           | `nuclei` · `nikto` · `feroxbuster` · `katana` · `ffuf` · `gobuster_dir` · `arjun` · `whatweb` · `wafw00f` · `cmseek` · `wpscan` · `testssl` · `dalfox` · `sqlmap` · `jwt_tool` · `trivy` · `interactsh` · `paramspider` · `sstimap`                                              |
 | **Exploitation**                      | `donut` · `hydra` · `searchsploit`                                                                                                                                                                                                                                               |
 | **AD / internal network**             | `impacket_secretsdump` · `impacket_kerberoast` · `impacket_asreproast` · `impacket_psexec` · `impacket_wmiexec` · `impacket_ntlmrelayx` · `netexec` · `certipy_find` · `bloodhound_collect` · `evil_winrm` · `enum4linux` · `smb_enum` · `ldap_search` · `responder` · `nbtscan` |
@@ -191,7 +191,7 @@ terminal agent (Pi) ──bash──▶  pi/marq shim ─┤   both hit the same
                                              │
                                   runner.Run ──▶ audit.jsonl (every call)
 
-           load_skill ──▶ skills library (markdown, ~80 playbooks / 14 domains)
+           load_skill ──▶ skills library (markdown, ~100 playbooks / 14 domains)
 ```
 
 Every exec tool funnels through `internal/runner/runner.go::Run` — the single
