@@ -36,7 +36,7 @@ Pick your path — start simple, add a layer only when you need it:
 
 ### The skills pack — install into your agent (no server, no Docker)
 
-The ~80 playbooks are a standard [Agent Skills](https://agentskills.io) pack under
+The ~100 playbooks are a standard [Agent Skills](https://agentskills.io) pack under
 [`skills/`](skills/), so agents that read `SKILL.md` load them natively:
 
 ```bash

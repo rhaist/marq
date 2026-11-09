@@ -1,6 +1,9 @@
 ---
 name: cmmc-800-171
-description: Assessor-level NIST SP 800-171 and CMMC — Rev 2 vs Rev 3 and which one CMMC L2 assesses, SP 800-171A objectives, the DoD scoring methodology and SPRS, CMMC POA&M rules and the 180-day closeout, affirmations, L1/L2/L3 scope, CUI asset categories and enclaves, and the current (suspended) CMMC phase state.
+description: Covers assessor-level NIST SP 800-171 and CMMC — Rev 2 vs Rev 3 and which one CMMC L2 assesses, SP 800-171A objectives, the DoD scoring methodology and SPRS, CMMC POA&M rules and the 180-day closeout, affirmations, L1/L2/L3 scope, CUI asset categories and enclaves, and the current (suspended) CMMC phase state. Use when the user handles CUI, supplies the US DoD, or asks about CMMC levels, SPRS scores, POA&Ms or 800-171 assessment scope.
+license: Apache-2.0
+metadata:
+  verified: "2026-11-06"
 ---
 
 # NIST SP 800-171 & CMMC: the assessor's view (practitioner orientation, NOT legal advice)

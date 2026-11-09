@@ -1,6 +1,9 @@
 ---
 name: bec-email-investigation
-description: Investigate a business-email-compromise or mailbox takeover in Microsoft 365 or Google Workspace — which logs to pull before they expire, the persistence to hunt (inbox rules, forwarding, delegates, OAuth grants, added MFA/devices), the containment order, and fast funds recovery via bank recall and the FBI IC3 Recovery Asset Team.
+description: Guides investigating a business-email-compromise or mailbox takeover in Microsoft 365 or Google Workspace — which logs to pull before they expire, the persistence to hunt (inbox rules, forwarding, delegates, OAuth grants, added MFA/devices), the containment order, and fast funds recovery via bank recall and the FBI IC3 Recovery Asset Team. Use when a mailbox is suspected compromised, a payment was diverted by email, or the user asks how to investigate BEC.
+license: Apache-2.0
+metadata:
+  verified: "2026-11-06"
 ---
 
 # BEC / mailbox-takeover investigation

@@ -1,6 +1,9 @@
 ---
 name: cloud-assurance
-description: Cloud assurance regimes providers attest to and buyers ask for — CSA STAR levels with CCM v4.1/CAIQ (and STAR for AI), BSI C5:2020→C5:2026, ISO/IEC 27017/27018, the stalled EUCS scheme, FedRAMP's 20x transition — and how to read a provider's attestation package versus a SOC 2.
+description: Covers cloud assurance regimes providers attest to and buyers ask for — CSA STAR levels with CCM v4.1/CAIQ (and STAR for AI), BSI C5:2020→C5:2026, ISO/IEC 27017/27018, the stalled EUCS scheme, FedRAMP's 20x transition — and how to read a provider's attestation package versus a SOC 2. Use when the user asks about CSA STAR, CCM, CAIQ, C5, EUCS or FedRAMP, or is assessing a cloud provider's assurance evidence.
+license: Apache-2.0
+metadata:
+  verified: "2026-11-06"
 ---
 
 # Cloud assurance: what providers attest to, and how to read it

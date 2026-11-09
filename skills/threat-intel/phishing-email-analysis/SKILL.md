@@ -1,6 +1,9 @@
 ---
 name: phishing-email-analysis
-description: Triage a reported phish (.eml/.msg) — read the Received chain and Authentication-Results (SPF/DKIM/DMARC/ARC/compauth), spot Reply-To/Return-Path mismatches, extract and safely handle URLs and attachments, recognize AiTM/device-code/consent phishing kits, and scope who else got or clicked it.
+description: Guides triaging a reported phish (.eml/.msg) — read the Received chain and Authentication-Results (SPF/DKIM/DMARC/ARC/compauth), spot Reply-To/Return-Path mismatches, extract and safely handle URLs and attachments, recognize AiTM/device-code/consent phishing kits, and scope who else got or clicked it. Use when the user shares a suspicious email or headers, asks whether a message is phishing, or needs to analyze a reported phish.
+license: Apache-2.0
+metadata:
+  verified: "2026-11-06"
 ---
 
 # Phishing email analysis

@@ -1,6 +1,9 @@
 ---
 name: breach-notification-matrix
-description: Every incident/breach notification clock a security team meets (EU, UK, US federal and state, APAC, contractual) in one table with trigger, recipient, deadline, owner and source, plus how to build the per-incident matrix in the first hour.
+description: Lists every incident/breach notification clock a security team meets (EU, UK, US federal and state, APAC, contractual) in one table with trigger, recipient, deadline, owner and source, plus how to build the per-incident matrix in the first hour. Use when an incident may trigger reporting duties, or the user asks who must be notified, by when, under GDPR, NIS2, DORA, SEC, CIRCIA, HIPAA or state breach laws.
+license: Apache-2.0
+metadata:
+  verified: "2026-11-06"
 ---
 
 # Breach notification matrix

@@ -1,6 +1,9 @@
 ---
 name: cloud-k8s-assessment
-description: Authorized external assessment of cloud and Kubernetes exposure with marq — cloud asset footprint, exposed control-plane ports (API server, kubelet, etcd, Docker), nuclei misconfiguration templates, trivy image/IaC review, leaked cloud keys in repos, and how to rate and report each finding.
+description: Guides an authorized external assessment of cloud and Kubernetes exposure with marq — cloud asset footprint, exposed control-plane ports (API server, kubelet, etcd, Docker), nuclei misconfiguration templates, trivy image/IaC review, leaked cloud keys in repos, and how to rate and report each finding. Use when the user asks to assess an in-scope cloud or Kubernetes footprint, find exposed kubelet/etcd/Docker APIs, or scan images and IaC for misconfigurations.
+license: Apache-2.0
+metadata:
+  verified: "2026-11-06"
 ---
 
 # Cloud & Kubernetes exposure assessment

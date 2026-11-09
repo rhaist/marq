@@ -1,6 +1,9 @@
 ---
 name: ai-governance
-description: Run an AI management system — ISO/IEC 42001 (with 42005/42006), NIST AI RMF and its profiles, the AI inventory and risk register, acceptable-use policy, model-vendor assessment, and how it evidences EU AI Act and AI-security duties.
+description: Guides running an AI management system — ISO/IEC 42001 (with 42005/42006), NIST AI RMF and its profiles, the AI inventory and risk register, acceptable-use policy, model-vendor assessment, and how it evidences EU AI Act and AI-security duties. Use when the user asks about ISO 42001, NIST AI RMF, an AI policy or inventory, assessing an AI vendor, or AI governance for EU AI Act compliance.
+license: Apache-2.0
+metadata:
+  verified: "2026-11-06"
 ---
 
 # AI governance (the management-system layer)

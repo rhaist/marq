@@ -1,6 +1,9 @@
 ---
 name: email-security
-description: Email authentication and transport architecture — SPF/DKIM/DMARC with a staged rollout to p=reject, the Google/Yahoo/Microsoft bulk-sender rules, DMARCbis (RFC 9989), ARC, MTA-STS/TLS-RPT, BIMI, and secure email gateway vs API-based (ICES) protection.
+description: Covers email authentication and transport architecture — SPF/DKIM/DMARC with a staged rollout to p=reject, the Google/Yahoo/Microsoft bulk-sender rules, DMARCbis (RFC 9989), ARC, MTA-STS/TLS-RPT, BIMI, and secure email gateway vs API-based (ICES) protection. Use when the user asks about SPF, DKIM, DMARC, MTA-STS or BIMI records, spoofing protection, bulk-sender requirements, or choosing an email security gateway.
+license: Apache-2.0
+metadata:
+  verified: "2026-11-06"
 ---
 
 # Email security architecture

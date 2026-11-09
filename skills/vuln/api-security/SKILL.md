@@ -1,6 +1,9 @@
 ---
 name: api-security
-description: Test REST and GraphQL APIs against the OWASP API Security Top 10 (2023) — surface and spec discovery, object/property/function-level authorization with two accounts, mass assignment, rate-limit and resource-consumption checks, GraphQL introspection — and report with proof.
+description: Guides testing REST and GraphQL APIs against the OWASP API Security Top 10 (2023) — surface and spec discovery, object/property/function-level authorization with two accounts, mass assignment, rate-limit and resource-consumption checks, GraphQL introspection — and reporting with proof. Use when the user asks to test an API, OpenAPI/Swagger spec or GraphQL endpoint for BOLA, BFLA, mass assignment or rate-limit flaws on an authorized target.
+license: Apache-2.0
+metadata:
+  verified: "2026-11-06"
 ---
 
 # API security (REST & GraphQL)

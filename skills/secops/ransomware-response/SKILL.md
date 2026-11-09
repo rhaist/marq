@@ -1,6 +1,9 @@
 ---
 name: ransomware-response
-description: End-to-end ransomware incident playbook — scope encryption vs exfiltration, isolate without losing evidence, identify the strain and find a decryptor, watch the leak site, restore clean-room in known-good order, and make the payment decision with its legal duties (OFAC, Australia, NYDFS, CIRCIA, UK).
+description: Provides an end-to-end ransomware incident playbook — scope encryption vs exfiltration, isolate without losing evidence, identify the strain and find a decryptor, watch the leak site, restore clean-room in known-good order, and make the payment decision with its legal duties (OFAC, Australia, NYDFS, CIRCIA, UK). Use when the user faces an active or suspected ransomware incident, an extortion demand, or is preparing a ransomware response plan.
+license: Apache-2.0
+metadata:
+  verified: "2026-11-06"
 ---
 
 # Ransomware response

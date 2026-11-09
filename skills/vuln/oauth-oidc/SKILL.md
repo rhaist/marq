@@ -1,6 +1,9 @@
 ---
 name: oauth-oidc
-description: Test OAuth 2.0 / OpenID Connect flows — redirect_uri validation, state/PKCE/nonce, response-mode and token leakage, ID-token validation (iss/aud/nonce/signature) — against the RFC 9700 Security BCP baseline, and report with proof.
+description: Guides testing OAuth 2.0 / OpenID Connect flows — redirect_uri validation, state/PKCE/nonce, response-mode and token leakage, ID-token validation (iss/aud/nonce/signature) — against the RFC 9700 Security BCP baseline, and reporting with proof. Use when the user asks to test SSO, an OAuth login or OIDC client, redirect_uri handling, or token leakage on an authorized target.
+license: Apache-2.0
+metadata:
+  verified: "2026-11-06"
 ---
 
 # OAuth 2.0 / OpenID Connect

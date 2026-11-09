@@ -1,6 +1,9 @@
 ---
 name: uk-cyber-regs
-description: The UK cyber/privacy regime post-Brexit — NIS Regulations 2018 and the Cyber Security and Resilience Bill, UK GDPR as changed by the Data (Use and Access) Act 2025, NCSC CAF v4.0, Cyber Essentials v3.3, the PSTI product-security regime, finance op-res rules, and where the UK now diverges from EU NIS2/GDPR/CRA/DORA.
+description: Covers the UK cyber/privacy regime post-Brexit — NIS Regulations 2018 and the Cyber Security and Resilience Bill, UK GDPR as changed by the Data (Use and Access) Act 2025, NCSC CAF v4.0, Cyber Essentials v3.3, the PSTI product-security regime, finance op-res rules, and where the UK now diverges from EU NIS2/GDPR/CRA/DORA. Use when the user operates in or sells into the UK, or asks about UK NIS, UK GDPR, CAF, Cyber Essentials or PSTI.
+license: Apache-2.0
+metadata:
+  verified: "2026-11-06"
 ---
 
 # UK cyber & privacy regulation (practitioner orientation, NOT legal advice)

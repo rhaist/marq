@@ -1,6 +1,9 @@
 ---
 name: cloud-incident-response
-description: Incident response in AWS, Azure, GCP and Microsoft 365/Entra — the logs that matter and their default retention, preserving evidence before auto-remediation, credential/session revocation order, identity-plane compromise (federation, app registrations, OAuth grants) and snapshot-based acquisition.
+description: Guides incident response in AWS, Azure, GCP and Microsoft 365/Entra — the logs that matter and their default retention, preserving evidence before auto-remediation, credential/session revocation order, identity-plane compromise (federation, app registrations, OAuth grants) and snapshot-based acquisition. Use when the user is responding to a cloud account or tenant compromise, leaked cloud keys, or needs to collect cloud forensic evidence.
+license: Apache-2.0
+metadata:
+  verified: "2026-11-06"
 ---
 
 # Cloud incident response

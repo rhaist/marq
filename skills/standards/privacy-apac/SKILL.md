@@ -1,6 +1,9 @@
 ---
 name: privacy-apac
-description: APAC privacy and cyber-reporting law for a security team — China (PIPL/DSL/amended CSL, incident-reporting measures, cross-border routes and exemptions), India (DPDP Act + Rules phase-in, CERT-In), Singapore PDPA, Japan APPI and its 2026 amendment, Korea PIPA 2026 amendment, Australia (Privacy Act reforms, NDB, SOCI, APRA CPS 234/230) — with every breach clock in one table.
+description: Covers APAC privacy and cyber-reporting law for a security team — China (PIPL/DSL/amended CSL, incident-reporting measures, cross-border routes and exemptions), India (DPDP Act + Rules phase-in, CERT-In), Singapore PDPA, Japan APPI and its 2026 amendment, Korea PIPA 2026 amendment, Australia (Privacy Act reforms, NDB, SOCI, APRA CPS 234/230) — with every breach clock in one table. Use when the user operates in or transfers data to APAC, or asks about PIPL, DPDP, CERT-In, PDPA, APPI, PIPA or Australian breach reporting.
+license: Apache-2.0
+metadata:
+  verified: "2026-11-06"
 ---
 
 # APAC privacy & breach reporting (practitioner orientation, NOT legal advice)

@@ -1,6 +1,9 @@
 ---
 name: container-kubernetes-security
-description: Securing container images and Kubernetes clusters — minimal/signed images and trivy scanning, Pod Security Admission, RBAC least privilege, NetworkPolicy, secrets, runtime detection (Falco/Tetragon), managed-K8s shared responsibility, CIS/NSA benchmarks and the Kubernetes support cadence.
+description: Covers securing container images and Kubernetes clusters — minimal/signed images and trivy scanning, Pod Security Admission, RBAC least privilege, NetworkPolicy, secrets, runtime detection (Falco/Tetragon), managed-K8s shared responsibility, CIS/NSA benchmarks and the Kubernetes support cadence. Use when the user is hardening or reviewing a container platform, EKS/AKS/GKE cluster, Kubernetes RBAC or Pod Security settings, or asks about image signing or runtime detection.
+license: Apache-2.0
+metadata:
+  verified: "2026-11-06"
 ---
 
 # Container & Kubernetes security
