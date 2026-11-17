@@ -136,7 +136,12 @@ func TestPassiveOnly(t *testing.T) {
 	refused("trufflehog", Args{"source": "github"})
 	refused("maigret_username", Args{"username": "--parse=https://acme.com/"})
 	refused("sherlock", Args{"username": "--site"})
-	for _, ok := range []string{"git https://github.com/acme/verifier", "github --org=acme", "gitlab --repo=https://gitlab.com/o/r"} {
+	refused("h8mail_breach", Args{"email": "a@acme.com", "options": "-u https://acme.com"})
+	refused("h8mail_breach", Args{"email": "a@acme.com", "options": "-bc /etc --loose"})
+	if inv := toolNamed(t, "h8mail_breach").Build(Args{"email": "a@acme.com", "options": "-bc /work/breach --loose -sk"}); inv.Refuse != "" {
+		t.Errorf("h8mail local compilation refused: %s", inv.Refuse)
+	}
+	for _, ok := range []string{"git https://github.com/acme/verifier", "github --org=acme", "git https://gitlab.com/o/r"} {
 		if inv := toolNamed(t, "trufflehog").Build(Args{"source": ok}); inv.Refuse != "" {
 			t.Errorf("trufflehog %q refused: %s", ok, inv.Refuse)
 		}

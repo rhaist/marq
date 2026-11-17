@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -68,15 +69,31 @@ func people() []Tool {
 			Name: "h8mail_breach",
 			Desc: "Check an EMAIL against breach/leak databases (h8mail). Largely keyless-limited — " +
 				"configure HIBP/Hunter/Snusbase/Dehashed/IntelX keys via a config file passed in `options` " +
-				"(e.g. '-c config.ini'), or point at a local breach compilation with '-bc /path --loose'. " +
+				"(e.g. '-c /work/h8mail.ini'), or point at a local breach compilation with '-bc /work/<dir> " +
+				"--loose'; '-sk' skips the default keyless sources. Only -c, -bc (paths under /work), " +
+				"--loose and -sk are accepted. " +
 				"(Note: h8mail is unmaintained upstream as of 2026 — some API integrations may have drifted.)",
 			Params: []Param{
 				{Name: "email", Type: StringParam, Desc: "email address", Required: true},
-				{Name: "options", Type: StringParam, Desc: "extra raw flags", Default: ""},
+				{Name: "options", Type: StringParam, Desc: "-c <file> / -bc <dir> under /work, --loose, -sk", Default: ""},
 			},
 			Build: func(a Args) Invocation {
-				argv := []string{"h8mail", "-t", a.S("email")}
-				argv = append(argv, shellword.Split(a.S("options"))...)
+				opts := shellword.Split(a.S("options"))
+				// Allowlist: h8mail's -u fetches arbitrary URLs (a target's own site) and
+				// -o/-j write anywhere; only config and local-compilation inputs pass.
+				for i := 0; i < len(opts); i++ {
+					switch opts[i] {
+					case "--loose", "-sk":
+						continue
+					case "-c", "-bc":
+						if i+1 < len(opts) && strings.HasPrefix(filepath.Clean(opts[i+1]), "/work/") {
+							i++
+							continue
+						}
+					}
+					return Invocation{Target: a.S("email"), Refuse: "options may only be -c <file>, -bc <dir> (under /work), --loose, -sk"}
+				}
+				argv := append([]string{"h8mail", "-t", a.S("email")}, opts...)
 				return Invocation{Argv: argv, Target: a.S("email")}
 			},
 		},

@@ -22,8 +22,8 @@ var publicHosts = []string{"github.com", "gitlab.com", "bitbucket.org", "codeber
 // verification (which logs in with the leaked secret) or point --endpoint at
 // the target's own server.
 func publicCodeSource(src []string) string {
-	const usage = "source must be 'git <https-url>', 'github --org=<org>', 'github --repo=<url>' or " +
-		"'gitlab --repo=<url>' on github.com, gitlab.com, bitbucket.org or codeberg.org, with no other flags"
+	const usage = "source must be 'git <https-url>', 'github --org=<org>' or 'github --repo=<url>' " +
+		"on github.com, gitlab.com, bitbucket.org or codeberg.org, with no other flags"
 	publicURL := func(raw string) bool {
 		u, err := url.Parse(raw)
 		return err == nil && u.Scheme == "https" && u.User == nil &&
@@ -41,8 +41,6 @@ func publicCodeSource(src []string) string {
 			ok = len(src) == 2 && publicURL(tok)
 		case "github":
 			ok = (isRepo && publicURL(repo)) || (isOrg && org != "" && !strings.ContainsAny(org, "/:"))
-		case "gitlab":
-			ok = isRepo && publicURL(repo)
 		}
 		if !ok {
 			return usage
@@ -136,12 +134,11 @@ func osint() []Tool {
 		},
 		{
 			Name: "trufflehog",
-			Desc: "Find leaked secrets in PUBLIC code with trufflehog. `source` must start with the " +
-				"subcommand: 'git <https-url>', 'github --org=<org>', 'github --repo=<url>' or " +
-				"'gitlab --repo=<url>', on github.com, gitlab.com, bitbucket.org or codeberg.org only — no " +
-				"self-hosted servers, no extra flags. Provide GITHUB_TOKEN for GitHub org scans (rate limits). " +
-				"Secrets are reported unverified — marq never tests found credentials against the " +
-				"service they belong to.",
+			Desc: "Find leaked secrets in PUBLIC code with trufflehog. `source` is 'git <https-url>', " +
+				"'github --org=<org>' or 'github --repo=<url>', on github.com, gitlab.com, bitbucket.org " +
+				"or codeberg.org only (GitLab repos via 'git <url>') — no self-hosted servers, no extra " +
+				"flags. Provide GITHUB_TOKEN for GitHub org scans (rate limits). Secrets are reported " +
+				"unverified — marq never tests found credentials against the service they belong to.",
 			Params: []Param{
 				{Name: "source", Type: StringParam, Desc: "subcommand + target, e.g. 'git https://github.com/org/repo'", Required: true},
 			},
