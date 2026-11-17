@@ -118,6 +118,32 @@ func TestStale(t *testing.T) {
 	}
 }
 
+// TestCrossReferencesResolve: skills point the model at each other
+// (`load_skill x`, "Pairs with"); a rename or removal must not leave it
+// asking for a skill that doesn't exist.
+func TestCrossReferencesResolve(t *testing.T) {
+	names := map[string]bool{}
+	for _, m := range List() {
+		names[m.Name] = true
+	}
+	loadRe := regexp.MustCompile(`load_skill\s+(?:\{"name":\s*")?([a-z0-9][a-z0-9-]*)`)
+	pairsRe := regexp.MustCompile(`(?s)## Pairs with(.*?)(?:\n## |\z)`)
+	tickRe := regexp.MustCompile("`([a-z0-9]+(?:-[a-z0-9]+)*)`")
+	for _, m := range List() {
+		body, _ := Load(m.Name)
+		var refs [][]string
+		refs = append(refs, loadRe.FindAllStringSubmatch(body, -1)...)
+		if p := pairsRe.FindStringSubmatch(body); p != nil {
+			refs = append(refs, tickRe.FindAllStringSubmatch(p[1], -1)...)
+		}
+		for _, r := range refs {
+			if !names[r[1]] {
+				t.Errorf("%s references unknown skill %q", m.Name, r[1])
+			}
+		}
+	}
+}
+
 // TestPluginListsEveryCategory: Claude Code plugins scan one level, so
 // plugin.json must name every skills/<category>/ or that category never loads.
 func TestPluginListsEveryCategory(t *testing.T) {
