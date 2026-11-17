@@ -5,8 +5,8 @@
 ### Current security expertise for your AI agent
 
 An open knowledge pack of security, GRC and OT/ICS playbooks that is re-checked
-against primary sources every 6–8 weeks, plus an optional tool server that refuses
-out-of-scope targets. It works with whatever model and agent you use.
+against primary sources every 6–8 weeks, plus an optional passive-OSINT tool
+server. It works with whatever model and agent you use.
 
 [![CI](https://github.com/rhaist/marq/actions/workflows/ci.yml/badge.svg)](https://github.com/rhaist/marq/actions/workflows/ci.yml)
 
@@ -18,21 +18,19 @@ out-of-scope targets. It works with whatever model and agent you use.
 "Our breach-notification clock under NIS2, GDPR and US law?"      → regulation
 "Threat-model this payment API."                                  → architecture
 "What does this malware sample actually do?"                      → malware
-"Run an authorized pentest of *.acme.com."                        → offensive
+"Footprint acme.com from public sources."                       → OSINT
 ```
 
-**The knowledge pack.** About 100 playbooks for practitioners at EU and US
+**The knowledge pack.** About 83 playbooks for practitioners at EU and US
 manufacturers. They run from a finding to the obligation it touches (IEC 62443,
 EU CRA, NIS2, ISO 27001, NIST, US sector rules) to the board report. Every skill
 records the date it was last checked, and Apache-2.0 means it installs into any
 agent, including internal ones.
 
-**The tool server (optional).** About 85 wrapped Kali tools plus an `exec` for
-the rest. Every active command is checked against the engagement scope before it
-runs: out-of-scope targets are refused, widening scope asks you first (on MCP
-clients that support elicitation), and every
-call lands in a fail-closed, operator-attributed audit log you can hand to a
-client or regulator.
+**The tool server (optional).** About 30 wrapped **passive OSINT** tools (domain,
+infrastructure, people, leaked secrets in public code). They query public sources
+and never probe, scan or exploit a target, and every call lands in a fail-closed,
+operator-attributed audit log you can hand to a client or regulator.
 
 ## Start
 
@@ -42,12 +40,12 @@ Pick your path — start simple, add a layer only when you need it:
 | :------------------------------------------- | :-------------- | :-------------------------- |
 | **cyber expertise inside my agent**          | skills pack     | one install command         |
 | **…the same, over MCP for any client**       | skills server   | one `go install`, no Docker |
-| **…plus the ~85-tool suite to _run_ things** | full MCP server | build/pull the image        |
+| **…plus the ~30 OSINT tools to _run_**   | full MCP server | build/pull the image        |
 | **…driven by a local model**                 | full + Pi       | image + Pi + llama.cpp      |
 
 ### The skills pack — install into your agent (no server, no Docker)
 
-The ~100 playbooks are a standard [Agent Skills](https://agentskills.io) pack under
+The ~83 playbooks are a standard [Agent Skills](https://agentskills.io) pack under
 [`skills/`](skills/), so agents that read `SKILL.md` load them natively:
 
 ```bash
@@ -66,13 +64,13 @@ lists anything overdue.
 ### Just the skills over MCP — for any MCP client (no Docker)
 
 The lowest-friction way in: add the **skills library + advisory tools** to any MCP
-client and skip the offensive tool suite entirely. `MARQ_SKILLS_ONLY=1` loads only
-the in-process knowledge tools (skills, findings, files) — no scan capabilities and
-**no Kali binaries**, so it's a single static Go binary you run natively:
+client and skip the OSINT tool suite entirely. `MARQ_SKILLS_ONLY=1` loads only
+the in-process knowledge tools (skills, findings, files) — no OSINT
+binaries, so it's a single static Go binary you run natively:
 
 ```bash
 go install github.com/rhaist/marq/cmd/marq@latest   # ~10 MB, skills embedded
-marq skills                                          # browse all 80, by domain
+marq skills                                          # browse all 83, by domain
 marq skills nis2-dora                                # read one, no client needed
 
 claude mcp add marq-skills \
@@ -81,7 +79,7 @@ claude mcp add marq-skills \
   -- marq serve
 ```
 
-Now ask _"Map our pentest findings to ISO 27001 and SOC 2"_ or _"What's our
+Now ask _"Map our audit findings to ISO 27001 and SOC 2"_ or _"What's our
 breach-notification clock under GDPR and NIS2?"_ and the model loads the right
 playbook (current 2026 standards) and drafts the deliverable. Scripted
 end-to-end demo: [`scripts/demo-skills.sh`](scripts/demo-skills.sh).
@@ -92,7 +90,7 @@ suite below when you need to _run_ something, not just reason about it.
 
 ### The full tool suite
 
-To _run_ tools (recon, web, AD, exploitation…), not just reason, get the image:
+To _run_ the OSINT tools (domain, people, leaked-secret lookups), not just reason, get the image:
 
 ```bash
 # prebuilt — or build from source: docker build -t marq .
@@ -101,7 +99,7 @@ docker pull ghcr.io/rhaist/marq && docker tag ghcr.io/rhaist/marq marq
 # first check: which build, and how many tools/skills did it come with
 docker run --rm marq version
 
-# the catalog — add a name (`marq tools nmap`) for one tool's schema
+# the catalog — add a name (`marq tools subfinder`) for one tool's schema
 docker run --rm marq tools
 ```
 
@@ -112,7 +110,7 @@ or point a frontier MCP client at it.
 ### Run it fully local
 
 Your own model, on your box: no cloud, nothing leaves the
-host — the recommended setup for hands-on offensive work. Drive marq from
+host — the recommended setup when investigating people or a client's footprint. Drive marq from
 [Pi](https://pi.dev/) over [llama.cpp](https://github.com/ggml-org/llama.cpp):
 
 ```bash
@@ -138,7 +136,7 @@ mkdir -p ~/.pi/agent && marq prompt system > ~/.pi/agent/SYSTEM.md
 # then run `pi`
 ```
 
-Then just talk to it: _"Set scope to scanme.nmap.org and run a quick nmap,"_ or
+Then just talk to it: _"Footprint example.com: subdomains, emails, exposed hosts,"_ or
 _"Load the nis2-dora skill — what's our breach clock?"_ Full local walkthrough
 (Pi provider, skill, tuning) → [`docs/SETUP.md`](docs/SETUP.md#4-run-with-a-local-model-pi--the-marq-skill).
 
@@ -150,52 +148,47 @@ client at marq instead:
 ```bash
 claude mcp add marq -- docker run --rm -i \
   --security-opt no-new-privileges:true --cap-drop ALL \
-  --cap-add NET_RAW --cap-add NET_ADMIN --cap-add NET_BIND_SERVICE \
   -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR="$USER" marq
 ```
 
 Any MCP client works (Codex, Claude Desktop) → [`docs/CLIENTS.md`](docs/CLIENTS.md).
-(The caps are only what SYN scans need. No keys or config required; optional
+(No keys or config required; optional
 API keys in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-sources).)
 
-> **Authorized use.** Advisory/knowledge is open; scanning & exploitation are
-> authorized-only and audit-logged — [`docs/SECURITY.md`](docs/SECURITY.md).
+> **Passive and purpose-bound.** marq queries public sources only and audit-logs
+> every call; people OSINT is personal-data processing, so record a purpose with
+> `set_engagement` — [`docs/SECURITY.md`](docs/SECURITY.md).
 
 ---
 
 ## What you get
 
-- **Execution** — ~85 wrapped Kali tools (recon, web, AD/internal, exploitation,
-  cred cracking, malware static analysis, OSINT), each audit-logged and sandboxed;
-  findings render to `findings.md` / `.csv` (with optional CVSS + CWE).
-- **Knowledge** — ~100 `load_skill` playbooks across 14 domains, web-researched to
+- **Execution** — ~30 wrapped passive-OSINT tools (domain/infra footprint, people,
+  leaked secrets in public code), each audit-logged and sandboxed; findings render
+  to `findings.md` / `.csv` (with optional CVSS + CWE).
+- **Knowledge** — ~83 `load_skill` playbooks across 13 domains, web-researched to
   current (2026) standards, telling the model _how_ to use the tools and _what_ to
-  do where there's no tool: offensive, malware, threat-intel, sec-ops, architecture,
-  GRC, standards & EU/US regulation, CISO, red/purple, resilience, human factors,
+  do where there's no tool: malware, threat-intel, sec-ops, architecture,
+  GRC, standards & EU/US regulation, CISO, purple-team, resilience, human factors,
   DevSecOps/privacy. Run these standalone with `MARQ_SKILLS_ONLY=1` — no tool
-  suite, no Kali binaries.
+  suite, no OSINT binaries.
 - **Auditable by design** — every external-tool call funnels through one choke
   point: an append-only, `fsync`'d audit log, a timeout, and an output cap. File
   access is sandboxed to `/work`+`/tmp`, and the image runs non-root (the
   recommended run args also drop all Linux capabilities + `no-new-privileges`).
 
 <details>
-<summary><b>Full tool suite</b> — ~85 tools on a Kali base (click to expand)</summary>
+<summary><b>Full tool suite</b> — ~30 passive OSINT tools (click to expand)</summary>
 
-| Category                              | Tools                                                                                                                                                                                                                                                                            |
-| :------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Recon / network**                   | `nmap` · `masscan` · `naabu` · `dnsx` · `dnsrecon` · `subfinder` · `httpx_probe` · `dns_lookup` · `whois_lookup` · `ssh_audit` · `fping_sweep` · `snmp_walk` · `snmp_check` · `snmp_brute` · `smtp_user_enum` · `smtp_test` · `asnmap` · `cdncheck` · `censys_view`              |
-| **OSINT — org/domain**                | `theharvester` · `spiderfoot` · `shodan_host` · `shodan_search` · `gitleaks` · `trufflehog` · `gau_urls` · `exif_metadata`                                                                                                                                                       |
-| **OSINT — people**                    | `sherlock` · `maigret_username` · `email_accounts` · `h8mail_breach` · `phoneinfoga`                                                                                                                                                                                             |
-| **Web app**                           | `nuclei` · `nikto` · `feroxbuster` · `katana` · `ffuf` · `gobuster_dir` · `arjun` · `whatweb` · `wafw00f` · `cmseek` · `wpscan` · `testssl` · `dalfox` · `sqlmap` · `jwt_tool` · `trivy` · `interactsh` · `paramspider` · `sstimap`                                              |
-| **Exploitation**                      | `donut` · `hydra` · `searchsploit`                                                                                                                                                                                                                                               |
-| **AD / internal network**             | `impacket_secretsdump` · `impacket_kerberoast` · `impacket_asreproast` · `impacket_psexec` · `impacket_wmiexec` · `impacket_ntlmrelayx` · `netexec` · `certipy_find` · `bloodhound_collect` · `evil_winrm` · `enum4linux` · `smb_enum` · `ldap_search` · `responder` · `nbtscan` |
-| **Credentials**                       | `john` · `hashcat` · `hash_identify`                                                                                                                                                                                                                                             |
-| **Malware research** (static)         | `capa` · `yara_scan` · `olevba` · `bin_headers`                                                                                                                                                                                                                                  |
-| **Files** (sandboxed `/work`, `/tmp`) | `list_dir` · `read_file` · `write_file`                                                                                                                                                                                                                                          |
-| **Findings & jobs**                   | `report_finding` · `render_report` · `list_jobs` · `job_status`                                                                                                                                                                                                                  |
-| **Knowledge**                         | `load_skill`                                                                                                                                                                                                                                                                     |
-| **Escape hatch** (opt-in)             | `run_shell`                                                                                                                                                                                                                                                                      |
+| Category                              | Tools                                                                                                           |
+| :------------------------------------ | :-------------------------------------------------------------------------------------------------------------- |
+| **Domain / infrastructure**           | `theharvester` · `spiderfoot` · `subfinder` · `dnsx` · `dns_lookup` · `whois_lookup` · `asnmap` · `cdncheck` · `gau_urls` |
+| **Exposure lookups**                  | `shodan_host` · `shodan_search` · `censys_view`                                                                 |
+| **Leaked secrets / metadata**         | `trufflehog` · `exif_metadata`                                                                                  |
+| **OSINT — people**                    | `sherlock` · `maigret_username` · `email_accounts` · `h8mail_breach` · `phoneinfoga`                            |
+| **Files** (sandboxed `/work`, `/tmp`) | `list_dir` · `read_file` · `write_file`                                                                         |
+| **Findings & jobs**                   | `report_finding` · `render_report` · `list_jobs` · `job_status`                                                 |
+| **Session & knowledge**               | `server_info` · `set_engagement` · `load_skill`                                                                 |
 
 </details>
 
@@ -208,23 +201,17 @@ terminal agent (Pi) ──bash──▶  pi/marq shim ─┤   both hit the same
                               (docker exec)  │
                                              ▼
                               registry.All() ── one Tool list
-                                ├─ recon     nmap, naabu, dnsx, masscan…
-                                ├─ osint     theHarvester, spiderfoot, shodan, gitleaks…
-                                ├─ people    sherlock, maigret, user-scanner, phoneinfoga…
-                                ├─ web       nuclei, katana, feroxbuster, sqlmap…
-                                ├─ exploit   donut, hydra, searchsploit
-                                ├─ internal  impacket, netexec, certipy, bloodhound, enum4linux…
-                                ├─ creds     john, hashcat, name-that-hash
-                                ├─ malware   capa, yara_scan, olevba, bin_headers
+                                ├─ osint     theHarvester, spiderfoot, subfinder, dnsx, shodan, trufflehog, gau…
+                                ├─ people    sherlock, maigret, user-scanner, h8mail, phoneinfoga
                                 ├─ files     read/write/list (sandboxed /work)
                                 └─ extras    report_finding, render_report, list_jobs, load_skill
                                              │
                                   runner.Run ──▶ audit.jsonl (every call)
 
-           load_skill ──▶ skills library (markdown, ~100 playbooks / 14 domains)
+           load_skill ──▶ skills library (markdown, ~83 playbooks / 13 domains)
 ```
 
-Every exec tool funnels through `internal/runner/runner.go::Run` — the single
+Every tool funnels through `internal/runner/runner.go::Run` — the single
 point for audit logging, timeouts, and output truncation.
 
 </details>

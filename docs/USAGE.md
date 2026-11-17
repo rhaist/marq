@@ -1,7 +1,7 @@
 # Usage
 
-How to build, smoke-test and drive marq — your universal cyber assistant (~85
-tools + ~100 skill playbooks across 14 domains). For choosing a client and model
+How to build, smoke-test and drive marq — your cyber assistant (~30
+passive-OSINT tools + ~83 skill playbooks across 13 domains). For choosing a client and model
 for the job (Claude Code / Codex as the expert, Pi for local work, LM
 Studio for testing) see [`CLIENTS.md`](CLIENTS.md); for a guided per-OS install
 see [`SETUP.md`](SETUP.md); for the safety model see [`SECURITY.md`](SECURITY.md).
@@ -16,7 +16,6 @@ see [`SETUP.md`](SETUP.md); for the safety model see [`SECURITY.md`](SECURITY.md
 - [API keys for OSINT sources](#api-keys-for-osint-sources)
 - [Environment variables](#environment-variables)
 - [Reading the audit log](#reading-the-audit-log)
-- [GPU hash cracking (optional)](#gpu-hash-cracking-optional)
 
 ## 1. Build the image
 
@@ -27,30 +26,15 @@ docker build -t marq .
 This pulls the Kali base and installs the full tool suite, so it is large
 (multi-GB) and the first build takes a while.
 
-**Setup baked in at build time.** A few tools fetch data or build a cache on
-first use; the Dockerfile does this during the build (as the runtime
-`marq` user, so it lands in that user's home) to avoid a slow,
-network-dependent first scan:
-
-- `nuclei` — the template repository (`nuclei -update-templates`)
-- `wpscan` — the WordPress vulnerability database (`wpscan --update`)
-- `trivy` — the vulnerability database (`trivy image --download-db-only`)
-- `rockyou` — decompressed to `/usr/share/wordlists/rockyou.txt`
-
-These steps are best-effort: a network hiccup during build won't fail the
-image — the tool just downloads on first run instead. To refresh the data in a
-running container later, re-run e.g. `nuclei -update-templates` or
-`wpscan --update`. All other tools ship their data bundled and need no setup.
-
 ## 2. Smoke-test the image
 
-Start with the binary's own self-report — no target, no capabilities, no client:
+Start with the binary's own self-report — no target, no client:
 
 ```bash
 # build revision + tool/skill counts
 docker run --rm marq version
 
-# the catalog — add a name (`marq tools nmap`) for that tool's schema
+# the catalog — add a name (`marq tools subfinder`) for that tool's schema
 docker run --rm marq tools
 
 # the playbook library, grouped by domain — add a name to print one
@@ -63,12 +47,7 @@ A wrong count here is the fastest way to spot a stale image or an unintended
 Then run a one-off tool to confirm the wrapped binaries work:
 
 ```bash
-# nmap/masscan/naabu carry file capabilities (cap_net_admin) that a bare
-# container won't exec — pass the caps for those:
-docker run --rm --cap-add NET_RAW --cap-add NET_ADMIN marq nmap --version
-
-# tools without special capabilities run with a plain docker run:
-docker run --rm marq searchsploit --help
+docker run --rm marq subfinder -version
 ```
 
 Get an interactive shell:
@@ -93,10 +72,10 @@ shared shape:
 1. Add the `marq` server from [`mcp.json.example`](../mcp.json.example) — drop the
    `mcpServers` block into Claude Code's `.mcp.json` or Claude Desktop's config.
    Codex uses TOML (`codex mcp add marq -- …`, see CLIENTS.md).
-2. Set `MARQ_OPERATOR` (the audit anchor). Engagement and scope are set at
-   runtime — have the model call `set_engagement` before any active testing
-   (advisory/knowledge use needs no scope).
-3. Use a tool-capable model. Have it call `server_info` first, record scope with
+2. Set `MARQ_OPERATOR` (the audit anchor). The engagement and its purpose are set at
+   runtime — have the model call `set_engagement` before any people OSINT
+   (GDPR: record why you are collecting).
+3. Use a tool-capable model. Have it call `server_info` first, record the purpose with
    `set_engagement`, then `load_skill` the domain it's working in.
 
 ## 4. Run with a local model (Pi)
@@ -111,72 +90,61 @@ forwards each call into a long-lived container over `docker exec`.
 # Install the shim
 docker run --rm marq shim > ~/.local/bin/marq && chmod +x ~/.local/bin/marq
 
-# Start ONE long-lived container, bound to your engagement dir
-marq up ~/engagements/acme        # docker run -d … sleep infinity
+# Start ONE long-lived container, bound to your working dir
+marq up ~/investigations/acme        # docker run -d … sleep infinity
 
 # Sanity checks through the shim
 marq tools                        # list every tool
-marq run server_info '{}'         # confirm scope
+marq run server_info '{}'         # confirm purpose
 
 marq down                         # tear down when finished
 ```
 
 Configure your model runtime **in Pi** (it owns the endpoint — that's no longer
 marq's concern), then load [`pi/SKILL.md`](../pi/SKILL.md) into Pi as a skill so
-the model knows the calling convention and scope rules. From there the model
+the model knows the calling convention. From there the model
 calls `server_info` first, works the tools, records findings with
 `report_finding`, and writes the report with `render_report` into `/work`.
 
-A long-lived container is **required**: background tools (spiderfoot, responder,
-ntlmrelayx) detach inside it and are polled later, so a per-call `docker run`
+A long-lived container is **required**: background tools (`spiderfoot`, `gau_urls`)
+detach inside it and are polled later, so a per-call `docker run`
 would kill them.
 
 Shim env vars: `MARQ_CONTAINER` (default `marq`), `MARQ_IMAGE` (default
 `marq:latest`), `MARQ_ENGINE` (container CLI, default `docker`; or `podman`),
 `MARQ_ENV_FILE` (default `~/.config/marq/env`, loaded if present). Nothing is
 required: `MARQ_OPERATOR` defaults to your `$USER`, and any API key exported in
-your shell is forwarded (see _API keys_ below); engagement + scope are set at
+your shell is forwarded (see _API keys_ below); the engagement + purpose is set at
 runtime via `set_engagement`.
 
 ## Available tools
 
-### Recon / network
+All wrapped tools are **passive**: they query public sources and never probe,
+scan or exploit a target.
 
-| Tool             | Wraps          | Purpose                           |
-| ---------------- | -------------- | --------------------------------- |
-| `server_info`    | —              | Show authorization banner + scope |
-| `set_engagement` | —              | Record engagement + scope         |
-| `exec`           | allowlisted    | Run a security tool directly (argv, no shell; scope-checked) |
-| `nmap`           | nmap           | Port/service scanning             |
-| `masscan`        | masscan        | Fast port sweeps                  |
-| `naabu`          | naabu          | Fast modern port scan (top-ports) |
-| `dns_lookup`     | dig            | DNS records                       |
-| `dnsx`           | dnsx           | Bulk DNS resolution / record enum |
-| `dnsrecon`       | dnsrecon       | DNS recon, zone transfer, brute   |
-| `whois_lookup`   | whois          | Registration data                 |
-| `subfinder`      | subfinder      | Passive subdomain enum            |
-| `httpx_probe`    | httpx          | Live HTTP probing / tech detect   |
-| `ssh_audit`      | ssh-audit      | SSH server algorithm/config audit |
-| `fping_sweep`    | fping          | Fast parallel ping sweep          |
-| `snmp_walk`      | snmpwalk       | SNMP MIB tree walk                |
-| `snmp_check`     | snmpcheck      | SNMP service enumeration          |
-| `snmp_brute`     | onesixtyone    | SNMP community-string bruteforce  |
-| `smtp_user_enum` | smtp-user-enum | SMTP VRFY/EXPN user enum          |
-| `smtp_test`      | swaks          | SMTP relay/injection testing      |
-| `asnmap`         | whois + curl   | IP/domain → ASN, ASN → CIDRs      |
-| `cdncheck`       | cdncheck       | CDN/cloud/WAF IP detection        |
+### Session
+
+| Tool             | Purpose                                                      |
+| ---------------- | ------------------------------------------------------------ |
+| `server_info`    | Operator, recorded engagement/purpose, what marq covers      |
+| `set_engagement` | Record the investigation label + purpose (GDPR: say why)     |
 
 ### Information gathering — company & domain footprint
 
 | Tool            | Wraps        | Purpose                                                             |
 | --------------- | ------------ | ------------------------------------------------------------------- |
 | `theharvester`  | theHarvester | Emails, employees, hosts, subdomains                                |
-| `spiderfoot`    | spiderfoot   | Broad automated OSINT footprint (background; poll with `read_file`) |
+| `spiderfoot`    | spiderfoot   | Broad automated OSINT footprint, passive use case (background)     |
+| `subfinder`     | subfinder    | Passive subdomain enum                                              |
+| `dns_lookup`    | dig          | DNS records (no zone transfers)                                     |
+| `dnsx`          | dnsx         | Bulk DNS resolution / record enum                                   |
+| `whois_lookup`  | whois        | Registration data                                                   |
+| `asnmap`        | whois + curl | IP/domain → ASN, ASN → CIDRs                                        |
+| `cdncheck`      | cdncheck     | CDN/cloud/WAF IP detection                                          |
 | `exif_metadata` | exiftool     | Metadata from a staged file/dir                                     |
 | `shodan_host`   | shodan       | Exposed ports/services/CVEs for an IP (keyless via InternetDB)      |
 | `shodan_search` | shodan       | Search exposed assets (e.g. `org:`) †                               |
-| `gitleaks`      | gitleaks     | Secrets in a local git repo/dir                                     |
-| `trufflehog`    | trufflehog   | Verified leaked secrets (git/GitHub) ‡                              |
+| `trufflehog`    | trufflehog   | Leaked secrets in public git/GitHub/GitLab (unverified) ‡           |
 | `gau_urls`      | gau          | Known URLs from Wayback/CommonCrawl/OTX/URLScan (background)        |
 | `censys_view`   | cencli       | Censys host/web/cert lookup (search is paid-only) †                 |
 
@@ -190,85 +158,17 @@ runtime via `set_engagement`.
 | `h8mail_breach`    | h8mail       | Email breach/leak exposure †        |
 | `phoneinfoga`      | phoneinfoga  | Phone number OSINT                  |
 
-### Web application
-
-| Tool           | Wraps       | Purpose                          |
-| -------------- | ----------- | -------------------------------- |
-| `nuclei`       | nuclei      | Template-based vuln scanning     |
-| `nikto`        | nikto       | Web server scanning              |
-| `ffuf`         | ffuf        | Content/dir fuzzing              |
-| `gobuster_dir` | gobuster    | Directory brute force            |
-| `feroxbuster`  | feroxbuster | Fast recursive content discovery |
-| `katana`       | katana      | Endpoint/JS crawler              |
-| `arjun`        | arjun       | Hidden HTTP parameter discovery  |
-| `whatweb`      | whatweb     | Web tech fingerprinting          |
-| `wafw00f`      | wafw00f     | WAF detection / fingerprint      |
-| `cmseek`       | CMSeeK      | CMS detection (180+ CMSs)        |
-| `wpscan`       | wpscan      | WordPress scanning               |
-| `testssl`      | testssl.sh  | SSL/TLS configuration analysis   |
-| `dalfox`       | dalfox      | XSS scanning                     |
-| `sqlmap`       | sqlmap      | SQL injection testing            |
-| `jwt_tool`     | jwt_tool    | JWT analysis / attacks           |
-| `trivy`        | Trivy       | Vuln/secret/misconfig scanning   |
-| `interactsh`   | interactsh  | OOB blind-vuln listener (bg)     |
-| `paramspider`  | paramspider | Hidden parameter mining          |
-| `sstimap`      | sstimap     | SSTI detection / exploitation    |
-
-### Exploitation / credentials
-
-| Tool            | Wraps          | Purpose                      |
-| --------------- | -------------- | ---------------------------- |
-| `searchsploit`  | exploitdb      | Local exploit DB search      |
-| `donut`         | go-donut       | Payload/shellcode generation |
-| `hydra`         | hydra          | Online credential testing    |
-| `john`          | john           | Offline hash cracking        |
-| `hashcat`       | hashcat        | GPU/CPU hash cracking        |
-| `hash_identify` | name-that-hash | Identify hash type (nth)     |
-| `run_shell`     | bash           | Arbitrary command (opt-in)   |
-
-### AD / internal network
-
-| Tool                   | Wraps                | Purpose                                   |
-| ---------------------- | -------------------- | ----------------------------------------- |
-| `impacket_secretsdump` | impacket-secretsdump | Dump NTDS / SAM / LSA secrets             |
-| `impacket_kerberoast`  | impacket-kerberoast  | Kerberoasting (TGS-REQ crack offline)     |
-| `impacket_asreproast`  | impacket-GetNPUsers  | AS-REP roasting (pre-auth accounts)       |
-| `impacket_psexec`      | impacket-psexec      | PsExec-style remote exec (SMB)            |
-| `impacket_wmiexec`     | impacket-wmiexec     | WMI-based remote exec                     |
-| `impacket_ntlmrelayx`  | impacket-ntlmrelayx  | NTLM relay server                         |
-| `netexec`              | netexec (nxc)        | Mass auth / spray / exec across hosts     |
-| `certipy_find`         | certipy-ad           | AD CS vulnerability enumeration (ESC1-17) |
-| `bloodhound_collect`   | bloodhound-python    | AD attack-path data collection            |
-| `evil_winrm`           | evil-winrm           | PowerShell remoting over WinRM            |
-| `enum4linux`           | enum4linux-ng        | SMB/RPC/NetBIOS enumeration               |
-| `smb_enum`             | smbmap               | Share & permission enumeration            |
-| `ldap_search`          | ldapsearch           | LDAP directory queries                    |
-| `responder`            | responder            | LLMNR/NBT-NS/mDNS poisoner (background)   |
-| `nbtscan`              | nbtscan              | NetBIOS host discovery                    |
-
-### Malware — static analysis
-
-Operate on a sample staged in `/work` (pass a container path; the model never
-uploads bytes). All static/offline — safe to run on untrusted samples.
-
-| Tool          | Wraps        | Purpose                                                 |
-| ------------- | ------------ | ------------------------------------------------------- |
-| `capa`        | capa (FLARE) | Identify capabilities / ATT&CK + MBC behaviors          |
-| `yara_scan`   | yara         | Match a sample against YARA rules                       |
-| `olevba`      | oletools     | Extract & analyse VBA macros from Office documents      |
-| `bin_headers` | rabin2       | Binary headers/imports/strings (format, sections, libs) |
-
 ### Working files (`/work`, `/tmp`)
 
 | Tool         | Purpose                                                          |
 | ------------ | ---------------------------------------------------------------- |
 | `list_dir`   | List a directory in the working area                             |
-| `read_file`  | Read back output a tool wrote to disk (cmseek JSON, `nuclei -o`) |
-| `write_file` | Stage an input file (a hash for `john`, a target list, …)        |
+| `read_file`  | Read back output a tool wrote to disk                             |
+| `write_file` | Stage an input file (a host list for `dnsx`, …)                 |
 
 These are sandboxed to `/work`, `/tmp` and `MARQ_WORK_DIR` — the model cannot read or write
 anywhere else. They are what make the file-driven tools usable: the model can
-`write_file` a captured hash then `john` it, or `read_file` a result another
+`write_file` a host list then `dnsx` it, or `read_file` a result another
 tool dropped on disk. Mount `/work` from the host (`-v ./work:/work`, as the
 `pi/marq` shim does) to exchange files with the operator.
 
@@ -280,7 +180,7 @@ tool dropped on disk. Mount `/work` from the host (`-v ./work:/work`, as the
 | `render_report`  | Write the severity-sorted `findings.md` + `findings.csv` deliverable                                                                              |
 | `list_jobs`      | List background jobs and whether each is running or done                                                                                          |
 | `job_status`     | A background job's state (running/done + exit code) + output tail                                                                                 |
-| `load_skill`     | Load a technique/vuln-class playbook (sqli, xss, ssrf, idor, recon-footprint, …) tied to these tool names                                         |
+| `load_skill`     | Load a playbook (recon-footprint, ioc-pivoting, nis2-dora, …) tied to these tool names                                         |
 
 A `report_finding` with a `cvss` vector (e.g. `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`)
 gets its base score computed. Your explicit `severity` stays authoritative; the
@@ -288,14 +188,14 @@ vector only sets severity when you omit one, and a divergent vector is flagged i
 the report rather than overriding your call. The skills library is also exposed as
 MCP resources: `marq://skills` (index) and `marq://skills/<name>`.
 
-**Background scans.** Tools too slow for a synchronous call (currently
-`spiderfoot`) launch in the background and return a job directory under
+**Background scans.** Tools too slow for a synchronous call (`spiderfoot`,
+`gau_urls`) launch in the background and return a job directory under
 `/work/jobs/<tool>-<id>/`. Results stream to `stdout.log`, diagnostics to
 `stderr.log`, and a `status` file (containing `exit=<code>`) appears when the
 scan finishes. Check progress with `list_jobs` / `job_status` (or `read_file` /
 `list_dir`) — the work survives individual tool-call timeouts.
 
-† Needs an API key (see _API keys_ below). ‡ GitHub org/repo scans need `GITHUB_TOKEN`.
+† Needs an API key (see _API keys_ below). ‡ GitHub org/repo scans need `GITHUB_TOKEN` (rate limits).
 
 ## API keys for OSINT sources
 
@@ -311,7 +211,6 @@ clients that inherit your environment — or put `KEY=value` lines in
 | `CENSYS_API_TOKEN` (+ `CENSYS_ORG_ID`) | `censys_view`                                                        |
 | `GITHUB_TOKEN`                         | `trufflehog` (GitHub scans)                                          |
 | `NUMVERIFY_API_KEY`                    | `phoneinfoga`                                                        |
-| `WPSCAN_API_TOKEN`                     | `wpscan` (vuln data)                                                 |
 
 theHarvester and h8mail read their own config files (`~/.theHarvester/api-keys.yaml`,
 an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.
@@ -321,28 +220,22 @@ an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.
 | Variable               | Default                     | Meaning                                                                                                           |
 | ---------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `MARQ_OPERATOR`        | `marq`                      | Recorded in every audit record — the accountability anchor; env-set only                                          |
-| `MARQ_ENGAGEMENT`      | `unspecified`               | Engagement / SOW identifier (initial default; overridable by `set_engagement`)                                    |
-| `MARQ_SCOPE`           | `""`                        | Free-text authorized scope (initial default; overridable by `set_engagement`)                                     |
+| `MARQ_ENGAGEMENT`      | `unspecified`               | Investigation label + purpose (initial default; overridable by `set_engagement`)                                  |
 | `MARQ_AUDIT_LOG`       | `/var/log/marq/audit.jsonl` | Audit log path                                                                                                    |
 | `MARQ_TIMEOUT`         | `900`                       | Default per-command timeout (seconds)                                                                             |
 | `MARQ_MAX_TIMEOUT`     | `3600`                      | Ceiling for a tool's per-call timeout override                                                                    |
 | `MARQ_MAX_OUTPUT`      | `60000`                     | Max output chars returned to the model                                                                            |
-| `MARQ_ALLOW_RAW_SHELL` | `false`                     | Expose the arbitrary-shell `run_shell` tool (opt-in; set `true` to enable)                                        |
-| `MARQ_SKILLS_ONLY`     | `false`                     | Knowledge-only mode: serve just the skills + findings/files tools, drop every Kali exec tool (runs with no image) |
+| `MARQ_SKILLS_ONLY`     | `false`                     | Knowledge-only mode: serve just the skills + findings/files tools, drop every OSINT exec tool (runs with no image) |
 | `MARQ_WORK_DIR`        | `/work`                     | Working area (findings, job dirs)                                                                                 |
 
-Engagement and scope are per-task, so the model sets them at session start with
-the **`set_engagement`** tool (from the operator's written authorization). Scope is
-**enforced** for active tools: write it as targets, e.g. `*.acme.com,
-203.0.113.0/24, app.example.org — per SOW v2` (wildcards and CIDRs; prose is
-ignored). Active calls touching anything outside it are refused and audit-logged;
-with no scope set, active tools don't run. On MCP clients with elicitation, the
-operator is asked before scope widens; otherwise the model must ask and then call
-`set_engagement`. See `docs/SECURITY.md`. It
-persists them to `$MARQ_WORK_DIR/.marq-context`, so they survive across the
-process-per-call `marq run` path and show up in `server_info` and every audit
-record. Operator stays env-set — it's the accountability anchor, not something
-the model should assert.
+The engagement is per-task, so the model sets it at session start with the
+**`set_engagement`** tool: a label plus the purpose, e.g.
+`acme-footprint-2026-11 — pre-acquisition exposure review`. People OSINT is
+GDPR personal-data processing, so always state why you are collecting. It persists
+to `$MARQ_WORK_DIR/.marq-context`, so it survives across the process-per-call
+`marq run` path and shows up in `server_info` and every audit record. Operator
+stays env-set — it's the accountability anchor, not something the model should
+assert.
 
 ## Reading the audit log
 
@@ -350,8 +243,3 @@ the model should assert.
 # Persisted to ./audit/ when you bind-mount it (-v ./audit:/var/log/marq).
 cat audit/audit.jsonl | jq 'select(.event=="invocation.start") | {ts, tool, target, argv}'
 ```
-
-## GPU hash cracking (optional)
-
-`hashcat` benefits from a GPU. Pass it through at run time, e.g. with the
-NVIDIA container toolkit: add `--gpus all` to the `docker run` args.

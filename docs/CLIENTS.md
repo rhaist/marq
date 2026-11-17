@@ -1,7 +1,7 @@
 # Driving marq — pick the brain for the job
 
-marq is **tools + knowledge**: ~85 wrapped Kali tools and ~100 skill playbooks
-across 14 domains (pentest, malware, threat-intel, sec-ops, architecture, GRC,
+marq is **tools + knowledge**: ~30 wrapped passive-OSINT tools and ~83 skill playbooks
+across 13 domains (OSINT, malware, threat-intel, sec-ops, architecture, GRC,
 standards, CISO, resilience, human factors, …). It does **not** bring a model.
 Your client does. So the question is which **brain** you point at it — and that
 depends on the work.
@@ -10,10 +10,10 @@ depends on the work.
 
 | You want to…                                                                                                             | Use                                                                        | Why                                                                                                         |
 | :----------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- |
-| Run fully local — hands-on offensive ops, on-box execution, nothing leaves the host _(recommended default)_              | **Pi** + a local model on **llama.cpp** + the `pi/marq` shim               | Terminal-native, no cloud; the model gets bash and calls `marq run` directly.                               |
+| Run fully local — hands-on OSINT, on-box execution, nothing leaves the host _(recommended default)_              | **Pi** + a local model on **llama.cpp** + the `pi/marq` shim               | Terminal-native, no cloud; the model gets bash and calls `marq run` directly.                               |
 | Reason hard — architecture review, threat modeling, GRC/compliance, IR leadership, write the report, app/code-sec review | **Claude Code** or **Codex** (frontier model) + marq over MCP _(fallback)_ | Strongest reasoning. marq hands it the current-standards skills and the tools; the model supplies judgment. |
 
-Rule of thumb: **local model by default** — hands-on offensive and
+Rule of thumb: **local model by default** — hands-on OSINT and
 privacy-sensitive work stays on your box. Reach for a **frontier model as a
 fallback** when a task is judgment-heavy (governance/architecture/advisory) and
 the data isn't sensitive. Keep both configured and switch per task.
@@ -25,7 +25,7 @@ findings/files tools — `go install github.com/rhaist/marq/cmd/marq@latest` wit
 `MARQ_SKILLS_ONLY=1`, a ~10 MB native binary, **no Docker** (see
 [`SETUP.md`](SETUP.md#skills-only--no-docker)). Reach for it when the work is
 advisory — architecture, GRC, standards, threat-intel research. The **full** build
-is the Docker image that adds the ~85-tool suite for when you need to _run_ things.
+is the Docker image that adds the ~30-tool OSINT suite for when you need to _run_ things.
 
 **Two transports** (both builds use the same `marq serve` stdio server):
 
@@ -51,7 +51,6 @@ project; drop it for project-local). Uses the hardened docker args from
 ```bash
 claude mcp add marq --scope user -- docker run --rm -i \
   --security-opt no-new-privileges:true --cap-drop ALL \
-  --cap-add NET_RAW --cap-add NET_ADMIN --cap-add NET_BIND_SERVICE \
   -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR="$USER" marq
 
 claude mcp list                    # confirm "marq … ✔ Connected"
@@ -62,8 +61,8 @@ findings/reports across sessions. **MCP servers load at session start, so
 restart Claude Code** before marq's tools/skills appear. Or commit a project
 [`.mcp.json`](https://docs.anthropic.com/en/docs/claude-code/mcp) with the
 `mcpServers` block from `mcp.json.example` (same schema). Then ask it to call
-`server_info` first; `load_skill` the domain you're in; for active testing,
-record authorization with `set_engagement`. Remove with `claude mcp remove marq
+`server_info` first; `load_skill` the domain you're in; for people OSINT,
+record the purpose with `set_engagement`. Remove with `claude mcp remove marq
 -s user`.
 
 **Best for:** "review this architecture against zero-trust", "map our findings
@@ -75,7 +74,7 @@ thinking; marq supplies current frameworks and the evidence tools.
 
 ```bash
 codex mcp add marq -- docker run --rm -i \
-  --cap-drop ALL --cap-add NET_RAW --cap-add NET_ADMIN \
+  --cap-drop ALL \
   -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR="$USER" marq
 ```
 
@@ -85,7 +84,6 @@ Or add it to `~/.codex/config.toml` (TOML, not JSON):
 [mcp_servers.marq]
 command = "docker"
 args = ["run", "--rm", "-i", "--cap-drop", "ALL",
-        "--cap-add", "NET_RAW", "--cap-add", "NET_ADMIN",
         "-v", "marq-audit:/var/log/marq", "-v", "marq-work:/work",
         "-e", "MARQ_OPERATOR=you", "marq"]
 ```
@@ -109,7 +107,7 @@ marq up ~/marq/work                               # long-lived container, any wo
 ```
 
 **Best for:** any cyber work you want fully local —
-malware triage, threat-intel pivoting, research, and hands-on offensive testing —
+malware triage, threat-intel pivoting, OSINT footprinting and research —
 where nothing leaves the box.
 
 ---
@@ -120,14 +118,15 @@ where nothing leaves the box.
   before diving in. The skills carry the current-standards detail and the right
   tool order — they're what make a smaller model competent and keep a frontier
   model from guessing at stale facts.
-- **Load only the skill you need.** There are ~100; pulling the one relevant
+- **Load only the skill you need.** There are ~83; pulling the one relevant
   playbook keeps context tight. `marq run load_skill '{}'` (or the `load_skill`
   tool) lists the index.
-- **Scope gates active testing, not advice.** GRC/architecture/standards
-  conversations are unrestricted; scanning and exploitation are authorized-only
-  and audit-logged. Record scope with `set_engagement` before any active testing.
+- **Record a purpose before people OSINT.** GRC/architecture/standards
+  conversations are unrestricted; marq's tools are passive and audit-logged, and
+  profiling people is GDPR personal-data processing. Record the purpose with
+  `set_engagement` first.
 - **Pick the model to the job.** A big reasoning model for analysis and writing;
-  a fast tool-capable local model for chaining scans and hands-on offensive work
+  a fast tool-capable local model for chaining lookups and hands-on OSINT
   you want to keep on-box.
 - **Weak local model bypassing marq (raw `curl`/`grep`, ignoring the tools)?**
   Install [`pi/SYSTEM.md`](../pi/SYSTEM.md): `ln -sf "$PWD/pi/SYSTEM.md"
@@ -136,5 +135,5 @@ where nothing leaves the box.
 run`" and in testing flipped a 12B model from 300+ `curl` calls to clean,
   audited tool use — it's the model's prompt, not your `llama-server` flags. Then
   lean on the skills and keep it to one tool call at a time.
-- **Long scans run in the background.** `list_jobs` / `job_status` instead of
+- **Slow lookups run in the background.** `list_jobs` / `job_status` instead of
   blocking; works the same in every client.

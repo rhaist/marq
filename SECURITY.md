@@ -1,8 +1,8 @@
 # Security Policy
 
 This policy covers vulnerabilities **in marq itself** — the Go binary, the MCP
-server, the tool wrappers, the file sandbox, and the audit/authorization model.
-For marq's operational threat model and authorized-use posture (how the tool is
+server, the tool wrappers, the file sandbox, and the audit model.
+For marq's operational threat model and safe-use posture (how the tool is
 meant to be operated safely), see [`docs/SECURITY.md`](docs/SECURITY.md).
 
 ## Reporting a vulnerability
@@ -29,19 +29,18 @@ Vulnerabilities in marq's own code and trust boundaries, for example:
   through the `files` tools (e.g. a symlink or path-traversal escape).
 - **Command/argument injection** in a tool wrapper that lets crafted input run
   unintended commands.
-- **Scope / authorization bypass** in the engagement or scope handling.
+- **Passive-only bypass** — a wrapper that can be made to actively probe,
+  scan or authenticate to a target (argument injection past its fixed flags).
 - **Container hardening regressions** in the shipped run configuration
   (capabilities, `no-new-privileges`, the unprivileged `marq` user).
 
 ## Out of scope
 
-- **The offensive tools doing what offensive tools do.** marq bundles scanners,
-  exploitation frameworks, and credential tools. Their intended functionality is
-  not a vulnerability.
-- **Using marq against systems you are not authorized to test.** That is misuse,
-  not a flaw in marq. Active testing is authorized-only and audit-logged by
-  design — see [`docs/SECURITY.md`](docs/SECURITY.md).
-- Vulnerabilities in the third-party Kali tools themselves — report those
+- **The OSINT tools doing what OSINT tools do.** Querying public sources about
+  organisations and people is their intended functionality, not a vulnerability.
+- **Using marq for unlawful collection of personal data.** That is misuse, not a
+  flaw in marq — see [`docs/SECURITY.md`](docs/SECURITY.md).
+- Vulnerabilities in the third-party tools themselves — report those
   upstream.
 
 ## Supported versions

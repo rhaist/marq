@@ -85,7 +85,7 @@ func serve() {
 }
 
 // runTool invokes a single tool by name with JSON arguments, for smoke testing
-// outside an MCP client. Example: marq run nmap '{"target":"127.0.0.1"}'
+// outside an MCP client. Example: marq run subfinder '{"domain":"example.com"}'
 func runTool(argv []string) {
 	if len(argv) < 1 {
 		fmt.Fprintln(os.Stderr, "usage: marq run <tool> ['<json-args>']")

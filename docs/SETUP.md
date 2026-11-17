@@ -11,7 +11,7 @@ is installing Docker). Once you're running, [`CLIENTS.md`](CLIENTS.md) helps you
 pick a client (Claude Code / Codex for the heaviest reasoning; Pi + llama.cpp for
 fully-local work).
 
-> Advisory and knowledge work is open; **active testing is authorized-only** —
+> marq's tools are passive OSINT; people OSINT is personal-data processing —
 > read [`SECURITY.md`](SECURITY.md) first.
 
 **Contents**
@@ -28,7 +28,7 @@ fully-local work).
 | Path                   | You get                                      | Needs                   | Setup                                                             |
 | ---------------------- | -------------------------------------------- | ----------------------- | ----------------------------------------------------------------- |
 | **Skills only**        | the knowledge library + findings/files tools | Go, no Docker           | [below](#skills-only--no-docker) — one `go install`               |
-| **Full MCP server**    | skills **+** the ~85-tool suite              | Docker                  | build the image, then any MCP client                              |
+| **Full MCP server**    | skills **+** the ~30-tool OSINT suite              | Docker                  | build the image, then any MCP client                              |
 | **Full + local model** | the above, driven by a local model           | Docker + Pi + llama.cpp | the [Pi subsection](#4-run-with-a-local-model-pi--the-marq-skill) |
 
 Start at the top and add a layer only when you need it. The image is the same for
@@ -37,9 +37,9 @@ the two full paths — build it once. Per-client setup is in [`CLIENTS.md`](CLIE
 ## Skills only — no Docker
 
 Want the **cyber-skills library + advisory tools** (skills, findings, files) for
-your LLM, without the offensive tool suite? `MARQ_SKILLS_ONLY=1` drops every
-Kali-binary tool, so marq is a single static Go binary — no image, no scan
-capabilities:
+your LLM, without the OSINT tool suite? `MARQ_SKILLS_ONLY=1` drops every
+external-binary tool, so marq is a single static Go binary — no image, no
+network lookups:
 
 ```bash
 go install github.com/rhaist/marq/cmd/marq@latest    # ~10 MB, skills embedded
@@ -91,8 +91,6 @@ docker pull ghcr.io/rhaist/marq && docker tag ghcr.io/rhaist/marq marq
 # …or build from source (native arch):
 git clone https://github.com/rhaist/marq.git && cd marq
 docker build -t marq .     # builds natively for your arch (arm64 on M-series)
-# Smaller image (skips warm-up; nuclei templates / wpscan DB / trivy DB fetched on first use):
-docker build --build-arg WARMUP=0 -t marq .
 ```
 
 ### 3. Run as an MCP server (external client brings the model)
@@ -100,17 +98,16 @@ docker build --build-arg WARMUP=0 -t marq .
 ```bash
 docker run --rm -i \
   --security-opt no-new-privileges:true --cap-drop ALL \
-  --cap-add NET_RAW --cap-add NET_ADMIN --cap-add NET_BIND_SERVICE \
   -v marq-audit:/var/log/marq \
   -v marq-work:/work \
   -e MARQ_OPERATOR="$USER" \
   marq
 ```
 
-Engagement and scope aren't passed here — the model records them at runtime with
-the `set_engagement` tool (from the operator's written authorization). The
+The engagement and its purpose aren't passed here — the model records them at runtime with
+the `set_engagement` tool (people OSINT is GDPR personal-data processing: say why). The
 `marq-work` volume persists findings/reports across restarts; swap it for a bind
-mount (`-v ~/engagements/acme:/work`) to read them straight off the host.
+mount (`-v ~/investigations/acme:/work`) to read them straight off the host.
 
 Wire it into a client with [`mcp.json.example`](../mcp.json.example) — per-client
 steps (Claude Code, Codex, Claude Desktop) are in [`CLIENTS.md`](CLIENTS.md).
@@ -125,7 +122,7 @@ tool calls and reproducible flags). Pi talks to any OpenAI-compatible endpoint, 
 vLLM or another server works too — the steps below assume `llama-server`.
 
 This is the fully-local way to drive marq as an all-round cyber agent — research,
-malware triage, threat-intel, GRC and standards work, and authorized testing —
+malware triage, threat-intel, GRC and standards work, and OSINT footprinting —
 through the `pi/marq` host shim, which forwards each call into a long-lived
 container over `docker exec`.
 
@@ -148,7 +145,7 @@ marq up ~/marq/work               # docker run -d … sleep infinity
 
 # Sanity checks
 marq tools                        # list every tool
-marq run server_info '{}'         # what marq covers + current authorization state
+marq run server_info '{}'         # what marq covers + current engagement/purpose
 
 marq down                         # tear down when finished
 ```
@@ -226,9 +223,9 @@ bypasses marq.
 > official weights, no third-party fine-tune in the trust path — not because it
 > measured better. Its one sweep to date was voided by a harness fault (see
 > `scripts/eval/`), so treat it as unmeasured until a clean run publishes.
-> A stock instruction-tuned model may also refuse some legitimate authorized
-> testing; if that blocks you on an engagement, evaluate alternatives with the
-> harness rather than swapping blind.
+> A stock instruction-tuned model may also refuse some legitimate people OSINT;
+> if that blocks you, evaluate alternatives with the harness rather than
+> swapping blind.
 
 **2a. Start `llama-server` for Gemma.** Install it once — macOS: `brew install
 llama.cpp` (builds with **Metal** on Apple Silicon; CPU on Intel Macs). Linux:
@@ -270,7 +267,7 @@ llama-server -hf google/gemma-4-12B-it-qat-q4_0-gguf \
   "12–16 GB GPU" means a 16 GB+ Mac (a 12B Q4 is ~7–8 GB). Intel Macs and
   CPU-only Linux run but are slow for a 12B — drop `-ngl -fa -ctk -ctv` there.
 - **`--ctx-size`** as high as VRAM allows (Gemma is 262 K native). Tool outputs
-  (nuclei/katana dumps) are large; a short window truncates them.
+  (spiderfoot/gau dumps) are large; a short window truncates them.
 - **Sampling** — the flags above are Google's official set for the `-it` model
   (`--temp 1.0 --top-p 0.95 --top-k 64`). Community fine-tunes usually ship
   their own preset on the model card; use theirs, not these. Either way it's the
@@ -293,7 +290,7 @@ marq prompt system > ~/.pi/agent/SYSTEM.md         # from the image, via the shi
 
 Pi's default prompt frames the model as a general coding assistant, so a small
 model reaches for raw `curl`/`grep` and bypasses marq entirely (no audit, no
-scope, no skills). [`pi/SYSTEM.md`](../pi/SYSTEM.md) replaces that framing —
+skills). [`pi/SYSTEM.md`](../pi/SYSTEM.md) replaces that framing —
 "drive everything through `marq run`, never raw bash" — which in testing flipped
 a 12B model from 300+ `curl` calls and zero marq use to clean, audited marq tool
 calls. (`~/.pi/agent/SYSTEM.md` is global; use a per-project `.pi/SYSTEM.md` if
@@ -305,7 +302,7 @@ you also run Pi for non-marq work.) The `pi/SKILL.md` catalog is still appended.
 pi --list-models                  # → lists `llama-cpp  gemma-local  64.0K …`
 ```
 
-Then just run `pi` in an engagement dir. The model loads the marq skill and
+Then just run `pi` in a working dir. The model loads the marq skill and
 drives `marq run` from bash; the shim runs it inside the container.
 
 > **Gotchas learned the hard way:** settings live in `~/.pi/agent/` (not
@@ -313,8 +310,8 @@ drives `marq run` from bash; the shim runs it inside the container.
 > settings `extensions` array needs full paths, not bare names); Pi's bundled
 > docs are at `…/pi-coding-agent/<ver>/libexec/.../docs/`.
 
-A long-lived container is **required**: background tools (spiderfoot, responder,
-ntlmrelayx) detach inside it and are polled later, so a per-call `docker run`
+A long-lived container is **required**: background tools (`spiderfoot`, `gau_urls`)
+detach inside it and are polled later, so a per-call `docker run`
 would kill them.
 
 Shim env vars: `MARQ_CONTAINER` (default `marq`), `MARQ_IMAGE` (default
@@ -322,7 +319,7 @@ Shim env vars: `MARQ_CONTAINER` (default `marq`), `MARQ_IMAGE` (default
 run daemonless without Docker Desktop), `MARQ_ENV_FILE` (default
 `~/.config/marq/env`, loaded if present). Nothing is required: `MARQ_OPERATOR`
 defaults to your `$USER`, and any API key exported in your shell is forwarded
-(keys: `docs/USAGE.md`); engagement + scope are set at runtime via `set_engagement`.
+(keys: `docs/USAGE.md`); the engagement + purpose is set at runtime via `set_engagement`.
 
 ---
 
@@ -348,10 +345,8 @@ sudo apt install -y podman podman-docker git curl
 sudo apt install -y golang
 ```
 
-Podman note: the scan tools (nmap/masscan/naabu) need `--cap-add NET_RAW
-NET_ADMIN`, which the shim already passes; **rootless** Podman may additionally
-need `net.ipv4.ping_group_range` set (or rootful `sudo podman`) for raw-socket
-scans. Docker's official CE repo is also fine instead of `docker.io`.
+Podman note: no extra capabilities are needed. Docker's official CE repo is also
+fine instead of `docker.io`.
 
 ### 2. Build the image
 
@@ -373,7 +368,7 @@ container build with CUDA/ROCm/Vulkan) and point Pi at it — the runtime lives 
 Pi, not in marq.
 
 > **Bind-mount permissions (Linux).** The container runs as the non-root `marq`
-> user, so the engagement dir you pass to `marq up` must be writable by it —
+> user, so the working dir you pass to `marq up` must be writable by it —
 > `chmod a+rwx <dir>` is the simplest. macOS Docker Desktop handles this
 > automatically.
 
@@ -382,24 +377,21 @@ Pi, not in marq.
 ## Local Go development (both OSes)
 
 Iterate on the server/tool layer without a Docker build (tool _calls_ still need
-the Kali binaries, so most only fully work in-container):
+the OSINT binaries, so most only fully work in-container):
 
 ```bash
 go build ./... && go vet ./... && go test ./...   # build + sanity gate
 go run ./cmd/marq serve                         # stdio MCP server locally
-go run ./cmd/marq run nmap '{"target":"scanme.nmap.org"}'   # invoke one tool
+go run ./cmd/marq run subfinder '{"domain":"example.com"}'   # invoke one tool
 ```
 
 ## Verify
 
 ```bash
-# Tool present in the built image. nmap/masscan/naabu have file capabilities
-# (cap_net_admin) a bare container won't exec — pass the caps, or smoke a
-# non-capped tool:
-docker run --rm --cap-add NET_RAW --cap-add NET_ADMIN marq nmap --version
-docker run --rm marq nuclei -version
+# Tool present in the built image:
+docker run --rm marq subfinder -version
 
-# MCP server lists its tools (expects ~85)
+# MCP server lists its tools (expects ~29)
 printf '%s\n' \
  '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"c","version":"0"}}}' \
  '{"jsonrpc":"2.0","method":"notifications/initialized"}' \

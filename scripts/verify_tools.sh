@@ -4,19 +4,18 @@
 #
 # Two phases, both against a throwaway container (never touches your local
 # model runtime or a running marq container):
-#   1. HELP   — for every wrapped tool, print the exact invocation the MCP
+#   1. HELP   — for every wrapped exec tool, print the exact invocation the MCP
 #               wrapper uses next to the tool's own --help/usage, so the flags
-#               can be verified by eye (this is how the httpx-toolkit / amass /
-#               dalfox mismatches were caught).
+#               can be verified by eye (passive OSINT tools only; no capabilities needed).
 #   2. TEST   — run scripts/test_tools.py, which drives the live MCP server and
 #               calls every tool with benign args.
 #
 # Usage:
-#   scripts/verify_tools.sh                 # help dump + local/passive smoke test
+#   scripts/verify_tools.sh                 # help dump + in-image smoke test
 #   scripts/verify_tools.sh --build         # docker build the image first
 #   scripts/verify_tools.sh --help-only     # just the help/invocation dump
 #   scripts/verify_tools.sh --test-only     # just the smoke test
-#   scripts/verify_tools.sh --external --slow   # forwarded to test_tools.py
+#   scripts/verify_tools.sh --external   # forwarded to test_tools.py
 #   IMAGE=marq:dev scripts/verify_tools.sh
 #
 set -uo pipefail
@@ -34,93 +33,33 @@ while [[ $# -gt 0 ]]; do
     --test-only)  TEST_ONLY=1 ;;
     --lines)      LINES="$2"; shift ;;
     --image)      IMAGE="$2"; shift ;;
-    *)            PASSTHROUGH+=("$1") ;;   # e.g. --external --slow --only ...
+    *)            PASSTHROUGH+=("$1") ;;   # e.g. --external --only ...
   esac
   shift
 done
 
-# Capabilities the scanners' file-caps require in order to exec.
-CAPS=(--cap-add NET_RAW --cap-add NET_ADMIN --cap-add NET_BIND_SERVICE)
-
 # name @@ wrapper-invocation (flags the wrapper passes) @@ help command
-# Keep this in sync with internal/registry/*.go — the point is to diff the two.
+# Keep this in sync with internal/registry/{recon,osint,people}.go — the point is to diff the two.
 TOOLS=(
-  "nmap@@nmap <options:-sV -T4> <target>@@nmap -h"
-  "masscan@@masscan <target> -p <ports> --rate <rate>@@masscan --help"
-  "naabu@@naabu -host <t> -silent (-p <ports> | -top-ports <n>)@@naabu -h"
   "dns_lookup@@dig +nocmd +noall +answer <domain> <type>@@dig -h"
   "whois_lookup@@whois <target>@@whois --help"
   "subfinder@@subfinder -silent -d <domain>@@subfinder -h"
-  "httpx_probe@@httpx-toolkit -silent -status-code -title -tech-detect@@httpx-toolkit -h"
   "dnsx@@dnsx -silent -resp -<record>@@dnsx -h"
-  "dnsrecon@@dnsrecon -d <domain> -t <std|brt|axfr|crt|zonewalk>@@dnsrecon -h"
+  "asnmap@@whois -h whois.cymru.com \" -v <ip>\" + RIPEstat@@whois --version"
+  "cdncheck@@cdncheck -silent (stdin IPs)@@cdncheck -h"
+  "censys_view@@censys view <assets> -O json --no-spinner --no-color@@censys view --help"
   "theharvester@@theHarvester -d <domain> -b <sources> -l <limit>@@theHarvester -h"
-  "spiderfoot@@spiderfoot -s <target> -u <use_case> -o json   (run in background)@@spiderfoot -h"
+  "spiderfoot@@spiderfoot -s <target> -u passive -o json   (run in background)@@spiderfoot -h"
   "exif_metadata@@exiftool -r <path>@@exiftool -ver"
-  "shodan_host@@shodan host <ip>@@shodan host --help"
+  "shodan_host@@InternetDB (keyless) / shodan host <ip>@@shodan host --help"
   "shodan_search@@shodan search --fields ... --limit <n> <query>@@shodan search --help"
-  "gitleaks@@gitleaks dir <path> --report-format json --report-path /dev/stdout@@gitleaks dir --help"
-  "trufflehog@@trufflehog <source...> --results=verified --json@@trufflehog --help"
-  "gau_urls@@echo <domain> | gau --subs --providers wayback,commoncrawl,otx,urlscan@@gau --help"
+  "trufflehog@@trufflehog <source...> --no-verification --json@@trufflehog --help"
+  "gau_urls@@echo <domain> | gau --subs --providers wayback,commoncrawl,otx,urlscan   (background)@@gau --help"
   "sherlock@@sherlock --print-found --no-color --timeout <t> <username>@@sherlock --help"
   "maigret_username@@maigret <username> --no-color --no-progressbar --timeout <t> --top-sites <n>@@maigret --help"
   "email_accounts@@user-scanner -e <email>@@user-scanner --help"
   "h8mail_breach@@h8mail -t <email> <options>@@h8mail --help"
   "phoneinfoga@@phoneinfoga scan -n <number>@@phoneinfoga scan --help"
-  "nuclei@@nuclei -silent -u <target> [-t <tpl>] [-severity <sev>]@@nuclei -h"
-  "nikto@@nikto -h <target>@@nikto -Help"
-  "ffuf@@ffuf -w <wordlist> -u <url-with-FUZZ> [options]@@ffuf -h"
-  "gobuster_dir@@gobuster dir -q -u <url> -w <wordlist>@@gobuster dir --help"
-  "whatweb@@whatweb <target>@@whatweb --help"
-  "wpscan@@wpscan --url <url> <options>@@wpscan --help"
-  "sqlmap@@sqlmap -u <url> <options:--batch>@@sqlmap -h"
-  "katana@@katana -u <url> -silent -d <depth> [-jc]@@katana -h"
-  "feroxbuster@@feroxbuster -u <url> -w <wordlist> --silent --no-state@@feroxbuster --help"
-  "arjun@@arjun -u <url> -m <GET|POST|JSON|XML>@@arjun -h"
-  "dalfox@@dalfox scan <url> --silence --no-color@@dalfox scan --help"
-  "wafw00f@@wafw00f -a <target>@@wafw00f -h"
-  "testssl@@testssl --quiet --color 0 <host>@@testssl --help"
-  "cmseek@@cmseek --batch --follow-redirect -u <url>@@cmseek --help"
-  "searchsploit@@searchsploit <query>@@searchsploit -h"
-  "hydra@@hydra <options> <target> <service>@@hydra -h"
-  "john@@john <options> <hash_file>@@john --help"
-  "hashcat@@hashcat -m <mode> --force <options> <hash_file> <wordlist>@@hashcat --version"
-  "hash_identify@@nth --no-banner -t <hash>@@nth --help"
-  "ssh_audit@@ssh-audit -p <port> <host>@@ssh-audit -h"
-  "fping_sweep@@fping -a -q -g <target>@@fping -h"
-  "snmp_walk@@snmpwalk -v 2c -c <community> <host>@@snmpwalk -h"
-  "snmp_check@@snmpcheck -t <host> -c <community>@@snmpcheck -h"
-  "snmp_brute@@onesixtyone -c <wordlist> <host>@@onesixtyone -h"
-  "smtp_user_enum@@smtp-user-enum -M <method> -U <users> -t <host>@@smtp-user-enum -h"
-  "smtp_test@@swaks --server <target> <options>@@swaks --help"
-  "asnmap@@whois -h whois.cymru.com \" -v <ip>\"@@whois --version"
-  "cdncheck@@cdncheck -silent (stdin IPs)@@cdncheck -h"
-  "censys_view@@censys view <assets> -O json --no-spinner --no-color@@censys view --help"
-  "impacket_secretsdump@@impacket-secretsdump <options> <target>@@impacket-secretsdump -h"
-  "impacket_kerberoast@@impacket-GetUserSPNs <options> <target>@@impacket-GetUserSPNs -h"
-  "impacket_asreproast@@impacket-GetNPUsers <options> <target>@@impacket-GetNPUsers -h"
-  "impacket_psexec@@impacket-psexec <options> <target> <command>@@impacket-psexec -h"
-  "impacket_wmiexec@@impacket-wmiexec <options> <target> <command>@@impacket-wmiexec -h"
-  "impacket_ntlmrelayx@@impacket-ntlmrelayx <options> (background)@@impacket-ntlmrelayx -h"
-  "netexec@@netexec <protocol> <options> <target>@@netexec -h"
-  "certipy_find@@certipy-ad find <options> -u <user> -p <pass>@@certipy-ad find --help"
-  "bloodhound_collect@@bloodhound-python -u <u> -p <p> -d <domain> -ns <DC> -c All@@bloodhound-python -h"
-  "evil_winrm@@evil-winrm -i <host:port> <options>@@evil-winrm -h"
-  "enum4linux@@enum4linux-ng <options> <target>@@enum4linux-ng -h"
-  "smb_enum@@smbmap -H <target> <options>@@smbmap -h"
-  "ldap_search@@ldapsearch -H <target> <options> <filter>@@ldapsearch -h"
-  "responder@@responder <options> (background)@@responder -h"
-  "nbtscan@@nbtscan <target>@@nbtscan -h"
-  "paramspider@@paramspider -d <domain> <options>@@paramspider -h"
-  "sstimap@@sstimap -u <url> <options>@@sstimap -h"
-  "donut@@go-donut -i <input> -o <output> <options>@@go-donut -h"
-  "jwt_tool@@jwt_tool <token> <options>@@jwt_tool -h"
-  "trivy@@trivy <mode> --quiet --scanners vuln,secret,misconfig <target>@@trivy --help"
-  "interactsh@@interactsh-client -v [-server <s>]   (run in background)@@interactsh-client -h"
-  "capa@@capa <options> <file>@@capa --help"
-  "yara_scan@@yara <options> <rules> <target>@@yara --help"
-  "olevba@@olevba <options> <file>@@olevba --help"
-  "bin_headers@@rabin2 <options> <file>@@rabin2 -h"
 )
 
 dump_help() {
@@ -137,7 +76,7 @@ dump_help() {
     script+="printf '\$ %s\n--- help ---\n' $(printf '%q' "$inv");"
     script+="{ ${helpcmd} ; } 2>&1 | head -n ${LINES};"
   done
-  docker run --rm "${CAPS[@]}" "$IMAGE" bash -c "$script"
+  docker run --rm "$IMAGE" bash -c "$script"
 }
 
 run_tests() {

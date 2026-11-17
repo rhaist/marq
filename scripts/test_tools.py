@@ -12,10 +12,9 @@ PASSES the binary check — we're testing the plumbing, not finding vulns.
 
 Safety
 ------
-By default every call targets only loopback (127.0.0.1), the reserved
-`example.com`, or files staged locally in the container's /work. Tools that
-reach third-party services (subdomain/OSINT/people/archive lookups) are skipped
-unless you pass --external. Nothing scans a target you didn't authorise.
+marq is passive OSINT only: calls query public data about the reserved
+`example.com`, a well-known public IP, or files staged in /work. Tools that
+reach third-party services are skipped unless you pass --external.
 
 The test container is launched with a short MARQ_TIMEOUT so slow tools
 return a "[timed out]" envelope instead of hanging (which keeps the JSON-RPC
@@ -26,8 +25,7 @@ Usage
 -----
     python3 scripts/test_tools.py                  # local + passive-safe tools
     python3 scripts/test_tools.py --external       # also hit internet OSINT
-    python3 scripts/test_tools.py --slow           # also run the slow crackers
-    python3 scripts/test_tools.py --only nmap,dnsx # a subset
+        python3 scripts/test_tools.py --only dnsx,whois_lookup # a subset
     python3 scripts/test_tools.py --image marq --timeout 25
 
 Exit code is non-zero if any tool FAILs the binary check or a tool the server
@@ -44,15 +42,12 @@ import sys
 import time
 
 # --- result staging targets (all benign) -----------------------------------
-LOOPBACK = "127.0.0.1"
-LOOPBACK_URL = "http://127.0.0.1/"
 EX_DOMAIN = "example.com"
 STAGE = "/work/smoke"  # created in-container via write_file before file tools
 
 # Categories drive which tools run in which mode.
 LOCAL = "local"        # loopback / staged / local DB — always run
 EXTERNAL = "external"  # reaches third-party services — needs --external
-SLOW = "slow"          # heavy crackers — needs --slow
 KEY = "key"            # needs an API key; run if reachable, "needs key" is fine
 
 # tool name -> (mode, arguments dict). Tools the server registers but that are
@@ -60,95 +55,30 @@ KEY = "key"            # needs an API key; run if reachable, "needs key" is fine
 TESTS: dict[str, tuple[str, dict]] = {
     # meta
     "server_info":   (LOCAL, {}),
-    "run_shell":     (LOCAL, {"command": "echo SMOKE_OK && command -v nmap && command -v nuclei"}),
-    "exec":          (LOCAL, {"command": "nmap -sn 127.0.0.1"}),
     # files (staging happens first, see stage_files)
     "write_file":    (LOCAL, {"path": f"{STAGE}/ping.txt", "content": "smoke"}),
     "read_file":     (LOCAL, {"path": f"{STAGE}/ping.txt"}),
     "list_dir":      (LOCAL, {"path": STAGE}),
-    # recon / network — loopback
-    "nmap":          (LOCAL, {"target": LOOPBACK, "options": "-p 22,80 -T4 -Pn"}),
-    "masscan":       (LOCAL, {"target": LOOPBACK, "ports": "80", "rate": 100}),
-    "naabu":         (LOCAL, {"target": LOOPBACK, "ports": "80"}),
+    # DNS / registration — resolver and WHOIS only
     "dns_lookup":    (LOCAL, {"domain": EX_DOMAIN, "record_type": "A"}),
     "whois_lookup":  (LOCAL, {"target": EX_DOMAIN}),
     "dnsx":          (LOCAL, {"hosts": EX_DOMAIN, "records": "a"}),
-    "dnsrecon":      (LOCAL, {"domain": EX_DOMAIN, "scan_type": "std"}),
-    "httpx_probe":   (LOCAL, {"targets": LOOPBACK}),
-    "ssh_audit":      (LOCAL, {"host": LOOPBACK, "port": 22}),
-    "fping_sweep":    (LOCAL, {"target": "127.0.0.1/30"}),
-    "nbtscan":        (LOCAL, {"target": LOOPBACK}),
-    "snmp_check":     (LOCAL, {"host": LOOPBACK, "community": "public"}),
-    "snmp_brute":     (SLOW,  {"host": LOOPBACK, "wordlist": f"{STAGE}/snmp_comm.txt"}),
-    "snmp_walk":      (LOCAL, {"host": LOOPBACK, "community": "public"}),
-    "smtp_user_enum": (LOCAL, {"host": LOOPBACK, "method": "VRFY", "users": f"{STAGE}/users.txt"}),
-    "smtp_test":      (LOCAL, {"target": "127.0.0.1:25"}),
-    "asnmap":         (EXTERNAL, {"target": "1.1.1.1"}),
-    "cdncheck":       (LOCAL, {"targets": "127.0.0.1"}),
-    "censys_view":    (KEY, {"assets": "8.8.8.8"}),
-    # web — loopback (connection refused is fine; the binary ran)
-    "nuclei":        (LOCAL, {"target": LOOPBACK_URL, "severity": "info"}),
-    "nikto":         (LOCAL, {"target": LOOPBACK_URL}),
-    "ffuf":          (LOCAL, {"url": "http://127.0.0.1/FUZZ"}),
-    "gobuster_dir":  (LOCAL, {"url": LOOPBACK_URL}),
-    "feroxbuster":   (LOCAL, {"url": LOOPBACK_URL}),
-    "whatweb":       (LOCAL, {"target": LOOPBACK_URL}),
-    "wafw00f":       (LOCAL, {"target": LOOPBACK_URL}),
-    "cmseek":        (LOCAL, {"url": LOOPBACK_URL}),
-    "testssl":       (LOCAL, {"host": "127.0.0.1:443"}),
-    "katana":        (LOCAL, {"url": LOOPBACK_URL}),
-    "arjun":         (LOCAL, {"url": LOOPBACK_URL}),
-    "dalfox":        (LOCAL, {"url": "http://127.0.0.1/?q=1"}),
-    "sqlmap":        (LOCAL, {"url": "http://127.0.0.1/?id=1", "options": "--batch --flush-session --disable-coloring"}),
-    "wpscan":        (LOCAL, {"url": LOOPBACK_URL}),
-    "jwt_tool":       (LOCAL, {"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ4In0.x"}),
-    "trivy":          (LOCAL, {"mode": "fs", "target": STAGE}),
-    "interactsh":     (EXTERNAL, {}),
-    "paramspider":    (EXTERNAL, {"domain": EX_DOMAIN}),
-    "sstimap":        (LOCAL, {"url": LOOPBACK_URL}),
-    "donut":          (LOCAL, {"input": f"{STAGE}/donut_test.py", "output": f"{STAGE}/donut.bin"}),
-    # exploitation / creds — local DBs / staged files
-    "searchsploit":  (LOCAL, {"query": "apache 2.4"}),
-    "impacket_secretsdump": (LOCAL, {"target": f"{STAGE}/ntds.txt"}),
-    "impacket_kerberoast":  (KEY, {"target": "test/test:test@127.0.0.1"}),
-    "impacket_asreproast":  (KEY, {"target": "test/test:test@127.0.0.1"}),
-    "impacket_psexec":      (KEY, {"target": "test/test:test@127.0.0.1", "command": "whoami"}),
-    "impacket_wmiexec":     (KEY, {"target": "test/test:test@127.0.0.1", "command": "whoami"}),
-    "impacket_ntlmrelayx":  (LOCAL, {"options": ""}),
-    "netexec":              (LOCAL, {"protocol": "smb", "target": LOOPBACK}),
-    "certipy_find":         (KEY, {"target": "test/test:test@127.0.0.1"}),
-    "bloodhound_collect":   (KEY, {"target": "test/test:test@127.0.0.1"}),
-    "evil_winrm":           (KEY, {"target": "127.0.0.1", "options": "-u test -p test"}),
-    "enum4linux":           (LOCAL, {"target": LOOPBACK}),
-    "smb_enum":             (LOCAL, {"target": LOOPBACK}),
-    "ldap_search":          (LOCAL, {"target": "ldap://127.0.0.1", "filter": "(objectclass=*)"}),
-    "responder":            (LOCAL, {"options": "-I lo -A"}),
-    # malware research — static, on staged files (an "unsupported file" error is fine; the binary ran)
-    "capa":          (LOCAL, {"file": f"{STAGE}/meta.txt"}),
-    "yara_scan":     (LOCAL, {"rules": f"{STAGE}/rules.yar", "target": f"{STAGE}/meta.txt"}),
-    "olevba":        (LOCAL, {"file": f"{STAGE}/meta.txt"}),
-    "bin_headers":   (LOCAL, {"file": f"{STAGE}/meta.txt"}),
+    "cdncheck":      (LOCAL, {"targets": "1.1.1.1"}),
+    "asnmap":        (EXTERNAL, {"target": "1.1.1.1"}),
+    "censys_view":   (KEY, {"assets": "8.8.8.8"}),
     # in-process: engagement, knowledge, findings, jobs
-    "set_engagement": (LOCAL, {"engagement": "smoke", "scope": "127.0.0.1 (smoke test)"}),
+    "set_engagement": (LOCAL, {"engagement": "smoke-test: tool plumbing check"}),
     "load_skill":    (LOCAL, {}),
-    "report_finding": (LOCAL, {"title": "smoke", "severity": "info", "target": LOOPBACK}),
+    "report_finding": (LOCAL, {"title": "smoke", "severity": "info", "target": EX_DOMAIN}),
     "render_report": (LOCAL, {}),
     "list_jobs":     (LOCAL, {}),
     "job_status":    (LOCAL, {"job": "no-such-job"}),
-    "hash_identify": (LOCAL, {"hash_value": "5f4dcc3b5aa765d61d8327deb882cf99"}),
     "exif_metadata": (LOCAL, {"path": f"{STAGE}/meta.txt"}),
-    "gitleaks":      (LOCAL, {"path": STAGE}),
-    "john":          (SLOW,  {"hash_file": f"{STAGE}/hash_md5.txt",
-                              "options": "--format=raw-md5 --wordlist=" + f"{STAGE}/wordlist.txt"}),
-    "hashcat":       (SLOW,  {"hash_file": f"{STAGE}/hash_md5.txt", "mode": 0,
-                              "wordlist": f"{STAGE}/wordlist.txt", "options": "--potfile-disable -D 1"}),
-    "hydra":         (SLOW,  {"target": LOOPBACK, "service": "ssh",
-                              "options": "-l root -p root -t 1 -f"}),
     # osint — these reach the internet, gated behind --external
     "subfinder":     (EXTERNAL, {"domain": EX_DOMAIN}),
     "theharvester":  (EXTERNAL, {"domain": EX_DOMAIN, "limit": 50}),
     "gau_urls":      (EXTERNAL, {"domain": EX_DOMAIN}),
-    "spiderfoot":    (EXTERNAL, {"target": EX_DOMAIN, "use_case": "passive"}),
+    "spiderfoot":    (EXTERNAL, {"target": EX_DOMAIN}),
     "sherlock":      (EXTERNAL, {"username": "octocat", "timeout": 15}),
     "maigret_username": (EXTERNAL, {"username": "octocat", "timeout": 15, "top_sites": 20}),
     "email_accounts": (EXTERNAL, {"email": "test@example.com"}),
@@ -156,12 +86,11 @@ TESTS: dict[str, tuple[str, dict]] = {
     "trufflehog":    (EXTERNAL, {"source": "git https://github.com/trufflesecurity/test_keys"}),
     # key-gated — run if reachable; "needs key" is an acceptable outcome
     "h8mail_breach": (KEY, {"email": "test@example.com"}),
-    "shodan_host":   (KEY, {"ip": "1.1.1.1"}),
+    "shodan_host":   (EXTERNAL, {"ip": "1.1.1.1"}),
     "shodan_search": (KEY, {"query": "org:\"Example\"", "limit": 5}),
 }
 
-FORWARD_KEYS = ["SHODAN_API_KEY", "CENSYS_API_TOKEN", "CENSYS_ORG_ID", "GITHUB_TOKEN", "NUMVERIFY_API_KEY",
-                "WPSCAN_API_TOKEN"]
+FORWARD_KEYS = ["SHODAN_API_KEY", "CENSYS_API_TOKEN", "CENSYS_ORG_ID", "GITHUB_TOKEN", "NUMVERIFY_API_KEY"]
 
 
 class MCP:
@@ -259,16 +188,7 @@ def classify(text: str, is_err: bool) -> tuple[str, str]:
 
 def stage_files(mcp: MCP, timeout: float) -> None:
     """Create the benign input files the file-driven tools need."""
-    staged = {
-        f"{STAGE}/hash_md5.txt": "5f4dcc3b5aa765d61d8327deb882cf99\n",  # md5('password')
-        f"{STAGE}/wordlist.txt": "password\n123456\nletmein\n",
-        f"{STAGE}/meta.txt": "smoke-test metadata sample\n",
-        f"{STAGE}/users.txt": "root\nadmin\ntest\n",
-        f"{STAGE}/snmp_comm.txt": "public\nprivate\ncommunity\n",
-        f"{STAGE}/donut_test.py": "import socket\nprint('donut smoke test')\n",
-        f"{STAGE}/ntds.txt": ":::\n",
-        f"{STAGE}/rules.yar": "rule smoke { strings: $a = \"smoke\" condition: $a }\n",
-    }
+    staged = {f"{STAGE}/meta.txt": "smoke-test metadata sample\n"}
     for path, content in staged.items():
         mcp.call("tools/call", {"name": "write_file", "arguments": {"path": path, "content": content}}, timeout)
 
@@ -278,7 +198,6 @@ def main() -> int:
     ap.add_argument("--image", default="marq", help="docker image to test (default: marq)")
     ap.add_argument("--timeout", type=int, default=25, help="server per-command timeout, seconds (default 25)")
     ap.add_argument("--external", action="store_true", help="also test tools that reach the internet")
-    ap.add_argument("--slow", action="store_true", help="also test the slow crackers/brute tools")
     ap.add_argument("--only", default="", help="comma-separated subset of tool names to test")
     ap.add_argument("--json", action="store_true", help="emit machine-readable JSON results")
     args = ap.parse_args()
@@ -288,13 +207,9 @@ def main() -> int:
 
     docker_cmd = [
         "docker", "run", "--rm", "-i",
-        # nmap/masscan/naabu carry cap_net_admin file-caps and won't exec without it.
-        "--cap-add", "NET_RAW", "--cap-add", "NET_ADMIN", "--cap-add", "NET_BIND_SERVICE",
         "-e", f"MARQ_TIMEOUT={args.timeout}",
         "-e", "MARQ_OPERATOR=smoke-test",
         "-e", "MARQ_ENGAGEMENT=tool-smoke-test",
-        "-e", "MARQ_SCOPE=loopback + example.com + staged files (smoke test)",
-        "-e", "MARQ_ALLOW_RAW_SHELL=true",
     ]
     for k in FORWARD_KEYS:
         if os.environ.get(k):
@@ -328,9 +243,6 @@ def main() -> int:
             mode, tool_args = TESTS[name]
             if mode == EXTERNAL and not args.external:
                 results.append({"tool": name, "status": "SKIP", "note": "needs --external"})
-                continue
-            if mode == SLOW and not args.slow:
-                results.append({"tool": name, "status": "SKIP", "note": "needs --slow"})
                 continue
             t0 = time.monotonic()
             try:

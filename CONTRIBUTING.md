@@ -1,16 +1,17 @@
 # Contributing to marq
 
 Thanks for your interest in improving marq. It's a Kali-based cyber assistant —
-~85 wrapped tools plus an embedded skills library — exposed from a single Go
+~30 wrapped passive-OSINT tools plus an embedded skills library — exposed from a single Go
 binary over MCP (`marq serve`) and direct invocation (`marq run`). This guide
 covers how to build it, the quality gates, and how to add a tool or a skill.
 
-> **Authorized use is the contract.** marq's safety model is _attribution, not
-> prevention_: every external-tool call funnels through one audited choke point
+> **Passive and attributable is the contract.** marq's tools query public sources
+> only and never probe a target; its safety model is _attribution_: every external-tool call funnels through one audited choke point
 > (`runner.Run`) that fails closed if it can't log. Any contribution must preserve
 > that — see [Design invariants](#design-invariants)
 > below and [`docs/SECURITY.md`](docs/SECURITY.md). Contributions that add
-> evasion, anti-forensics, or that bypass the audit log will not be merged.
+> active scanning, exploitation, evasion, anti-forensics, or that bypass the audit
+> log will not be merged.
 
 ## Getting started
 
@@ -33,8 +34,8 @@ Run these before opening a PR — CI enforces the first two on every push/PR, an
 | Gate              | Command                                             | What it checks                                                                                                                                                   |
 | ----------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Fast gate**     | `go build ./... && go vet ./... && go test ./...`   | Compiles, vets, and the registry unit test: no duplicate tool names, every tool has exactly one of `Build`/`Handler`, generated input schemas are well-formed.   |
-| **End-to-end**    | `scripts/e2e.sh`                                    | User-facing promises through the real `marq run` CLI (scope persistence, skills load, findings + CVSS, audit, file sandbox, catalog). No image; runs in seconds. |
-| **Image e2e**     | `scripts/e2e-image.sh`                              | Promises that only hold for the running image (`/work` persistence, per-container jwt keys). Needs a built image.                                                |
+| **End-to-end**    | `scripts/e2e.sh`                                    | User-facing promises through the real `marq run` CLI (engagement persistence, skills load, findings + CVSS, audit, file sandbox, catalog). No image; runs in seconds. |
+| **Image e2e**     | `scripts/e2e-image.sh`                              | Promises that only hold for the running image (`/work` persistence across containers). Needs a built image.                                                |
 | **Tool plumbing** | `scripts/test_tools.py` / `scripts/verify_tools.sh` | Drives the built image over MCP for wrapped-binary coverage.                                                                                                     |
 
 `go test ./...` is the sanity gate; keep it green.
@@ -63,11 +64,11 @@ These are load-bearing — breaking them silently defeats marq's safety model:
    If it isn't packaged, install it in the Go-built block of the `Dockerfile`.
 2. If it caches/downloads on first use, add a warm-up line in the post-`USER`
    block of the `Dockerfile` (so the cache lands in `/home/marq`, not `/root`).
-3. Add the `Tool` to the relevant `internal/registry/*.go` (recon, web, osint,
-   exploit, creds, internal, files, …). `Tool.Desc` is the model's only guidance
+3. Add the `Tool` to the relevant `internal/registry/*.go` (osint, people, files,
+   extras, …). `Tool.Desc` is the model's only guidance
    — make it informative (usage, defaults, API-key needs, caveats).
-4. Set `Invocation.Target` to the network/file target so it's audited (and
-   eligible for any scope enforcement at the runner).
+4. Set `Invocation.Target` to the lookup target so it's audited. The tool must
+   query public third-party sources only, never the target's own hosts.
 5. Document it in [`docs/USAGE.md`](docs/USAGE.md).
 
 ## Adding a skill
