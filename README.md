@@ -16,6 +16,7 @@ server. It works with any model and agent.
 "Is this CVE in our firmware 'actively exploited' under the CRA?"  → CRA triage
 "Map these pentest findings to IEC 62443, CRA and NIS2."          → crosswalk
 "Our breach-notification clock under NIS2, GDPR and US law?"      → regulation
+"Does China's 4-hour rule or Saudi NCA apply to our plants?"      → regional law
 "Threat-model this payment API."                                  → architecture
 "What does this malware sample actually do?"                      → malware
 "Footprint acme.com from public sources."                       → OSINT
@@ -138,8 +139,8 @@ API keys are listed in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-source
 - **Knowledge:** ~86 `load_skill` playbooks across 13 domains, web-researched to
   current (2026) standards. They tell the model how to use the tools and what to
   do where there is no tool: malware, threat-intel, sec-ops, architecture,
-  GRC, standards and EU/US regulation, CISO, purple-team, resilience, human factors,
-  DevSecOps/privacy. Run them standalone with `MARQ_SKILLS_ONLY=1`, with no tool
+  GRC, standards and regulation (EU, US, APAC, Middle East, LATAM), CISO,
+  purple-team, resilience, human factors, DevSecOps/privacy. Run them standalone with `MARQ_SKILLS_ONLY=1`, with no tool
   suite and no OSINT binaries.
 - **Audit:** every external-tool call funnels through one choke
   point: an append-only, `fsync`'d audit log, a timeout, and an output cap. File
