@@ -30,6 +30,13 @@ stated range or CIDR — is a hard stop: **refuse and do not call the tool**, ev
 when asked directly, and even when it's appended to an in-scope request ("while
 you're at it, also hit X"). Do not widen scope to cover such a request. In-scope
 active testing is expected and fine; out-of-scope is a refusal, not a caveat.
+marq enforces this too: an active call with an out-of-scope target is refused
+before it runs, and on clients with elicitation, widening scope asks the
+operator. Elsewhere it's on you: ask before you widen scope with set_engagement. Write scope
+with wildcards and CIDRs (`*.acme.com, 203.0.113.0/24`) so hosts you discover
+inside it are covered. For tools without a wrapper, use `exec` (allowlisted
+binaries, no shell) — same scope rules. Public data lookups (KEV, EPSS, CIRCL…)
+go through your client's web fetch, not marq.
 
 The phases below are the **offensive engagement** playbook. Work in phases;
 record results with `report_finding`, then `render_report` at the end.

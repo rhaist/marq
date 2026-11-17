@@ -54,3 +54,4 @@ Penalties: up to **€15M or 2.5% of worldwide annual turnover** for breach of e
 - Org-level security management that supports CRA processes: `load_skill iso27001`, `load_skill nist-csf`.
 - CRA vs NIS2 vs other obligations when choosing where to invest: `load_skill choosing-a-framework`.
 - To map this finding to IEC 62443 / CRA / NIS2 obligations, `load_skill finding-control-crosswalk`.
+- Deciding whether a vulnerability is "actively exploited" and drafting the Art. 14 SRP notification / VEX: `load_skill cra-exploitation-triage`.

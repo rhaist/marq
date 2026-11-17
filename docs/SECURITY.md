@@ -24,11 +24,33 @@ inherently dual-use. Read this before you run anything.
   numverify). Your queries leave the box and are logged by those providers — do
   not submit data you are not permitted to disclose to a third party.
 
-## Guardrail model: logging-only
+## Guardrail model: enforced scope + fail-closed audit
 
-This build uses **logging-only** guardrails (an explicit operator choice). That
-means: nothing is blocked on **scope** grounds (scope is recorded, not enforced),
-but **every exec-tool invocation is audit-logged** as JSON lines, before and after
+**Scope is enforced for active tools.** Every active tool (scanners, exploitation,
+credential attacks, `exec`, `run_shell`) is checked before it runs: the hosts,
+IPs, CIDRs and URLs in its arguments, stdin and declared target must sit inside the
+engagement scope, or the call is refused and the refusal is audit-logged. With no
+scope recorded, active tools don't run at all. Scope is set at runtime with
+`set_engagement` (wildcards like `*.acme.com` and CIDRs work; plain words in the
+note are ignored), so it can follow a live engagement. Widening it is a human
+decision: on MCP clients that support elicitation, an out-of-scope call or a
+`set_engagement` that adds targets asks the operator first, and the answer is
+audit-logged (`scope.confirm`). Without elicitation, the refusal tells the model to
+ask the operator. Passive OSINT and offline analysis are not scope-gated.
+
+This protects against an agent **drifting** off-scope. It is not a sandbox against
+a deliberately malicious operator or prompt: anyone who can call `set_engagement`
+on a client without elicitation (or via `marq run`) can widen scope; such
+widenings are audit-logged but not confirmed. Target detection fails closed for
+what it recognises (URLs and URL-like hosts incl. hex/decimal IPs, IPv4/IPv6,
+nmap/masscan ranges, hostnames with a real or common internal TLD, target-list
+files behind -iL/-l/-list/-dL/-M), but it skips file paths and bare single-label
+names (`dc01`), and `run_shell` scripts are only scanned as text. Hostnames are
+resolved only when the scope is IP-only. `exec` refuses shells/interpreters and
+flags that hide targets or run custom code (nmap -iR / script files, config
+files, nuclei -code); offline tools (capa, yara, john, …) run without a scope.
+
+**Every exec-tool invocation is audit-logged** as JSON lines, before and after
 it runs — and an exec or file tool whose start record can't be persisted is
 refused (fail-closed), so the log can't be silently skipped. In-process tools
 (`server_info`, `load_skill`, `list_jobs`, `job_status`) are not logged;
@@ -50,10 +72,9 @@ tool does not run (rather than executing unlogged). Default location:
 the tools, so for a tamper-resistant trail rely on the stderr mirror / ship it
 off-box (below), or make it append-only at the filesystem level.
 
-> If you later want hard controls, the natural place to add them is
-> `internal/runner/runner.go::Run` (e.g. a scope allowlist check before the
-> subprocess is spawned) — auditing already funnels through that one function,
-> so enforcement can too.
+> The scope gate lives in `registry.Tool.Call` (shared by the MCP and `marq run`
+> paths), right before `runner.Run`; the elicitation round trip is in
+> `internal/mcpserver`. Target parsing is `internal/scope`.
 
 ## Skills-only mode has a smaller surface
 

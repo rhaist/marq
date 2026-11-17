@@ -28,7 +28,7 @@ fully-local work).
 | Path                   | You get                                      | Needs                   | Setup                                                             |
 | ---------------------- | -------------------------------------------- | ----------------------- | ----------------------------------------------------------------- |
 | **Skills only**        | the knowledge library + findings/files tools | Go, no Docker           | [below](#skills-only--no-docker) — one `go install`               |
-| **Full MCP server**    | skills **+** the ~80-tool suite              | Docker                  | build the image, then any MCP client                              |
+| **Full MCP server**    | skills **+** the ~85-tool suite              | Docker                  | build the image, then any MCP client                              |
 | **Full + local model** | the above, driven by a local model           | Docker + Pi + llama.cpp | the [Pi subsection](#4-run-with-a-local-model-pi--the-marq-skill) |
 
 Start at the top and add a layer only when you need it. The image is the same for
@@ -399,7 +399,7 @@ go run ./cmd/marq run nmap '{"target":"scanme.nmap.org"}'   # invoke one tool
 docker run --rm --cap-add NET_RAW --cap-add NET_ADMIN marq nmap --version
 docker run --rm marq nuclei -version
 
-# MCP server lists its tools (expects ~80)
+# MCP server lists its tools (expects ~85)
 printf '%s\n' \
  '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"c","version":"0"}}}' \
  '{"jsonrpc":"2.0","method":"notifications/initialized"}' \

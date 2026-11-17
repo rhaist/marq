@@ -146,6 +146,7 @@ runtime via `set_engagement`.
 | ---------------- | -------------- | --------------------------------- |
 | `server_info`    | —              | Show authorization banner + scope |
 | `set_engagement` | —              | Record engagement + scope         |
+| `exec`           | allowlisted    | Run a security tool directly (argv, no shell; scope-checked) |
 | `nmap`           | nmap           | Port/service scanning             |
 | `masscan`        | masscan        | Fast port sweeps                  |
 | `naabu`          | naabu          | Fast modern port scan (top-ports) |
@@ -331,7 +332,13 @@ an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.
 | `MARQ_WORK_DIR`        | `/work`                     | Working area (findings, job dirs)                                                                                 |
 
 Engagement and scope are per-task, so the model sets them at session start with
-the **`set_engagement`** tool (from the operator's written authorization). It
+the **`set_engagement`** tool (from the operator's written authorization). Scope is
+**enforced** for active tools: write it as targets, e.g. `*.acme.com,
+203.0.113.0/24, app.example.org — per SOW v2` (wildcards and CIDRs; prose is
+ignored). Active calls touching anything outside it are refused and audit-logged;
+with no scope set, active tools don't run. On MCP clients with elicitation, the
+operator is asked before scope widens; otherwise the model must ask and then call
+`set_engagement`. See `docs/SECURITY.md`. It
 persists them to `$MARQ_WORK_DIR/.marq-context`, so they survive across the
 process-per-call `marq run` path and show up in `server_info` and every audit
 record. Operator stays env-set — it's the accountability anchor, not something

@@ -2,26 +2,37 @@
 
 <img src="docs/logo.svg" alt="marq" width="320">
 
-### Your universal cyber assistant
+### Current security expertise for your AI agent
 
-Ask anything across security and get the right tools and current expertise to
-answer it — on whatever model you choose, local or frontier.
+An open knowledge pack of security, GRC and OT/ICS playbooks that is re-checked
+against primary sources every 6–8 weeks, plus an optional tool server that refuses
+out-of-scope targets. It works with whatever model and agent you use.
 
 [![CI](https://github.com/rhaist/marq/actions/workflows/ci.yml/badge.svg)](https://github.com/rhaist/marq/actions/workflows/ci.yml)
 
 </div>
 
 ```text
-"Threat-model this payment API."                       → architecture
-"Map our pentest findings to ISO 27001 and SOC 2."     → GRC + standards
-"What does this malware sample actually do?"           → malware
-"Run an authorized pentest of *.acme.com."             → offensive
-"Our breach-notification clock under GDPR + US law?"   → regulation
-"Build the ransomware incident runbook."               → IR + resilience
+"Is this CVE in our firmware 'actively exploited' under the CRA?"  → CRA triage
+"Map these pentest findings to IEC 62443, CRA and NIS2."          → crosswalk
+"Our breach-notification clock under NIS2, GDPR and US law?"      → regulation
+"Threat-model this payment API."                                  → architecture
+"What does this malware sample actually do?"                      → malware
+"Run an authorized pentest of *.acme.com."                        → offensive
 ```
 
-**~85 security tools + ~100 expert playbooks (current 2026 standards), in one
-auditable binary.** You bring the model; marq brings the tools and the knowledge.
+**The knowledge pack.** About 100 playbooks for practitioners at EU and US
+manufacturers. They run from a finding to the obligation it touches (IEC 62443,
+EU CRA, NIS2, ISO 27001, NIST, US sector rules) to the board report. Every skill
+records the date it was last checked, and Apache-2.0 means it installs into any
+agent, including internal ones.
+
+**The tool server (optional).** About 85 wrapped Kali tools plus an `exec` for
+the rest. Every active command is checked against the engagement scope before it
+runs: out-of-scope targets are refused, widening scope asks you first (on MCP
+clients that support elicitation), and every
+call lands in a fail-closed, operator-attributed audit log you can hand to a
+client or regulator.
 
 ## Start
 

@@ -128,15 +128,44 @@ func readContext(workDir string) (engagement, scope string) {
 // the human/env-set attribution anchor.
 func SetEngagement(engagement, scope string) error {
 	engMu.Lock()
+	defer engMu.Unlock()
+	e, s := C.Engagement, C.ScopeNote
 	if engagement != "" {
-		C.Engagement = engagement
+		e = engagement
 	}
 	if scope != "" {
-		C.ScopeNote = scope
+		s = scope
 	}
-	b, _ := json.Marshal(engagementContext{C.Engagement, C.ScopeNote})
-	engMu.Unlock()
-	return os.WriteFile(contextPath(C.WorkDir), b, 0o644)
+	return persist(e, s)
+}
+
+// persist writes the context file and, only if that succeeds, applies it to C,
+// so a failed write never leaves the live scope ahead of the file. Callers
+// hold engMu for the whole read-modify-write.
+func persist(engagement, scope string) error {
+	b, _ := json.Marshal(engagementContext{engagement, scope})
+	if err := os.WriteFile(contextPath(C.WorkDir), b, 0o644); err != nil {
+		return err
+	}
+	C.Engagement, C.ScopeNote = engagement, scope
+	return nil
+}
+
+// WidenScope appends targets to the scope note and persists it. Callers record
+// who authorized the widening in the audit log (mcpserver: operator confirmation
+// via elicitation).
+func WidenScope(targets ...string) error {
+	engMu.Lock()
+	defer engMu.Unlock()
+	note := C.ScopeNote
+	for _, t := range targets {
+		if note == "" {
+			note = t
+		} else {
+			note += ", " + t
+		}
+	}
+	return persist(C.Engagement, note)
 }
 
 // Attribution returns the current engagement label and scope note under a read

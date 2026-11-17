@@ -61,6 +61,7 @@ TESTS: dict[str, tuple[str, dict]] = {
     # meta
     "server_info":   (LOCAL, {}),
     "run_shell":     (LOCAL, {"command": "echo SMOKE_OK && command -v nmap && command -v nuclei"}),
+    "exec":          (LOCAL, {"command": "nmap -sn 127.0.0.1"}),
     # files (staging happens first, see stage_files)
     "write_file":    (LOCAL, {"path": f"{STAGE}/ping.txt", "content": "smoke"}),
     "read_file":     (LOCAL, {"path": f"{STAGE}/ping.txt"}),

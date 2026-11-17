@@ -6,7 +6,9 @@
 package registry
 
 import (
+	"cmp"
 	"fmt"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -14,6 +16,7 @@ import (
 	"github.com/rhaist/marq/internal/audit"
 	"github.com/rhaist/marq/internal/config"
 	"github.com/rhaist/marq/internal/runner"
+	"github.com/rhaist/marq/internal/scope"
 )
 
 // ParamType is the JSON-schema scalar type of a tool parameter.
@@ -41,6 +44,8 @@ type Invocation struct {
 	Stdin      string
 	Timeout    int // seconds; 0 = default
 	Background bool
+	Refuse     string // non-empty: don't run; Call returns this (audited) instead
+	Passive    bool   // an Active tool's call that touches no target (offline analysis): skip the scope gate
 }
 
 // Tool is one capability. Exactly one of Build (exec) or Handler (in-process)
@@ -265,6 +270,13 @@ func (t Tool) Call(raw map[string]any) string {
 		return warn + t.Handler(args)
 	}
 	inv := t.Build(args)
+	if msg := t.refusal(inv); msg != "" {
+		target := cmp.Or(inv.Target, "(unspecified)")
+		id, _ := audit.LogStart(t.Name, target, inv.Argv)
+		code := 3
+		audit.LogEnd(id, t.Name, &code, 0, false, "refused: "+msg)
+		return warn + "refused: " + msg
+	}
 	if inv.Background {
 		jobDir, errMsg := runner.RunBackground(t.Name, inv.Argv, inv.Target)
 		if errMsg != "" {
@@ -278,6 +290,67 @@ func (t Tool) Call(raw map[string]any) string {
 		Timeout: inv.Timeout,
 	})
 	return warn + res.Render()
+}
+
+// ScopeGap returns the targets an active exec tool would touch that the
+// recorded scope doesn't authorize (all of them when no scope is set). Nil for
+// passive tools, handlers, and calls whose arguments don't resolve.
+func (t Tool) ScopeGap(raw map[string]any) []string {
+	if !t.Active || t.Build == nil || len(t.missingRequired(raw)) > 0 {
+		return nil
+	}
+	inv := t.Build(Resolve(t.Params, raw))
+	if inv.Refuse != "" || inv.Passive {
+		return nil
+	}
+	_, note := config.Attribution()
+	return scope.Parse(note).OutOfScope(scopeTexts(inv)...)
+}
+
+// scopeTexts is everything a call could target: argv, stdin, the declared target,
+// and the contents of target-list files (-iL, -l, …; any existing file for nxc,
+// which takes target files positionally).
+func scopeTexts(inv Invocation) []string {
+	texts := append(slices.Clone(inv.Argv), inv.Stdin, inv.Target)
+	if len(inv.Argv) == 0 {
+		return texts
+	}
+	nxc := slices.Contains([]string{"netexec", "nxc"}, filepath.Base(inv.Argv[0]))
+	for i, a := range inv.Argv[1:] {
+		if slices.Contains(scope.ListFlags, a) && i+2 < len(inv.Argv) {
+			a = inv.Argv[i+2]
+		} else if !nxc {
+			continue
+		}
+		if ts, err := scope.FileTargets(a); err == nil {
+			texts = append(texts, strings.Join(ts, " "))
+		}
+	}
+	return texts
+}
+
+// refusal is the pre-run gate: a Build-level refusal, or for active tools a
+// missing scope or out-of-scope targets. Every exec funnels here before runner,
+// so the scope rule holds on both the MCP and `marq run` paths.
+func (t Tool) refusal(inv Invocation) string {
+	if inv.Refuse != "" {
+		return inv.Refuse
+	}
+	if !t.Active || inv.Passive {
+		return ""
+	}
+	_, note := config.Attribution()
+	set := scope.Parse(note)
+	if set.Empty() {
+		return "no engagement scope recorded, so active tools can't run. Ask the operator for the " +
+			"authorized targets (wildcards like *.acme.com and CIDRs work) and record them with set_engagement."
+	}
+	if oos := set.OutOfScope(scopeTexts(inv)...); len(oos) > 0 {
+		return fmt.Sprintf("%s is outside the recorded engagement scope (%q). Don't work around this: "+
+			"ask the operator whether it is authorized; if they confirm, record the widened scope with "+
+			"set_engagement, then retry.", strings.Join(oos, ", "), note)
+	}
+	return ""
 }
 
 func backgroundMsg(tool, target, jobDir string) string {
@@ -349,7 +422,7 @@ func All() []Tool {
 	tools := slices.Concat(
 		[]Tool{serverInfoTool(), setEngagementTool()},
 		recon(), osint(), people(), web(),
-		exploit(), creds(), internal(), malware(), fileTools(), reportTools(), knowledgeTools(),
+		exploit(), creds(), internal(), malware(), execTools(), fileTools(), reportTools(), knowledgeTools(),
 	)
 	if config.C.AllowRawShell {
 		tools = append(tools, shell()...)

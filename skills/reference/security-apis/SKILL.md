@@ -25,8 +25,9 @@ keys: https://github.com/jaegeral/security-apis
 - **Already wrapped — use the tool, not the raw API:** Shodan (`shodan_host`,
   `shodan_search`), Censys lookups (`censys_view`), subdomains (`subfinder`), ASN
   (`asnmap`). The APIs below add what those don't.
-- **Otherwise:** fetch the URL — the client's web-fetch, or keep it audited and
-  on the container's network with `run_shell` → `curl -s '<url>'`.
+- **Otherwise:** fetch the URL with the client's web-fetch (or `curl` from your own
+  shell). Not through marq's `exec`/`run_shell`: those are scope-enforced, and a
+  third-party API host isn't in an engagement's scope.
 - **Search-engine queries/dorks** use the client's web search (marq wraps none;
   Google's Custom Search API closes 2027-01-01). If you have none, tell the user to add a web-search skill or MCP server to their client rather than guessing results.
 - These are free _because_ they're rate-limited (HackerTarget ~50/day per IP,
