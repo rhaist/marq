@@ -26,36 +26,37 @@ PASS="SHODAN_API_KEY CENSYS_API_TOKEN CENSYS_ORG_ID GITHUB_TOKEN NUMVERIFY_API_K
 CFG="${MARQ_ENV_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/marq/env}"
 
 case "${1:-}" in
-  up)
-    work="${2:?usage: marq up <workspace-dir>}"
-    mkdir -p "$work"
-    "$ENGINE" rm -f "$C" >/dev/null 2>&1 || true
-    envargs=()
-    [ -f "$CFG" ] && envargs+=(--env-file "$CFG")
-    for k in $PASS; do [ -n "${!k:-}" ] && envargs+=(-e "$k"); done
-    # Audit attribution: your shell's MARQ_OPERATOR, else the env file's, else $USER.
-    if [ -n "${MARQ_OPERATOR:-}" ]; then envargs+=(-e MARQ_OPERATOR)
-    elif ! { [ -f "$CFG" ] && grep -q '^MARQ_OPERATOR=' "$CFG"; }; then envargs+=(-e "MARQ_OPERATOR=${USER:-marq}"); fi
-    "$ENGINE" run -d --name "$C" \
-      -v "$(cd "$work" && pwd):/work" \
-      "${envargs[@]}" \
-      "$IMG" sleep infinity >/dev/null
-    echo "marq up: container '$C', /work -> $(cd "$work" && pwd)"
-    ;;
-  down)
-    "$ENGINE" rm -f "$C" >/dev/null 2>&1 || true
-    ;;
-  shell)
-    exec "$ENGINE" exec -it "$C" bash
-    ;;
-  "")
-    echo "usage: marq up <dir> | down | shell" >&2
-    echo "       marq run <tool> '<json>' | tools [name] | skills [name]" >&2
-    echo "       marq prompt <system|skill> | version   (forwarded to the container)" >&2
-    exit 1
-    ;;
-  *)
-    # Forward everything else (run, tools, …) to the marq binary in the container.
-    exec "$ENGINE" exec -i "$C" marq "$@"
-    ;;
+up)
+  work="${2:?usage: marq up <workspace-dir>}"
+  mkdir -p "$work"
+  "$ENGINE" rm -f "$C" >/dev/null 2>&1 || true
+  envargs=()
+  [ -f "$CFG" ] && envargs+=(--env-file "$CFG")
+  for k in $PASS; do [ -n "${!k:-}" ] && envargs+=(-e "$k"); done
+  # Audit attribution: your shell's MARQ_OPERATOR, else the env file's, else $USER.
+  if [ -n "${MARQ_OPERATOR:-}" ]; then
+    envargs+=(-e MARQ_OPERATOR)
+  elif ! { [ -f "$CFG" ] && grep -q '^MARQ_OPERATOR=' "$CFG"; }; then envargs+=(-e "MARQ_OPERATOR=${USER:-marq}"); fi
+  "$ENGINE" run -d --name "$C" \
+    -v "$(cd "$work" && pwd):/work" \
+    "${envargs[@]}" \
+    "$IMG" sleep infinity >/dev/null
+  echo "marq up: container '$C', /work -> $(cd "$work" && pwd)"
+  ;;
+down)
+  "$ENGINE" rm -f "$C" >/dev/null 2>&1 || true
+  ;;
+shell)
+  exec "$ENGINE" exec -it "$C" bash
+  ;;
+"")
+  echo "usage: marq up <dir> | down | shell" >&2
+  echo "       marq run <tool> '<json>' | tools [name] | skills [name]" >&2
+  echo "       marq prompt <system|skill> | version   (forwarded to the container)" >&2
+  exit 1
+  ;;
+*)
+  # Forward everything else (run, tools, …) to the marq binary in the container.
+  exec "$ENGINE" exec -i "$C" marq "$@"
+  ;;
 esac

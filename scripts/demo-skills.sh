@@ -15,10 +15,13 @@ BIN="$WORK/marq"
 export MARQ_SKILLS_ONLY=1 MARQ_WORK_DIR="$WORK" MARQ_AUDIT_LOG="$WORK/audit.jsonl"
 trap 'rm -rf "$WORK"' EXIT
 
-step() { printf '\n\033[1;36m$ %s\033[0m\n' "$*"; }        # cyan prompt line
-run()  { "$BIN" run "$@" 2>/dev/null; }
+step() { printf '\n\033[1;36m$ %s\033[0m\n' "$*"; } # cyan prompt line
+run() { "$BIN" run "$@" 2>/dev/null; }
 
-( cd "$ROOT" && go build -o "$BIN" ./cmd/marq ) || { echo "build failed"; exit 1; }
+(cd "$ROOT" && go build -o "$BIN" ./cmd/marq) || {
+  echo "build failed"
+  exit 1
+}
 
 step "marq run server_info   # knowledge-only mode — no tool suite loaded"
 run server_info '{}'

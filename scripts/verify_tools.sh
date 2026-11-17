@@ -28,12 +28,18 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --build)      BUILD=1 ;;
-    --help-only)  HELP_ONLY=1 ;;
-    --test-only)  TEST_ONLY=1 ;;
-    --lines)      LINES="$2"; shift ;;
-    --image)      IMAGE="$2"; shift ;;
-    *)            PASSTHROUGH+=("$1") ;;   # e.g. --external --only ...
+  --build) BUILD=1 ;;
+  --help-only) HELP_ONLY=1 ;;
+  --test-only) TEST_ONLY=1 ;;
+  --lines)
+    LINES="$2"
+    shift
+    ;;
+  --image)
+    IMAGE="$2"
+    shift
+    ;;
+  *) PASSTHROUGH+=("$1") ;; # e.g. --external --only ...
   esac
   shift
 done
@@ -75,8 +81,10 @@ dump_help() {
   # Build a single in-container script so we only spawn one container.
   local script=""
   for entry in "${TOOLS[@]}"; do
-    local name="${entry%%@@*}"; local rest="${entry#*@@}"
-    local inv="${rest%%@@*}"; local helpcmd="${rest#*@@}"
+    local name="${entry%%@@*}"
+    local rest="${entry#*@@}"
+    local inv="${rest%%@@*}"
+    local helpcmd="${rest#*@@}"
     script+="printf '\n═══════════════ %s ═══════════════\n' $(printf '%q' "$name");"
     script+="printf '\$ %s\n--- help ---\n' $(printf '%q' "$inv");"
     script+="{ ${helpcmd} ; } 2>&1 | head -n ${LINES};"
@@ -105,5 +113,8 @@ fi
 
 rc=0
 [[ "$TEST_ONLY" == 1 ]] || dump_help
-[[ "$HELP_ONLY" == 1 ]] || { run_tests; rc=$?; }
+[[ "$HELP_ONLY" == 1 ]] || {
+  run_tests
+  rc=$?
+}
 exit "$rc"

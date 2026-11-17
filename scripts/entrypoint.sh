@@ -10,12 +10,12 @@
 set -euo pipefail
 
 case "${1:-}" in
-    "" | mcp | serve)
-        exec marq serve
-        ;;
-    run | tools | skills | shim | prompt | version)
-        exec marq "$@"
-        ;;
+"" | mcp | serve)
+  exec marq serve
+  ;;
+run | tools | skills | shim | prompt | version)
+  exec marq "$@"
+  ;;
 esac
 
 exec "$@"

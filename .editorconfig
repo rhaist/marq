@@ -1,0 +1,10 @@
+root = true
+
+# shfmt reads this: keep the scripts at 2-space indent.
+[*.sh]
+indent_style = space
+indent_size = 2
+
+[pi/marq]
+indent_style = space
+indent_size = 2
