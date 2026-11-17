@@ -21,14 +21,14 @@ import _ "embed"
 //go:embed marq
 var Shim string
 
-// SystemPrompt replaces Pi's default agent framing with marq's scope-first one.
+// SystemPrompt replaces Pi's default agent framing with marq's purpose-first one.
 // Without it a small model narrates instead of driving the tools.
 //
 //go:embed SYSTEM.md
 var SystemPrompt string
 
 // Skill is the portable markdown skill: calling convention, tool discovery,
-// scope rules and a few-shot for small models.
+// passive-only/purpose rules and a few-shot for small models.
 //
 //go:embed SKILL.md
 var Skill string

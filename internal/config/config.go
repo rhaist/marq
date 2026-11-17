@@ -1,6 +1,5 @@
 // Package config holds all server settings, read once from the environment at
-// startup. It mirrors the env-driven knobs of the original Python server
-// (MARQ_*); adding a knob means adding a field plus an env read here.
+// startup (MARQ_*); adding a knob means adding a field plus an env read here.
 package config
 
 import (
@@ -141,6 +140,9 @@ func Attribution() string {
 // Python module-level CONFIG). Components read config.C directly.
 var C = Load()
 
+// TrafficNote is the precise passive-only promise, shared with the MCP instructions.
+const TrafficNote = "never scan, crawl or exploit a target's hosts — the only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. Username and email tools send lookup requests to third-party sites."
+
 // Banner returns the usage notice shown to the operator before tools run.
 // Pointer receiver + Attribution() so it doesn't read the mutable field while
 // set_engagement may be writing it concurrently.
@@ -148,17 +150,18 @@ func (c *Config) Banner() string {
 	if c.SkillsOnly {
 		return "marq is running in knowledge-only mode: the cyber skills library " +
 			"and advisory tools are available; the OSINT tool suite is not loaded. " +
-			"All invocations are audit-logged.\n  operator   : " + c.Operator + "\n  audit log  : " + c.AuditLog
+			"Findings and file access are audit-logged.\n  operator   : " + c.Operator + "\n  audit log  : " + c.AuditLog
 	}
 	return fmt.Sprintf(
 		"marq does passive OSINT only: its tools query public third-party sources "+
-			"(DNS, WHOIS, certificate logs, Shodan/Censys, web archives, breach databases, "+
-			"social sites) and never probe a target's own infrastructure. People OSINT is "+
-			"personal-data processing — keep it to the recorded purpose. All invocations "+
-			"are audit-logged.\n"+
+			"(DNS resolvers, WHOIS, certificate logs, Shodan/Censys, web archives, breach "+
+			"databases, social and code-hosting sites) and %s People OSINT is "+
+			"personal-data processing — keep it to the recorded purpose. Every OSINT-tool, "+
+			"file and findings call is audit-logged; a tool won't run if its start record "+
+			"can't be written.\n"+
 			"  operator   : %s\n"+
 			"  engagement : %s\n"+
 			"  audit log  : %s",
-		c.Operator, Attribution(), c.AuditLog,
+		TrafficNote, c.Operator, Attribution(), c.AuditLog,
 	)
 }

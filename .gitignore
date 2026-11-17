@@ -15,12 +15,11 @@ build/
 # Real secrets (API keys belong in ~/.config/marq/env, never the repo).
 .env
 
-# Never commit audit logs, scan output, loot or scope files.
+# Never commit audit logs, scan output, or loot.
 *.jsonl
 # …but the eval's task set IS source, not output — un-ignore it:
 !scripts/eval/tasks.jsonl
 *.log
 /audit/
 /loot/
-/scope.txt
 /results/

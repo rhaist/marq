@@ -3,7 +3,7 @@
 marq bundles **passive OSINT / footprinting tooling** that profiles organisations
 and people (theHarvester, spiderfoot, sherlock, user-scanner, h8mail, phoneinfoga,
 …) and exposes it to an LLM through MCP. The tools query public third-party
-sources only; none of them scans, probes, exploits or attacks a target. Even so,
+sources and never scan, crawl or exploit a target's hosts (the only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers). Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks). Even so,
 people OSINT is personal-data processing. Read this before you run anything.
 
 ## Legal & ethical baseline
@@ -25,10 +25,10 @@ people OSINT is personal-data processing. Read this before you run anything.
 
 There is no active-testing capability to gate: the tool set is passive by
 construction (spiderfoot runs only its `passive` use case, trufflehog accepts only
-public git/GitHub/GitLab sources and never verifies secrets, DNS tools refuse zone
+public git hosts (GitHub, GitLab, Bitbucket, Codeberg) and never verifies secrets, DNS tools refuse zone
 transfers), and there is no generic command runner or raw shell.
 
-**Every exec-tool invocation is audit-logged** as JSON lines, before and after
+**Every OSINT-tool, file and findings call is audit-logged** as JSON lines, before and after
 it runs — and an exec or file tool whose start record can't be persisted is
 refused (fail-closed), so the log can't be silently skipped. In-process tools
 (`server_info`, `load_skill`, `list_jobs`, `job_status`) are not logged;
@@ -76,17 +76,16 @@ Applies to the full Docker tool suite (skills-only above needs none of it):
   a local container — the model runtime is the client's concern (e.g. Pi), not
   marq's, so marq itself opens no outbound model connection.
 - **No shell or generic executor.** The model is bounded to the wrapped tool set.
-- **File access is sandboxed — for the file tools.** The
-  `read_file`/`write_file`/`list_dir` tools resolve real paths (defeating symlink
-  and `..` escapes) and refuse anything outside `/work`, `/tmp` and `MARQ_WORK_DIR`, so the model
+- **File access is sandboxed — for the file tools and `exif_metadata`.** The
+  `read_file`/`write_file`/`list_dir` tools and `exif_metadata` resolve real paths (defeating symlink
+  and `..` escapes) and refuse anything outside `/work`, `/tmp` and `MARQ_WORK_DIR` (the audit log itself is refused), so the model
   can exchange working files without reading or clobbering the rest of the
-  container. This bounds **those tools**, not tool _execution_: an OSINT tool
-  with an output option can still write anywhere the `marq` user can, so the
-  sandbox is a file-exchange boundary, not a jail. These ops are
-  audit-logged like every tool run.
+  container. The other tools aren't path-sandboxed; they are bounded by fixed or
+  allowlisted argv and the container (no wrapper exposes an output-file option; h8mail `-o`/`-j` are refused). These ops are
+  audit-logged.
 - Output is truncated to a token budget so a runaway query can't flood the model.
 - A per-command timeout (`MARQ_TIMEOUT`, default 900s) bounds runaway tools.
-- **Audit completeness depends on the driver.** Every call through `marq run` /
+- **Audit completeness depends on the driver.** Every OSINT-tool call through `marq run` /
   `marq serve` is logged at `runner.Run`. The `pi/marq` shim, however, hands the
   agent raw host bash, so a model _could_ `docker exec` a tool directly and skip
   the audit trail — the skill instructs "always use `marq run`," but that's

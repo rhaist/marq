@@ -1,6 +1,6 @@
 // Package registry is the single source of truth for the tool suite. Each tool
 // is data — name, description, params and a builder — so both adapters (the MCP
-// stdio server and the TUI agent loop) iterate the same []Tool. Most tools are
+// stdio server and `marq run`) iterate the same []Tool. Most tools are
 // exec tools (Build -> Invocation -> runner); a few (files, findings, jobs) are
 // in-process Handler tools.
 package registry

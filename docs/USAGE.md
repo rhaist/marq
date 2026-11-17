@@ -1,6 +1,6 @@
 # Usage
 
-How to build, smoke-test and drive marq — your cyber assistant (~30
+How to build, smoke-test and drive marq — your cyber assistant (19 passive-OSINT tools, 29 tools in all
 passive-OSINT tools + ~83 skill playbooks across 13 domains). For choosing a client and model
 for the job (Claude Code / Codex as the expert, Pi for local work, LM
 Studio for testing) see [`CLIENTS.md`](CLIENTS.md); for a guided per-OS install
@@ -59,7 +59,7 @@ docker run --rm -it --entrypoint /bin/bash marq
 Confirm the MCP server starts (it will wait for JSON-RPC on stdin; Ctrl-C to exit):
 
 ```bash
-docker run --rm -i marq        # prints the authorization banner to stderr
+docker run --rm -i marq        # prints the usage notice to stderr
 ```
 
 ## 3. Wire it into an MCP client
@@ -119,8 +119,7 @@ runtime via `set_engagement`.
 
 ## Available tools
 
-All wrapped tools are **passive**: they query public sources and never probe,
-scan or exploit a target.
+All wrapped tools are **passive**: they query public third-party sources (DNS resolvers, WHOIS, certificate logs, Shodan/Censys, web archives, breach databases, social and code-hosting sites) and never scan, crawl or exploit a target's hosts — the only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks).
 
 ### Session
 
@@ -144,7 +143,7 @@ scan or exploit a target.
 | `exif_metadata` | exiftool     | Metadata from a staged file/dir                                     |
 | `shodan_host`   | shodan       | Exposed ports/services/CVEs for an IP (keyless via InternetDB)      |
 | `shodan_search` | shodan       | Search exposed assets (e.g. `org:`) †                               |
-| `trufflehog`    | trufflehog   | Leaked secrets in public git/GitHub/GitLab (unverified) ‡           |
+| `trufflehog`    | trufflehog   | Leaked secrets in public git hosts (GitHub, GitLab, Bitbucket, Codeberg; unverified) ‡           |
 | `gau_urls`      | gau          | Known URLs from Wayback/CommonCrawl/OTX/URLScan (background)        |
 | `censys_view`   | cencli       | Censys host/web/cert lookup (search is paid-only) †                 |
 
@@ -166,8 +165,7 @@ scan or exploit a target.
 | `read_file`  | Read back output a tool wrote to disk                             |
 | `write_file` | Stage an input file (a host list for `dnsx`, …)                 |
 
-These are sandboxed to `/work`, `/tmp` and `MARQ_WORK_DIR` — the model cannot read or write
-anywhere else. They are what make the file-driven tools usable: the model can
+These, and `exif_metadata`, are sandboxed to `/work`, `/tmp` and `MARQ_WORK_DIR` (realpath-checked; the audit log itself is refused). Other tools aren't path-sandboxed but are bounded by fixed/allowlisted argv and the container. They are what make the file-driven tools usable: the model can
 `write_file` a host list then `dnsx` it, or `read_file` a result another
 tool dropped on disk. Mount `/work` from the host (`-v ./work:/work`, as the
 `pi/marq` shim does) to exchange files with the operator.
@@ -219,7 +217,7 @@ an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.
 
 | Variable               | Default                     | Meaning                                                                                                           |
 | ---------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `MARQ_OPERATOR`        | `marq`                      | Recorded in every audit record — the accountability anchor; env-set only                                          |
+| `MARQ_OPERATOR`        | `marq` (bare binary), `unknown` (image); `pi/marq` shim: host `$USER` | Recorded in every audit record — the accountability anchor; env-set only                |
 | `MARQ_ENGAGEMENT`      | `unspecified`               | Investigation label + purpose (initial default; overridable by `set_engagement`)                                  |
 | `MARQ_AUDIT_LOG`       | `/var/log/marq/audit.jsonl` | Audit log path                                                                                                    |
 | `MARQ_TIMEOUT`         | `900`                       | Default per-command timeout (seconds)                                                                             |

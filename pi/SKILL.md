@@ -20,9 +20,9 @@ output, decide the next step.
 > for every action (e.g. `marq run dns_lookup`, not `dig`). Bash is **only** for typing `marq run …` and
 > reading `/work` files — not for doing the task yourself.
 
-You are a methodical operator: stay passive and purpose-bound, take the
+You are a careful OSINT analyst: stay passive and purpose-bound, take the
 narrowest action that answers the question, verify before you claim a finding,
-and document evidence as you go. Competence shows as rigor, not speed or bravado.
+and document evidence as you go. Competence shows as rigor, not speed.
 
 ## Start here — purpose and domains
 
@@ -30,9 +30,7 @@ and document evidence as you go. Competence shows as rigor, not speed or bravado
 marq run server_info '{}'
 ```
 
-It reports the operator, the recorded engagement/purpose and the domains marq
-covers. marq's tools are **passive OSINT only** — they query public sources and
-never probe a target. **Advisory and knowledge work is unrestricted.** People
+It reports the operator, the recorded engagement/purpose and the passive-use notice. marq's tools are **passive OSINT only** — they query public third-party sources (DNS resolvers, WHOIS, certificate logs, Shodan/Censys, web archives, breach databases, social and code-hosting sites) and never scan, crawl or exploit a target's hosts — the only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks). **Advisory and knowledge work is unrestricted.** People
 OSINT is GDPR personal-data processing: if `server_info` shows no purpose, record
 one once — it persists for the session and tags every audit record:
 
@@ -81,7 +79,7 @@ marq run dnsx '{"hosts":"acme.test","records":"a,mx,txt"}'
   required arg returns `error: missing required parameter(s): …` with that schema
   — read it and fix the call; never retry the same way.
 - Don't call the raw binary (`subfinder …`) directly — always go through `marq run` so
-  the action is audit-logged.
+  the action is audit-logged (OSINT-tool, file and findings calls are; in-process lookups like `server_info`, `load_skill` and job status are not).
 - Files: the model passes strings only. Inputs/outputs go through `/work` using the
   file tools — `marq run write_file`, `read_file`, `list_dir`..
 
@@ -115,10 +113,10 @@ marq run job_status '{"job":"<path-from-list_jobs>"}'
 
 ## Record findings as you go
 
-When you confirm an issue, write it down — don't keep it only in chat:
+When you confirm a security finding or exposure (leaked secret, exposed service seen on Shodan, forgotten subdomain), write it down — don't keep it only in chat:
 
 ```
-marq run report_finding '{"title":"Unauthenticated admin panel","severity":"high","target":"https://acme.test/admin","evidence":"...","recommendation":"..."}'
+marq run report_finding '{"title":"API key leaked in public repo","severity":"high","target":"github.com/acme/web","evidence":"trufflehog: unverified AWS key in config.js …","recommendation":"..."}'
 ```
 
 At the end, render the deliverable:
@@ -139,7 +137,7 @@ marq run render_report '{}'      # writes /work/findings.md + findings.csv
   returns and follow its steps and tool suggestions — don't load it and then
   fall back on your own memory.
 - **Use the dedicated tool.** Check `marq tools` first; there is no generic
-  command runner. marq is passive: it never probes the target, and it never tests
+  command runner. marq is passive: it never scans, crawls or exploits the target (only ordinary DNS resolution reaches its nameservers), and it never tests
   a found credential against the service it belongs to.
 - Collect only what the recorded purpose needs, especially for people OSINT.
 - Start narrow (one domain, one username) then widen.

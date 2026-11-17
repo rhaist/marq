@@ -14,7 +14,7 @@ import (
 // escape the sandbox. A naive HasPrefix(abs, root) check (no symlink resolution)
 // would pass the e2e absolute-path test but fail this one.
 func TestSandboxRejectsSymlinkEscape(t *testing.T) {
-	// Keep audit happy so audited() doesn't fail-closed before resolve() runs.
+	// Keep audit happy so audited() doesn't fail-closed before Resolve() runs.
 	config.C.AuditLog = filepath.Join(t.TempDir(), "audit.log")
 
 	// EvalSymlinks so the roots match what realpath() produces (macOS /tmp etc).
@@ -41,7 +41,7 @@ func TestSandboxRejectsSymlinkEscape(t *testing.T) {
 	// (1) read through the escaping symlink must be refused
 	out := ReadFile(filepath.Join(root, "escape", "secret"), 0)
 	if strings.Contains(out, "TOPSECRET") {
-		t.Fatal("symlink escape read a file outside the sandbox — resolve() failed")
+		t.Fatal("symlink escape read a file outside the sandbox — Resolve() failed")
 	}
 	if !strings.Contains(out, "outside the allowed area") {
 		t.Errorf("want sandbox-refusal message, got %q", out)
@@ -120,21 +120,21 @@ func TestSandboxRefusesAuditLog(t *testing.T) {
 	origRoots, origWork, origLog := allowedRoots, config.C.WorkDir, config.C.AuditLog
 	allowedRoots, config.C.WorkDir, config.C.AuditLog = []string{"/nonexistent-root"}, work, filepath.Join(work, "audit.jsonl")
 	t.Cleanup(func() { allowedRoots, config.C.WorkDir, config.C.AuditLog = origRoots, origWork, origLog })
-	// audited() writes the start record before resolve(), so the log always exists.
+	// audited() writes the start record before Resolve(), so the log always exists.
 	if err := os.WriteFile(config.C.AuditLog, nil, 0o600); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := resolve(filepath.Join(work, "audit.jsonl")); err == nil {
+	if _, err := Resolve(filepath.Join(work, "audit.jsonl")); err == nil {
 		t.Fatal("audit log path was allowed")
 	}
 	if err := os.Symlink(filepath.Join(work, "audit.jsonl"), filepath.Join(work, "alias")); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := resolve(filepath.Join(work, "alias")); err == nil {
+	if _, err := Resolve(filepath.Join(work, "alias")); err == nil {
 		t.Fatal("symlink to the audit log was allowed")
 	}
-	if _, err := resolve(filepath.Join(work, "findings.md")); err != nil {
+	if _, err := Resolve(filepath.Join(work, "findings.md")); err != nil {
 		t.Errorf("ordinary work file refused: %v", err)
 	}
 }

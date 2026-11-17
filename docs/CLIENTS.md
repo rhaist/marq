@@ -1,6 +1,6 @@
 # Driving marq — pick the brain for the job
 
-marq is **tools + knowledge**: ~30 wrapped passive-OSINT tools and ~83 skill playbooks
+marq is **tools + knowledge**: 19 passive-OSINT tools (29 tools in all) and 83 skill playbooks
 across 13 domains (OSINT, malware, threat-intel, sec-ops, architecture, GRC,
 standards, CISO, resilience, human factors, …). It does **not** bring a model.
 Your client does. So the question is which **brain** you point at it — and that
@@ -10,7 +10,7 @@ depends on the work.
 
 | You want to…                                                                                                             | Use                                                                        | Why                                                                                                         |
 | :----------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- |
-| Run fully local — hands-on OSINT, on-box execution, nothing leaves the host _(recommended default)_              | **Pi** + a local model on **llama.cpp** + the `pi/marq` shim               | Terminal-native, no cloud; the model gets bash and calls `marq run` directly.                               |
+| Run fully local — hands-on OSINT, on-box execution, the model and your data stay local _(recommended default)_ | **Pi** + a local model on **llama.cpp** + the `pi/marq` shim               | Terminal-native, no cloud model (OSINT lookups still query third-party sources); the model gets bash and calls `marq run` directly.                               |
 | Reason hard — architecture review, threat modeling, GRC/compliance, IR leadership, write the report, app/code-sec review | **Claude Code** or **Codex** (frontier model) + marq over MCP _(fallback)_ | Strongest reasoning. marq hands it the current-standards skills and the tools; the model supplies judgment. |
 
 Rule of thumb: **local model by default** — hands-on OSINT and
@@ -25,7 +25,7 @@ findings/files tools — `go install github.com/rhaist/marq/cmd/marq@latest` wit
 `MARQ_SKILLS_ONLY=1`, a ~10 MB native binary, **no Docker** (see
 [`SETUP.md`](SETUP.md#skills-only--no-docker)). Reach for it when the work is
 advisory — architecture, GRC, standards, threat-intel research. The **full** build
-is the Docker image that adds the ~30-tool OSINT suite for when you need to _run_ things.
+is the Docker image that adds the 19-tool OSINT suite for when you need to _run_ things.
 
 **Two transports** (both builds use the same `marq serve` stdio server):
 
@@ -74,7 +74,7 @@ thinking; marq supplies current frameworks and the evidence tools.
 
 ```bash
 codex mcp add marq -- docker run --rm -i \
-  --cap-drop ALL \
+  --security-opt no-new-privileges:true --cap-drop ALL \
   -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR="$USER" marq
 ```
 
@@ -92,7 +92,7 @@ Same uses as Claude Code. Docs: [Codex MCP](https://developers.openai.com/codex/
 
 ## Pi (local, standalone)
 
-The fully-local path — no cloud, on-box execution. See
+The fully-local path — no cloud model, on-box execution (OSINT lookups still query third-party sources). See
 [`SETUP.md`](SETUP.md#4-run-with-a-local-model-pi--the-marq-skill):
 
 ```bash
@@ -108,7 +108,7 @@ marq up ~/marq/work                               # long-lived container, any wo
 
 **Best for:** any cyber work you want fully local —
 malware triage, threat-intel pivoting, OSINT footprinting and research —
-where nothing leaves the box.
+where the model and your data stay on the box.
 
 ---
 
@@ -122,7 +122,7 @@ where nothing leaves the box.
   playbook keeps context tight. `marq run load_skill '{}'` (or the `load_skill`
   tool) lists the index.
 - **Record a purpose before people OSINT.** GRC/architecture/standards
-  conversations are unrestricted; marq's tools are passive and audit-logged, and
+  conversations are unrestricted; marq's tools are passive and OSINT-tool/file/findings calls are audit-logged, and
   profiling people is GDPR personal-data processing. Record the purpose with
   `set_engagement` first.
 - **Pick the model to the job.** A big reasoning model for analysis and writing;

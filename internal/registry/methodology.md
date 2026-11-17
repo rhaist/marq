@@ -22,7 +22,7 @@ index, then load the playbook(s) for the work in front of you:
 
 marq's tools are **passive OSINT only**: they query public third-party sources
 (DNS, WHOIS, certificate/archive data, Shodan/Censys, public code, username and
-email lookups) and never probe, scan or exploit a target. Advisory and knowledge
+email lookups) and never scan, crawl or exploit a target's hosts — the only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks). Advisory and knowledge
 work is unrestricted. People OSINT (usernames, emails, phones) is personal-data
 processing under GDPR: record the investigation's purpose with `set_engagement`
 (`engagement` = label + purpose, e.g. `acme-footprint-2026-11 — pre-acquisition
@@ -63,7 +63,7 @@ The phases below are the **passive OSINT workflow**. Record results with
 
 ## 5. Leaked secrets in public code
 
-- `trufflehog` on public git/GitHub/GitLab sources. Secrets are reported
+- `trufflehog` on public git hosts (GitHub, GitLab, Bitbucket, Codeberg). Secrets are reported
   unverified — never test a found credential against the service it belongs to.
 
 ## 6. Report
@@ -75,6 +75,6 @@ The phases below are the **passive OSINT workflow**. Record results with
 ## Operating notes
 
 - Stage inputs and read tool output via `write_file` / `read_file` / `list_dir`
-  (sandboxed to /work and /tmp).
+  (sandboxed to /work, /tmp and MARQ_WORK_DIR).
 - Large output is truncated. Write big results to a file and read it back in parts.
-- Every invocation is audit-logged (a call that can't be logged is refused).
+- Every OSINT-tool, file and findings call is audit-logged (an OSINT tool won't run if its start record can't be written); in-process lookups (server_info, load_skill, job status) are not logged.

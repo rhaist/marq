@@ -1,11 +1,13 @@
 package registry
 
 import (
+	"net"
 	"net/url"
 	"slices"
 	"strconv"
 	"strings"
 
+	"github.com/rhaist/marq/internal/files"
 	"github.com/rhaist/marq/internal/shellword"
 )
 
@@ -90,13 +92,17 @@ func osint() []Tool {
 		{
 			Name: "exif_metadata",
 			Desc: "Extract embedded metadata (author, software, GPS, internal paths, emails) from a file " +
-				"or directory with exiftool. `path` must be inside the container — stage documents in the " +
-				"mounted /work dir. Surfaces internal usernames and software versions.",
+				"or directory with exiftool. `path` must be inside the working area (/work or /tmp) — stage " +
+				"downloaded public documents there. Surfaces internal usernames and software versions.",
 			Params: []Param{
 				{Name: "path", Type: StringParam, Desc: "file or directory inside the container", Required: true},
 			},
 			Build: func(a Args) Invocation {
-				return Invocation{Argv: []string{"exiftool", "-r", a.S("path")}, Target: a.S("path")}
+				real, err := files.Resolve(a.S("path")) // same sandbox as read_file
+				if err != nil {
+					return Invocation{Target: a.S("path"), Refuse: err.Error()}
+				}
+				return Invocation{Argv: []string{"exiftool", "-r", real}, Target: a.S("path")}
 			},
 		},
 		{
@@ -108,6 +114,9 @@ func osint() []Tool {
 				{Name: "ip", Type: StringParam, Desc: "IP address", Required: true},
 			},
 			Build: func(a Args) Invocation {
+				if net.ParseIP(a.S("ip")) == nil {
+					return Invocation{Target: a.S("ip"), Refuse: "ip must be an IP address"}
+				}
 				cmd := `if [ -n "$SHODAN_API_KEY" ]; then shodan init "$SHODAN_API_KEY" >/dev/null 2>&1; ` +
 					"shodan host " + shellword.Quote(a.S("ip")) + "; else " +
 					"echo '(keyless InternetDB lookup; set SHODAN_API_KEY for full banners)'; " +

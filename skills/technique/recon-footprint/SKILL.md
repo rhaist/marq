@@ -8,8 +8,8 @@ metadata:
 
 # Recon / footprint workflow
 
-Everything here queries public third-party sources; no packet is sent to the
-target. marq does no port scanning, probing or crawling.
+Everything here queries public third-party sources; no scanning, probing or
+crawling of the target; DNS lookups may reach the domain's own nameservers.
 
 Passive doesn't mean lawful-by-default: OSINT on named people collects personal
 data governed by GDPR and APAC privacy regimes (Singapore PDPA, Japan APPI, etc.).
@@ -30,7 +30,7 @@ cross-border misstep.
   `email_accounts` (email → accounts), `h8mail_breach` (email → breaches),
   `phoneinfoga` (phone numbers), `exif_metadata` (author/device data in
   retrieved documents).
-- Secrets/exposure: `trufflehog` on public git/GitHub/GitLab sources (never
+- Secrets/exposure: `trufflehog` on public git hosts (GitHub, GitLab, Bitbucket, Codeberg) (never
   verifies, so it doesn't use any key it finds).
 
 ## 2. Resolve & classify

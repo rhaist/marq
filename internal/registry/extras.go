@@ -38,9 +38,10 @@ func reportTools() []Tool {
 	return []Tool{
 		{
 			Name: "report_finding",
-			Desc: "Record a validated security finding in the engagement deliverable. `severity` is one " +
-				"of info/low/medium/high/critical. Provide `evidence` (the proof — tool output, request/" +
-				"response) and a `recommendation`. Optionally add a CVSS 3.1 `cvss` vector (e.g. " +
+			Desc: "Record a security finding or exposure in the deliverable (e.g. a leaked secret, an " +
+				"exposed service seen on Shodan, a forgotten subdomain). `severity` is one " +
+				"of info/low/medium/high/critical. Provide `evidence` (the tool output it rests on) " +
+				"and a `recommendation`. Optionally add a CVSS 3.1 `cvss` vector (e.g. " +
 				"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H — its base score is computed and sets severity), " +
 				"a `cwe` (e.g. CWE-89), and `references` (CVE ids / links). Call render_report when done.",
 			Params: []Param{

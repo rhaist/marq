@@ -70,7 +70,7 @@ risk-assessment`), their score now vs last quarter, and what moved them. Shows
 - **Out-of-cycle: any Sev-1/2 incident or material change** — don't let the board
   first hear of a breach from the news or a regulator.
 - **Annual** — strategy & budget review, independent validation results (pentest /
-  red team — run marq engagements), re-baselined maturity.
+  red team — commission externally; marq runs none), re-baselined maturity.
 
 ## Building the deck from marq output
 

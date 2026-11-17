@@ -265,7 +265,7 @@ func printVersion() {
 }
 
 func usage() {
-	fmt.Fprint(os.Stderr, `marq — Kali pentest/OSINT toolkit (MCP server + direct tool runner)
+	fmt.Fprint(os.Stderr, `marq — passive-OSINT toolkit + cyber skills library (MCP server + direct tool runner)
 
 usage:
   marq serve              run the MCP stdio server (default)

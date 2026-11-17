@@ -1,5 +1,5 @@
 // Package skills is an on-demand knowledge library: expert playbooks as
-// embedded markdown spanning offensive, malware, threat-intel, and governance
+// embedded markdown spanning OSINT, threat-intel, malware, sec-ops and governance
 // (GRC, standards, CISO) domains, tied to this server's actual tool names where
 // relevant. The model loads a skill when it starts on that kind of work — the
 // cheapest way to make a local model chain the tools competently (modeled on

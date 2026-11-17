@@ -12,7 +12,7 @@ Social engineering attacks the human, so the defense is **process + technical
 backstops**, not "be more careful." In the AI/deepfake era, content-based
 detection ("does this look fake?") is losing — shift defense to **process
 enforcement** that holds regardless of how convincing the lure is. This is the
-defensive pair to marq's offensive social-eng/people-OSINT tooling; for the
+defensive pair to marq's passive people-OSINT tools; for the
 program/culture side see `load_skill security-awareness`.
 
 ## Threat taxonomy (quick reference)

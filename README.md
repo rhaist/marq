@@ -27,10 +27,8 @@ EU CRA, NIS2, ISO 27001, NIST, US sector rules) to the board report. Every skill
 records the date it was last checked, and Apache-2.0 means it installs into any
 agent, including internal ones.
 
-**The tool server (optional).** About 30 wrapped **passive OSINT** tools (domain,
-infrastructure, people, leaked secrets in public code). They query public sources
-and never probe, scan or exploit a target, and every call lands in a fail-closed,
-operator-attributed audit log you can hand to a client or regulator.
+**The tool server (optional).** 19 **passive OSINT** tools (29 tools in all: domain,
+infrastructure, people, leaked secrets in public code). They query public third-party sources (DNS resolvers, WHOIS, certificate logs, Shodan/Censys, web archives, breach databases, social and code-hosting sites) and never scan, crawl or exploit a target's hosts — the only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks). Every OSINT-tool, file and findings call lands in an operator-attributed audit log you can hand to a client or regulator, and an OSINT tool won't run if its start record can't be written (fail-closed).
 
 ## Start
 
@@ -40,7 +38,7 @@ Pick your path — start simple, add a layer only when you need it:
 | :------------------------------------------- | :-------------- | :-------------------------- |
 | **cyber expertise inside my agent**          | skills pack     | one install command         |
 | **…the same, over MCP for any client**       | skills server   | one `go install`, no Docker |
-| **…plus the ~30 OSINT tools to _run_**   | full MCP server | build/pull the image        |
+| **…plus the 19-tool OSINT suite to _run_**   | full MCP server | build/pull the image        |
 | **…driven by a local model**                 | full + Pi       | image + Pi + llama.cpp      |
 
 ### The skills pack — install into your agent (no server, no Docker)
@@ -109,8 +107,8 @@ or point a frontier MCP client at it.
 
 ### Run it fully local
 
-Your own model, on your box: no cloud, nothing leaves the
-host — the recommended setup when investigating people or a client's footprint. Drive marq from
+Your own model, on your box: no cloud model, and your data stays local (OSINT
+lookups still query third-party sources) — the recommended setup when investigating people or a client's footprint. Drive marq from
 [Pi](https://pi.dev/) over [llama.cpp](https://github.com/ggml-org/llama.cpp):
 
 ```bash
@@ -156,15 +154,15 @@ Any MCP client works (Codex, Claude Desktop) → [`docs/CLIENTS.md`](docs/CLIENT
 API keys in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-sources).)
 
 > **Passive and purpose-bound.** marq queries public sources only and audit-logs
-> every call; people OSINT is personal-data processing, so record a purpose with
+> every OSINT-tool, file and findings call; people OSINT is personal-data processing, so record a purpose with
 > `set_engagement` — [`docs/SECURITY.md`](docs/SECURITY.md).
 
 ---
 
 ## What you get
 
-- **Execution** — ~30 wrapped passive-OSINT tools (domain/infra footprint, people,
-  leaked secrets in public code), each audit-logged and sandboxed; findings render
+- **Execution** — 19 wrapped passive-OSINT tools (29 tools in all: domain/infra footprint, people,
+  leaked secrets in public code), audit-logged; file tools and `exif_metadata` sandboxed to `/work` and `/tmp`; findings render
   to `findings.md` / `.csv` (with optional CVSS + CWE).
 - **Knowledge** — ~83 `load_skill` playbooks across 13 domains, web-researched to
   current (2026) standards, telling the model _how_ to use the tools and _what_ to
@@ -178,7 +176,7 @@ API keys in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-sources).)
   recommended run args also drop all Linux capabilities + `no-new-privileges`).
 
 <details>
-<summary><b>Full tool suite</b> — ~30 passive OSINT tools (click to expand)</summary>
+<summary><b>Full tool suite</b> — 19 passive OSINT tools (click to expand)</summary>
 
 | Category                              | Tools                                                                                                           |
 | :------------------------------------ | :-------------------------------------------------------------------------------------------------------------- |
@@ -206,7 +204,7 @@ terminal agent (Pi) ──bash──▶  pi/marq shim ─┤   both hit the same
                                 ├─ files     read/write/list (sandboxed /work)
                                 └─ extras    report_finding, render_report, list_jobs, load_skill
                                              │
-                                  runner.Run ──▶ audit.jsonl (every call)
+                                  runner.Run ──▶ audit.jsonl (OSINT/file/findings calls)
 
            load_skill ──▶ skills library (markdown, ~83 playbooks / 13 domains)
 ```
@@ -233,4 +231,4 @@ point for audit logging, timeouts, and output truncation.
 run a modified version as a network service and you must offer users its source.
 The skills pack under [`skills/`](skills/) is **Apache-2.0** ([`skills/LICENSE`](skills/LICENSE)),
 so you can install and adapt the playbooks in any agent, including internal ones.
-For authorized security testing and education, **no warranty** — use responsibly.
+For lawful OSINT, security research and education, **no warranty** — use responsibly.

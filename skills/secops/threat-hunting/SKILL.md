@@ -82,7 +82,7 @@ high-value pattern:
 
 ## marq tie-in
 
-This is an offensive box, not a hunt platform — but use it to _validate_ a
+marq is passive OSINT, not a hunt platform or emulation box — but use it to _validate_ a
 detection hypothesis end-to-end: emulate the TTP (with your own emulation tooling; marq runs none), then confirm the data source/rule would have caught it. `report_finding`
 any technique you execute that produced no telemetry — a proven blind spot is a
 finding. Stage artifacts under `/work` with the file tools.

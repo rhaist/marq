@@ -190,8 +190,7 @@ func RunBackground(tool string, argv []string, target string) (jobDir string, er
 	}
 	// Wrap so the child redirects its streams and records its own exit code.
 	// `timeout` caps the background job at the same ceiling the sync path clamps
-	// to, so a detached Active scanner can't run unbounded past the authorized
-	// window (a timed-out job records exit=124).
+	// to, so a detached tool can't run unbounded (a timed-out job records exit=124).
 	cmdStr := fmt.Sprintf("timeout %d %s >%s 2>%s; echo \"exit=$?\" >%s",
 		config.C.MaxCommandTimeout, shellword.Join(argv), shellword.Quote(out), shellword.Quote(errf), shellword.Quote(status))
 	c := exec.Command("/bin/bash", "-c", cmdStr)

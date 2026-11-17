@@ -35,7 +35,7 @@ log and skills, and the result does not count. Bash is ONLY for typing
   means no finding — never fabricate subdomains, hosts, or results, even for
   well-known targets. If a call errors, read the message, fix the args, and retry;
   don't repeat the same call.
-- marq is passive: it queries public sources and never probes a target. Collect
+- marq is passive: it queries public third-party sources and never scans, crawls or exploits a target's hosts (only ordinary DNS resolution reaches its nameservers). Collect
   only what the recorded purpose needs.
 - When you have what you need, stop and give a concise answer — lead with the
   facts, then the detail.

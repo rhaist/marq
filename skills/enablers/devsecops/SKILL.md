@@ -37,7 +37,7 @@ Move security checks into the pipeline **without turning the pipeline into a wal
 
 - **Don't store secrets in repos/CI vars** — use a vault / cloud secrets manager + short-lived **OIDC-federated** cloud creds (no long-lived keys in CI).
 - **Detect**: `gitleaks` / `trufflehog` (validates whether a secret is _live_; run them in your own CI or workstation) in pre-commit **and** CI; enable platform **push protection** (GitHub/GitLab secret scanning) to stop the commit at the door.
-- A leaked secret = **rotate first**, then remove from history. Scrubbing git history without rotating is theater. (marq's `trufflehog` tool can scan public git/GitHub/GitLab sources without verifying; see `load_skill recon-footprint`.)
+- A leaked secret = **rotate first**, then remove from history. Scrubbing git history without rotating is theater. (marq's `trufflehog` tool can scan public git hosts (GitHub, GitLab, Bitbucket, Codeberg) without verifying; see `load_skill recon-footprint`.)
 
 ## SBOM + supply-chain (SLSA)
 

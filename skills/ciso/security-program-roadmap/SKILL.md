@@ -71,7 +71,7 @@ invisible and slow, which is exactly why they get skipped.
 board-metrics-reporting`).
 - Q2: detection & response maturity (SIEM/EDR if budget; tuned alerts > more alerts).
 - Q3: third-party / supply-chain risk, data protection, segmentation of crown jewels.
-- Q4: independent validation — pentest / red team (run marq engagements) — then
+- Q4: independent validation — pentest / red team (commission an external pentest/red team; marq runs none) — then
   re-baseline maturity and re-plan. Measure against where you started, not perfection.
 
 ## Budget heuristics

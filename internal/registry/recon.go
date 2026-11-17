@@ -56,6 +56,9 @@ func recon() []Tool {
 				{Name: "target", Type: StringParam, Desc: "domain or IP", Required: true},
 			},
 			Build: func(a Args) Invocation {
+				if strings.HasPrefix(a.S("target"), "-") { // whois -h <server> would query an arbitrary host
+					return Invocation{Target: a.S("target"), Refuse: "target must be a domain or IP"}
+				}
 				return Invocation{Argv: []string{"whois", a.S("target")}, Target: a.S("target")}
 			},
 		},

@@ -20,7 +20,7 @@ import (
 // (see roots) so findings/jobs written there on a bare install stay readable.
 var allowedRoots = []string{"/work", "/tmp"}
 
-// Roots are realpath'd so they match resolve()'s output (macOS /tmp -> /private/tmp).
+// Roots are realpath'd so they match Resolve()'s output (macOS /tmp -> /private/tmp).
 // A MARQ_WORK_DIR that is / or contains $HOME is ignored: it would expose
 // ~/.ssh, ~/.aws etc. to read_file/write_file.
 func roots() []string {
@@ -56,9 +56,9 @@ func realpath(p string) string {
 	return filepath.Join(realpath(dir), filepath.Base(p))
 }
 
-// resolve confirms path sits inside an allowed root, else errors. Resolving real
+// Resolve confirms path sits inside an allowed root, else errors. Resolving real
 // paths first defeats symlink escape tricks (e.g. /work/escape -> /).
-func resolve(path string) (string, error) {
+func Resolve(path string) (string, error) {
 	abs, err := filepath.Abs(path)
 	if err != nil {
 		return "", err
@@ -106,7 +106,7 @@ func ListDir(path string) string {
 		path = "/work"
 	}
 	return audited("list_dir", path, func() (string, error) {
-		real, err := resolve(path)
+		real, err := Resolve(path)
 		if err != nil {
 			return "", err
 		}
@@ -144,7 +144,7 @@ func ListDir(path string) string {
 // budget (or maxBytes if smaller).
 func ReadFile(path string, maxBytes int) string {
 	return audited("read_file", path, func() (string, error) {
-		real, err := resolve(path)
+		real, err := Resolve(path)
 		if err != nil {
 			return "", err
 		}
@@ -174,7 +174,7 @@ func ReadFile(path string, maxBytes int) string {
 // WriteFile writes a text file into the working area, creating parent dirs.
 func WriteFile(path, content string) string {
 	return audited("write_file", path, func() (string, error) {
-		real, err := resolve(path)
+		real, err := Resolve(path)
 		if err != nil {
 			return "", err
 		}

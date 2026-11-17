@@ -25,8 +25,8 @@ Vulnerabilities in marq's own code and trust boundaries, for example:
 
 - **Audit bypass** — a tool path that reaches `os/exec` without funnelling
   through `internal/runner` (so the call isn't logged).
-- **File-sandbox escape** — reading or writing outside `/work` and `/tmp`
-  through the `files` tools (e.g. a symlink or path-traversal escape).
+- **File-sandbox escape** — reading or writing outside `/work`, `/tmp` and `MARQ_WORK_DIR`
+  (or reading the audit log itself) through the `files` tools (e.g. a symlink or path-traversal escape).
 - **Command/argument injection** in a tool wrapper that lets crafted input run
   unintended commands.
 - **Passive-only bypass** — a wrapper that can be made to actively probe,

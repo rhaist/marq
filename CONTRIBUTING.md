@@ -1,12 +1,12 @@
 # Contributing to marq
 
 Thanks for your interest in improving marq. It's a Kali-based cyber assistant —
-~30 wrapped passive-OSINT tools plus an embedded skills library — exposed from a single Go
+19 wrapped passive-OSINT tools (29 tools in all) plus an embedded skills library — exposed from a single Go
 binary over MCP (`marq serve`) and direct invocation (`marq run`). This guide
 covers how to build it, the quality gates, and how to add a tool or a skill.
 
 > **Passive and attributable is the contract.** marq's tools query public sources
-> only and never probe a target; its safety model is _attribution_: every external-tool call funnels through one audited choke point
+> only and never scan, crawl or exploit a target's hosts (only ordinary DNS resolution can reach its nameservers); its safety model is _attribution_: every OSINT-tool, file and findings call is audit-logged, and an OSINT tool funnels through one audited choke point
 > (`runner.Run`) that fails closed if it can't log. Any contribution must preserve
 > that — see [Design invariants](#design-invariants)
 > below and [`docs/SECURITY.md`](docs/SECURITY.md). Contributions that add
@@ -52,7 +52,7 @@ These are load-bearing — breaking them silently defeats marq's safety model:
   anything that prompts will hang until timeout.
 - **No file upload.** The model passes strings only. File inputs/outputs go
   through the `/work` mount and the `files` tools, which are sandboxed to
-  `/work` and `/tmp`.
+  `/work`, `/tmp` and `MARQ_WORK_DIR` (as is `exif_metadata`).
 - **Long-running tools go to the background** (`Invocation.Background = true`),
   polled via `list_jobs` / `job_status`.
 - **API keys degrade quietly.** Tools needing keys must still run (with reduced
@@ -62,8 +62,7 @@ These are load-bearing — breaking them silently defeats marq's safety model:
 
 1. Prefer a **Kali apt package** (verify on [pkg.kali.org](https://pkg.kali.org)).
    If it isn't packaged, install it in the Go-built block of the `Dockerfile`.
-2. If it caches/downloads on first use, add a warm-up line in the post-`USER`
-   block of the `Dockerfile` (so the cache lands in `/home/marq`, not `/root`).
+2. It must work on first run: the image has no warm-up step.
 3. Add the `Tool` to the relevant `internal/registry/*.go` (osint, people, files,
    extras, …). `Tool.Desc` is the model's only guidance
    — make it informative (usage, defaults, API-key needs, caveats).

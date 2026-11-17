@@ -14,7 +14,7 @@
 # Usage:  scripts/e2e.sh
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-WORK="${MARQ_E2E_WORK:-$(mktemp -d)}"   # override to a pre-authorized dir if needed
+WORK="${MARQ_E2E_WORK:-$(mktemp -d)}"   # override to a any writable dir if needed
 BIN="$WORK/marq"
 export MARQ_WORK_DIR="$WORK" MARQ_AUDIT_LOG="$WORK/audit.jsonl"
 unset MARQ_OPERATOR MARQ_ENGAGEMENT   # exercise the defaults

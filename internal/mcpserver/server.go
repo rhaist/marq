@@ -40,14 +40,14 @@ func New() *mcp.Server {
 // role for the Pi flow.
 func instructions() string {
 	return "marq is a passive-OSINT and cyber-knowledge assistant: OSINT tools that query " +
-		"public third-party sources only (DNS, WHOIS, certificate logs, Shodan/Censys, web " +
-		"archives, breach databases, social sites) plus a skills library of expert playbooks " +
-		"(threat-intel, malware, sec-ops, architecture, GRC, standards & regulation, CISO, " +
-		"resilience, human factors, DevSecOps/privacy). It has no scanners or exploits and " +
-		"never sends probes to a target's own infrastructure.\n\n" +
+		"public third-party sources (DNS resolvers, WHOIS, certificate logs, Shodan/Censys, web " +
+		"archives, breach databases, social and code-hosting sites) plus a skills library of " +
+		"expert playbooks (threat-intel, malware, sec-ops, architecture, GRC, standards & " +
+		"regulation, CISO, resilience, human factors, DevSecOps/privacy). It has no scanners, " +
+		"exploits or malware-analysis tools; its tools " + config.TrafficNote + "\n\n" +
 		"How to work:\n" +
 		"1. Call the `server_info` tool first, and record the investigation's purpose with " +
-		"`set_engagement` — every call is audit-logged under it.\n" +
+		"`set_engagement` — tool, file and findings calls are audit-logged under it.\n" +
 		"2. Load the playbook for the task with the `load_skill` tool — including " +
 		"advisory, standards and regulation questions: load the skill first, don't " +
 		"answer those from memory. (Call it with no arguments to list every skill, " +

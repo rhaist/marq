@@ -47,7 +47,7 @@ plain text won't drive the loop.
 3. Smoke the marq side (no model needed):
    ```bash
    python3 scripts/eval/harness.py --list-tools
-   # → server instructions: ~9500 chars / tools: 86
+   # → server instructions: ~9500 chars / tools: 29
    ```
 
 ## Run — two tiers, cheap one first
@@ -108,9 +108,7 @@ until you rebuild — two runs can be labelled as different arms and be
 byte-identical. Equal `sha256` across arms means the comparison is void, whatever
 the scores say. To iterate on priming without a multi-GB rebuild, point
 `--marq-cmd` at a freshly built binary (`go build -o /tmp/marq-eval ./cmd/marq`,
-then `--marq-cmd '/tmp/marq-eval serve'`); the scope traps score the _presence_
-of a tool call, which is recorded even when the Kali binary is absent, so they
-work — and cannot actually scan — on that path.
+then `--marq-cmd '/tmp/marq-eval serve'`); in task-set v2 the scope traps are dormant (marq has no active tools), so this path needs no special handling.
 
 The deterministic scorer can't judge _quality_ — whether the GRC mapping was
 right, whether the reasoning was sound. That's a later semantic pass (an LLM
@@ -170,7 +168,7 @@ artificial setting — and because the config rides along in the result, the
 comparison stays honest and you can A/B a model to find its sweet spot. (Want
 strict apples-to-apples instead? Leave `profiles.json` at `{"default": {}}` and
 every model runs identically.) Thinking models are the clearest case: reasoning
-before each tool call is costly over marq's ~90 schemas, so `no_think` + a modest
+before each tool call is costly over marq's 29 schemas, so `no_think` + a modest
 `max_steps` keeps them from crawling or flailing on a tool that isn't present.
 
 `results/<model>.json` keeps a **history** (a measurement per run), so you can
@@ -183,7 +181,7 @@ are not.
 
 This is a good harness and a small experiment — don't oversell it. Pass-rates
 carry a **95% Wilson confidence interval** over task×repeat observations, and the
-leaderboard leads with a disclaimer: with ~21 tasks the intervals are wide, so
+leaderboard leads with a disclaimer: with 16 tasks the intervals are wide, so
 **overlapping intervals mean the ranking isn't reliable**. The board measures
 models _as driven by this harness at the recorded config_, not models in the
 abstract, and rows differ in quant/config. Treat it as a smoke test until the
@@ -245,12 +243,12 @@ genuine model failure.
   qwen3 sweep scored ~half its real performance until the fallback existed. Symptom:
   `trace.jsonl` shows few/no calls while `responses.jsonl` is full of `<tool_call>`.
 - **Thinking models are slow and leak.** Reasoning before every call is costly over
-  marq's ~90 schemas; `/no_think` (set per model in `profiles.json`) speeds it but
+  marq's 29 schemas; `/no_think` (set per model in `profiles.json`) speeds it but
   can route the answer into `reasoning_content` (the harness falls back to it for
   the final answer). It's a real behaviour change — recorded in the measurement, so
   you can A/B `no_think` on/off.
-- **Cap tool execution.** If the Kali tools are installed on the eval host (running
-  marq as the bare binary, not the image), a model that picks `masscan -p1-65535`
+- **Cap tool execution.** If the OSINT binaries are installed on the eval host (running
+  marq as the bare binary, not the image), a model that picks a slow tool (e.g. `spiderfoot`)
   actually runs it and blocks for minutes. The harness defaults `MARQ_TIMEOUT=30`;
   export it lower (`MARQ_TIMEOUT=10`) for faster sweeps — we score tool _selection_,
   not execution.
