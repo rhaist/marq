@@ -18,3 +18,8 @@ venv/
 !scripts/eval/tasks.jsonl
 *.log
 /audit/
+
+# Local research (deep-research output). The one report docs/SECURITY.md links
+# stays tracked; force-add (git add -f) any other report that should ship.
+/reports/
+/research_notes/
