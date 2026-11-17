@@ -24,16 +24,13 @@ func knowledgeTools() []Tool {
 	}
 }
 
-// Methodology is the engagement workflow guidance (feature #3). It is exposed as
-// the marq://methodology MCP resource (serve mode) and injected into the
-// agent system prompt (tui mode).
+// Methodology is the passive-OSINT workflow guidance, exposed as the
+// marq://methodology resource and appended to the MCP server instructions.
 //
 //go:embed methodology.md
 var Methodology string
 
-// reportTools returns the findings (feature #1) and background-job (feature #2)
-// tools. These are in-process Handler tools wired into the same registry, so MCP
-// clients and the TUI agent both get them.
+// reportTools returns the findings and background-job tools (in-process Handlers).
 func reportTools() []Tool {
 	return []Tool{
 		{

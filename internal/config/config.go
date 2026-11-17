@@ -24,8 +24,7 @@ type Config struct {
 	AuditLog string
 	// CommandTimeout is the per-command wall-clock timeout in seconds.
 	CommandTimeout int
-	// MaxCommandTimeout is the hard ceiling a tool may request via a per-call
-	// timeout override.
+	// MaxCommandTimeout caps how long a background job may run.
 	MaxCommandTimeout int
 	// MaxOutputChars caps characters of tool output returned to the model.
 	MaxOutputChars int
@@ -34,7 +33,7 @@ type Config struct {
 	Operator   string
 	Engagement string
 	// SkillsOnly serves only the in-process knowledge tools (skills, findings,
-	// files, info) and drops every Kali-binary exec tool, so the server runs
+	// files, info) and drops the exec and job tools, so the server runs
 	// standalone without the tool image — the "cyber skills for your LLM" mode.
 	SkillsOnly bool
 	// WorkDir is the engagement working area (findings, job dirs live here).
@@ -93,7 +92,6 @@ func Load() Config {
 }
 
 // engagementContext is the on-disk form of the runtime-set engagement metadata.
-// (Older files also carry a "scope" key from the scope-gated era; it's ignored.)
 type engagementContext struct {
 	Engagement string `json:"engagement"`
 }
@@ -136,8 +134,8 @@ func Attribution() string {
 	return C.Engagement
 }
 
-// C is the process-wide configuration, resolved once at startup (mirrors the
-// Python module-level CONFIG). Components read config.C directly.
+// C is the process-wide configuration, resolved once at startup. Components
+// read config.C directly.
 var C = Load()
 
 // TrafficNote is the precise passive-only promise, shared with the MCP instructions.

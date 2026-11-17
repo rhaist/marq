@@ -1,7 +1,5 @@
-// Package findings is the engagement deliverable store (feature #1). Tools and
-// the agent record structured findings as they go; render produces the Markdown
-// + CSV report. Without this, tool output evaporates into the chat and the
-// engagement leaves no artifact behind.
+// Package findings is the deliverable store: the model records structured
+// findings as it goes, and render produces the Markdown + CSV report.
 package findings
 
 import (

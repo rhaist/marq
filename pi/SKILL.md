@@ -81,7 +81,7 @@ marq run dnsx '{"hosts":"acme.test","records":"a,mx,txt"}'
 - Don't call the raw binary (`subfinder …`) directly — always go through `marq run` so
   the action is audit-logged (OSINT-tool, file and findings calls are; in-process lookups like `server_info`, `load_skill` and job status are not).
 - Files: the model passes strings only. Inputs/outputs go through `/work` using the
-  file tools — `marq run write_file`, `read_file`, `list_dir`..
+  file tools — `marq run write_file`, `read_file`, `list_dir`.
 
 ## Discover tools
 

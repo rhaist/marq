@@ -25,8 +25,8 @@ Usage
 -----
     python3 scripts/test_tools.py                  # local + passive-safe tools
     python3 scripts/test_tools.py --external       # also hit internet OSINT
-        python3 scripts/test_tools.py --only dnsx,whois_lookup # a subset
-    python3 scripts/test_tools.py --image marq --timeout 25
+    python3 scripts/test_tools.py --only dnsx,whois_lookup # a subset
+    python3 scripts/test_tools.py --image marq --timeout 90
 
 Exit code is non-zero if any tool FAILs the binary check or a tool the server
 registered has no test defined (so new tools don't silently go untested).
@@ -46,7 +46,7 @@ EX_DOMAIN = "example.com"
 STAGE = "/work/smoke"  # created in-container via write_file before file tools
 
 # Categories drive which tools run in which mode.
-LOCAL = "local"        # loopback / staged / local DB — always run
+LOCAL = "local"        # in-process, staged files, or reserved example.com / public IP — always run
 EXTERNAL = "external"  # reaches third-party services — needs --external
 KEY = "key"            # needs an API key; run if reachable, "needs key" is fine
 
@@ -201,7 +201,7 @@ def stage_files(mcp: MCP, timeout: float) -> None:
 def main() -> int:
     ap = argparse.ArgumentParser(description="Smoke-test every marq tool.")
     ap.add_argument("--image", default="marq", help="docker image to test (default: marq)")
-    ap.add_argument("--timeout", type=int, default=25, help="server per-command timeout, seconds (default 25)")
+    ap.add_argument("--timeout", type=int, default=90, help="server per-command timeout, seconds (default 90)")
     ap.add_argument("--external", action="store_true", help="also test tools that reach the internet")
     ap.add_argument("--only", default="", help="comma-separated subset of tool names to test")
     ap.add_argument("--json", action="store_true", help="emit machine-readable JSON results")

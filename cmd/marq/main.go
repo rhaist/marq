@@ -159,7 +159,7 @@ func parseToolArgs(rest []string) (map[string]any, error) {
 
 // listTools prints every registered tool with the first line of its
 // description, so a terminal agent (or the operator) can browse the catalog on
-// demand instead of carrying 70+ tool specs in the system prompt. With a tool
+// demand instead of carrying every tool spec in the system prompt. With a tool
 // name, it prints that tool's full parameter schema (Usage) for arg discovery.
 func listTools(argv []string) {
 	if len(argv) > 0 {

@@ -44,8 +44,8 @@ func roots() []string {
 }
 
 // realpath resolves symlinks for the longest existing prefix of p, then appends
-// the remainder — mirroring Python os.path.realpath, which works even when p (or
-// its tail) does not exist yet (needed by write_file).
+// the remainder, so it works even when p (or its tail) does not exist yet
+// (needed by write_file).
 func realpath(p string) string {
 	if r, err := filepath.EvalSymlinks(p); err == nil {
 		return r

@@ -148,5 +148,6 @@ interceptor (experimental).
 
 ## Reporting issues
 
-Found a problem with the tooling itself (not a target system)? Open an issue.
-Do not file vulnerabilities discovered in third-party targets here.
+For a vulnerability in marq itself, report it privately as described in
+[`SECURITY.md`](../SECURITY.md); do not open a public issue. Other bugs can go in a normal
+issue. Do not file vulnerabilities discovered in third-party targets here.

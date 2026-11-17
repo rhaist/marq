@@ -40,7 +40,6 @@ type Invocation struct {
 	Argv       []string
 	Target     string
 	Stdin      string
-	Timeout    int // seconds; 0 = default
 	Background bool
 	Refuse     string // non-empty: don't run; Call returns this (audited) instead
 }
@@ -273,9 +272,8 @@ func (t Tool) Call(raw map[string]any) string {
 		return warn + backgroundMsg(t.Name, inv.Target, jobDir)
 	}
 	res := runner.Run(t.Name, inv.Argv, runner.Opts{
-		Target:  inv.Target,
-		Stdin:   inv.Stdin,
-		Timeout: inv.Timeout,
+		Target: inv.Target,
+		Stdin:  inv.Stdin,
 	})
 	return warn + res.Render()
 }
@@ -338,10 +336,12 @@ func All() []Tool {
 		recon(), intel(), osint(), people(), fileTools(), reportTools(), knowledgeTools(),
 	)
 	if config.C.SkillsOnly {
-		// Knowledge-only mode: keep the in-process tools (skills, findings, files,
-		// info), drop every exec tool so the server needs no Kali binaries. Exec
-		// tools are exactly those with a Build; in-process tools have a Handler.
-		tools = slices.DeleteFunc(tools, func(t Tool) bool { return t.Build != nil })
+		// Knowledge-only mode: drop every exec tool (those with a Build) so the
+		// server needs no Kali binaries, and the job tools, since only exec
+		// tools start jobs.
+		tools = slices.DeleteFunc(tools, func(t Tool) bool {
+			return t.Build != nil || t.Name == "list_jobs" || t.Name == "job_status"
+		})
 	}
 	return tools
 }

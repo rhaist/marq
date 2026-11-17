@@ -1,13 +1,13 @@
 // Package mcpserver adapts the shared tool registry onto an MCP stdio server
-// using the official modelcontextprotocol/go-sdk. It is the drop-in replacement
-// for the original Python server: an external MCP client (Claude Desktop, etc.)
-// launches it over stdio and brings its own model.
+// using the official modelcontextprotocol/go-sdk. An external MCP client
+// (Claude Code, Claude Desktop, etc.) launches it over stdio and brings its own model.
 package mcpserver
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"runtime/debug"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -16,13 +16,19 @@ import (
 	"github.com/rhaist/marq/internal/skills"
 )
 
-// Version is the server's reported implementation version.
-const Version = "2.0.0"
+// version is the module version from the build info ("dev" for a local build),
+// so there is no constant to forget to bump.
+func version() string {
+	if bi, ok := debug.ReadBuildInfo(); ok && bi.Main.Version != "" && bi.Main.Version != "(devel)" {
+		return bi.Main.Version
+	}
+	return "dev"
+}
 
-// New builds the MCP server with every registered tool, the authorization +
-// methodology resources, and the server_info tool.
+// New builds the MCP server with every registered tool and the notice,
+// methodology and skills resources.
 func New() *mcp.Server {
-	s := mcp.NewServer(&mcp.Implementation{Name: "marq", Version: Version},
+	s := mcp.NewServer(&mcp.Implementation{Name: "marq", Version: version()},
 		&mcp.ServerOptions{Instructions: instructions()})
 
 	for _, t := range registry.All() {
@@ -100,13 +106,13 @@ func addTool(s *mcp.Server, tool registry.Tool) {
 func addResources(s *mcp.Server) {
 	s.AddResource(
 		&mcp.Resource{
-			URI:         "marq://authorization",
-			Name:        "authorization",
+			URI:         "marq://notice",
+			Name:        "notice",
 			Description: "Usage notice for this session (passive OSINT only, operator, purpose, audit log). Surface to the operator before running tools.",
 			MIMEType:    "text/plain",
 		},
 		func(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
-			return resourceText("marq://authorization", config.C.Banner()), nil
+			return resourceText("marq://notice", config.C.Banner()), nil
 		},
 	)
 	s.AddResource(

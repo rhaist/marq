@@ -136,7 +136,8 @@ print("\n".join(ps) or "(no announced prefixes)")'`
 		{
 			Name: "cdncheck",
 			Desc: "Identify whether IPs belong to a CDN, cloud, or WAF provider with cdncheck (ProjectDiscovery). " +
-				"`target` is a comma/newline-separated IP list. Useful to exclude third-party infra from scans.",
+				"`targets` is a comma/newline-separated IP list. Separates CDN/cloud-hosted IPs from the " +
+				"organisation's own infrastructure.",
 			Params: []Param{
 				{Name: "targets", Type: StringParam, Desc: "comma/newline-separated IPs", Required: true},
 			},

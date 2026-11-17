@@ -20,7 +20,6 @@ fully-local work).
 - [Skills only, no Docker](#skills-only-no-docker)
 - [macOS](#macos)
 - [Debian Testing (rolling)](#debian-testing-rolling)
-- [Local Go development](#local-go-development-both-oses)
 - [Verify](#verify)
 
 ## Pick a path
@@ -28,7 +27,7 @@ fully-local work).
 | Path                   | You get                                      | Needs                   | Setup                                                             |
 | ---------------------- | -------------------------------------------- | ----------------------- | ----------------------------------------------------------------- |
 | Skills only            | the knowledge library + findings/files tools | Go, no Docker           | [below](#skills-only-no-docker), one `go install`                |
-| Full MCP server        | skills and the 24-tool OSINT suite           | Docker                  | build the image, then any MCP client                              |
+| Full MCP server        | skills and the OSINT tool suite              | Docker                  | build the image, then any MCP client                              |
 | Full + local model     | the above, driven by a local model           | Docker + Pi + llama.cpp | the [Pi subsection](#4-run-with-a-local-model-pi--the-marq-skill) |
 
 Start at the top and add a layer only when you need it. The image is the same for
@@ -95,22 +94,14 @@ docker build -t marq .     # builds natively for your arch (arm64 on M-series)
 
 ### 3. Run as an MCP server (external client brings the model)
 
-```bash
-docker run --rm -i \
-  --security-opt no-new-privileges:true --cap-drop ALL \
-  -v marq-audit:/var/log/marq \
-  -v marq-work:/work \
-  -e MARQ_OPERATOR="$USER" \
-  marq
-```
-
-The engagement and its purpose aren't passed here. The model records them at runtime with
-the `set_engagement` tool (people OSINT is GDPR personal-data processing, so say why). The
-`marq-work` volume persists findings/reports across restarts; swap it for a bind
+Run the image with the hardened flags from [`mcp.json.example`](../mcp.json.example)
+(the same command is spelled out per client in [`CLIENTS.md`](CLIENTS.md)). The engagement
+and its purpose aren't passed there: the model records them at runtime with
+`set_engagement` (why: [`SECURITY.md`](SECURITY.md#legal--ethical-baseline)). The
+`marq-work` volume in those args persists findings/reports across restarts; swap it for a bind
 mount (`-v ~/investigations/acme:/work`) to read them straight off the host.
 
-Wire it into a client with [`mcp.json.example`](../mcp.json.example). Per-client
-steps (Claude Code, Codex, Claude Desktop) are in [`CLIENTS.md`](CLIENTS.md).
+Per-client steps (Claude Code, Codex, Claude Desktop) are in [`CLIENTS.md`](CLIENTS.md).
 
 ### 4. Run with a local model (Pi + the marq skill)
 
@@ -124,7 +115,7 @@ vLLM or another server works too. The steps below assume `llama-server`.
 This is the fully-local way to drive marq as an all-round cyber agent for research,
 malware triage, threat-intel, GRC and standards work, and OSINT footprinting,
 through the `pi/marq` host shim, which forwards each call into a long-lived
-container over `docker exec`.
+container over `docker exec` ([why, and the shim env vars](USAGE.md#4-run-with-a-local-model-pi)).
 
 ```bash
 # Put the shim on your PATH in a user-owned dir (don't pollute Homebrew's prefix
@@ -221,8 +212,8 @@ bypasses marq.
 
 > Not yet on the leaderboard. This is the default on provenance grounds
 > (official weights, no third-party fine-tune in the trust path), not because it
-> measured better. Its one sweep to date was voided by a harness fault (see
-> `scripts/eval/`), so treat it as unmeasured until a clean run publishes.
+> measured better. Treat it as unmeasured until a clean run publishes (see
+> `scripts/eval/`).
 > A stock instruction-tuned model may also refuse some legitimate people OSINT.
 > If that blocks you, evaluate alternatives with the harness rather than
 > swapping blind.
@@ -310,16 +301,8 @@ drives `marq run` from bash; the shim runs it inside the container.
 > settings `extensions` array needs full paths, not bare names); Pi's bundled
 > docs are at `…/pi-coding-agent/<ver>/libexec/.../docs/`.
 
-A long-lived container is required. Background tools (`spiderfoot`, `gau_urls`, `dnstwist`)
-detach inside it and are polled later, so a per-call `docker run`
-would kill them.
-
-Shim env vars: `MARQ_CONTAINER` (default `marq`), `MARQ_IMAGE` (default
-`marq:latest`), `MARQ_ENGINE` (container CLI, default `docker`; set `podman` to
-run daemonless without Docker Desktop), `MARQ_ENV_FILE` (default
-`~/.config/marq/env`, loaded if present). Nothing is required: `MARQ_OPERATOR`
-defaults to your `$USER`, and any API key exported in your shell is forwarded
-(keys: `docs/USAGE.md`); the engagement + purpose is set at runtime via `set_engagement`.
+The shim env vars (`MARQ_CONTAINER`, `MARQ_IMAGE`, `MARQ_ENGINE`, `MARQ_ENV_FILE`) and why a
+long-lived container is required are in [`USAGE.md`](USAGE.md#4-run-with-a-local-model-pi).
 
 ---
 
@@ -374,33 +357,12 @@ Pi, not in marq.
 
 ---
 
-## Local Go development (both OSes)
-
-Iterate on the server/tool layer without a Docker build (tool _calls_ still need
-the OSINT binaries, so most only fully work in-container):
-
-```bash
-go build ./... && go vet ./... && go test ./...   # build + sanity gate
-go run ./cmd/marq serve                         # stdio MCP server locally
-go run ./cmd/marq run subfinder '{"domain":"example.com"}'   # invoke one tool
-```
-
 ## Verify
 
+Quality gates and local Go iteration are in [`CONTRIBUTING.md`](../CONTRIBUTING.md); image
+smoke tests are in [`USAGE.md`](USAGE.md#2-smoke-test-the-image). To check the
+image exposes the full tool set (expects 34):
+
 ```bash
-# Tool present in the built image:
-docker run --rm marq subfinder -version
-
-# MCP server lists its tools (expects ~34)
-printf '%s\n' \
- '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"c","version":"0"}}}' \
- '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
- '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
- | docker run --rm -i marq | grep -o '"name":"[a-z_]*"' | wc -l
-
-# List every tool with a one-line description (also how the model discovers them):
-docker run --rm marq tools
+docker run --rm marq tools | wc -l
 ```
-
-The full end-to-end harness is `scripts/verify_tools.sh` (drives the built image
-over MCP).

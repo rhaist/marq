@@ -1,6 +1,5 @@
-// Package shellword provides shell word-splitting and quoting, the Go
-// equivalents of Python's shlex.split / shlex.quote / shlex.join used by the
-// original tool wrappers.
+// Package shellword provides shell word-splitting and quoting (the shlex
+// split / quote / join trio) for the tool wrappers.
 package shellword
 
 import (

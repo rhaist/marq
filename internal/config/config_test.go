@@ -1,10 +1,6 @@
 package config
 
-import (
-	"os"
-	"path/filepath"
-	"testing"
-)
+import "testing"
 
 // TestLoadEnv verifies env vars drive the per-engagement fields.
 func TestLoadEnv(t *testing.T) {
@@ -19,8 +15,7 @@ func TestLoadEnv(t *testing.T) {
 }
 
 // SetEngagement must update the live config and persist so a fresh Load (the
-// per-call `marq run` path) reads the same engagement back — including from a
-// context file written by the older scope-gated build.
+// per-call `marq run` path) reads the same engagement back.
 func TestSetEngagementRoundTrip(t *testing.T) {
 	dir := t.TempDir()
 	C = Config{WorkDir: dir, Operator: "alice", Engagement: "unspecified"}
@@ -32,11 +27,4 @@ func TestSetEngagementRoundTrip(t *testing.T) {
 		t.Fatalf("not persisted: live=%q file=%q", C.Engagement, readContext(dir))
 	}
 
-	legacy := `{"engagement":"old-2025","scope":"*.acme.com"}`
-	if err := os.WriteFile(filepath.Join(dir, ".marq-context"), []byte(legacy), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if got := readContext(dir); got != "old-2025" {
-		t.Fatalf("legacy context = %q; want old-2025", got)
-	}
 }

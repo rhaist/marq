@@ -26,9 +26,8 @@ import (
 
 // Opts are per-call options for Run.
 type Opts struct {
-	Target  string
-	Stdin   string
-	Timeout int // seconds; 0 = use the configured default
+	Target string
+	Stdin  string
 }
 
 // Result is the outcome of a tool invocation, rendered into a text envelope the
@@ -71,7 +70,7 @@ func (r Result) Render() string {
 			"required flags are set, and any needed API key is present in the container env]")
 	}
 	if r.Truncated {
-		fmt.Fprintf(&b, "\n\n[output truncated to %d chars — narrow the scan or "+
+		fmt.Fprintf(&b, "\n\n[output truncated to %d chars — narrow the query or "+
 			"write results to a file inside the container]", config.C.MaxOutputChars)
 	}
 	return b.String()
@@ -95,9 +94,6 @@ func truncate(text string, budget int) (string, bool) {
 // Run executes argv with auditing, a timeout and output truncation.
 func Run(tool string, argv []string, opts Opts) Result {
 	limit := config.C.CommandTimeout
-	if opts.Timeout > 0 {
-		limit = max(min(opts.Timeout, config.C.MaxCommandTimeout), 1)
-	}
 
 	target := opts.Target
 	if target == "" {

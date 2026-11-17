@@ -6,8 +6,7 @@ import (
 	"testing"
 )
 
-// TestNoDuplicateToolNames is the project's core sanity gate (ported from the
-// Python "register against a stub, assert no duplicate names" check).
+// TestNoDuplicateToolNames is the core sanity gate: tool names must be unique.
 func TestNoDuplicateToolNames(t *testing.T) {
 	seen := map[string]bool{}
 	for _, tool := range All() {
@@ -117,7 +116,7 @@ func TestCensysAssetsAfterDoubleDash(t *testing.T) {
 // TestPassiveOnly pins the OSINT-only promise in each tool's argv: nothing the
 // model passes can turn a lookup into a probe of the target's own infrastructure
 // (zone transfer, DNS brute force, active spiderfoot modules, credential
-// verification). With the scope gate gone, these argv checks are the enforcement.
+// verification). These argv checks are the enforcement.
 func TestPassiveOnly(t *testing.T) {
 	refused := func(name string, a Args) {
 		t.Helper()

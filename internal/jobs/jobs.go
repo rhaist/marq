@@ -1,6 +1,5 @@
-// Package jobs surfaces background-job status (feature #2). Long scans launched
-// via runner.RunBackground stream to /work/jobs/<id>/; today the model has to
-// manually read_file/list_dir-poll those dirs. list_jobs/job_status read the
+// Package jobs surfaces background-job status. Long lookups launched via
+// runner.RunBackground stream to /work/jobs/<id>/; list_jobs/job_status read the
 // `status` file (written last by the background wrapper) and tail stdout so the
 // model gets a clean running|done answer.
 package jobs

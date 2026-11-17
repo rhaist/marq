@@ -1,7 +1,7 @@
 # Contributing to marq
 
 Thanks for your interest in improving marq. It is a Kali-based cyber assistant:
-24 wrapped passive-OSINT tools (34 tools in all) plus an embedded skills library, exposed from a single Go
+wrapped passive-OSINT tools plus an embedded skills library, exposed from a single Go
 binary over MCP (`marq serve`) and direct invocation (`marq run`). This guide
 covers how to build it, the quality gates, and how to add a tool or a skill.
 
@@ -16,10 +16,9 @@ covers how to build it, the quality gates, and how to add a tool or a skill.
 ## Getting started
 
 ```bash
-# Local Go iteration — no Docker build needed for the server/tool-wrapper layer.
-# (Most tool *calls* only fully work in-container, since they shell out to Kali
-# binaries, but build/vet/test and the MCP plumbing all run locally.)
-go build ./... && go vet ./... && go test ./...
+# Local Go iteration needs no Docker build for the server/tool-wrapper layer
+# (most tool *calls* only fully work in-container, since they shell out to Kali
+# binaries). Run the fast gate below first.
 go run ./cmd/marq serve                  # stdio MCP server
 go run ./cmd/marq run <tool> '<json>'    # invoke one tool
 
@@ -62,12 +61,14 @@ These are load-bearing, and breaking them silently defeats marq's safety model:
 
 1. Prefer a **Kali apt package** (verify on [pkg.kali.org](https://pkg.kali.org)).
    If it isn't packaged, install it in the Go-built block of the `Dockerfile`.
-2. It must work on first run: the image has no warm-up step.
-3. Add the `Tool` to the relevant `internal/registry/*.go` (osint, people, files,
-   extras, …). `Tool.Desc` is the model's only guidance, so make it informative
+2. Add the `Tool` to the relevant `internal/registry/*.go` (recon, intel, osint, people,
+   files, extras). `Tool.Desc` is the model's only guidance, so make it informative
    (usage, defaults, API-key needs, caveats).
-4. Set `Invocation.Target` to the lookup target so the call is audited. The tool must
+3. Set `Invocation.Target` to the lookup target so the call is audited. The tool must
    query public third-party sources only, never the target's own hosts.
+4. Extend `TestPassiveOnly` in `internal/registry/registry_test.go`. A wrapper must not
+   let model input reach the target: fixed flags, allowlisted values, and
+   `Invocation{Refuse: …}` for anything else.
 5. Document it in [`docs/USAGE.md`](docs/USAGE.md).
 
 ## Adding a skill

@@ -1,24 +1,13 @@
 # llama.cpp quickstarts for the eval sweep
 
-Ready-to-run `llama-server` commands for the two reference Gemma configs. These
-carry the same context-size / `temperature` / `top_p` / `top_k` / `min_p` /
+A ready-to-run `llama-server` command for the reference Gemma config. It carries
+the same context-size / `temperature` / `top_p` / `top_k` / `min_p` /
 `repeat_penalty` settings the profiles expect, passed as `llama-server` flags.
-The harness then talks to
-`http://localhost:8080/v1`.
+The harness then talks to `http://localhost:8080/v1`.
 
 ## Official Gemma 4 QAT (default)
 
 Google's `gemma-4-12B-it-qat-q4_0-gguf`, with Google's own sampling preset:
-
-```bash
-llama-server -hf google/gemma-4-12B-it-qat-q4_0-gguf \
-    --host 127.0.0.1 --port 8080 --ctx-size 65536 --jinja -fa on \
-    --temp 1.0 --top-p 0.95 --top-k 64
-```
-
-## Stock Google Gemma-4-12B-IT (QAT Q4_0)
-
-Google's official sampling:
 
 ```bash
 llama-server -hf google/gemma-4-12B-it-qat-q4_0-gguf \

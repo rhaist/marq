@@ -71,11 +71,10 @@ go install github.com/rhaist/marq/cmd/marq@latest   # ~10 MB, skills embedded
 marq skills                                          # browse all 83, by domain
 marq skills nis2-dora                                # read one, no client needed
 
-claude mcp add marq-skills \
-  -e MARQ_SKILLS_ONLY=1 -e MARQ_WORK_DIR=$HOME/.marq \
-  -e MARQ_AUDIT_LOG=$HOME/.marq/audit.jsonl \
-  -- marq serve
+claude mcp add marq-skills -e MARQ_SKILLS_ONLY=1 -e MARQ_WORK_DIR=$HOME/.marq -- marq serve
 ```
+
+Other clients and the audit-log variable: [`docs/SETUP.md`](docs/SETUP.md#skills-only-no-docker).
 
 Now ask _"Map our audit findings to ISO 27001 and SOC 2"_ or _"What's our
 breach-notification clock under GDPR and NIS2?"_ and the model loads the right
@@ -108,48 +107,19 @@ or point a frontier MCP client at it.
 ### Run it fully local
 
 Your own model, on your box: no cloud model, and your data stays local (OSINT
-lookups still query third-party sources). This is the recommended setup when investigating people or a client's footprint. Drive marq from
+lookups still query third-party sources). This is the recommended setup when
+investigating people or a client's footprint. Drive marq from
 [Pi](https://pi.dev/) over [llama.cpp](https://github.com/ggml-org/llama.cpp):
-
-```bash
-# 1. the model — full flags matter: --reasoning-format keeps chain-of-thought
-#    out of the reply, --jinja makes tool calls parse (see docs/SETUP.md §2a)
-llama-server -hf google/gemma-4-12B-it-qat-q4_0-gguf \
-  --host 127.0.0.1 --port 8080 -ngl 99 --ctx-size 65536 --jinja \
-  --reasoning-format deepseek \
-  -fa on -ctk q8_0 -ctv q8_0 \
-  --temp 1.0 --top-p 0.95 --top-k 64
-
-# 2. marq in a long-lived container bound to your workspace. The shim ships
-#    inside the image, so it always matches the marq it drives — no clone.
-mkdir -p ~/.local/bin && docker run --rm marq shim > ~/.local/bin/marq
-chmod +x ~/.local/bin/marq
-
-marq up ~/work
-
-# 3. one-time Pi config — marq's system prompt. Without it a small model
-#    narrates instead of driving marq. → docs/SETUP.md §4
-mkdir -p ~/.pi/agent && marq prompt system > ~/.pi/agent/SYSTEM.md
-
-# then run `pi`
-```
-
-Then talk to it: _"Footprint example.com: subdomains, emails, exposed hosts,"_ or
-_"Load the nis2-dora skill: what's our breach clock?"_ The full local walkthrough
-(Pi provider, skill, tuning) is in [`docs/SETUP.md`](docs/SETUP.md#4-run-with-a-local-model-pi--the-marq-skill).
+the shim comes out of the image (`docker run --rm marq shim`), then `marq up
+~/work` starts the container. The `llama-server` flags, Pi provider, skill and
+system prompt are in [`docs/SETUP.md`](docs/SETUP.md#4-run-with-a-local-model-pi--the-marq-skill).
+Then ask _"Footprint example.com: subdomains, emails, exposed hosts."_
 
 ### Or fall back to a frontier model
 
 For the heaviest reasoning (architecture, GRC, IR write-ups), point a frontier MCP
-client at marq instead:
-
-```bash
-claude mcp add marq -- docker run --rm -i \
-  --security-opt no-new-privileges:true --cap-drop ALL \
-  -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR="$USER" marq
-```
-
-Any MCP client works (Codex, Claude Desktop); see [`docs/CLIENTS.md`](docs/CLIENTS.md).
+client at marq instead. The hardened `docker run` command for Claude Code, Codex and Claude Desktop is in
+[`docs/CLIENTS.md`](docs/CLIENTS.md) and [`mcp.json.example`](mcp.json.example).
 No keys or config are required; optional
 API keys are listed in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-sources).
 
@@ -175,22 +145,8 @@ API keys are listed in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-source
   access is sandboxed to `/work`+`/tmp`, and the image runs non-root (the
   recommended run args also drop all Linux capabilities and set `no-new-privileges`).
 
-<details>
-<summary><b>Full tool suite</b>: 24 passive OSINT tools (click to expand)</summary>
-
-| Category                              | Tools                                                                                                           |
-| :------------------------------------ | :-------------------------------------------------------------------------------------------------------------- |
-| **Domain / infrastructure**           | `theharvester` · `spiderfoot` · `subfinder` · `dnsx` · `dns_lookup` · `whois_lookup` · `asnmap` · `cdncheck` · `gau_urls` |
-| **Certificates / registry / lookalikes** | `ct_search` · `rdap` · `dnstwist` (background) |
-| **Threat-intel lookups**              | `ioc_lookup` · `orkl`                                                                                           |
-| **Exposure lookups**                  | `shodan_host` · `shodan_search` · `censys_view`                                                                 |
-| **Leaked secrets / metadata**         | `trufflehog` · `exif_metadata`                                                                                  |
-| **OSINT, people**                     | `sherlock` · `maigret_username` · `email_accounts` · `h8mail_breach` · `phoneinfoga`                            |
-| **Files** (sandboxed `/work`, `/tmp`) | `list_dir` · `read_file` · `write_file`                                                                         |
-| **Findings & jobs**                   | `report_finding` · `render_report` · `list_jobs` · `job_status`                                                 |
-| **Session & knowledge**               | `server_info` · `set_engagement` · `load_skill`                                                                 |
-
-</details>
+The full tool catalog, with what each tool wraps and which need API keys, is in
+[`docs/USAGE.md`](docs/USAGE.md#available-tools).
 
 <details>
 <summary><b>How it works</b>: one registry, two front-ends (click to expand)</summary>
@@ -201,8 +157,9 @@ terminal agent (Pi) ──bash──▶  pi/marq shim ─┤   both hit the same
                               (docker exec)  │
                                              ▼
                               registry.All() ── one Tool list
+                                ├─ recon     dns_lookup, whois_lookup, subfinder, dnsx (DNS/registry lookups)
                                 ├─ intel     ct_search, rdap, dnstwist, ioc_lookup, orkl
-                                ├─ osint     theHarvester, spiderfoot, subfinder, dnsx, shodan, trufflehog, gau…
+                                ├─ osint     theHarvester, spiderfoot, shodan, trufflehog, gau…
                                 ├─ people    sherlock, maigret, user-scanner, h8mail, phoneinfoga
                                 ├─ files     read/write/list (sandboxed /work)
                                 └─ extras    report_finding, render_report, list_jobs, load_skill

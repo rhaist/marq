@@ -8,7 +8,7 @@
 # The Go build toolchain is kept out of the runtime image (built in a separate
 # stage; golang-go purged in-layer). See docs/SECURITY.md before running.
 
-# --- Stage 1: build the Go MCP server / agent-host binary ------------------
+# --- Stage 1: build the Go MCP server binary ------------------------------
 # Built in an isolated golang stage and copied in as a static binary, so the
 # Kali image carries no Go build toolchain for the server itself. Runs on the
 # native BUILDPLATFORM and cross-compiles to TARGETARCH (CGO off) — fast on both
@@ -30,7 +30,6 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} \
 FROM kalilinux/kali-rolling
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    PIP_NO_CACHE_DIR=1 \
     PYTHONUNBUFFERED=1 \
     VIRTUAL_ENV=/opt/venv \
     PATH=/opt/venv/bin:$PATH
@@ -40,7 +39,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # auditable and reproducible. git is for trufflehog's `git` source.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates curl git \
-        python3 python3-pip python3-venv \
+        python3 python3-venv \
         # DNS / registry
         bind9-dnsutils whois rdap subfinder dnsx dnstwist \
         # company & domain footprint
@@ -97,7 +96,7 @@ RUN python3 -m venv --system-site-packages "$VIRTUAL_ENV" \
     # would otherwise skip it and leave the broken /usr/bin/shodan on PATH.
     && pip install --no-cache-dir --ignore-installed shodan 'setuptools<82'
 
-# --- Go MCP server / agent-host binary -------------------------------------
+# --- Go MCP server binary -------------------------------------------------
 COPY --from=gobuild /out/marq /usr/local/bin/marq
 COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
@@ -108,8 +107,7 @@ RUN useradd --create-home --shell /bin/bash marq \
     && chown -R marq:marq /var/log/marq /work
 USER marq
 ENV MARQ_AUDIT_LOG=/var/log/marq/audit.jsonl \
-    MARQ_OPERATOR=unknown \
-    MARQ_ENGAGEMENT=unspecified
+    MARQ_OPERATOR=unknown
 
 # Tools that drop output in the cwd must land in the writable engagement dir,
 # not "/" — the runner inherits this cwd and "/" is not writable by the marq user.

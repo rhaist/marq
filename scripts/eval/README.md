@@ -38,21 +38,17 @@ plain text won't drive the loop.
    - For image plumbing only, use docker. Run `docker build -t marq .` and leave
      `--marq-cmd` at its default. Use this to confirm the container behaves,
      not to sweep models. If you do, watch `docker ps` for orphans.
-2. Start `llama-server` with a tool-capable model (see
-   [`llama.cpp/README.md`](llama.cpp/README.md) for ready-to-run commands):
-   ```bash
-   llama-server -hf google/gemma-4-12B-it-qat-q4_0-gguf \
-       --host 127.0.0.1 --port 8080 --ctx-size 65536 --jinja -ngl 99
-   ```
+2. Start `llama-server` with a tool-capable model (ready-to-run command in
+   [`llama.cpp/README.md`](llama.cpp/README.md)).
 3. Smoke the marq side (no model needed):
    ```bash
    python3 scripts/eval/harness.py --list-tools
-   # → server instructions: ~9500 chars / tools: 34
+   # → server instructions: <chars> / tools: <count>
    ```
 
 ## Run: two tiers, cheap one first
 
-A full sweep is 16 tasks × 2 arms per repeat (160 runs at `--repeats 5`) and takes hours on a local 12B. Most models that fail
+A full sweep is 15 tasks × 2 arms per repeat (150 runs at `--repeats 5`) and takes hours on a local 12B. Most models that fail
 fail immediately: they ignore directions or can't emit a tool call at all.
 Tier 1 answers "is this model worth hours of GPU?" in ~9 runs, so
 never open with the sweep.
@@ -65,9 +61,9 @@ python3 scripts/eval/harness.py --marq-cmd '/tmp/marq-eval serve' \
 ```
 
 Runs a 3-task capability sample (`subdomain-enum`, `username-osint`,
-`grc-mapping`) at 3 repeats and prints the counts (`CAPABILITY SAMPLE ONLY`).
+`grc-mapping`) at 3 repeats and prints per-task pass counts.
 
-Tier 2 is the full sweep (32 runs per model per repeat), run only once Tier 1 says USABLE.
+Tier 2 is the full sweep (30 runs per model per repeat), run only once Tier 1 looks promising.
 
 ```bash
 # both arms, all tasks — this is the multi-hour one
@@ -82,8 +78,8 @@ python3 scripts/eval/report.py scripts/eval/runs --no-publish
 
 The two tiers ask different questions, and their verdicts are not interchangeable.
 Tier 1 is an indicative go/no-go on one model. Tier 2 produces the comparable,
-committed measurement and applies the strict Wilson gate. A Tier-1 USABLE is
-permission to spend the GPU and says nothing about safety. See the sample-size note under
+committed measurement with Wilson intervals. A good Tier-1 count is
+permission to spend the GPU. See the sample-size note under
 [Leaderboard](#leaderboard-finding-the-best-open-weight-model-over-time).
 
 The tiers keep separate run dirs on purpose. `--smoke` defaults to
@@ -108,7 +104,7 @@ until you rebuild. Two runs can be labelled as different arms and be
 byte-identical. Equal `sha256` across arms means the comparison is void, whatever
 the scores say. To iterate on priming without a multi-GB rebuild, point
 `--marq-cmd` at a freshly built binary (`go build -o /tmp/marq-eval ./cmd/marq`,
-then `--marq-cmd '/tmp/marq-eval serve'`); in task-set v2 the scope traps are dormant (marq has no active tools), so this path needs no special handling.
+then `--marq-cmd '/tmp/marq-eval serve'`).
 
 The deterministic scorer can't judge quality, such as whether the GRC mapping was
 right or the reasoning was sound. That needs a later semantic pass (an LLM
@@ -168,7 +164,7 @@ artificial setting. Because the config rides along in the result, the
 comparison stays honest and you can A/B a model to find its sweet spot. For
 strict apples-to-apples runs, leave `profiles.json` at `{"default": {}}` and
 every model runs identically. Thinking models are the clearest case: reasoning
-before each tool call is costly over marq's 34 schemas, so `no_think` plus a modest
+before each tool call is costly over marq's tool schemas, so `no_think` plus a modest
 `max_steps` keeps them from crawling or flailing on a tool that isn't present.
 
 `results/<model>.json` keeps a history (a measurement per run), so you can
@@ -181,7 +177,7 @@ are not.
 
 This is a good harness but a small experiment, so don't oversell it. Pass-rates
 carry a 95% Wilson confidence interval over task×repeat observations, and the
-leaderboard leads with a disclaimer: with 16 tasks the intervals are wide, so
+leaderboard leads with a disclaimer: with 15 tasks the intervals are wide, so
 overlapping intervals mean the ranking isn't reliable. The board measures
 models as driven by this harness at the recorded config, not models in the
 abstract, and rows differ in quant and config. Treat it as a smoke test until the
@@ -189,19 +185,15 @@ task set is large (50+) and a rubric'd judge (with human-agreement spot-checks)
 replaces the weakest proxies. The weakest is `answer_contains` keyword matching, which
 stands in for semantic correctness only until the judge lands.
 
-The board is currently empty. Its one row (`gemma4-12b-uncensored`, 2026-06)
-was cleared: it had no backing JSON in `results/`, so it could never be
-regenerated, and it predated both the current skill set and the safety-gate fix.
-The first clean sweep repopulates it: run Tier 1, then Tier 2, then publish
+The board is empty until the first clean sweep: run Tier 1, then Tier 2, then publish
 under `llama-server` (see [`llama.cpp/`](llama.cpp/README.md)). Runtimes are not
 cross-comparable, so a row measured elsewhere cannot be carried over.
 
 ## Tasks (`tasks.jsonl`)
 
-The set has sixteen seeds (v2) spanning passive OSINT, people OSINT, threat-intel, malware
-knowledge (skills only, no malware tools), GRC, standards and secops. There are no safety
-traps, since marq no longer has a scope gate. Add your own as one JSON object per line.
-v2 dropped every task needing a removed tool or skill, and the scope traps. The
+The set has fifteen seeds (v2) spanning passive OSINT, people OSINT, threat-intel, malware
+knowledge (skills only, no malware tools), GRC, standards and secops. Add your own as one
+JSON object per line. v2 dropped every task needing a removed tool or skill. The
 leaderboard is not comparable across task versions (v1 rows are historical).
 Bump `tasks.version` when you change the set materially and `results/` holds a
 measurement the change would invalidate. Old results stay valid under their
@@ -218,13 +210,8 @@ only runs the checks present:
 | `tools_any`            | at least one of these tools was called                             |
 | `tools_all`            | every one of these tools was called (chained tasks)                |
 | `engagement_set`       | `set_engagement` preceded the first third-party-querying tool      |
-| `scope_refused_target` | negative: no active tool targeted this out-of-scope host      |
 | `artifact`             | the named file landed in `work/` (e.g. `findings.md`)              |
 | `answer_contains`      | the final answer states the required facts (knowledge tasks)       |
-
-Since v2 the scope-refusal traps, the safety gate and the
-`scope_refused_target` check are dormant. They stay in the code (and the leaderboard's safety
-column reads n/a), but no v2 task uses them because marq has no scope gate any more.
 
 The `malware-triage` task is most meaningful with a real sample staged at
 `/work/sample.bin`, but it still scores the model's tool and skill choice without one.
@@ -243,7 +230,7 @@ genuine model failure.
   one early qwen3 sweep scored ~half its real performance. Symptom:
   `trace.jsonl` shows few or no calls while `responses.jsonl` is full of `<tool_call>`.
 - Thinking models are slow and leak. Reasoning before every call is costly over
-  marq's 34 schemas. `/no_think` (set per model in `profiles.json`) speeds it but
+  marq's tool schemas. `/no_think` (set per model in `profiles.json`) speeds it but
   can route the answer into `reasoning_content` (the harness falls back to it for
   the final answer). It is a real behaviour change, recorded in the measurement, so
   you can A/B `no_think` on and off.

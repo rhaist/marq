@@ -1,9 +1,9 @@
 # Usage
 
-How to build, smoke-test and drive marq, your cyber assistant: 24 passive-OSINT tools (34 tools in all)
-and ~83 skill playbooks across 13 domains. To choose a client and model
-for the job (Claude Code / Codex as the expert, Pi for local work, LM
-Studio for testing), see [`CLIENTS.md`](CLIENTS.md); for a guided per-OS install,
+How to build, smoke-test and drive marq, your cyber assistant: passive-OSINT tools
+and skill playbooks. To choose a client and model
+for the job (Claude Code / Codex as the expert, Pi for local work), see
+[`CLIENTS.md`](CLIENTS.md); for a guided per-OS install,
 see [`SETUP.md`](SETUP.md); for the safety model, see [`SECURITY.md`](SECURITY.md).
 
 **Contents**
@@ -42,7 +42,7 @@ docker run --rm marq skills
 ```
 
 A wrong count here is the fastest way to spot a stale image or an unintended
-`MARQ_SKILLS_ONLY=1` (which drops the suite to the ~10 in-process tools).
+`MARQ_SKILLS_ONLY=1` (which drops the suite to the 8 in-process tools: `server_info`, `set_engagement`, `list_dir`, `read_file`, `write_file`, `report_finding`, `render_report`, `load_skill`).
 
 Then run a one-off tool to confirm the wrapped binaries work:
 
@@ -73,53 +73,32 @@ shared shape:
    `mcpServers` block into Claude Code's `.mcp.json` or Claude Desktop's config.
    Codex uses TOML (`codex mcp add marq -- …`, see CLIENTS.md).
 2. Set `MARQ_OPERATOR` (the audit anchor). The engagement and its purpose are set at
-   runtime: have the model call `set_engagement` before any people OSINT
-   (GDPR: record why you are collecting).
+   runtime with `set_engagement` (see [`SECURITY.md`](SECURITY.md#legal--ethical-baseline)).
 3. Use a tool-capable model. Have it call `server_info` first, record the purpose with
    `set_engagement`, then `load_skill` the domain it's working in.
 
 ## 4. Run with a local model (Pi)
 
-Instead of an external MCP client, drive marq from [Pi](https://pi.dev/), a
-minimal terminal agent that runs a local model on llama.cpp's
-`llama-server` (any OpenAI-compatible endpoint works) and gives the model
-bash. The model invokes `marq run <tool> '<json>'`; the `pi/marq` host shim
-forwards each call into a long-lived container over `docker exec`.
-
-```bash
-# Install the shim
-docker run --rm marq shim > ~/.local/bin/marq && chmod +x ~/.local/bin/marq
-
-# Start ONE long-lived container, bound to your working dir
-marq up ~/investigations/acme        # docker run -d … sleep infinity
-
-# Sanity checks through the shim
-marq tools                        # list every tool
-marq run server_info '{}'         # confirm purpose
-
-marq down                         # tear down when finished
-```
-
-Configure your model runtime in Pi (it owns the endpoint, which is no longer
-marq's concern), then load [`pi/SKILL.md`](../pi/SKILL.md) into Pi as a skill so
-the model knows the calling convention. From there the model
-calls `server_info` first, works the tools, records findings with
-`report_finding`, and writes the report with `render_report` into `/work`.
+To drive marq from [Pi](https://pi.dev/) over llama.cpp instead of an MCP client,
+follow [`SETUP.md`](SETUP.md#4-run-with-a-local-model-pi--the-marq-skill): the shim,
+`llama-server` flags, Pi provider, skill and system prompt. The model invokes
+`marq run <tool> '<json>'`, calls `server_info` first, works the tools, records
+findings with `report_finding`, and writes the report with `render_report` into `/work`.
 
 A long-lived container is required: background tools (`spiderfoot`, `gau_urls`, `dnstwist`)
 detach inside it and are polled later, so a per-call `docker run`
-would kill them.
+would kill them. The `pi/marq` shim (`marq up` / `marq down`) manages it.
 
 The shim reads these env vars: `MARQ_CONTAINER` (default `marq`), `MARQ_IMAGE` (default
-`marq:latest`), `MARQ_ENGINE` (container CLI, default `docker`; or `podman`),
-`MARQ_ENV_FILE` (default `~/.config/marq/env`, loaded if present). Nothing is
-required: `MARQ_OPERATOR` defaults to your `$USER`, and any API key exported in
-your shell is forwarded (see _API keys_ below); the engagement + purpose is set at
-runtime via `set_engagement`.
+`marq:latest`), `MARQ_ENGINE` (container CLI, default `docker`; set `podman` to
+run daemonless without Docker Desktop), `MARQ_ENV_FILE` (default `~/.config/marq/env`,
+loaded if present). Nothing is required: `MARQ_OPERATOR` defaults to your `$USER`, and
+any API key exported in your shell is forwarded (see _API keys_ below); the engagement
+and purpose are set at runtime via `set_engagement`.
 
 ## Available tools
 
-All wrapped tools are passive: they query public third-party sources (DNS resolvers, WHOIS, certificate logs, Shodan/Censys, web archives, breach databases, social and code-hosting sites) and never scan, crawl or exploit a target's hosts. The only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks).
+All wrapped tools are passive: they query public third-party sources and never scan, crawl or exploit a target's hosts (details in [`SECURITY.md`](SECURITY.md)).
 
 ### Session
 
@@ -170,7 +149,7 @@ All wrapped tools are passive: they query public third-party sources (DNS resolv
 | `read_file`  | Read back output a tool wrote to disk                             |
 | `write_file` | Stage an input file (a host list for `dnsx`, …)                 |
 
-These, and `exif_metadata`, are sandboxed to `/work`, `/tmp` and `MARQ_WORK_DIR` (realpath-checked; the audit log itself is refused). Other tools aren't path-sandboxed but are bounded by fixed/allowlisted argv and the container. Together they make the file-driven tools usable: the model can
+These, and `exif_metadata`, are sandboxed to `/work`, `/tmp` and `MARQ_WORK_DIR` (see [`SECURITY.md`](SECURITY.md#container-hardening-applied)). Together they make the file-driven tools usable: the model can
 `write_file` a host list then `dnsx` it, or `read_file` a result another
 tool dropped on disk. Mount `/work` from the host (`-v ./work:/work`, as the
 `pi/marq` shim does) to exchange files with the operator.
@@ -226,15 +205,14 @@ an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.
 | `MARQ_ENGAGEMENT`      | `unspecified`               | Investigation label + purpose (initial default; overridable by `set_engagement`)                                  |
 | `MARQ_AUDIT_LOG`       | `/var/log/marq/audit.jsonl` | Audit log path                                                                                                    |
 | `MARQ_TIMEOUT`         | `900`                       | Default per-command timeout (seconds)                                                                             |
-| `MARQ_MAX_TIMEOUT`     | `3600`                      | Ceiling for a tool's per-call timeout override                                                                    |
+| `MARQ_MAX_TIMEOUT`     | `3600`                      | Cap on how long a background job may run                                                                          |
 | `MARQ_MAX_OUTPUT`      | `60000`                     | Max output chars returned to the model                                                                            |
 | `MARQ_SKILLS_ONLY`     | `false`                     | Knowledge-only mode: serve just the skills + findings/files tools, drop every OSINT exec tool (runs with no image) |
 | `MARQ_WORK_DIR`        | `/work`                     | Working area (findings, job dirs)                                                                                 |
 
 The engagement is per-task, so the model sets it at session start with the
-`set_engagement` tool: a label plus the purpose, e.g.
-`acme-footprint-2026-11 — pre-acquisition exposure review`. People OSINT is
-GDPR personal-data processing, so always state why you are collecting. It persists
+`set_engagement` tool (a label plus the purpose; why in
+[`SECURITY.md`](SECURITY.md#legal--ethical-baseline)). It persists
 to `$MARQ_WORK_DIR/.marq-context`, so it survives across the process-per-call
 `marq run` path and shows up in `server_info` and every audit record. Operator
 stays env-set because it is the accountability anchor, and the model should not

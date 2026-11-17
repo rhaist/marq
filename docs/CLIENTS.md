@@ -1,7 +1,7 @@
 # Driving marq: pick the model for the job
 
-marq is tools plus knowledge: 24 passive-OSINT tools (34 tools in all) and 83 skill playbooks
-across 13 domains (OSINT, malware, threat-intel, sec-ops, architecture, GRC,
+marq is tools plus knowledge: passive-OSINT tools and skill playbooks
+across many domains (OSINT, malware, threat-intel, sec-ops, architecture, GRC,
 standards, CISO, resilience, human factors, …). It does not bring a model.
 Your client does, so you choose which model to point at it, and that
 depends on the work.
@@ -21,11 +21,10 @@ the data isn't sensitive. Keep both configured and switch per task.
 ## How marq runs & connects
 
 There are two builds. The skills-only build serves just the knowledge library +
-findings/files tools: `go install github.com/rhaist/marq/cmd/marq@latest` with
-`MARQ_SKILLS_ONLY=1`, a ~10 MB native binary, with no Docker (see
+findings/files tools, a ~10 MB native binary with no Docker (install:
 [`SETUP.md`](SETUP.md#skills-only-no-docker)). Reach for it when the work is
 advisory: architecture, GRC, standards, threat-intel research. The full build
-is the Docker image that adds the 24-tool OSINT suite for when you need to _run_ things.
+is the Docker image that adds the OSINT tool suite for when you need to _run_ things.
 
 There are two transports (both builds use the same `marq serve` stdio server):
 
@@ -92,19 +91,9 @@ Same uses as Claude Code. Docs: [Codex MCP](https://developers.openai.com/codex/
 
 ## Pi (local, standalone)
 
-The fully-local path has no cloud model and runs on the box (OSINT lookups still query third-party sources). See
-[`SETUP.md`](SETUP.md#4-run-with-a-local-model-pi--the-marq-skill):
-
-```bash
-# The shim comes out of the image (or `install -m 0755 pi/marq …` from a checkout)
-docker run --rm marq shim > ~/.local/bin/marq     # user-owned dir on PATH
-chmod +x ~/.local/bin/marq
-
-marq up ~/marq/work                               # long-lived container, any workspace
-
-# start llama-server, add a llama.cpp provider extension + register the marq
-# skill in ~/.pi/agent/settings.json, then run `pi` — full steps in SETUP.md
-```
+The fully-local path has no cloud model and runs on the box (OSINT lookups still query
+third-party sources). Setup (shim, `llama-server`, Pi provider, skill, system prompt) is
+in [`SETUP.md`](SETUP.md#4-run-with-a-local-model-pi--the-marq-skill).
 
 Best for: any cyber work you want fully local (malware triage, threat-intel pivoting,
 OSINT footprinting and research), where the model and your data stay on the box.
@@ -117,22 +106,18 @@ OSINT footprinting and research), where the model and your data stay on the box.
   before diving in. The skills carry the current-standards detail and the right
   tool order. They make a smaller model competent and keep a frontier
   model from guessing at stale facts.
-- Load only the skill you need. There are ~83, and pulling the one relevant
+- Load only the skill you need. There are many, and pulling the one relevant
   playbook keeps context tight. `marq run load_skill '{}'` (or the `load_skill`
   tool) lists the index.
-- Record a purpose before people OSINT. GRC/architecture/standards
-  conversations are unrestricted; marq's tools are passive and OSINT-tool/file/findings calls are audit-logged, and
-  profiling people is GDPR personal-data processing. Record the purpose with
-  `set_engagement` first.
+- Record a purpose with `set_engagement` before people OSINT (why:
+  [`SECURITY.md`](SECURITY.md#legal--ethical-baseline)). GRC/architecture/standards
+  conversations are unrestricted.
 - Pick the model to the job. Use a big reasoning model for analysis and writing and
   a fast tool-capable local model for chaining lookups and hands-on OSINT
   you want to keep on-box.
 - If a weak local model bypasses marq (raw `curl`/`grep`, ignoring the tools),
-  install [`pi/SYSTEM.md`](../pi/SYSTEM.md): `ln -sf "$PWD/pi/SYSTEM.md"
-~/.pi/agent/SYSTEM.md` (SETUP.md step 2b). Pi's default prompt frames the model
-  as a coding assistant; this replaces it with "drive everything through `marq
-run`" and in testing flipped a 12B model from 300+ `curl` calls to clean,
-  audited tool use. The cause is the model's prompt, not your `llama-server` flags. Then
+  install `pi/SYSTEM.md` ([`SETUP.md`](SETUP.md#4-run-with-a-local-model-pi--the-marq-skill), step 2b).
+  The cause is the model's prompt, not your `llama-server` flags. Then
   lean on the skills and keep it to one tool call at a time.
 - Slow lookups run in the background. Use `list_jobs` / `job_status` instead of
   blocking; this works the same in every client.

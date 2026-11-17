@@ -2,9 +2,6 @@ __pycache__/
 *.pyc
 .venv/
 venv/
-*.egg-info/
-dist/
-build/
 
 # Engagement working area — runtime mount, never committed.
 /work/
@@ -15,11 +12,9 @@ build/
 # Real secrets (API keys belong in ~/.config/marq/env, never the repo).
 .env
 
-# Never commit audit logs, scan output, or loot.
+# Never commit audit logs or tool output.
 *.jsonl
 # …but the eval's task set IS source, not output — un-ignore it:
 !scripts/eval/tasks.jsonl
 *.log
 /audit/
-/loot/
-/results/

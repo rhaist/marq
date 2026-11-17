@@ -81,7 +81,7 @@ func LogStart(tool, target string, argv []string) (string, error) {
 }
 
 // LogEnd records the completion of an invocation. exitCode is nil when the tool
-// timed out or failed to spawn (mirrors the Python None).
+// timed out or failed to spawn.
 func LogEnd(id, tool string, exitCode *int, durationS float64, timedOut bool, errMsg string) {
 	rec := map[string]any{
 		"event":      "invocation.end",
