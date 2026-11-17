@@ -2,6 +2,7 @@ package registry
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/rhaist/marq/internal/shellword"
 )
@@ -18,6 +19,9 @@ func people() []Tool {
 				{Name: "timeout", Type: IntParam, Desc: "per-site timeout seconds", Default: 30},
 			},
 			Build: func(a Args) Invocation {
+				if strings.HasPrefix(a.S("username"), "-") { // a flag, e.g. maigret --parse=<url> fetches it
+					return Invocation{Target: a.S("username"), Refuse: "username must not start with '-'"}
+				}
 				argv := []string{"sherlock", "--print-found", "--no-color", "--timeout", strconv.Itoa(a.I("timeout")), a.S("username")}
 				return Invocation{Argv: argv, Target: a.S("username")}
 			},
@@ -32,6 +36,9 @@ func people() []Tool {
 				{Name: "top_sites", Type: IntParam, Desc: "limit number of sites", Default: 500},
 			},
 			Build: func(a Args) Invocation {
+				if strings.HasPrefix(a.S("username"), "-") {
+					return Invocation{Target: a.S("username"), Refuse: "username must not start with '-'"}
+				}
 				argv := []string{
 					"maigret", a.S("username"),
 					"--no-color", "--no-progressbar",

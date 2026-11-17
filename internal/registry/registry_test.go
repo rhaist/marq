@@ -130,6 +130,17 @@ func TestPassiveOnly(t *testing.T) {
 	refused("dnsx", Args{"hosts": "acme.com", "records": "a,w"}) // -w = wordlist brute force
 	refused("trufflehog", Args{"source": "filesystem /etc"})
 	refused("trufflehog", Args{"source": "git https://github.com/o/r --no-no-verification"})
+	refused("trufflehog", Args{"source": "git https://git.acme.com/o/r"}) // target's own server
+	refused("trufflehog", Args{"source": "git file:///work/repo"})
+	refused("trufflehog", Args{"source": "gitlab --repo=https://gitlab.com/o/r --endpoint=https://gitlab.acme.com"})
+	refused("trufflehog", Args{"source": "github"})
+	refused("maigret_username", Args{"username": "--parse=https://acme.com/"})
+	refused("sherlock", Args{"username": "--site"})
+	for _, ok := range []string{"git https://github.com/acme/verifier", "github --org=acme", "gitlab --repo=https://gitlab.com/o/r"} {
+		if inv := toolNamed(t, "trufflehog").Build(Args{"source": ok}); inv.Refuse != "" {
+			t.Errorf("trufflehog %q refused: %s", ok, inv.Refuse)
+		}
+	}
 
 	if argv := toolNamed(t, "dns_lookup").Build(Args{"domain": "acme.com", "record_type": "MX"}).Argv; !slices.Equal(argv[4:], []string{"acme.com", "mx"}) {
 		t.Errorf("dns_lookup argv = %q", argv)

@@ -13,6 +13,44 @@ import (
 // (theHarvester 4.11 dropped anubis, bing and threatminer; an unknown source fails the whole run.)
 const harvesterKeyless = "crtsh,duckduckgo,otx,rapiddns,hackertarget,certspotter,urlscan,subdomaincenter"
 
+// publicHosts are the public code-hosting services trufflehog may read from. A
+// target's self-hosted git/GitLab server is its own infrastructure, so it's out.
+var publicHosts = []string{"github.com", "gitlab.com", "bitbucket.org", "codeberg.org"}
+
+// publicCodeSource allowlists the whole trufflehog source, token by token, and
+// returns a refusal message for anything else: another flag could re-enable
+// verification (which logs in with the leaked secret) or point --endpoint at
+// the target's own server.
+func publicCodeSource(src []string) string {
+	const usage = "source must be 'git <https-url>', 'github --org=<org>', 'github --repo=<url>' or " +
+		"'gitlab --repo=<url>' on github.com, gitlab.com, bitbucket.org or codeberg.org, with no other flags"
+	publicURL := func(raw string) bool {
+		u, err := url.Parse(raw)
+		return err == nil && u.Scheme == "https" && u.User == nil &&
+			slices.Contains(publicHosts, strings.ToLower(strings.TrimPrefix(u.Host, "www.")))
+	}
+	if len(src) < 2 {
+		return usage
+	}
+	for _, tok := range src[1:] {
+		repo, isRepo := strings.CutPrefix(tok, "--repo=")
+		org, isOrg := strings.CutPrefix(tok, "--org=")
+		ok := false
+		switch src[0] {
+		case "git":
+			ok = len(src) == 2 && publicURL(tok)
+		case "github":
+			ok = (isRepo && publicURL(repo)) || (isOrg && org != "" && !strings.ContainsAny(org, "/:"))
+		case "gitlab":
+			ok = isRepo && publicURL(repo)
+		}
+		if !ok {
+			return usage
+		}
+	}
+	return ""
+}
+
 // osint returns company/domain footprint & information-gathering tools.
 func osint() []Tool {
 	return []Tool{
@@ -100,7 +138,8 @@ func osint() []Tool {
 			Name: "trufflehog",
 			Desc: "Find leaked secrets in PUBLIC code with trufflehog. `source` must start with the " +
 				"subcommand: 'git <https-url>', 'github --org=<org>', 'github --repo=<url>' or " +
-				"'gitlab --repo=<url>'. Provide GITHUB_TOKEN for GitHub org scans (rate limits). " +
+				"'gitlab --repo=<url>', on github.com, gitlab.com, bitbucket.org or codeberg.org only — no " +
+				"self-hosted servers, no extra flags. Provide GITHUB_TOKEN for GitHub org scans (rate limits). " +
 				"Secrets are reported unverified — marq never tests found credentials against the " +
 				"service they belong to.",
 			Params: []Param{
@@ -108,12 +147,8 @@ func osint() []Tool {
 			},
 			Build: func(a Args) Invocation {
 				src := shellword.Split(a.S("source"))
-				if len(src) == 0 || !slices.Contains([]string{"git", "github", "gitlab"}, src[0]) {
-					return Invocation{Target: a.S("source"), Refuse: "source must start with git, github or gitlab"}
-				}
-				// Verification logs in with the leaked credential — that's using it, not OSINT.
-				if strings.Contains(strings.ToLower(a.S("source")), "verif") {
-					return Invocation{Target: a.S("source"), Refuse: "verification flags are not allowed; secrets stay unverified"}
+				if msg := publicCodeSource(src); msg != "" {
+					return Invocation{Target: a.S("source"), Refuse: msg}
 				}
 				argv := append([]string{"trufflehog"}, src...)
 				argv = append(argv, "--no-verification", "--json")

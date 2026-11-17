@@ -181,7 +181,7 @@ func RenderReport() string {
 
 func renderMarkdown(all []Finding) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "# Penetration Test Findings\n\n")
+	fmt.Fprintf(&b, "# Security Findings\n\n")
 	engagement := config.Attribution()
 	fmt.Fprintf(&b, "_Operator: %s · Engagement: %s_\n\n", config.C.Operator, engagement)
 	counts := map[string]int{}
