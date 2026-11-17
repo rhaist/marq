@@ -83,6 +83,14 @@ binary (`load_skill`, `marq://skills/<name>`) and installs natively via the
 Claude Code plugin or `npx skills add rhaist/marq`. The periodic review sweep is
 the `/refresh-skills` skill (`.claude/skills/refresh-skills/`).
 
+**Regional review wanted.** The regional skills (`apac-cyber-regs`,
+`middle-east-regs`, `latam-regs`, `privacy-apac`) were researched mostly from English
+sources, and the official-language text is what counts. If you work with one of these
+jurisdictions, a review of its section is the most useful contribution you can make:
+confirm or correct a claim against the official text and cite it. Where a claim carries
+a tag, change it from U (unconfirmed) or S (summary) to V (official text read).
+Corrections from local practitioners outrank our sources.
+
 ## Commits and PRs
 
 - This repo uses **Conventional Commits** (`feat:`, `fix:`, `docs:`,

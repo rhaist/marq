@@ -1,21 +1,23 @@
 ---
 name: apac-cyber-regs
-description: "Covers APAC cyber law (not privacy) for an HQ security/GRC team overseeing plants and offices in China, Japan, South Korea, Taiwan, Hong Kong, Australia, Singapore, India, Malaysia, Indonesia, Vietnam, Thailand and the Philippines: whether a site is in scope, which incident clock runs, what telemetry can leave the country, and OT/ICS rules. Use when the user asks about MLPS, China CSL or CAC incident reporting, CERT-In, SOCI or the Cyber Security Act 2024, Singapore CII code, Japan Cyber Response Capability Act, Taiwan/Hong Kong/Malaysia/Vietnam cyber law, or whether an APAC plant must comply."
+description: "Covers APAC cyber law (not privacy) for security and GRC teams responsible for an entity, at group HQ or locally, in China, Japan, South Korea, Taiwan, Hong Kong, Australia, Singapore, India, Malaysia, Indonesia, Vietnam, Thailand and the Philippines: whether an entity or site is in scope, which incident clock runs, what telemetry can leave the country, and OT/ICS rules. Use when the user asks about MLPS, China CSL or CAC incident reporting, CERT-In, SOCI or the Cyber Security Act 2024, Singapore CII code, Japan Cyber Response Capability Act, Taiwan/Hong Kong/Malaysia/Vietnam cyber law, or whether an APAC entity or site must comply."
 license: Apache-2.0
 metadata:
   verified: "2026-11-17"
 ---
 
-# APAC cyber law for HQ oversight (practitioner orientation, NOT legal advice)
+# APAC cyber law for security and GRC teams (practitioner orientation, NOT legal advice)
 
-There is no APAC NIS2. Each country has its own statute, regulator and clock, and most of them attach to a **designated** population, not to "manufacturers". Only China and India bind an ordinary foreign-owned plant directly with an incident clock, and Australia does for ransomware payments. This skill covers cyber law only; privacy and breach law for personal data is in `load_skill privacy-apac`. Status tags: **V** read from official text, **S** secondary source only, **U** unconfirmed (treat as a question for local counsel, not a fact). Checked Nov 2026; re-verify before advising.
+Written for security and GRC teams responsible for an entity in the region, whether at group HQ or the local entity itself. Where a law's official text is not in English (Chinese, Japanese, Korean, Malay, Vietnamese, Thai, Indonesian), check the original: English versions and summaries are aids, and some are outdated (Korea's official English Network Act text, for one).
 
-## Does it reach my plant? Triage
+There is no APAC NIS2. Each country has its own statute, regulator and clock, and most of them attach to a **designated** population, not to every business. Only China and India bind an ordinary entity directly with an incident clock, and Australia does for ransomware payments. This skill covers cyber law only; privacy and breach law for personal data is in `load_skill privacy-apac`. Status tags: **V** read from official text, **S** secondary source only, **U** unconfirmed (treat as a question for local counsel, not a fact). Checked Nov 2026; re-verify before advising.
 
-1. **Applies to every operator or body corporate:** China (network operators: every plant) and India (CERT-In Directions: body corporates). Assume in scope.
+## Does it reach this entity? Triage
+
+1. **Applies to every operator or body corporate:** China (network operators: every site) and India (CERT-In Directions: body corporates). Assume in scope.
 2. **Applies to every business above a threshold, for one event:** Australia ransomware-payment report (prior-year turnover above AUD 3m, pro-rated for part years).
 3. **Applies only if designated:** Japan, Korea, Taiwan, Hong Kong, Singapore, Malaysia, Thailand, Australia SOCI. Designation lists are often not public, and sector wording is broad (Malaysia lists "Trade, industry and economy" among 11 NCII sectors; Singapore and SOCI have no manufacturing class; Thailand's draft adds an "industrial sector"). Ask each local entity for **written confirmation of designation or non-designation** per site, plus whether it is a supplier to a designated operator.
-4. **Reached by contract:** designated customers push logging, forensics and supplier-extension demands down (Japan, Korea, Taiwan, Hong Kong; Hogan Lovells for Japan, S). China adds a statutory flow-down: operators must contractually require their security/ops service providers to report incidents to them (CAC Measures Art. 5, V), which hits the plant's local MSSP and integrator contracts.
+4. **Reached by contract:** designated customers push logging, forensics and supplier-extension demands down (Japan, Korea, Taiwan, Hong Kong; Hogan Lovells for Japan, S). China adds a statutory flow-down: operators must contractually require their security/ops service providers to report incidents to them (CAC Measures Art. 5, V), which hits the entity's local MSSP and integrator contracts.
 
 Output per site: statute, trigger, designating body, evidence of designation, flow-down chain.
 
@@ -37,27 +39,29 @@ Output per site: statute, trigger, designating body, evidence of designation, fl
 | Thailand               | Designated CII                                       | 24h initial (trigger wording ambiguous)                                                      | Regulator                                       | U                                       |
 | Indonesia, Philippines | n/a                                                  | No applicable clock found                                                                    | n/a                                             | S                                       |
 
-Run the shortest clock first: a China plant incident has a 4h external clock before HQ has finished triage.
+Run the shortest clock first: a China incident has a 4h external clock, often before any group function outside China has finished triage.
 
-## Per country (HQ view)
+## Per country
 
 - **China.** Amended CSL in force **1 Jan 2026** (V). Penalties are tiered (Art. 61): operators RMB 10k to 50k, rising to RMB 50k to 500k if they refuse to correct or harm results; RMB 500k to 2m for large data leakage; the **RMB 10m** top tier needs a CII losing its main function. The new AI article's number is U. Reporting thresholds: 1m / 10m / 100m individuals' PI or RMB 5m / 20m / 100m direct loss; CII outage of 10 min (whole) or 30 min (main function) at the lowest tier. Ransomware demand details are reportable; 30-day summary after closure. **MLPS 2.0** (GB/T 22239-2019): level 2 and above filed with local public security within 30 days of grading; level 3 evaluated at least yearly by a PRC-based agency (V, from 2007 MPS Measures; whether a pending regulation supersedes them is U). Product vendors report vulnerabilities to MIIT within 2 days (V, 2021 Provisions).
 - **India.** CERT-In Directions bind body corporates; also NTP sync (a global time source is allowed if it does not deviate from NIC/NPL). CEA power-sector rules: see OT below. NCIIPC sector list U. MSME deferral year U.
-- **Australia.** SOCI s9 has **no manufacturing class** (nearest: food and grocery, defence industry; V for the Act, but rules-prescribed assets under s9(1)(f) were not checked). The ransomware duty is the one that reaches an ordinary plant. Smart-device standard (consumer-connectable products manufactured from 4 Mar 2026) matters for plants **exporting** such products to Australia, not for the plant's own OT; whether industrial products are exempt is U. Essential Eight is mandatory only for non-corporate Commonwealth entities. Any "education first" grace on ransomware reporting is not in the legislation (U).
+- **Australia.** SOCI s9 has **no manufacturing class** (nearest: food and grocery, defence industry; V for the Act, but rules-prescribed assets under s9(1)(f) were not checked). The ransomware duty is the one that reaches an ordinary business above the threshold. Smart-device standard (consumer-connectable products manufactured from 4 Mar 2026) matters for manufacturers **exporting** such products to Australia, not for their own OT; whether industrial products are exempt is U. Essential Eight is mandatory only for non-corporate Commonwealth entities. Any "education first" grace on ransomware reporting is not in the legislation (U).
 - **Singapore.** Cybersecurity (Amendment) Act 2024 partly in force 31 Oct 2025 (provider-owned CII including overseas-located systems, wider reporting; V). Manufacturing is not a CII sector. The Code for CII (2026), effective 29 Jul 2026, replaced "CCoP 2.0"; CII owners must hold Cyber Trust Mark Advocate (Tier 5) within 24 months of designation (V). Later Act parts (ESCI, major FDI) not found commenced (U).
-- **Japan.** Cyber Response Capability Enhancement Act core duties from **1 Oct 2026**: asset notification (existing operators have six months), incident reporting, consultative council. Penalties U. A foreign-owned plant is reached mainly as a supplier.
-- **Korea.** Law No. 21500 (Network Act amendment) in force 1 Oct 2026, level evaluation from 1 Apr 2027 (S). Reported CISO, committee and 3% revenue fines for repeat incidents are U. A plain plant is in scope only if designated under the ICI Protection Act or if it is an ICT service provider.
+- **Japan.** Cyber Response Capability Enhancement Act core duties from **1 Oct 2026**: asset notification (existing operators have six months), incident reporting, consultative council. Penalties U. An entity that is not itself designated is reached mainly as a supplier.
+- **Korea.** Law No. 21500 (Network Act amendment) in force 1 Oct 2026, level evaluation from 1 Apr 2027 (S). Reported CISO, committee and 3% revenue fines for repeat incidents are U. An ordinary entity is in scope only if designated under the ICI Protection Act or if it is an ICT service provider.
 - **Taiwan.** Cyber Security Management Act amendments reportedly effective 1 Dec 2025 (S); fine maximum and which manufacturers are designated are U.
 - **Hong Kong.** Cap. 653 in force 1 Jan 2026 (S, L.N. 144 of 2025). Sectors: energy, IT, banking, air/land/maritime transport, healthcare, telecoms and broadcasting, plus "other infrastructure". Audit at least every 24 months, risk assessment at least every 12; fines to HK$5m (all as the Bill). No designations found.
 - **Malaysia.** Act 854 in force 26 Aug 2024. Failure to notify: up to RM 500,000 or 10 years. Audit cadence U.
 - **Vietnam.** Law 116/2025/QH15 in force 1 Jul 2026 (S); Decree 333/2026 (19 Aug 2026) exists; Decree 53/2022's repeal status U; Law text U.
 - **Thailand.** Cybersecurity Act binds designated CII only; current 24h clock and THB 200,000 fine U; no primary Thai text was read.
-- **Indonesia / Philippines.** No cyber statute binds a private plant: Indonesia's RUU KKS is in committee, the Philippines' HB 9605 is at the Senate.
+- **Indonesia / Philippines.** No dedicated cyber statute binds a private entity (Indonesia's PP 71/2019 duties for private electronic system operators aside): Indonesia's RUU KKS is in committee, the Philippines' HB 9605 is at the Senate.
 
 ## What can leave the country (SOC, SIEM, MES, historian feeds)
 
+Each rule below states what must stay in country; the practical consequence falls on any cross-border SOC or SIEM.
+
 - **China.** CAC Provisions Art. 3 (22 Mar 2024, V) exempts data generated in international trade, cross-border transport, academic cooperation or **transnational manufacturing and marketing** from assessment, standard contract and certification, if it contains **no personal information or important data**. Production telemetry usually fits; a SIEM feed that carries user accounts or other PI does not (inference, apply the privacy routes in `load_skill privacy-apac`). "Important data" means data notified by the authorities or publicly released as important (Art. 2); the identification standard GB/T 43697-2024 is S. MIIT industrial-sector data rules (Wang An [2022] No. 166) are partly verified; their domestic-storage wording was not read, so do not assume a rule either way.
-- **India.** CERT-In requires ICT logs kept for a rolling **180 days within Indian jurisdiction**. SCADA, historian and firewall logs can fall under "ICT systems" wording (a reading, not a CERT-In statement), so an HQ-central SIEM must keep the India copy.
+- **India.** CERT-In requires ICT logs kept for a rolling **180 days within Indian jurisdiction**. SCADA, historian and firewall logs can fall under "ICT systems" wording (a reading, not a CERT-In statement), so a SIEM hosted outside India (for example a group-central one) must keep the India copy.
 - **Vietnam.** Decree 333 localisation targets user and user-created data of service providers (24-month minimum storage), not factory OT. Foreign enterprises in listed sectors are required to localise or set up an office only after triggers such as repeated non-compliance.
 - **Indonesia.** PP 71/2019: private-scope operators may store abroad if supervisory and law-enforcement access is ensured; public-scope data stays onshore (S; Perpres 82/2022 and BSSN rules U).
 - Other countries: no cyber-law localisation rule was found in the sources; that is absence of evidence, so confirm with counsel.
@@ -72,9 +76,9 @@ Run the shortest clock first: a China plant incident has a 4h external clock bef
 
 ## Mapping to ISO 27001 / IEC 62443 / NIST CSF
 
-No jurisdiction found mandates ISO 27001, IEC 62443 or NIST CSF as such for a private factory, and none accepts a certificate in place of the national act. China's MLPS filing and testing are separate legal acts. Singapore's Code mentions no IEC 62443 (keyword search, not exhaustive) and requires Cyber Trust Mark for CII owners. Japan's METI guidelines' NIST CSF and IEC 62443 basis is U.
+Each national act stands on its own terms, and mappings to frameworks are reuse aids that work in both directions. No jurisdiction found mandates ISO 27001, IEC 62443 or NIST CSF as such for a private entity, and none accepts a certificate in place of the national act. China's MLPS filing and testing are separate legal acts. Singapore's Code mentions no IEC 62443 (keyword search, not exhaustive) and requires Cyber Trust Mark for CII owners. Japan's METI guidelines' NIST CSF and IEC 62443 basis is U.
 
-Inference, not sourced: MLPS level 3 controls roughly correspond to ISO 27001 Annex A plus IEC 62443 zone and conduit ideas, so one HQ control set can feed the evidence, but treat each national act as its own audit. Use `load_skill choosing-a-framework` for the internal baseline and `load_skill control-mapping` for crosswalks.
+Inference, not sourced: MLPS level 3 controls roughly correspond to ISO 27001 Annex A plus IEC 62443 zone and conduit ideas, so evidence can be reused in both directions (an entity built on MLPS can feed an ISO 27001 programme, and a group control set can feed MLPS), but treat each national act as its own audit. Use `load_skill choosing-a-framework` for the internal baseline and `load_skill control-mapping` for crosswalks.
 
 ## Watch list (dated)
 
@@ -87,10 +91,10 @@ Inference, not sourced: MLPS level 3 controls roughly correspond to ISO 27001 An
 
 ## Working rules
 
-- Scope per site in writing before any HQ policy cascade: designation status, local MSSP contract flow-down, log location.
+- Scope per site in writing before any group policy cascade: designation status, local MSSP contract flow-down, log location.
 - Do not cite a U item to a board or auditor as law; carry the flag into the register.
 - Local-language text governs; use local counsel for filings and keep templates ready for the 1h to 6h clocks (`load_skill incident-response-leadership`).
-- A central SIEM design needs three checks per country: cyber clock, log or data location, and personal-data transfer route.
+- A cross-border or central SIEM design needs three checks per country: cyber clock, log or data location, and personal-data transfer route.
 
 ## Pairs with
 

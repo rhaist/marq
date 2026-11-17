@@ -1,20 +1,20 @@
 ---
 name: middle-east-regs
-description: "Covers Middle East cyber and data-protection law for HQ security and GRC teams: Saudi Arabia (NCA ECC-2, OTCC-1, SDAIA PDPL), UAE (federal PDPL, Dubai DESC, DIFC, ADGM), Qatar (PDPPL, QFC), Bahrain, Oman, Kuwait, Israel and Turkey (Law 7545, KVKK), with scope triage, one clocks table, localisation and remote-SOC limits, OT/ICS angles and pending changes. Use when the user has plants or offices in the Gulf, Israel or Turkey, or asks about NCA ECC or OTCC, SDAIA PDPL, DIFC, ADGM, PDPPL, KVKK, Law 7545, or whether an EU SOC may monitor a Saudi site."
+description: "Covers Middle East cyber and data-protection law for security and GRC teams responsible for an entity in the region, at group HQ or locally: Saudi Arabia (NCA ECC-2, OTCC-1, SDAIA PDPL), UAE (federal PDPL, Dubai DESC, DIFC, ADGM), Qatar (PDPPL, QFC), Bahrain, Oman, Kuwait, Israel and Turkey (Law 7545, KVKK), with scope triage, one clocks table, localisation and remote-SOC limits, OT/ICS angles and pending changes. Use when the user has entities, sites or offices in the Gulf, Israel or Turkey, or asks about NCA ECC or OTCC, SDAIA PDPL, DIFC, ADGM, PDPPL, KVKK, Law 7545, or whether a SOC outside the Kingdom may monitor an in-scope Saudi entity."
 license: Apache-2.0
 metadata:
   verified: "2026-11-17"
 ---
 
-# Middle East cyber & privacy regulation (HQ oversight, NOT legal advice)
+# Middle East cyber & privacy regulation (practitioner orientation, NOT legal advice)
 
-Written for an EU/US HQ asking four questions about a plant or office in the region: does it reach us, which clock runs, what can leave the country, can our central SOC monitor it. It is not a local-practitioner guide. Status tags used below: **V** read in official text, **S** secondary or snippet-level source, **U** unverified. Anything tagged U is a lead to confirm with local counsel, not a fact. Dates checked 17 Nov 2026; this region moves fast.
+Written for security and GRC teams responsible for an entity in the region, whether at group HQ or the local entity itself, asking four questions: does it reach this entity, which clock runs, what can leave the country, can a SOC outside the country monitor it. Where a law's official text is in Arabic, Hebrew or Turkish, check the original: English versions and summaries are aids. DIFC, ADGM and QFC publish their law in English. Status tags used below: **V** read in official text, **S** secondary or snippet-level source, **U** unverified. Anything tagged U is a lead to confirm with local counsel, not a fact. Dates checked 17 Nov 2026; this region moves fast.
 
-## Does it reach my plant? (triage)
+## Does it reach this entity? (triage)
 
-1. **Saudi NCA controls bind by status.** ECC-2:2024 covers government entities and their affiliates (inside and outside the Kingdom) plus private entities owning, operating or hosting critical national infrastructure (CNI) (V). Other entities are only "strongly encouraged". A foreign-owned factory is not automatically in scope; it is reached through CNI status or customer flow-down (e.g. Aramco, government contracts). Get written applicability from the customer or NCA.
-2. **UAE is three layers.** Onshore federal law, Dubai (DESC), and the financial free zones DIFC and ADGM, each with its own data law. Locate each entity: a plant onshore, an HQ office in DIFC and a regional treasury in ADGM sit under different regimes.
-3. **Dubai cyber rules bind government and designated critical entities.** Law 15/2024 gives DESC oversight of government entities and "critical non-government entities" (S). A private Dubai plant is reached by designation or contract.
+1. **Saudi NCA controls bind by status.** ECC-2:2024 covers government entities and their affiliates (inside and outside the Kingdom) plus private entities owning, operating or hosting critical national infrastructure (CNI) (V). Other entities are only "strongly encouraged". A private entity outside CNI is not automatically in scope; it is reached through CNI status or customer flow-down (e.g. Aramco, government contracts). Get written applicability from the customer or NCA.
+2. **UAE is three layers.** Onshore federal law, Dubai (DESC), and the financial free zones DIFC and ADGM, each with its own data law. Locate each entity: an operating entity onshore, an office in DIFC and a treasury entity in ADGM sit under different regimes.
+3. **Dubai cyber rules bind government and designated critical entities.** Law 15/2024 gives DESC oversight of government entities and "critical non-government entities" (S). A private Dubai entity is reached by designation or contract.
 4. **Turkey designates by sector.** The Cybersecurity Board named 15 critical sectors on 5 May 2026, including **Manufacturing Industry** and **Energy** (V). Secondary regulations are still in preparation, so duties for those sectors are not yet defined.
 5. **Data-protection laws bind everyone processing personal data** in the country (HR, CRM, visitor, CCTV, badge data), whatever the sector.
 
@@ -52,16 +52,18 @@ Do not cite 72h as UAE federal law, and do not cite 72h for DIFC. Qatar's NCSA a
 
 ## Transfers, localisation and remote SOC
 
-- **Saudi, the sharpest constraint.** ECC-2 control 4-1-3-2: managed cyber monitoring or operations centres that use remote access must be **fully located in the Kingdom** for in-scope entities (V). A central EU/US SOC cannot be assumed to monitor an in-scope Saudi site; ask for a written exemption or stand up an in-Kingdom managed service.
+The rules below state what must stay in country or what safeguards a transfer needs; the practical consequence falls on any SOC, SIEM or central hosting outside it.
+
+- **Saudi, the sharpest constraint.** ECC-2 control 4-1-3-2: managed cyber monitoring or operations centres that use remote access must be **fully located in the Kingdom** for in-scope entities (V). A group SOC outside the Kingdom (for example in the EU or US) cannot be assumed to monitor an in-scope Saudi site; ask for a written exemption or stand up an in-Kingdom managed service.
 - **Saudi PDPL transfers** (Transfer Regulation v2.0, Aug 2024, V): SDAIA adequacy list reviewed every 4 years; safeguards are SCCs, BCRs or an accreditation certificate; intra-group "necessary central operations" are an exemption route (BCRs, SCCs or certified recipient); a transfer risk assessment is mandatory (Art. 7).
-- **Oman:** transfers allowed under the regulation's controls, "without prejudice to Cyber Defence Centre competences" (Art. 23), with the OMR 100,000 to 500,000 penalty ceiling. Treat every HQ data flow as in scope.
+- **Oman:** transfers allowed under the regulation's controls, "without prejudice to Cyber Defence Centre competences" (Art. 23), with the OMR 100,000 to 500,000 penalty ceiling. Treat every cross-border data flow, including group reporting, as in scope.
 - **UAE sector rules (S):** health data may not leave the UAE; payments data stays onshore.
 - **Turkey:** Law 7499 routes (adequacy, BCRs, Board standard contract).
 - Kuwait NCSC approval for offshore storage is headline-only (U). Qatar PDPPL Art. 15 transfers are U.
 
 ## OT / ICS
 
-- **Saudi OTCC-1:2022** is the OT extension of ECC: 4 domains, 23 subdomains, 47 main controls, 122 subcontrols (V). It applies to ICS in facilities "deemed critical" owned or operated by government or CNI organisations, **whether in the Kingdom or abroad**. Criticality (high/moderate/low) is set per facility in a separate Methodology and Mapping Annex (not read), so ask the customer which level your plant was assigned. An OT site in scope needs OTCC on top of ECC-2.
+- **Saudi OTCC-1:2022** is the OT extension of ECC: 4 domains, 23 subdomains, 47 main controls, 122 subcontrols (V). It applies to ICS in facilities "deemed critical" owned or operated by government or CNI organisations, **whether in the Kingdom or abroad**. Criticality (high/moderate/low) is set per facility in a separate Methodology and Mapping Annex (not read), so ask the customer which level your site was assigned. An OT site in scope needs OTCC on top of ECC-2.
 - **OTCC has no confirmed IEC 62443 mapping.** The text read never mentions 62443; an Annex crosswalk is U. An IEC 62443 programme gives partial coverage at best.
 - **Dubai:** the DESC ICS Standard targets government and semi-government critical-infrastructure operators (S). ISR applies to Dubai Government Entities; "ISR v3" has no official source.
 - **Turkey:** manufacturing and energy are designated critical sectors; wait for the secondary regulations, and meanwhile expect OT questions from customers.
@@ -69,25 +71,25 @@ Do not cite 72h as UAE federal law, and do not cite 72h for DIFC. Qatar's NCSA a
 
 ## Framework mapping (inference, not published crosswalks)
 
-The notes call these mappings inference, so treat them as planning aids. No crosswalk from ECC-2 to ISO 27001 or NIST CSF is confirmed in the sources, so any existing ISMS or CSF programme is a starting point, not evidence of compliance. OTCC extends ECC, so an IEC 62443 programme may cover part of it (no confirmed crosswalk). The Israeli bill may accept listed standards such as NIST SP 800-53 (a bill, not law). Qatar NIA is described as ISO 27001-aligned by a low-authority vendor summary (U). Kuwait's baseline is described as CIS or NIST CSF aligned by one vendor (U).
+National frameworks stand on their own terms: ECC-2 is the baseline for in-scope Saudi entities and OTCC extends it. Entities already on ISO 27001 or NIST CSF can reuse that work, and mappings work in both directions (national control sets can feed an ISO or CSF programme). The notes call these mappings inference, so treat them as planning aids. No crosswalk from ECC-2 to ISO 27001 or NIST CSF is confirmed in the sources, so any existing ISMS or CSF programme is a starting point, not evidence of compliance. OTCC extends ECC, so an IEC 62443 programme may cover part of it (no confirmed crosswalk). The Israeli bill may accept listed standards such as NIST SP 800-53 (a bill, not law). Qatar NIA is described as ISO 27001-aligned by a low-authority vendor summary (U). Kuwait's baseline is described as CIS or NIST CSF aligned by one vendor (U).
 
 ## Pending changes (as of 17 Nov 2026)
 
-| Item                                                 | Status                                                                                                                                                                                                                             |
-| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Saudi PDPL Implementing Regulation amendment (draft) | Consultation 6 Oct to 5 Nov 2026 (law-firm sources): store-in-Kingdom duty for controllers, wider registration, breach-reporting harm threshold reportedly removed. Adoption not found. Biggest HQ risk for central HR/CRM hosting |
-| Saudi NCNICC-1:2024 (non-CNI private organisations)  | Draft; only title and status confirmed. Directly relevant to foreign-owned plants                                                                                                                                                  |
-| UAE federal PDPL Executive Regulations               | Not confirmed issued. New AI and Data authority announced June 2026 (S)                                                                                                                                                            |
-| Israel National Cyber Defense Bill 5786-2026         | Passed first reading 8 Jun 2026 (S); survival across the Knesset election U                                                                                                                                                        |
-| Turkey Law 7545 sector regulations                   | Manufacturing and Energy rules in preparation (Presidency FAQ, Jul 2026)                                                                                                                                                           |
-| Kuwait NCSC Decision 2/2026                          | Reported; 18-month compliance window; unconfirmed against the Gazette                                                                                                                                                              |
+| Item                                                 | Status                                                                                                                                                                                                                                     |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Saudi PDPL Implementing Regulation amendment (draft) | Consultation 6 Oct to 5 Nov 2026 (law-firm sources): store-in-Kingdom duty for controllers, wider registration, breach-reporting harm threshold reportedly removed. Adoption not found. Biggest risk for HR/CRM hosted outside the Kingdom |
+| Saudi NCNICC-1:2024 (non-CNI private organisations)  | Draft; only title and status confirmed (scope unread). Watch it if the entity is private and outside CNI                                                                                                                                   |
+| UAE federal PDPL Executive Regulations               | Not confirmed issued. New AI and Data authority announced June 2026 (S)                                                                                                                                                                    |
+| Israel National Cyber Defense Bill 5786-2026         | Passed first reading 8 Jun 2026 (S); survival across the Knesset election U                                                                                                                                                                |
+| Turkey Law 7545 sector regulations                   | Manufacturing and Energy rules in preparation (Presidency FAQ, Jul 2026)                                                                                                                                                                   |
+| Kuwait NCSC Decision 2/2026                          | Reported; 18-month compliance window; unconfirmed against the Gazette                                                                                                                                                                      |
 
 ## Working rules
 
 - Get **written applicability** per site (customer letter, designation, regulator reply) before building to ECC-2, OTCC or a Turkish sector rule.
 - Keep a per-site map: legal entity, zone (onshore, DIFC, ADGM, QFC), data categories, whether any customer flow-down applies.
 - Build the incident path to the **shortest confirmed clock** per site, and treat table rows tagged U as "ask counsel", not as the clock.
-- Before any central SOC, MDR or SIEM onboarding of a Saudi site, check control 4-1-3-2.
+- Before any SOC, MDR or SIEM outside the Kingdom onboards a Saudi site, check control 4-1-3-2.
 - Do not cite Israel or Bahrain figures to a regulator or in a contract; the sources are weak.
 - Re-verify against primary text after each pending item above lands.
 

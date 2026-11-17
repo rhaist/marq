@@ -22,12 +22,12 @@ server. It works with any model and agent.
 "Footprint acme.com from public sources."                       → OSINT
 ```
 
-**The knowledge pack.** About 86 playbooks for practitioners at EU and US
-manufacturers with sites worldwide. They take you from a finding to the obligation it
-touches (IEC 62443, EU CRA, NIS2, ISO 27001, NIST, US sector rules, and the national
-cyber and privacy laws of APAC, the Middle East and Latin America) and on to the board
-report. Every skill records the date it was last checked. The pack is Apache-2.0, so it
-installs into any agent, including internal ones.
+**The knowledge pack.** About 86 playbooks for security and GRC practitioners in any
+sector and region. They take you from a finding to the obligation it touches (IEC 62443,
+EU CRA, NIS2, ISO 27001, NIST, US sector rules, and the national cyber and privacy laws
+of APAC, the Middle East and Latin America) and on to the board report. Every skill
+records the date it was last checked. The pack is Apache-2.0, so it installs into any
+agent, including internal ones.
 
 **The tool server (optional).** 24 passive OSINT tools (34 tools in all: domain,
 infrastructure, people, leaked secrets in public code). They query public third-party sources (DNS resolvers, WHOIS, certificate logs, Shodan/Censys, web archives, breach databases, social and code-hosting sites) and never scan, crawl or exploit a target's hosts. The only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks). Every OSINT-tool, file and findings call lands in an operator-attributed audit log you can hand to a client or regulator, and an OSINT tool won't run if its start record can't be written (fail-closed).
