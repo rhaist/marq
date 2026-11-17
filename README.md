@@ -4,9 +4,9 @@
 
 ### Current security expertise for your AI agent
 
-An open knowledge pack of security, GRC and OT/ICS playbooks that is re-checked
-against primary sources every 6–8 weeks, plus an optional passive-OSINT tool
-server. It works with whatever model and agent you use.
+An open knowledge pack of security, GRC and OT/ICS playbooks, re-checked
+against primary sources every 6 to 8 weeks, plus an optional passive-OSINT tool
+server. It works with any model and agent.
 
 [![CI](https://github.com/rhaist/marq/actions/workflows/ci.yml/badge.svg)](https://github.com/rhaist/marq/actions/workflows/ci.yml)
 
@@ -22,17 +22,17 @@ server. It works with whatever model and agent you use.
 ```
 
 **The knowledge pack.** About 83 playbooks for practitioners at EU and US
-manufacturers. They run from a finding to the obligation it touches (IEC 62443,
-EU CRA, NIS2, ISO 27001, NIST, US sector rules) to the board report. Every skill
-records the date it was last checked, and Apache-2.0 means it installs into any
+manufacturers. They take you from a finding to the obligation it touches (IEC 62443,
+EU CRA, NIS2, ISO 27001, NIST, US sector rules) and on to the board report. Every skill
+records the date it was last checked. The pack is Apache-2.0, so it installs into any
 agent, including internal ones.
 
-**The tool server (optional).** 19 **passive OSINT** tools (29 tools in all: domain,
-infrastructure, people, leaked secrets in public code). They query public third-party sources (DNS resolvers, WHOIS, certificate logs, Shodan/Censys, web archives, breach databases, social and code-hosting sites) and never scan, crawl or exploit a target's hosts — the only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks). Every OSINT-tool, file and findings call lands in an operator-attributed audit log you can hand to a client or regulator, and an OSINT tool won't run if its start record can't be written (fail-closed).
+**The tool server (optional).** 19 passive OSINT tools (29 tools in all: domain,
+infrastructure, people, leaked secrets in public code). They query public third-party sources (DNS resolvers, WHOIS, certificate logs, Shodan/Censys, web archives, breach databases, social and code-hosting sites) and never scan, crawl or exploit a target's hosts. The only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks). Every OSINT-tool, file and findings call lands in an operator-attributed audit log you can hand to a client or regulator, and an OSINT tool won't run if its start record can't be written (fail-closed).
 
 ## Start
 
-Pick your path — start simple, add a layer only when you need it:
+Pick a path. Start simple and add a layer only when you need it:
 
 | I want…                                      | Path            | Setup                       |
 | :------------------------------------------- | :-------------- | :-------------------------- |
@@ -41,7 +41,7 @@ Pick your path — start simple, add a layer only when you need it:
 | **…plus the 19-tool OSINT suite to _run_**   | full MCP server | build/pull the image        |
 | **…driven by a local model**                 | full + Pi       | image + Pi + llama.cpp      |
 
-### The skills pack — install into your agent (no server, no Docker)
+### The skills pack: install into your agent (no server, no Docker)
 
 The ~83 playbooks are a standard [Agent Skills](https://agentskills.io) pack under
 [`skills/`](skills/), so agents that read `SKILL.md` load them natively:
@@ -56,15 +56,15 @@ npx skills add rhaist/marq
 ```
 
 Each skill carries `metadata.verified`, the date of its last review sweep. The
-pack is re-verified against primary sources every 6–8 weeks; `marq skills --stale`
+pack is re-verified against primary sources every 6 to 8 weeks; `marq skills --stale`
 lists anything overdue.
 
-### Just the skills over MCP — for any MCP client (no Docker)
+### Just the skills over MCP, for any MCP client (no Docker)
 
-The lowest-friction way in: add the **skills library + advisory tools** to any MCP
+The lowest-friction way in: add the skills library and advisory tools to any MCP
 client and skip the OSINT tool suite entirely. `MARQ_SKILLS_ONLY=1` loads only
-the in-process knowledge tools (skills, findings, files) — no OSINT
-binaries, so it's a single static Go binary you run natively:
+the in-process knowledge tools (skills, findings, files) and no OSINT
+binaries, so it is a single static Go binary you run natively:
 
 ```bash
 go install github.com/rhaist/marq/cmd/marq@latest   # ~10 MB, skills embedded
@@ -82,7 +82,7 @@ breach-notification clock under GDPR and NIS2?"_ and the model loads the right
 playbook (current 2026 standards) and drafts the deliverable. Scripted
 end-to-end demo: [`scripts/demo-skills.sh`](scripts/demo-skills.sh).
 
-Prefer containers, or already pulled the image? The same mode runs there too — use
+Prefer containers, or already pulled the image? The same mode runs there too. Use
 the `marq-skills` entry in [`mcp.json.example`](mcp.json.example). Add the full tool
 suite below when you need to _run_ something, not just reason about it.
 
@@ -101,14 +101,14 @@ docker run --rm marq version
 docker run --rm marq tools
 ```
 
-No Docker Desktop needed — **OrbStack** (macOS) or **Podman / Colima** (Linux) run
+You do not need Docker Desktop. OrbStack (macOS) or Podman / Colima (Linux) run
 it just as well ([`docs/SETUP.md`](docs/SETUP.md)). Then drive it fully local (below)
 or point a frontier MCP client at it.
 
 ### Run it fully local
 
 Your own model, on your box: no cloud model, and your data stays local (OSINT
-lookups still query third-party sources) — the recommended setup when investigating people or a client's footprint. Drive marq from
+lookups still query third-party sources). This is the recommended setup when investigating people or a client's footprint. Drive marq from
 [Pi](https://pi.dev/) over [llama.cpp](https://github.com/ggml-org/llama.cpp):
 
 ```bash
@@ -134,9 +134,9 @@ mkdir -p ~/.pi/agent && marq prompt system > ~/.pi/agent/SYSTEM.md
 # then run `pi`
 ```
 
-Then just talk to it: _"Footprint example.com: subdomains, emails, exposed hosts,"_ or
-_"Load the nis2-dora skill — what's our breach clock?"_ Full local walkthrough
-(Pi provider, skill, tuning) → [`docs/SETUP.md`](docs/SETUP.md#4-run-with-a-local-model-pi--the-marq-skill).
+Then talk to it: _"Footprint example.com: subdomains, emails, exposed hosts,"_ or
+_"Load the nis2-dora skill: what's our breach clock?"_ The full local walkthrough
+(Pi provider, skill, tuning) is in [`docs/SETUP.md`](docs/SETUP.md#4-run-with-a-local-model-pi--the-marq-skill).
 
 ### Or fall back to a frontier model
 
@@ -149,41 +149,41 @@ claude mcp add marq -- docker run --rm -i \
   -v marq-audit:/var/log/marq -v marq-work:/work -e MARQ_OPERATOR="$USER" marq
 ```
 
-Any MCP client works (Codex, Claude Desktop) → [`docs/CLIENTS.md`](docs/CLIENTS.md).
-(No keys or config required; optional
-API keys in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-sources).)
+Any MCP client works (Codex, Claude Desktop); see [`docs/CLIENTS.md`](docs/CLIENTS.md).
+No keys or config are required; optional
+API keys are listed in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-sources).
 
 > **Passive and purpose-bound.** marq queries public sources only and audit-logs
-> every OSINT-tool, file and findings call; people OSINT is personal-data processing, so record a purpose with
-> `set_engagement` — [`docs/SECURITY.md`](docs/SECURITY.md).
+> every OSINT-tool, file and findings call. People OSINT is personal-data processing, so record a purpose with
+> `set_engagement`. See [`docs/SECURITY.md`](docs/SECURITY.md).
 
 ---
 
 ## What you get
 
-- **Execution** — 19 wrapped passive-OSINT tools (29 tools in all: domain/infra footprint, people,
-  leaked secrets in public code), audit-logged; file tools and `exif_metadata` sandboxed to `/work` and `/tmp`; findings render
-  to `findings.md` / `.csv` (with optional CVSS + CWE).
-- **Knowledge** — ~83 `load_skill` playbooks across 13 domains, web-researched to
-  current (2026) standards, telling the model _how_ to use the tools and _what_ to
-  do where there's no tool: malware, threat-intel, sec-ops, architecture,
-  GRC, standards & EU/US regulation, CISO, purple-team, resilience, human factors,
-  DevSecOps/privacy. Run these standalone with `MARQ_SKILLS_ONLY=1` — no tool
-  suite, no OSINT binaries.
-- **Auditable by design** — every external-tool call funnels through one choke
+- **Execution:** 19 wrapped passive-OSINT tools (29 tools in all: domain/infra footprint, people,
+  leaked secrets in public code), audit-logged. File tools and `exif_metadata` are sandboxed to `/work` and `/tmp`. Findings render
+  to `findings.md` / `.csv` (with optional CVSS and CWE).
+- **Knowledge:** ~83 `load_skill` playbooks across 13 domains, web-researched to
+  current (2026) standards. They tell the model how to use the tools and what to
+  do where there is no tool: malware, threat-intel, sec-ops, architecture,
+  GRC, standards and EU/US regulation, CISO, purple-team, resilience, human factors,
+  DevSecOps/privacy. Run them standalone with `MARQ_SKILLS_ONLY=1`, with no tool
+  suite and no OSINT binaries.
+- **Audit:** every external-tool call funnels through one choke
   point: an append-only, `fsync`'d audit log, a timeout, and an output cap. File
   access is sandboxed to `/work`+`/tmp`, and the image runs non-root (the
-  recommended run args also drop all Linux capabilities + `no-new-privileges`).
+  recommended run args also drop all Linux capabilities and set `no-new-privileges`).
 
 <details>
-<summary><b>Full tool suite</b> — 19 passive OSINT tools (click to expand)</summary>
+<summary><b>Full tool suite</b>: 19 passive OSINT tools (click to expand)</summary>
 
 | Category                              | Tools                                                                                                           |
 | :------------------------------------ | :-------------------------------------------------------------------------------------------------------------- |
 | **Domain / infrastructure**           | `theharvester` · `spiderfoot` · `subfinder` · `dnsx` · `dns_lookup` · `whois_lookup` · `asnmap` · `cdncheck` · `gau_urls` |
 | **Exposure lookups**                  | `shodan_host` · `shodan_search` · `censys_view`                                                                 |
 | **Leaked secrets / metadata**         | `trufflehog` · `exif_metadata`                                                                                  |
-| **OSINT — people**                    | `sherlock` · `maigret_username` · `email_accounts` · `h8mail_breach` · `phoneinfoga`                            |
+| **OSINT, people**                     | `sherlock` · `maigret_username` · `email_accounts` · `h8mail_breach` · `phoneinfoga`                            |
 | **Files** (sandboxed `/work`, `/tmp`) | `list_dir` · `read_file` · `write_file`                                                                         |
 | **Findings & jobs**                   | `report_finding` · `render_report` · `list_jobs` · `job_status`                                                 |
 | **Session & knowledge**               | `server_info` · `set_engagement` · `load_skill`                                                                 |
@@ -191,7 +191,7 @@ API keys in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-sources).)
 </details>
 
 <details>
-<summary><b>How it works</b> — one registry, two front-ends (click to expand)</summary>
+<summary><b>How it works</b>: one registry, two front-ends (click to expand)</summary>
 
 ```
 MCP client  ──stdio JSON-RPC──▶  marq serve  ┐
@@ -209,7 +209,7 @@ terminal agent (Pi) ──bash──▶  pi/marq shim ─┤   both hit the same
            load_skill ──▶ skills library (markdown, ~83 playbooks / 13 domains)
 ```
 
-Every tool funnels through `internal/runner/runner.go::Run` — the single
+Every tool funnels through `internal/runner/runner.go::Run`, the single
 point for audit logging, timeouts, and output truncation.
 
 </details>
@@ -220,15 +220,15 @@ point for audit logging, timeouts, and output truncation.
 
 | Doc                                    | What's in it                                                      |
 | :------------------------------------- | :---------------------------------------------------------------- |
-| [`docs/SETUP.md`](docs/SETUP.md)       | Per-OS install — skills-only (no Docker), full suite, local model |
-| [`docs/CLIENTS.md`](docs/CLIENTS.md)   | Pick a client/model — Claude Code, Codex, Pi + llama.cpp          |
+| [`docs/SETUP.md`](docs/SETUP.md)       | Per-OS install: skills-only (no Docker), full suite, local model |
+| [`docs/CLIENTS.md`](docs/CLIENTS.md)   | Pick a client/model: Claude Code, Codex, Pi + llama.cpp           |
 | [`docs/USAGE.md`](docs/USAGE.md)       | Every tool, env vars, API keys, reading the audit log             |
 | [`docs/SECURITY.md`](docs/SECURITY.md) | Legal/ethical baseline, the guardrail model, hardening            |
 
 ## License
 
-**GNU AGPLv3** — see [`LICENSE`](LICENSE). © 2026 marq contributors. Free software;
-run a modified version as a network service and you must offer users its source.
-The skills pack under [`skills/`](skills/) is **Apache-2.0** ([`skills/LICENSE`](skills/LICENSE)),
+GNU AGPLv3, see [`LICENSE`](LICENSE). © 2026 marq contributors. This is free software:
+if you run a modified version as a network service, you must offer users its source.
+The skills pack under [`skills/`](skills/) is Apache-2.0 ([`skills/LICENSE`](skills/LICENSE)),
 so you can install and adapt the playbooks in any agent, including internal ones.
-For lawful OSINT, security research and education, **no warranty** — use responsibly.
+marq is for lawful OSINT, security research and education. There is no warranty, so use it responsibly.

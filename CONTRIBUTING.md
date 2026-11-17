@@ -1,14 +1,14 @@
 # Contributing to marq
 
-Thanks for your interest in improving marq. It's a Kali-based cyber assistant —
-19 wrapped passive-OSINT tools (29 tools in all) plus an embedded skills library — exposed from a single Go
+Thanks for your interest in improving marq. It is a Kali-based cyber assistant:
+19 wrapped passive-OSINT tools (29 tools in all) plus an embedded skills library, exposed from a single Go
 binary over MCP (`marq serve`) and direct invocation (`marq run`). This guide
 covers how to build it, the quality gates, and how to add a tool or a skill.
 
 > **Passive and attributable is the contract.** marq's tools query public sources
-> only and never scan, crawl or exploit a target's hosts (only ordinary DNS resolution can reach its nameservers); its safety model is _attribution_: every OSINT-tool, file and findings call is audit-logged, and an OSINT tool funnels through one audited choke point
+> only and never scan, crawl or exploit a target's hosts (only ordinary DNS resolution can reach its nameservers). Its safety model is _attribution_: every OSINT-tool, file and findings call is audit-logged, and an OSINT tool funnels through one audited choke point
 > (`runner.Run`) that fails closed if it can't log. Any contribution must preserve
-> that — see [Design invariants](#design-invariants)
+> that. See [Design invariants](#design-invariants)
 > below and [`docs/SECURITY.md`](docs/SECURITY.md). Contributions that add
 > active scanning, exploitation, evasion, anti-forensics, or that bypass the audit
 > log will not be merged.
@@ -29,7 +29,7 @@ docker build -t marq .
 
 ## Quality gates
 
-Run these before opening a PR — CI enforces the first two on every push/PR, and the image e2e when image paths change:
+Run these before opening a PR. CI enforces the first two on every push/PR, and the image e2e when image paths change:
 
 | Gate              | Command                                             | What it checks                                                                                                                                                   |
 | ----------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -42,15 +42,15 @@ Run these before opening a PR — CI enforces the first two on every push/PR, an
 
 ## Design invariants
 
-These are load-bearing — breaking them silently defeats marq's safety model:
+These are load-bearing, and breaking them silently defeats marq's safety model:
 
 - **Never call `os/exec` directly.** Every exec tool funnels through
   `internal/runner/runner.go::Run` (or `RunBackground`). That is the single choke
   point for audit logging, timeout, and output truncation.
 - **No interactive tools.** The transport is synchronous, one-shot, stateless,
-  no TTY. Always pass non-interactive flags (`--batch`, `-x "...; exit"`, etc.) —
-  anything that prompts will hang until timeout.
-- **No file upload.** The model passes strings only. File inputs/outputs go
+  with no TTY. Always pass non-interactive flags (`--batch`, `-x "...; exit"`, etc.),
+  because anything that prompts will hang until timeout.
+- **No file upload.** The model passes strings only. File inputs and outputs go
   through the `/work` mount and the `files` tools, which are sandboxed to
   `/work`, `/tmp` and `MARQ_WORK_DIR` (as is `exif_metadata`).
 - **Long-running tools go to the background** (`Invocation.Background = true`),
@@ -64,9 +64,9 @@ These are load-bearing — breaking them silently defeats marq's safety model:
    If it isn't packaged, install it in the Go-built block of the `Dockerfile`.
 2. It must work on first run: the image has no warm-up step.
 3. Add the `Tool` to the relevant `internal/registry/*.go` (osint, people, files,
-   extras, …). `Tool.Desc` is the model's only guidance
-   — make it informative (usage, defaults, API-key needs, caveats).
-4. Set `Invocation.Target` to the lookup target so it's audited. The tool must
+   extras, …). `Tool.Desc` is the model's only guidance, so make it informative
+   (usage, defaults, API-key needs, caveats).
+4. Set `Invocation.Target` to the lookup target so the call is audited. The tool must
    query public third-party sources only, never the target's own hosts.
 5. Document it in [`docs/USAGE.md`](docs/USAGE.md).
 
@@ -74,7 +74,7 @@ These are load-bearing — breaking them silently defeats marq's safety model:
 
 Create `skills/<category>/<name>/SKILL.md` with `name` (equal to the directory
 name), `description` and `metadata.verified` (the date you checked it) in its
-frontmatter — see the [Agent Skills spec](https://agentskills.io/specification);
+frontmatter (see the [Agent Skills spec](https://agentskills.io/specification));
 `go test ./internal/skills/` enforces it. A new category also needs adding to
 `skills` in `skills/.claude-plugin/plugin.json`. The pack is embedded in the
 binary (`load_skill`, `marq://skills/<name>`) and installs natively via the
