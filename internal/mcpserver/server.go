@@ -6,20 +6,13 @@ package mcpserver
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/rand"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/rhaist/marq/internal/audit"
 	"github.com/rhaist/marq/internal/config"
 	"github.com/rhaist/marq/internal/registry"
-	"github.com/rhaist/marq/internal/scope"
 	"github.com/rhaist/marq/internal/skills"
 )
 
@@ -46,37 +39,30 @@ func New() *mcp.Server {
 // server_info first, then load_skill the right playbook. Mirrors pi/SKILL.md's
 // role for the Pi flow.
 func instructions() string {
-	return "marq is a universal cyber assistant: ~80 security tools plus a skills " +
-		"library of expert playbooks across 14 domains (offensive, malware, " +
-		"threat-intel, sec-ops, architecture, GRC, standards & regulation, CISO, " +
-		"resilience, human factors, DevSecOps/privacy).\n\n" +
+	return "marq is a passive-OSINT and cyber-knowledge assistant: OSINT tools that query " +
+		"public third-party sources only (DNS, WHOIS, certificate logs, Shodan/Censys, web " +
+		"archives, breach databases, social sites) plus a skills library of expert playbooks " +
+		"(threat-intel, malware, sec-ops, architecture, GRC, standards & regulation, CISO, " +
+		"resilience, human factors, DevSecOps/privacy). It has no scanners or exploits and " +
+		"never sends probes to a target's own infrastructure.\n\n" +
 		"How to work:\n" +
-		"1. Call the `server_info` tool first — it reports scope and the domains.\n" +
+		"1. Call the `server_info` tool first, and record the investigation's purpose with " +
+		"`set_engagement` — every call is audit-logged under it.\n" +
 		"2. Load the playbook for the task with the `load_skill` tool — including " +
 		"advisory, standards and regulation questions: load the skill first, don't " +
 		"answer those from memory. (Call it with no arguments to list every skill, " +
-		"then load the relevant one by name.) The skills carry current-standards " +
-		"detail and the right tool order.\n" +
+		"then load the relevant one by name.)\n" +
 		"3. Record results with `report_finding`; render the deliverable with " +
-		"`render_report`. Long scans run in the background — poll with `list_jobs` / " +
+		"`render_report`. Long lookups run in the background — poll with `list_jobs` / " +
 		"`job_status`.\n\n" +
 		"Work efficiently (matters most for smaller models):\n" +
-		"- Prefer the dedicated tool over `run_shell` — check `marq tools` and use " +
-		"the wrapper if one exists (it's scoped, structured and audited). Use " +
-		"`exec` (allowlisted binaries, no shell) for options or tools a wrapper doesn't cover, " +
-		"and `run_shell` only when it's enabled and nothing else fits.\n" +
 		"- When you have what you need, stop calling tools and give a concise final " +
 		"answer — lead with the key facts/numbers, then the supporting detail.\n" +
-		"- Report only what a tool actually returned this session — never open ports, " +
-		"hosts, subdomains or findings from prior knowledge (even for well-known " +
-		"targets). No tool output means no finding; run the tool first.\n\n" +
-		"Advisory and knowledge work is unrestricted. Active testing (scanning, " +
-		"exploitation, credential attacks) is authorized-only: run active tools only " +
-		"against targets inside the recorded scope, and refuse — don't call the tool — " +
-		"for anything outside it, even when a request tacks an extra target onto an " +
-		"in-scope one. marq also enforces this: out-of-scope active calls are refused, and " +
-		"widening scope asks the operator when the client supports it — otherwise ask them yourself first. Every call is audit-logged. (Scope handling is spelled out in " +
-		"the methodology below.)\n\n" +
+		"- Report only what a tool actually returned this session — never hosts, " +
+		"subdomains, accounts or findings from prior knowledge (even for well-known " +
+		"targets). No tool output means no finding; run the tool first.\n" +
+		"- People OSINT (usernames, emails, phone numbers) is personal-data processing: " +
+		"stick to the recorded purpose and collect only what it needs.\n\n" +
 		"--- methodology ---\n\n" + registry.Methodology
 }
 
@@ -94,98 +80,10 @@ func addTool(s *mcp.Server, tool registry.Tool) {
 				return errorResult(fmt.Sprintf("invalid arguments: %v", err)), nil
 			}
 		}
-		if res := confirmScope(req, tool, args); res != nil {
-			return res, nil
-		}
 		out := tool.Call(args)
 		return textResult(out), nil
 	}
 	s.AddTool(mcpTool, handler)
-}
-
-// confirmScope makes widening scope a human decision on clients that support
-// elicitation: an out-of-scope active call, or a set_engagement that adds
-// targets, asks the operator first. It uses the multi-round-trip pattern
-// (SEP-2322): the first pass returns the question as InputRequests, the client
-// retries with the answer, and the SDK bridges legacy clients via Elicit.
-// Accepting widens scope (audit-logged) and the call proceeds; declining returns
-// a refusal. Without elicitation support it returns nil, and registry.Call's own
-// gate refuses out-of-scope calls as on the `marq run` path.
-func confirmScope(req *mcp.CallToolRequest, tool registry.Tool, args map[string]any) *mcp.CallToolResult {
-	if caps := req.ClientCapabilities(); caps == nil || caps.Elicitation == nil {
-		return nil
-	}
-	var added []string
-	var question string
-	if tool.Name == "set_engagement" {
-		_, old := config.Attribution()
-		newNote, _ := args["scope"].(string)
-		if added = scope.Added(old, newNote); len(added) == 0 {
-			return nil
-		}
-		question = fmt.Sprintf("The agent wants to set the engagement scope to %q, which authorizes %s. Confirm?",
-			newNote, strings.Join(added, ", "))
-	} else {
-		if added = tool.ScopeGap(args); len(added) == 0 {
-			return nil
-		}
-		question = fmt.Sprintf("%s wants to touch %s, which is outside the engagement scope. Authorize and add to scope?",
-			tool.Name, strings.Join(added, ", "))
-	}
-	// The answer only counts on the retry of the question we asked: the state is
-	// an HMAC over the tool and the exact targets, so an answer can't be
-	// pre-supplied or carried over to a retry with different targets.
-	state := scopeState(tool.Name, added)
-	answer, answered := req.Params.InputResponses[scopeInput].(*mcp.ElicitResult)
-	if !answered || !hmac.Equal([]byte(req.Params.RequestState), []byte(state)) {
-		return &mcp.CallToolResult{RequestState: state, InputRequests: mcp.InputRequestMap{scopeInput: &mcp.ElicitParams{
-			Message: "marq: " + question,
-			RequestedSchema: map[string]any{
-				"type": "object",
-				"properties": map[string]any{
-					"approve": map[string]any{"type": "boolean", "title": "Authorize these targets for this engagement"},
-				},
-				"required": []string{"approve"},
-			},
-		}}}
-	}
-	approved := answer.Action == "accept" && answer.Content["approve"] == true
-	id, _ := audit.LogStart("scope.confirm", strings.Join(added, ", "),
-		[]string{"tool=" + tool.Name, "action=" + answer.Action, fmt.Sprintf("approved=%t", approved)})
-	code := 0
-	if !approved {
-		code = 3
-	}
-	audit.LogEnd(id, "scope.confirm", &code, 0, false, "")
-	if !approved {
-		return textResult(fmt.Sprintf("refused: the operator did not authorize %s. Don't retry or work around "+
-			"it; continue within the current scope or ask the operator.", strings.Join(added, ", ")))
-	}
-	if tool.Name != "set_engagement" {
-		if err := config.WidenScope(added...); err != nil {
-			return textResult("refused: could not persist the widened scope: " + err.Error())
-		}
-	}
-	return nil
-}
-
-// scopeInput is the InputRequests key for the scope confirmation.
-const scopeInput = "scope_confirmation"
-
-// stateKey signs scope-confirmation request state; per process, so a state is
-// only valid against the server that issued it.
-var stateKey = func() []byte {
-	k := make([]byte, 32)
-	if _, err := rand.Read(k); err != nil {
-		panic(err)
-	}
-	return k
-}()
-
-func scopeState(tool string, targets []string) string {
-	m := hmac.New(sha256.New, stateKey)
-	m.Write([]byte(tool + "\x00" + strings.Join(targets, ",")))
-	return hex.EncodeToString(m.Sum(nil))
 }
 
 func addResources(s *mcp.Server) {
@@ -193,7 +91,7 @@ func addResources(s *mcp.Server) {
 		&mcp.Resource{
 			URI:         "marq://authorization",
 			Name:        "authorization",
-			Description: "Rules-of-engagement / authorization notice for this session. Surface to the operator before running tools.",
+			Description: "Usage notice for this session (passive OSINT only, operator, purpose, audit log). Surface to the operator before running tools.",
 			MIMEType:    "text/plain",
 		},
 		func(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
@@ -204,7 +102,7 @@ func addResources(s *mcp.Server) {
 		&mcp.Resource{
 			URI:         "marq://methodology",
 			Name:        "methodology",
-			Description: "Cross-domain methodology + the offensive engagement phases (recon -> enumerate -> test -> exploit -> report). Read before driving the tools.",
+			Description: "Cross-domain methodology + the passive OSINT workflow. Read before driving the tools.",
 			MIMEType:    "text/markdown",
 		},
 		func(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
@@ -221,7 +119,7 @@ func addSkillResources(s *mcp.Server) {
 		&mcp.Resource{
 			URI:         "marq://skills",
 			Name:        "skills",
-			Description: "Index of expert playbooks (offensive, malware, threat-intel, governance/standards/CISO). Load a body with the load_skill tool or read marq://skills/<name>.",
+			Description: "Index of expert playbooks (OSINT, threat-intel, malware, governance/standards/CISO). Load a body with the load_skill tool or read marq://skills/<name>.",
 			MIMEType:    "text/markdown",
 		},
 		func(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {

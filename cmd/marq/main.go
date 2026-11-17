@@ -175,9 +175,6 @@ func listTools(argv []string) {
 	}
 	for _, t := range registry.All() {
 		desc, _, _ := strings.Cut(t.Desc, "\n")
-		if t.Active {
-			desc += "  [active: in-scope only]"
-		}
 		fmt.Printf("%-24s %s\n", t.Name, desc)
 	}
 }

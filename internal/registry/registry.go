@@ -8,7 +8,6 @@ package registry
 import (
 	"cmp"
 	"fmt"
-	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -16,7 +15,6 @@ import (
 	"github.com/rhaist/marq/internal/audit"
 	"github.com/rhaist/marq/internal/config"
 	"github.com/rhaist/marq/internal/runner"
-	"github.com/rhaist/marq/internal/scope"
 )
 
 // ParamType is the JSON-schema scalar type of a tool parameter.
@@ -45,7 +43,6 @@ type Invocation struct {
 	Timeout    int // seconds; 0 = default
 	Background bool
 	Refuse     string // non-empty: don't run; Call returns this (audited) instead
-	Passive    bool   // an Active tool's call that touches no target (offline analysis): skip the scope gate
 }
 
 // Tool is one capability. Exactly one of Build (exec) or Handler (in-process)
@@ -56,12 +53,6 @@ type Tool struct {
 	Params  []Param
 	Build   func(a Args) Invocation
 	Handler func(a Args) string
-	// Active marks an active-testing tool (scanning, exploitation, credential
-	// attacks, on-target probing) that must run only against authorized in-scope
-	// targets. Surfaced at the point of action (catalog + Usage) so the scope
-	// rule is reinforced where the model decides — not just at server_info.
-	// Passive OSINT, offline cracking, and static analysis stay false.
-	Active bool
 }
 
 // Args holds resolved argument values, already defaulted and coerced to Go types.
@@ -227,9 +218,6 @@ func (t Tool) Usage() string {
 		}
 	}
 	fmt.Fprintf(&b, "call: %s", call.String())
-	if t.Active {
-		b.WriteString("\n[active testing] run only against authorized, in-scope targets — confirm scope with server_info first; every call is audit-logged.")
-	}
 	return b.String()
 }
 
@@ -270,7 +258,7 @@ func (t Tool) Call(raw map[string]any) string {
 		return warn + t.Handler(args)
 	}
 	inv := t.Build(args)
-	if msg := t.refusal(inv); msg != "" {
+	if msg := inv.Refuse; msg != "" {
 		target := cmp.Or(inv.Target, "(unspecified)")
 		id, _ := audit.LogStart(t.Name, target, inv.Argv)
 		code := 3
@@ -292,67 +280,6 @@ func (t Tool) Call(raw map[string]any) string {
 	return warn + res.Render()
 }
 
-// ScopeGap returns the targets an active exec tool would touch that the
-// recorded scope doesn't authorize (all of them when no scope is set). Nil for
-// passive tools, handlers, and calls whose arguments don't resolve.
-func (t Tool) ScopeGap(raw map[string]any) []string {
-	if !t.Active || t.Build == nil || len(t.missingRequired(raw)) > 0 {
-		return nil
-	}
-	inv := t.Build(Resolve(t.Params, raw))
-	if inv.Refuse != "" || inv.Passive {
-		return nil
-	}
-	_, note := config.Attribution()
-	return scope.Parse(note).OutOfScope(scopeTexts(inv)...)
-}
-
-// scopeTexts is everything a call could target: argv, stdin, the declared target,
-// and the contents of target-list files (-iL, -l, …; any existing file for nxc,
-// which takes target files positionally).
-func scopeTexts(inv Invocation) []string {
-	texts := append(slices.Clone(inv.Argv), inv.Stdin, inv.Target)
-	if len(inv.Argv) == 0 {
-		return texts
-	}
-	nxc := slices.Contains([]string{"netexec", "nxc"}, filepath.Base(inv.Argv[0]))
-	for i, a := range inv.Argv[1:] {
-		if slices.Contains(scope.ListFlags, a) && i+2 < len(inv.Argv) {
-			a = inv.Argv[i+2]
-		} else if !nxc {
-			continue
-		}
-		if ts, err := scope.FileTargets(a); err == nil {
-			texts = append(texts, strings.Join(ts, " "))
-		}
-	}
-	return texts
-}
-
-// refusal is the pre-run gate: a Build-level refusal, or for active tools a
-// missing scope or out-of-scope targets. Every exec funnels here before runner,
-// so the scope rule holds on both the MCP and `marq run` paths.
-func (t Tool) refusal(inv Invocation) string {
-	if inv.Refuse != "" {
-		return inv.Refuse
-	}
-	if !t.Active || inv.Passive {
-		return ""
-	}
-	_, note := config.Attribution()
-	set := scope.Parse(note)
-	if set.Empty() {
-		return "no engagement scope recorded, so active tools can't run. Ask the operator for the " +
-			"authorized targets (wildcards like *.acme.com and CIDRs work) and record them with set_engagement."
-	}
-	if oos := set.OutOfScope(scopeTexts(inv)...); len(oos) > 0 {
-		return fmt.Sprintf("%s is outside the recorded engagement scope (%q). Don't work around this: "+
-			"ask the operator whether it is authorized; if they confirm, record the widened scope with "+
-			"set_engagement, then retry.", strings.Join(oos, ", "), note)
-	}
-	return ""
-}
-
 func backgroundMsg(tool, target, jobDir string) string {
 	return fmt.Sprintf(
 		"%s launched in the background for %s.\n"+
@@ -364,45 +291,33 @@ func backgroundMsg(tool, target, jobDir string) string {
 	)
 }
 
-// serverInfoTool reports the authorization banner + configured scope. Lives in
-// the registry so both front-ends expose it (the model is told to call it first
-// to confirm scope); previously it was an MCP-only tool, so the agent/TUI loop
-// errored on it.
+// serverInfoTool reports the usage notice (operator, purpose, audit log). Lives
+// in the registry so both front-ends expose it; the model is told to call it first.
 func serverInfoTool() Tool {
 	return Tool{
 		Name: "server_info",
-		Desc: "Return the scope/operator metadata and the domains marq covers (offensive, " +
-			"malware, threat-intel, governance). Call this first; before any active testing " +
-			"(scanning/exploitation) confirm the targets are in the authorized scope it reports. " +
-			"If no scope is set, record it with set_engagement.",
-		Handler: func(a Args) string {
-			raw := "disabled"
-			if config.C.AllowRawShell {
-				raw = "enabled"
-			}
-			return config.C.Banner() + "\n  raw shell  : " + raw
-		},
+		Desc: "Return the operator/purpose metadata and what marq covers (passive OSINT from public " +
+			"third-party sources, plus the cyber skills library). Call this first; if no purpose is " +
+			"recorded, record it with set_engagement.",
+		Handler: func(a Args) string { return config.C.Banner() },
 	}
 }
 
-// setEngagementTool records the engagement label and authorized scope for the
-// session. Operator stays the host/env-set audit anchor and is not settable here.
+// setEngagementTool records the investigation label/purpose for the session's
+// audit trail. Operator stays the host/env-set audit anchor and is not settable here.
 func setEngagementTool() Tool {
 	return Tool{
 		Name: "set_engagement",
-		Desc: "Record the engagement label and the authorized testing scope for this session, from the " +
-			"operator's written authorization. Persists under the working dir so every subsequent tool " +
-			"call — across processes — is audit-logged under it; set it before any active testing. " +
-			"Operator identity is fixed by the host (MARQ_OPERATOR) and is not settable here. `scope` " +
-			"should name the exact in-scope targets, e.g. '*.acme.com, 203.0.113.0/24 — per SOW'.",
+		Desc: "Record the investigation label and its purpose, e.g. 'acme-footprint-2026-11 — " +
+			"pre-acquisition exposure review'. Persists under the working dir so every subsequent tool " +
+			"call — across processes — is audit-logged under it. People OSINT is personal-data " +
+			"processing: name the purpose. Operator identity is fixed by the host (MARQ_OPERATOR).",
 		Params: []Param{
-			{Name: "scope", Type: StringParam, Desc: "authorized in-scope targets per the SOW", Required: true},
-			{Name: "engagement", Type: StringParam, Desc: "engagement label, e.g. acme-webapp-2026-06", Default: ""},
+			{Name: "engagement", Type: StringParam, Desc: "investigation label and purpose", Required: true},
 		},
 		Handler: func(a Args) string {
-			id, _ := audit.LogStart("set_engagement", a.S("scope"),
-				[]string{"engagement=" + a.S("engagement"), "scope=" + a.S("scope")})
-			err := config.SetEngagement(a.S("engagement"), a.S("scope"))
+			id, _ := audit.LogStart("set_engagement", a.S("engagement"), []string{"engagement=" + a.S("engagement")})
+			err := config.SetEngagement(a.S("engagement"))
 			ec, msg := 0, ""
 			if err != nil {
 				ec, msg = 1, err.Error()
@@ -416,17 +331,12 @@ func setEngagementTool() Tool {
 	}
 }
 
-// All returns every registered tool. shell is included only when raw shell is
-// enabled (mirrors the Python conditional registration).
+// All returns every registered tool.
 func All() []Tool {
 	tools := slices.Concat(
 		[]Tool{serverInfoTool(), setEngagementTool()},
-		recon(), osint(), people(), web(),
-		exploit(), creds(), internal(), malware(), execTools(), fileTools(), reportTools(), knowledgeTools(),
+		recon(), osint(), people(), fileTools(), reportTools(), knowledgeTools(),
 	)
-	if config.C.AllowRawShell {
-		tools = append(tools, shell()...)
-	}
 	if config.C.SkillsOnly {
 		// Knowledge-only mode: keep the in-process tools (skills, findings, files,
 		// info), drop every exec tool so the server needs no Kali binaries. Exec

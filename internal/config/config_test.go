@@ -1,47 +1,42 @@
 package config
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
+)
 
-// TestLoadEnv verifies env vars drive the per-engagement fields and that an
-// unset scope falls back to the placeholder shown in the banner.
+// TestLoadEnv verifies env vars drive the per-engagement fields.
 func TestLoadEnv(t *testing.T) {
 	t.Setenv("MARQ_OPERATOR", "alice")
 	t.Setenv("MARQ_ENGAGEMENT", "acme-2026")
-	t.Setenv("MARQ_SCOPE", "*.example.com")
+	t.Setenv("MARQ_WORK_DIR", t.TempDir()) // isolate from any real /work/.marq-context
 
 	c := Load()
-	if c.Operator != "alice" || c.Engagement != "acme-2026" || c.ScopeNote != "*.example.com" {
+	if c.Operator != "alice" || c.Engagement != "acme-2026" || c.Banner() == "" {
 		t.Fatalf("env not applied: %+v", c)
-	}
-
-	t.Setenv("MARQ_SCOPE", "")
-	t.Setenv("MARQ_WORK_DIR", t.TempDir()) // isolate from any real /work/.marq-context
-	if got := Load(); got.Banner() == "" || got.ScopeNote != "" {
-		t.Fatalf("empty scope should stay empty (banner adds the placeholder): %+v", got)
 	}
 }
 
 // SetEngagement must update the live config and persist so a fresh Load (the
-// per-call `marq run` path) reads the same engagement/scope back.
+// per-call `marq run` path) reads the same engagement back — including from a
+// context file written by the older scope-gated build.
 func TestSetEngagementRoundTrip(t *testing.T) {
 	dir := t.TempDir()
 	C = Config{WorkDir: dir, Operator: "alice", Engagement: "unspecified"}
 
-	if err := SetEngagement("acme-2026", "*.acme.com"); err != nil {
+	if err := SetEngagement("acme-2026"); err != nil {
 		t.Fatalf("SetEngagement: %v", err)
 	}
-	if C.Engagement != "acme-2026" || C.ScopeNote != "*.acme.com" {
-		t.Fatalf("live config not updated: %+v", C)
-	}
-	if e, s := readContext(dir); e != "acme-2026" || s != "*.acme.com" {
-		t.Fatalf("readContext = %q,%q; want acme-2026,*.acme.com", e, s)
+	if C.Engagement != "acme-2026" || readContext(dir) != "acme-2026" {
+		t.Fatalf("not persisted: live=%q file=%q", C.Engagement, readContext(dir))
 	}
 
-	// Empty engagement keeps the prior label; scope still updates.
-	if err := SetEngagement("", "10.0.0.0/8"); err != nil {
-		t.Fatalf("SetEngagement: %v", err)
+	legacy := `{"engagement":"old-2025","scope":"*.acme.com"}`
+	if err := os.WriteFile(filepath.Join(dir, ".marq-context"), []byte(legacy), 0o644); err != nil {
+		t.Fatal(err)
 	}
-	if C.Engagement != "acme-2026" || C.ScopeNote != "10.0.0.0/8" {
-		t.Fatalf("partial update wrong: %+v", C)
+	if got := readContext(dir); got != "old-2025" {
+		t.Fatalf("legacy context = %q; want old-2025", got)
 	}
 }

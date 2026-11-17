@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"slices"
 	"strings"
 	"testing"
 )
@@ -110,5 +111,33 @@ func TestCensysAssetsAfterDoubleDash(t *testing.T) {
 	cmd := toolNamed(t, "censys_view").Build(Args{"assets": "-i /work/creds.txt"}).Argv[2]
 	if !strings.HasSuffix(cmd, "-- '-i /work/creds.txt'") {
 		t.Errorf("assets not after --: %q", cmd)
+	}
+}
+
+// TestPassiveOnly pins the OSINT-only promise in each tool's argv: nothing the
+// model passes can turn a lookup into a probe of the target's own infrastructure
+// (zone transfer, DNS brute force, active spiderfoot modules, credential
+// verification). With the scope gate gone, these argv checks are the enforcement.
+func TestPassiveOnly(t *testing.T) {
+	refused := func(name string, a Args) {
+		t.Helper()
+		if inv := toolNamed(t, name).Build(a); inv.Refuse == "" {
+			t.Errorf("%s %v should be refused, got argv %q", name, a, inv.Argv)
+		}
+	}
+	refused("dns_lookup", Args{"domain": "acme.com", "record_type": "AXFR"})
+	refused("dns_lookup", Args{"domain": "@ns1.acme.com", "record_type": "a"})
+	refused("dnsx", Args{"hosts": "acme.com", "records": "a,w"}) // -w = wordlist brute force
+	refused("trufflehog", Args{"source": "filesystem /etc"})
+	refused("trufflehog", Args{"source": "git https://github.com/o/r --no-no-verification"})
+
+	if argv := toolNamed(t, "dns_lookup").Build(Args{"domain": "acme.com", "record_type": "MX"}).Argv; !slices.Equal(argv[4:], []string{"acme.com", "mx"}) {
+		t.Errorf("dns_lookup argv = %q", argv)
+	}
+	if argv := toolNamed(t, "spiderfoot").Build(Args{"target": "acme.com"}).Argv; !slices.Contains(argv, "passive") {
+		t.Errorf("spiderfoot not forced passive: %q", argv)
+	}
+	if argv := toolNamed(t, "trufflehog").Build(Args{"source": "github --org=acme"}).Argv; !slices.Contains(argv, "--no-verification") {
+		t.Errorf("trufflehog verifies secrets: %q", argv)
 	}
 }

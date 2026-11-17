@@ -2,7 +2,9 @@ package registry
 
 import (
 	"net/url"
+	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/rhaist/marq/internal/shellword"
 )
@@ -37,16 +39,15 @@ func osint() []Tool {
 			Name: "spiderfoot",
 			Desc: "Broad automated OSINT footprint of a target (spiderfoot, 200+ modules) — domains, " +
 				"IPs, netblocks, ASN, emails, names, breach data. `target` may be a domain, IP, email, " +
-				"name or username. `use_case` is one of all/footprint/investigate/passive (`passive` is " +
-				"safe + fastest). Runs in the BACKGROUND and returns a job dir to poll. " +
+				"name or username. Always runs spiderfoot's `passive` use case (no modules that touch " +
+				"the target). Runs in the BACKGROUND and returns a job dir to poll. " +
 				"(Note: the open-source spiderfoot is unmaintained upstream as of 2026 — still functional; " +
 				"cross-check anything critical.)",
 			Params: []Param{
 				{Name: "target", Type: StringParam, Desc: "domain/IP/email/name/username", Required: true},
-				{Name: "use_case", Type: StringParam, Desc: "all/footprint/investigate/passive", Default: "passive"},
 			},
 			Build: func(a Args) Invocation {
-				argv := []string{"spiderfoot", "-s", a.S("target"), "-u", a.S("use_case"), "-o", "json"}
+				argv := []string{"spiderfoot", "-s", a.S("target"), "-u", "passive", "-o", "json"}
 				return Invocation{Argv: argv, Target: a.S("target"), Background: true}
 			},
 		},
@@ -96,32 +97,26 @@ func osint() []Tool {
 			},
 		},
 		{
-			Name: "gitleaks",
-			Desc: "Scan a local git repo or directory for committed secrets (gitleaks). `path` is a " +
-				"checked-out repo/dir inside the container. Reports findings as JSON to stdout.",
-			Params: []Param{
-				{Name: "path", Type: StringParam, Desc: "repo/dir inside the container", Required: true},
-			},
-			Build: func(a Args) Invocation {
-				argv := []string{"gitleaks", "dir", a.S("path"), "--report-format", "json", "--report-path", "/dev/stdout"}
-				return Invocation{Argv: argv, Target: a.S("path")}
-			},
-		},
-		{
 			Name: "trufflehog",
-			Desc: "Find (and verify) leaked secrets with trufflehog. `source` must start with the " +
-				"trufflehog subcommand — a bare URL fails. Use 'git <https-url>', 'github --org=<org>', " +
-				"'github --repo=<url>' or 'filesystem <path>'; it is passed through as raw args. Provide a " +
-				"GITHUB_TOKEN env for GitHub org/repo scans. Defaults to only verified secrets to cut noise.",
+			Desc: "Find leaked secrets in PUBLIC code with trufflehog. `source` must start with the " +
+				"subcommand: 'git <https-url>', 'github --org=<org>', 'github --repo=<url>' or " +
+				"'gitlab --repo=<url>'. Provide GITHUB_TOKEN for GitHub org scans (rate limits). " +
+				"Secrets are reported unverified — marq never tests found credentials against the " +
+				"service they belong to.",
 			Params: []Param{
 				{Name: "source", Type: StringParam, Desc: "subcommand + target, e.g. 'git https://github.com/org/repo'", Required: true},
-				{Name: "options", Type: StringParam, Desc: "extra raw flags", Default: "--results=verified"},
 			},
 			Build: func(a Args) Invocation {
-				argv := []string{"trufflehog"}
-				argv = append(argv, shellword.Split(a.S("source"))...)
-				argv = append(argv, shellword.Split(a.S("options"))...)
-				argv = append(argv, "--json")
+				src := shellword.Split(a.S("source"))
+				if len(src) == 0 || !slices.Contains([]string{"git", "github", "gitlab"}, src[0]) {
+					return Invocation{Target: a.S("source"), Refuse: "source must start with git, github or gitlab"}
+				}
+				// Verification logs in with the leaked credential — that's using it, not OSINT.
+				if strings.Contains(strings.ToLower(a.S("source")), "verif") {
+					return Invocation{Target: a.S("source"), Refuse: "verification flags are not allowed; secrets stay unverified"}
+				}
+				argv := append([]string{"trufflehog"}, src...)
+				argv = append(argv, "--no-verification", "--json")
 				return Invocation{Argv: argv, Target: a.S("source")}
 			},
 		},

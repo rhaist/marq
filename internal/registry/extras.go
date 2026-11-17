@@ -13,7 +13,7 @@ func knowledgeTools() []Tool {
 	return []Tool{
 		{
 			Name: "load_skill",
-			Desc: "Load an expert playbook (offensive, malware, threat-intel, and governance — GRC, " +
+			Desc: "Load an expert playbook (OSINT, threat-intel, malware, sec-ops, and governance — GRC, " +
 				"standards, CISO) before working that kind of task. Pass one skill name or a comma list (max 5). Available skills:\n" +
 				skills.IndexText(),
 			Params: []Param{

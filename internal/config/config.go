@@ -13,7 +13,7 @@ import (
 	"sync"
 )
 
-// engMu guards the only mutable fields of C — Engagement and ScopeNote — which
+// engMu guards the only mutable field of C — Engagement — which
 // set_engagement can write while, in `serve` mode, the go-sdk dispatches other
 // tool handlers concurrently (their audit records read the same fields). Every
 // other field is set once at Load() and read-only thereafter.
@@ -30,13 +30,10 @@ type Config struct {
 	MaxCommandTimeout int
 	// MaxOutputChars caps characters of tool output returned to the model.
 	MaxOutputChars int
-	// Operator / Engagement / ScopeNote are recorded in every audit record and
-	// surfaced in the authorization banner.
+	// Operator / Engagement (label + purpose) are recorded in every audit record
+	// and surfaced in the banner.
 	Operator   string
 	Engagement string
-	ScopeNote  string
-	// AllowRawShell exposes the generic run_shell escape hatch when true.
-	AllowRawShell bool
 	// SkillsOnly serves only the in-process knowledge tools (skills, findings,
 	// files, info) and drops every Kali-binary exec tool, so the server runs
 	// standalone without the tool image — the "cyber skills for your LLM" mode.
@@ -75,7 +72,7 @@ func envBool(name string, def bool) bool {
 }
 
 // Load reads configuration from the environment (MARQ_*). Operator is the
-// human/env-set audit attribution anchor; engagement and scope default from env
+// human/env-set audit attribution anchor; engagement defaults from env
 // but can be set at runtime via SetEngagement (the set_engagement tool), which
 // persists them under WorkDir so they survive across `marq run` processes that
 // each re-Load.
@@ -85,127 +82,83 @@ func Load() Config {
 		CommandTimeout:    envInt("MARQ_TIMEOUT", 900),
 		MaxCommandTimeout: envInt("MARQ_MAX_TIMEOUT", 3600),
 		MaxOutputChars:    envInt("MARQ_MAX_OUTPUT", 60000),
-		AllowRawShell:     envBool("MARQ_ALLOW_RAW_SHELL", false),
 		SkillsOnly:        envBool("MARQ_SKILLS_ONLY", false),
 		WorkDir:           env("MARQ_WORK_DIR", "/work"),
 		Operator:          env("MARQ_OPERATOR", "marq"),
 		Engagement:        env("MARQ_ENGAGEMENT", "unspecified"),
-		ScopeNote:         env("MARQ_SCOPE", ""),
 	}
-	e, s := readContext(cfg.WorkDir)
-	if e != "" {
+	if e := readContext(cfg.WorkDir); e != "" {
 		cfg.Engagement = e
-	}
-	if s != "" {
-		cfg.ScopeNote = s
 	}
 	return cfg
 }
 
 // engagementContext is the on-disk form of the runtime-set engagement metadata.
+// (Older files also carry a "scope" key from the scope-gated era; it's ignored.)
 type engagementContext struct {
 	Engagement string `json:"engagement"`
-	Scope      string `json:"scope"`
 }
 
 func contextPath(workDir string) string { return filepath.Join(workDir, ".marq-context") }
 
-// readContext returns the persisted engagement/scope, or empty strings if the
-// file is absent or unreadable (env defaults then stand).
-func readContext(workDir string) (engagement, scope string) {
+// readContext returns the persisted engagement, or "" if the file is absent or
+// unreadable (the env default then stands).
+func readContext(workDir string) string {
 	b, err := os.ReadFile(contextPath(workDir))
 	if err != nil {
-		return "", ""
+		return ""
 	}
 	var c engagementContext
 	json.Unmarshal(b, &c)
-	return c.Engagement, c.Scope
+	return c.Engagement
 }
 
-// SetEngagement records the engagement label and authorized scope, updating the
-// live config and persisting them under WorkDir so subsequent `marq run`
-// processes inherit them. Operator is deliberately not settable here — it stays
-// the human/env-set attribution anchor.
-func SetEngagement(engagement, scope string) error {
+// SetEngagement records the engagement label/purpose, persisting it under
+// WorkDir first so a failed write never leaves the live value ahead of the file
+// and subsequent `marq run` processes inherit it. Operator is deliberately not
+// settable here — it stays the human/env-set attribution anchor.
+func SetEngagement(engagement string) error {
 	engMu.Lock()
 	defer engMu.Unlock()
-	e, s := C.Engagement, C.ScopeNote
-	if engagement != "" {
-		e = engagement
-	}
-	if scope != "" {
-		s = scope
-	}
-	return persist(e, s)
-}
-
-// persist writes the context file and, only if that succeeds, applies it to C,
-// so a failed write never leaves the live scope ahead of the file. Callers
-// hold engMu for the whole read-modify-write.
-func persist(engagement, scope string) error {
-	b, _ := json.Marshal(engagementContext{engagement, scope})
+	b, _ := json.Marshal(engagementContext{engagement})
 	if err := os.WriteFile(contextPath(C.WorkDir), b, 0o644); err != nil {
 		return err
 	}
-	C.Engagement, C.ScopeNote = engagement, scope
+	C.Engagement = engagement
 	return nil
 }
 
-// WidenScope appends targets to the scope note and persists it. Callers record
-// who authorized the widening in the audit log (mcpserver: operator confirmation
-// via elicitation).
-func WidenScope(targets ...string) error {
-	engMu.Lock()
-	defer engMu.Unlock()
-	note := C.ScopeNote
-	for _, t := range targets {
-		if note == "" {
-			note = t
-		} else {
-			note += ", " + t
-		}
-	}
-	return persist(C.Engagement, note)
-}
-
-// Attribution returns the current engagement label and scope note under a read
-// lock — the race-free way to read the two mutable fields of C. Callers on the
-// concurrent path (audit records, banner, report rendering) must use this rather
-// than reading C.Engagement / C.ScopeNote directly.
-func Attribution() (engagement, scope string) {
+// Attribution returns the current engagement label under a read lock — the
+// race-free way to read the one mutable field of C. Callers on the concurrent
+// path (audit records, banner, report rendering) must use this.
+func Attribution() string {
 	engMu.RLock()
 	defer engMu.RUnlock()
-	return C.Engagement, C.ScopeNote
+	return C.Engagement
 }
 
 // C is the process-wide configuration, resolved once at startup (mirrors the
 // Python module-level CONFIG). Components read config.C directly.
 var C = Load()
 
-// Banner returns the authorization notice shown to the operator before tools run.
-// Pointer receiver + Attribution() so it doesn't copy/read the mutable fields
-// while set_engagement may be writing them concurrently.
+// Banner returns the usage notice shown to the operator before tools run.
+// Pointer receiver + Attribution() so it doesn't read the mutable field while
+// set_engagement may be writing it concurrently.
 func (c *Config) Banner() string {
-	engagement, scope := Attribution()
-	if scope == "" {
-		scope = "(none provided — set MARQ_SCOPE)"
-	}
 	if c.SkillsOnly {
 		return "marq is running in knowledge-only mode: the cyber skills library " +
-			"and advisory tools are available; the active-testing tool suite is not " +
-			"loaded. Advisory and knowledge work is unrestricted. All invocations are " +
-			"audit-logged.\n  operator   : " + c.Operator + "\n  audit log  : " + c.AuditLog
+			"and advisory tools are available; the OSINT tool suite is not loaded. " +
+			"All invocations are audit-logged.\n  operator   : " + c.Operator + "\n  audit log  : " + c.AuditLog
 	}
 	return fmt.Sprintf(
-		"marq spans offensive, malware, threat-intel, and governance work. "+
-			"Advisory and knowledge work is unrestricted. ACTIVE SECURITY TESTING "+
-			"(scanning, exploitation, credential attacks) is AUTHORIZED USE ONLY — "+
-			"run it only against systems you own or are authorized in writing to "+
-			"test, within the scope below. All invocations are audit-logged.\n"+
+		"marq does passive OSINT only: its tools query public third-party sources "+
+			"(DNS, WHOIS, certificate logs, Shodan/Censys, web archives, breach databases, "+
+			"social sites) and never probe a target's own infrastructure. People OSINT is "+
+			"personal-data processing — keep it to the recorded purpose. All invocations "+
+			"are audit-logged.\n"+
 			"  operator   : %s\n"+
 			"  engagement : %s\n"+
-			"  scope note : %s\n"+
 			"  audit log  : %s",
-		c.Operator, engagement, scope, c.AuditLog,
+		c.Operator, Attribution(), c.AuditLog,
 	)
 }
