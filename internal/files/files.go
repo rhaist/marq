@@ -14,6 +14,8 @@ import (
 
 	"github.com/rhaist/marq/internal/audit"
 	"github.com/rhaist/marq/internal/config"
+
+	"github.com/rhaist/marq/internal/untrusted"
 )
 
 // allowedRoots are the only directories the model may touch, plus MARQ_WORK_DIR
@@ -165,9 +167,9 @@ func ReadFile(path string, maxBytes int) string {
 		}
 		s := string(data)
 		if len(s) > budget {
-			return s[:budget] + "\n…[truncated — narrow with max_bytes or read in parts]…", nil
+			s = s[:budget] + "\n…[truncated — narrow with max_bytes or read in parts]…"
 		}
-		return s, nil
+		return untrusted.Wrap("file "+path, s), nil // files hold tool output: same fence as runner
 	})
 }
 

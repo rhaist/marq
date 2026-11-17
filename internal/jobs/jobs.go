@@ -13,6 +13,8 @@ import (
 	"strings"
 
 	"github.com/rhaist/marq/internal/config"
+
+	"github.com/rhaist/marq/internal/untrusted"
 )
 
 func jobsRoot() string { return filepath.Join(config.C.WorkDir, "jobs") }
@@ -75,12 +77,13 @@ func Status(job string) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "job    : %s\nstatus : %s\n", filepath.Base(dir), state)
 	fmt.Fprintf(&b, "results: %s/stdout.log\n", dir)
+	src := "job " + filepath.Base(dir)
 	if tail := tailFile(filepath.Join(dir, "stdout.log"), 40); tail != "" {
-		fmt.Fprintf(&b, "--- stdout (last 40 lines) ---\n%s", tail)
+		fmt.Fprintf(&b, "--- stdout (last 40 lines) ---\n%s", untrusted.Wrap(src, tail))
 	}
 	if !done {
 		if tail := tailFile(filepath.Join(dir, "stderr.log"), 10); tail != "" {
-			fmt.Fprintf(&b, "\n--- stderr (last 10 lines) ---\n%s", tail)
+			fmt.Fprintf(&b, "\n--- stderr (last 10 lines) ---\n%s", untrusted.Wrap(src, tail))
 		}
 	}
 	return b.String()

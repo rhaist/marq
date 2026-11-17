@@ -21,6 +21,8 @@ import (
 	"github.com/rhaist/marq/internal/audit"
 	"github.com/rhaist/marq/internal/config"
 	"github.com/rhaist/marq/internal/shellword"
+
+	"github.com/rhaist/marq/internal/untrusted"
 )
 
 // Opts are per-call options for Run.
@@ -56,11 +58,12 @@ func (r Result) Render() string {
 		code = strconv.Itoa(*r.ExitCode)
 	}
 	fmt.Fprintf(&b, "\n[exit code: %s, %.1fs]", code, r.DurationS)
+	// Tool output is third-party text (a prompt-injection channel): sanitize and fence it.
 	if r.Stdout != "" {
-		fmt.Fprintf(&b, "\n--- stdout ---\n%s", r.Stdout)
+		fmt.Fprintf(&b, "\n--- stdout ---\n%s", untrusted.Wrap(r.Tool, r.Stdout))
 	}
 	if r.Stderr != "" {
-		fmt.Fprintf(&b, "\n--- stderr ---\n%s", r.Stderr)
+		fmt.Fprintf(&b, "\n--- stderr ---\n%s", untrusted.Wrap(r.Tool, r.Stderr))
 	}
 	// A non-zero exit with no output is opaque to a model (e.g. a missing input
 	// file or an absent API key). Name the likely causes instead of leaving it bare.

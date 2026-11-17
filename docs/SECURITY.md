@@ -91,6 +91,46 @@ This applies to the full Docker tool suite (skills-only above needs none of it).
   guidance, not enforcement. For a hard, unbypassable audit boundary use
   `marq serve` (no shell exposed to the model).
 
+## Prompt injection in tool output
+
+Everything marq's tools return was written by someone else: WHOIS remarks, DNS TXT
+records, certificate SANs, social profiles, threat-intel pulses, scan titles. Any
+of it can carry instructions aimed at the model (indirect prompt injection). marq
+applies two deterministic layers to all OSINT-tool output, `read_file` and
+`job_status` (`internal/untrusted`):
+
+- It strips characters that hide text from the person reading the transcript:
+  Unicode tag characters (ASCII smuggling), variation-selector smuggling, bidi
+  overrides, zero-width characters, ANSI/OSC terminal escapes and other control
+  codes. When it removes any, the output starts with a `[marq removed …]` note.
+- It fences the text between `[untrusted-data <id> begin …]` and
+  `[untrusted-data <id> end]` markers with a random id per call, so a payload
+  can't forge the end of the block. The MCP instructions and the Pi prompts tell
+  the model to treat fenced content as data and to report instructions it finds.
+
+The OSINT tools also carry the standard MCP `readOnlyHint` and `openWorldHint`
+annotations, so clients can tell they read untrusted external content.
+
+These layers reduce the risk; they don't remove it. Published measurements show
+delimiting lowers attack success by a few points, and adaptive attacks get past
+every published prompt-level defense. The controls that hold sit in the client:
+
+- **Rule of Two** (Meta, 2025): in one session, combine at most two of untrusted
+  input, access to sensitive data or systems, and the ability to change state or
+  communicate externally. marq's tools are the untrusted input, so don't give the
+  same session unattended shell, email or write access to production.
+- Keep tool approval on for anything outside marq, and review the model's next
+  call after it reads third-party content.
+- The full research behind this design is in
+  [`reports/MCP tool output injection defenses.md`](../reports/MCP%20tool%20output%20injection%20defenses.md).
+
+Not adopted: bundling a classifier such as Llama Prompt Guard 2 (independent
+tests show low recall on tool-output injection, the licence and Hugging Face
+gating complicate redistribution, and Go has no clean DeBERTa tokenizer) and
+cloud scanners (data would leave the host). If you want a classifier anyway, put
+it in front of marq in your own gateway, for example a Docker MCP Gateway `after`
+interceptor (experimental).
+
 ## Recommended operational practices
 
 - Run the container where you'd run any service that makes outbound requests;
