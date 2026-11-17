@@ -149,6 +149,23 @@ func TestPassiveOnly(t *testing.T) {
 	if argv := toolNamed(t, "rdap").Build(Args{"query": "as13335"}).Argv; !slices.Equal(argv, []string{"go-rdap", "-j", "-t", "autnum", "13335"}) {
 		t.Errorf("rdap argv = %q", argv)
 	}
+	refused("ioc_lookup", Args{"indicator": "10.0.0.5"})
+	for ind, want := range map[string]string{
+		"D41D8CD98F00B204E9800998ECF8427E": "hashlookup.circl.lu/lookup/md5/d41d8cd98f00b204e9800998ecf8427e",
+		"::ffff:1.2.3.4":                   "/indicators/IPv4/1.2.3.4/general",
+		"2606:4700::1111":                  "/indicators/IPv6/2606:4700::1111/general",
+		"acme.com":                         "q=domain%3Aacme.com",
+	} {
+		if cmd := toolNamed(t, "ioc_lookup").Build(Args{"indicator": ind}).Argv[2]; !strings.Contains(cmd, want) {
+			t.Errorf("ioc_lookup %q: want %q in %q", ind, want, cmd)
+		}
+	}
+	if cmd := toolNamed(t, "ct_search").Build(Args{"domain": "acme.com"}).Argv[2]; !strings.Contains(cmd, "q=%25.acme.com&deduplicate=Y&output=json&exclude=expired") {
+		t.Errorf("ct_search url: %q", cmd)
+	}
+	if cmd := toolNamed(t, "ct_search").Build(Args{"domain": "acme.com", "include_expired": true}).Argv[2]; strings.Contains(cmd, "exclude=expired") {
+		t.Errorf("ct_search include_expired still excludes: %q", cmd)
+	}
 	refused("maigret_username", Args{"username": "--parse=https://acme.com/"})
 	refused("sherlock", Args{"username": "--site"})
 	refused("h8mail_breach", Args{"email": "a@acme.com", "options": "-u https://acme.com"})

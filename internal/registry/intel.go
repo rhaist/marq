@@ -18,8 +18,11 @@ var hashRE = regexp.MustCompile(`(?i)^([0-9a-f]{32}|[0-9a-f]{40}|[0-9a-f]{64})$`
 
 // fetch is a curl of one fixed third-party URL, capped so one oversized
 // response (OTX runs to ~440 KB) can't crowd the rest out of the output budget.
+// The HTTP status (000 = the request failed) is always printed, so a failed
+// lookup never reads as an empty "not seen".
 func fetch(label, u string) string {
-	return "echo " + shellword.Quote("# "+label) + "; curl -sS --max-time 30 " + shellword.Quote(u) + " | head -c 20000; echo; "
+	return "echo " + shellword.Quote("# "+label) + "; r=$(curl -sS --max-time 30 -w '\\n[HTTP %{http_code}]' " +
+		shellword.Quote(u) + ` 2>&1); if [ ${#r} -gt 12000 ]; then printf '%s\n... (truncated at 12 kB) %s\n' "${r:0:12000}" "${r##*$'\n'}"; else printf '%s\n' "$r"; fi; `
 }
 
 // intel returns the certificate, registration, lookalike-domain and
@@ -31,22 +34,30 @@ func intel() []Tool {
 			Desc: "Search Certificate Transparency logs (crt.sh) for certificates issued for a DOMAIN and " +
 				"its subdomains: SANs, issuer, not-before/not-after. Shows when a host got its certificate " +
 				"(e.g. a phishing domain certified just before the send) and names subfinder may miss. " +
-				"Expired certificates are excluded. Keyless; crt.sh is slow on very large domains.",
+				"Expired certificates are excluded unless `include_expired` is set (use it for past " +
+				"campaigns). Shows the newest 300. Keyless; crt.sh is slow on very large domains.",
 			Params: []Param{
 				{Name: "domain", Type: StringParam, Desc: "domain, e.g. acme.com", Required: true},
+				{Name: "include_expired", Type: BoolParam, Desc: "also list expired certificates", Default: false},
 			},
 			Build: func(a Args) Invocation {
 				d := strings.ToLower(strings.TrimSpace(a.S("domain")))
 				if !domainRE.MatchString(d) {
 					return Invocation{Target: d, Refuse: "domain must be a DNS name like acme.com"}
 				}
-				u := "https://crt.sh/?q=" + url.QueryEscape("%."+d) + "&exclude=expired&deduplicate=Y&output=json"
+				u := "https://crt.sh/?q=" + url.QueryEscape("%."+d) + "&deduplicate=Y&output=json"
+				if !a.B("include_expired") {
+					u += "&exclude=expired"
+				}
 				cmd := "set -o pipefail; curl -sS --max-time 90 " + shellword.Quote(u) + ` | python3 -I -c 'import json,sys
 try: rows=json.load(sys.stdin)
 except Exception as e: sys.exit("crt.sh returned no JSON (it times out on big domains): %r" % e)
-for r in sorted(rows, key=lambda r: r.get("not_before",""), reverse=True)[:300]:
-    print(r.get("not_before","")[:10], r.get("not_after","")[:10], r.get("issuer_name","").split("O=")[-1].split(",")[0], " ".join(sorted(set(r.get("name_value","").split()))), sep=" | ")
-print("(%d certificates)" % len(rows))'`
+if not isinstance(rows, list): sys.exit("crt.sh returned an unexpected response: %.300r" % rows)
+f=lambda r,k: str(r.get(k) or "") if isinstance(r, dict) else ""
+rows=sorted(rows, key=lambda r: f(r,"not_before"), reverse=True)
+for r in rows[:300]:
+    print(f(r,"not_before")[:10], f(r,"not_after")[:10], f(r,"issuer_name").split("O=")[-1].split(",")[0], " ".join(sorted(set(f(r,"name_value").split()))), sep=" | ")
+print("(%d certificates%s)" % (len(rows), ", newest 300 shown" if len(rows) > 300 else ""))'`
 				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: d}
 			},
 		},
@@ -99,7 +110,7 @@ print("(%d certificates)" % len(rows))'`
 				"SHA-256) goes to CIRCL hashlookup (known-good/known-file database); an IP to GreyNoise " +
 				"community (internet scanner / benign service?) and AlienVault OTX pulses; a domain to OTX " +
 				"and urlscan.io's public scan history. Lookups only — nothing is submitted for scanning. " +
-				"Note the services see what you query. Each response is capped at 20 kB.",
+				"Note the services see what you query. Each response is capped at 12 kB (two sources must fit the 30 kB stdout budget).",
 			Params: []Param{
 				{Name: "indicator", Type: StringParam, Desc: "hash, IP or domain", Required: true},
 			},
@@ -111,9 +122,14 @@ print("(%d certificates)" % len(rows))'`
 					algo := map[int]string{32: "md5", 40: "sha1", 64: "sha256"}[len(ind)]
 					cmd = fetch("CIRCL hashlookup", "https://hashlookup.circl.lu/lookup/"+algo+"/"+ind)
 				case ip != nil:
+					if ip.IsPrivate() || ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsUnspecified() {
+						return Invocation{Target: ind, Refuse: "private/internal IPs aren't sent to third-party feeds"}
+					}
 					fam := "IPv4"
-					if ip.To4() == nil {
-						fam = "IPv6"
+					if ip4 := ip.To4(); ip4 != nil {
+						ind = ip4.String() // ::ffff:1.2.3.4 -> 1.2.3.4
+					} else {
+						fam, ind = "IPv6", ip.String()
 					}
 					cmd = fetch("GreyNoise community (404 = not seen scanning)", "https://api.greynoise.io/v3/community/"+ind) +
 						fetch("AlienVault OTX", "https://otx.alienvault.com/api/v1/indicators/"+fam+"/"+ind+"/general")
