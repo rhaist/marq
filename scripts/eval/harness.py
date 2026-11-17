@@ -376,18 +376,24 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
 
 def smoke_verdict(out_dir, model, tasks):
     """Tier-1 smoke: print per-task pass counts (skills-on, completed runs only)
-    for the capability sample. Indicative only — there is no pass/fail gate."""
+    for the capability sample. Indicative only, no pass/fail gate; returns False
+    when no run completed, so a crashed or empty sweep never looks like a result."""
     import report  # sibling module; sys.path[0] is this script's dir when run directly
     out = pathlib.Path(out_dir)
     slug = model.replace("/", "_").replace(":", "_")
     bar = "=" * 60
     print(f"\n{bar}\nSMOKE — {model}  (capability sample, skills-on, completed runs only)\n{bar}")
+    completed = 0
     for t in tasks:
         dirs = [d for d in sorted(out.glob(f"{slug}__skills-on__{t['id']}__r*"))
                 if (d / "meta.json").exists()
                 and not report.is_aborted(json.loads((d / "meta.json").read_text()))]
         print(f"  {sum(report.passed(t, d) for d in dirs)}/{len(dirs)}  {t['id']}")
+        completed += len(dirs)
     print(bar)
+    if not completed:
+        print("  no run completed: fix the environment and re-run")
+    return completed > 0
 
 
 def _loads(s):
@@ -470,9 +476,8 @@ def main():
                     run_task(args, model, on, task, r, info, cfg)
 
     if args.smoke:
-        for m in models:
-            smoke_verdict(args.out, m, tasks)
-        return 0
+        ok = [smoke_verdict(args.out, m, tasks) for m in models]
+        return 0 if all(ok) else 1
     print(f"\nruns in {args.out}")
     print(f"look:    python3 scripts/eval/report.py {args.out} --no-publish")
     print(f"publish: python3 scripts/eval/report.py {args.out} --quant <Q> --runtime llama.cpp")

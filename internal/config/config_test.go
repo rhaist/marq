@@ -26,5 +26,4 @@ func TestSetEngagementRoundTrip(t *testing.T) {
 	if C.Engagement != "acme-2026" || readContext(dir) != "acme-2026" {
 		t.Fatalf("not persisted: live=%q file=%q", C.Engagement, readContext(dir))
 	}
-
 }
