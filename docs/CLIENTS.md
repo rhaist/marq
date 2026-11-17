@@ -1,6 +1,6 @@
 # Driving marq: pick the model for the job
 
-marq is tools plus knowledge: 19 passive-OSINT tools (29 tools in all) and 83 skill playbooks
+marq is tools plus knowledge: 23 passive-OSINT tools (33 tools in all) and 83 skill playbooks
 across 13 domains (OSINT, malware, threat-intel, sec-ops, architecture, GRC,
 standards, CISO, resilience, human factors, …). It does not bring a model.
 Your client does, so you choose which model to point at it, and that
@@ -25,7 +25,7 @@ findings/files tools: `go install github.com/rhaist/marq/cmd/marq@latest` with
 `MARQ_SKILLS_ONLY=1`, a ~10 MB native binary, with no Docker (see
 [`SETUP.md`](SETUP.md#skills-only-no-docker)). Reach for it when the work is
 advisory: architecture, GRC, standards, threat-intel research. The full build
-is the Docker image that adds the 19-tool OSINT suite for when you need to _run_ things.
+is the Docker image that adds the 23-tool OSINT suite for when you need to _run_ things.
 
 There are two transports (both builds use the same `marq serve` stdio server):
 

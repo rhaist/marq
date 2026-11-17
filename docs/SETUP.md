@@ -28,7 +28,7 @@ fully-local work).
 | Path                   | You get                                      | Needs                   | Setup                                                             |
 | ---------------------- | -------------------------------------------- | ----------------------- | ----------------------------------------------------------------- |
 | Skills only            | the knowledge library + findings/files tools | Go, no Docker           | [below](#skills-only-no-docker), one `go install`                |
-| Full MCP server        | skills and the 19-tool OSINT suite           | Docker                  | build the image, then any MCP client                              |
+| Full MCP server        | skills and the 23-tool OSINT suite           | Docker                  | build the image, then any MCP client                              |
 | Full + local model     | the above, driven by a local model           | Docker + Pi + llama.cpp | the [Pi subsection](#4-run-with-a-local-model-pi--the-marq-skill) |
 
 Start at the top and add a layer only when you need it. The image is the same for
@@ -310,7 +310,7 @@ drives `marq run` from bash; the shim runs it inside the container.
 > settings `extensions` array needs full paths, not bare names); Pi's bundled
 > docs are at `…/pi-coding-agent/<ver>/libexec/.../docs/`.
 
-A long-lived container is required. Background tools (`spiderfoot`, `gau_urls`)
+A long-lived container is required. Background tools (`spiderfoot`, `gau_urls`, `dnstwist`)
 detach inside it and are polled later, so a per-call `docker run`
 would kill them.
 
@@ -391,7 +391,7 @@ go run ./cmd/marq run subfinder '{"domain":"example.com"}'   # invoke one tool
 # Tool present in the built image:
 docker run --rm marq subfinder -version
 
-# MCP server lists its tools (expects ~29)
+# MCP server lists its tools (expects ~33)
 printf '%s\n' \
  '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"c","version":"0"}}}' \
  '{"jsonrpc":"2.0","method":"notifications/initialized"}' \

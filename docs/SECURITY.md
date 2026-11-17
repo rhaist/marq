@@ -3,7 +3,7 @@
 marq bundles passive OSINT and footprinting tooling that profiles organisations
 and people (theHarvester, spiderfoot, sherlock, user-scanner, h8mail, phoneinfoga,
 …) and exposes it to an LLM through MCP. The tools query public third-party
-sources and never scan, crawl or exploit a target's hosts. The only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks). People OSINT is still personal-data processing, so read this before you run anything.
+sources and never scan, crawl or exploit a target's hosts. The only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. `dnstwist` resolves lookalike domains through the normal resolver; those are not the target's infrastructure. Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks). People OSINT is still personal-data processing, so read this before you run anything.
 
 ## Legal & ethical baseline
 
@@ -16,8 +16,9 @@ sources and never scan, crawl or exploit a target's hosts. The only traffic that
   sources over individual profiling.
 - marq never tests credentials. `trufflehog` reports found secrets unverified;
   do not try them against the service they belong to.
-- Several tools call third-party APIs (Shodan, Censys, GitHub, HIBP,
-  numverify). Your queries leave the box and are logged by those providers, so
+- Several tools call third-party services (Shodan, Censys, GitHub, HIBP,
+  numverify, crt.sh, the RDAP registries, GreyNoise, AlienVault OTX, urlscan.io,
+  CIRCL). Your queries leave the box and are logged by those providers, so
   do not submit data you are not permitted to disclose to a third party.
 
 ## Guardrail model: passive tools + fail-closed audit

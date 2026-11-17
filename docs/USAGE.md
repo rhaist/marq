@@ -1,6 +1,6 @@
 # Usage
 
-How to build, smoke-test and drive marq, your cyber assistant: 19 passive-OSINT tools (29 tools in all)
+How to build, smoke-test and drive marq, your cyber assistant: 23 passive-OSINT tools (33 tools in all)
 and ~83 skill playbooks across 13 domains. To choose a client and model
 for the job (Claude Code / Codex as the expert, Pi for local work, LM
 Studio for testing), see [`CLIENTS.md`](CLIENTS.md); for a guided per-OS install,
@@ -106,7 +106,7 @@ the model knows the calling convention. From there the model
 calls `server_info` first, works the tools, records findings with
 `report_finding`, and writes the report with `render_report` into `/work`.
 
-A long-lived container is required: background tools (`spiderfoot`, `gau_urls`)
+A long-lived container is required: background tools (`spiderfoot`, `gau_urls`, `dnstwist`)
 detach inside it and are polled later, so a per-call `docker run`
 would kill them.
 
@@ -140,6 +140,10 @@ All wrapped tools are passive: they query public third-party sources (DNS resolv
 | `whois_lookup`  | whois        | Registration data                                                   |
 | `asnmap`        | whois + curl | IP/domain → ASN, ASN → CIDRs                                        |
 | `cdncheck`      | cdncheck     | CDN/cloud/WAF IP detection                                          |
+| `ct_search`     | curl (crt.sh) | Certificates issued for a domain and subdomains (CT logs)          |
+| `rdap`          | go-rdap      | Registration data over RDAP for a domain, IP or ASN                 |
+| `dnstwist`      | dnstwist     | Registered lookalike domains, DNS-only (background)                 |
+| `ioc_lookup`    | curl         | Hash, IP or domain enrichment: CIRCL hashlookup, GreyNoise community, OTX, urlscan.io |
 | `exif_metadata` | exiftool     | Metadata from a staged file/dir                                     |
 | `shodan_host`   | shodan       | Exposed ports/services/CVEs for an IP (keyless via InternetDB)      |
 | `shodan_search` | shodan       | Search exposed assets (e.g. `org:`) †                               |
@@ -187,7 +191,7 @@ the report rather than overriding your call. The skills library is also exposed 
 MCP resources: `marq://skills` (index) and `marq://skills/<name>`.
 
 Tools too slow for a synchronous call (`spiderfoot`,
-`gau_urls`) launch in the background and return a job directory under
+`gau_urls`, `dnstwist`) launch in the background and return a job directory under
 `/work/jobs/<tool>-<id>/`. Results stream to `stdout.log`, diagnostics to
 `stderr.log`, and a `status` file (containing `exit=<code>`) appears when the
 scan finishes. Check progress with `list_jobs` / `job_status` (or `read_file` /

@@ -65,6 +65,10 @@ TESTS: dict[str, tuple[str, dict]] = {
     "dnsx":          (LOCAL, {"hosts": EX_DOMAIN, "records": "a"}),
     "cdncheck":      (LOCAL, {"targets": "1.1.1.1"}),
     "asnmap":        (EXTERNAL, {"target": "1.1.1.1"}),
+    "ct_search":     (EXTERNAL, {"domain": EX_DOMAIN}),
+    "rdap":          (EXTERNAL, {"query": EX_DOMAIN}),
+    "dnstwist":      (EXTERNAL, {"domain": EX_DOMAIN}),
+    "ioc_lookup":    (EXTERNAL, {"indicator": "d41d8cd98f00b204e9800998ecf8427e"}),
     "censys_view":   (KEY, {"assets": "8.8.8.8"}),
     # in-process: engagement, knowledge, findings, jobs
     "set_engagement": (LOCAL, {"engagement": "smoke-test: tool plumbing check"}),

@@ -39,13 +39,17 @@ while [[ $# -gt 0 ]]; do
 done
 
 # name @@ wrapper-invocation (flags the wrapper passes) @@ help command
-# Keep this in sync with internal/registry/{recon,osint,people}.go — the point is to diff the two.
+# Keep this in sync with internal/registry/{recon,intel,osint,people}.go — the point is to diff the two.
 TOOLS=(
   "dns_lookup@@dig +nocmd +noall +answer <domain> <type>@@dig -h"
   "whois_lookup@@whois <target>@@whois --help"
   "subfinder@@subfinder -silent -d <domain>@@subfinder -h"
   "dnsx@@dnsx -silent -resp -<record>@@dnsx -h"
   "asnmap@@whois -h whois.cymru.com \" -v <ip>\" + RIPEstat@@whois --version"
+  "ct_search@@curl crt.sh/?q=%25.<domain>&output=json (jq summary)@@curl --version"
+  "rdap@@go-rdap -j -t <domain|ip|autnum> <query>@@go-rdap -h"
+  "dnstwist@@dnstwist --registered --format json --threads 8 <domain>   (background)@@dnstwist --help"
+  "ioc_lookup@@curl CIRCL hashlookup / GreyNoise community / OTX / urlscan (by indicator type)@@curl --version"
   "cdncheck@@cdncheck -silent (stdin IPs)@@cdncheck -h"
   "censys_view@@censys view <assets> -O json --no-spinner --no-color@@censys view --help"
   "theharvester@@theHarvester -d <domain> -b <sources> -l <limit>@@theHarvester -h"

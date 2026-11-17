@@ -27,7 +27,7 @@ EU CRA, NIS2, ISO 27001, NIST, US sector rules) and on to the board report. Ever
 records the date it was last checked. The pack is Apache-2.0, so it installs into any
 agent, including internal ones.
 
-**The tool server (optional).** 19 passive OSINT tools (29 tools in all: domain,
+**The tool server (optional).** 23 passive OSINT tools (33 tools in all: domain,
 infrastructure, people, leaked secrets in public code). They query public third-party sources (DNS resolvers, WHOIS, certificate logs, Shodan/Censys, web archives, breach databases, social and code-hosting sites) and never scan, crawl or exploit a target's hosts. The only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks). Every OSINT-tool, file and findings call lands in an operator-attributed audit log you can hand to a client or regulator, and an OSINT tool won't run if its start record can't be written (fail-closed).
 
 ## Start
@@ -38,7 +38,7 @@ Pick a path. Start simple and add a layer only when you need it:
 | :------------------------------------------- | :-------------- | :-------------------------- |
 | **cyber expertise inside my agent**          | skills pack     | one install command         |
 | **…the same, over MCP for any client**       | skills server   | one `go install`, no Docker |
-| **…plus the 19-tool OSINT suite to _run_**   | full MCP server | build/pull the image        |
+| **…plus the 23-tool OSINT suite to _run_**   | full MCP server | build/pull the image        |
 | **…driven by a local model**                 | full + Pi       | image + Pi + llama.cpp      |
 
 ### The skills pack: install into your agent (no server, no Docker)
@@ -161,7 +161,7 @@ API keys are listed in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-source
 
 ## What you get
 
-- **Execution:** 19 wrapped passive-OSINT tools (29 tools in all: domain/infra footprint, people,
+- **Execution:** 23 wrapped passive-OSINT tools (33 tools in all: domain/infra footprint, people,
   leaked secrets in public code), audit-logged. File tools and `exif_metadata` are sandboxed to `/work` and `/tmp`. Findings render
   to `findings.md` / `.csv` (with optional CVSS and CWE).
 - **Knowledge:** ~83 `load_skill` playbooks across 13 domains, web-researched to
@@ -176,11 +176,13 @@ API keys are listed in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-source
   recommended run args also drop all Linux capabilities and set `no-new-privileges`).
 
 <details>
-<summary><b>Full tool suite</b>: 19 passive OSINT tools (click to expand)</summary>
+<summary><b>Full tool suite</b>: 23 passive OSINT tools (click to expand)</summary>
 
 | Category                              | Tools                                                                                                           |
 | :------------------------------------ | :-------------------------------------------------------------------------------------------------------------- |
 | **Domain / infrastructure**           | `theharvester` · `spiderfoot` · `subfinder` · `dnsx` · `dns_lookup` · `whois_lookup` · `asnmap` · `cdncheck` · `gau_urls` |
+| **Certificates / registry / lookalikes** | `ct_search` · `rdap` · `dnstwist` (background) |
+| **Threat-intel lookups**              | `ioc_lookup`                                                                                                    |
 | **Exposure lookups**                  | `shodan_host` · `shodan_search` · `censys_view`                                                                 |
 | **Leaked secrets / metadata**         | `trufflehog` · `exif_metadata`                                                                                  |
 | **OSINT, people**                     | `sherlock` · `maigret_username` · `email_accounts` · `h8mail_breach` · `phoneinfoga`                            |
@@ -199,6 +201,7 @@ terminal agent (Pi) ──bash──▶  pi/marq shim ─┤   both hit the same
                               (docker exec)  │
                                              ▼
                               registry.All() ── one Tool list
+                                ├─ intel     ct_search, rdap, dnstwist, ioc_lookup
                                 ├─ osint     theHarvester, spiderfoot, subfinder, dnsx, shodan, trufflehog, gau…
                                 ├─ people    sherlock, maigret, user-scanner, h8mail, phoneinfoga
                                 ├─ files     read/write/list (sandboxed /work)
