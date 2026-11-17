@@ -3,8 +3,10 @@ package registry
 import (
 	_ "embed"
 
+	"github.com/rhaist/marq/internal/config"
 	"github.com/rhaist/marq/internal/findings"
 	"github.com/rhaist/marq/internal/jobs"
+	"github.com/rhaist/marq/internal/laws"
 	"github.com/rhaist/marq/internal/skills"
 )
 
@@ -20,6 +22,25 @@ func knowledgeTools() []Tool {
 				{Name: "name", Type: StringParam, Desc: "skill name(s), comma-separated (max 5); omit to list all skills"},
 			},
 			Handler: func(a Args) string { return skills.LoadMany(a.S("name")) },
+		},
+		{
+			Name: "law_lookup",
+			Desc: "Read the text of a law or regulation from marq's local corpus (official texts fetched from " +
+				"government sites, plus government-published English translations). No arguments: list the laws. " +
+				"`law` (an id, title or key term such as GDPR, PIPL, KVKK, 网络安全法): its metadata and article numbers. " +
+				"`law` + `article` (any style: 33, Art. 33, 第四条, المادة الأولى): that article's text. " +
+				"`query`: articles containing every word, optionally within `law`. Texts are in their original " +
+				"language, so search with the law's own terms. Quote article numbers and version dates from here " +
+				"rather than from memory, and say when a text is a reference translation.",
+			Params: []Param{
+				{Name: "law", Type: StringParam, Desc: "law id, title or key term (omit to list the corpus)"},
+				{Name: "article", Type: StringParam, Desc: "article number in any style (needs law)"},
+				{Name: "query", Type: StringParam, Desc: "words to search for, in the law's language"},
+				{Name: "limit", Type: IntParam, Desc: "max search hits", Default: 5},
+			},
+			Handler: func(a Args) string {
+				return laws.Answer(config.C.LawsDB, a.S("law"), a.S("article"), a.S("query"), a.I("limit"), config.C.MaxOutputChars)
+			},
 		},
 	}
 }

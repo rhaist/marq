@@ -49,6 +49,10 @@ Penalties: up to **€15M or 2.5% of worldwide annual turnover** for breach of e
 - **"On the market before the date" is not a permanent exemption**: substantial modification re-triggers the obligations.
 - Don't assume self-assessment: check **Annex III/IV** class first; misclassifying Class II as default skips a mandatory notified-body step.
 
+## Law texts
+
+Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `eu-cra 14`.
+
 ## Pairs with
 
 - Org-level security management that supports CRA processes: `load_skill iso27001`, `load_skill nist-csf`.

@@ -1,0 +1,292 @@
+package laws
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
+	"testing"
+	"testing/fstest"
+)
+
+func TestNormalizeNum(t *testing.T) {
+	for in, want := range map[string]string{
+		"Art. 23":             "23",
+		"Article 4":           "4",
+		"第二十三条":               "23",
+		"第一百零五条":              "105",
+		"第十条":                 "10",
+		"第48条の3":              "48-3",
+		"제48조의3":              "48-3",
+		"Artículo 5 bis":      "5bis",
+		"Artículo 1o":         "1",
+		"Art. 1º":             "1",
+		"MADDE 12":            "12",
+		"المادة الأولى":       "1",
+		"المادة الحادية عشرة": "11",
+		"الثالثة والأربعون":   "43",
+		"المادة (٢٠)":         "20",
+		"มาตรา ๒๔":            "24",
+		"Điều 7":              "7",
+		"  12  ":              "12",
+	} {
+		if got := NormalizeNum(in); got != want {
+			t.Errorf("NormalizeNum(%q) = %q, want %q", in, got, want)
+		}
+	}
+}
+
+func TestSplit(t *testing.T) {
+	cases := []struct {
+		lang, text string
+		want       []string // article numbers in order
+	}{
+		{"en", "Preamble text\nArticle 1\nSubject matter\nArticle 2\nScope\nArticle 6(1) is a cross-reference at a line start\nArticle 3\nDefinitions", []string{"preamble", "1", "2", "3"}},
+		{"zh", "第一条　为了保障网络安全。\n第二条　在境内建设网络。\n依照本法第二十一条的规定\n第三条　国家坚持。", []string{"1", "2", "3"}},
+		{"ja", "第一条 目的\n第二条 定義\n第二条の二 追加\n第三条 責務", []string{"1", "2", "2-2", "3"}},
+		{"ko", "제1조(목적)\n제2조(정의)\n제2조의2(추가)\n제3조", []string{"1", "2", "2-2", "3"}},
+		{"es", "ARTÍCULO 1.- Objeto\nArtículo 2o.- Ámbito\nArtículo 3 bis.- Nuevo", []string{"1", "2", "3bis"}},
+		{"pt", "Art. 1º Esta Lei dispõe\nArt. 2º A disciplina\nArt. 3º Esta Lei aplica-se", []string{"1", "2", "3"}},
+		{"tr", "MADDE 1 – Amaç\nMADDE 2 – Kapsam", []string{"1", "2"}},
+		{"ar", "المادة الأولى:\nالتعريفات\nالمادة الثانية:\nالنطاق\nالمادة الثالثة\nالأحكام", []string{"1", "2", "3"}},
+		{"en", "No headings here at all.", []string{"all"}},
+		{"zh", "第 1 條 目的\n第 1-1 條 補充\n第 1-2 條 再補充\n第 2 條 定義", nil}, // filled below with a custom split
+		// a table of contents lists the headings before the body does: the body wins
+		{"en", "Contents\nArticle 1\nArticle 2\nArticle 3\nArticle 1\nScope text\nArticle 2\nMore\nArticle 3\nEnd", []string{"preamble", "1", "2", "3"}},
+	}
+	for _, c := range cases {
+		if c.want == nil {
+			continue
+		}
+		var got []string
+		for _, a := range Split(c.text, c.lang, "", 0) {
+			got = append(got, a.Num)
+		}
+		if strings.Join(got, ",") != strings.Join(c.want, ",") {
+			t.Errorf("Split(%s) = %v, want %v", c.lang, got, c.want)
+		}
+	}
+	if got := Split("§ 314.1 Purpose\n§ 314.2 Definitions\nsee § 314.9 here\n§ 314.3 Standards", "en", `(?m)^§ (\d+\.\d+)`, 0); len(got) != 3 || got[2].Num != "314.3" {
+		t.Errorf("CFR-style sections: %+v", got)
+	}
+	tw := Split("第 1 條 目的\n第 1-1 條 補充\n第 1-2 條 再補充\n第 2 條 定義", "zh", `(?m)^第 (\d+(?:-\d+)?) 條`, 0)
+	if len(tw) != 4 || tw[2].Num != "1-2" {
+		t.Errorf("sub-articles 1-1, 1-2 must each be kept: %+v", tw)
+	}
+	gappy := "Article 1\nA\nArticle 2\nB\nArticle 37\nC\nArticle 38\nD"
+	if got := Split(gappy, "en", "", 0); len(got) != 3 || got[0].Num != "preamble" || got[1].Num != "37" {
+		t.Errorf("default gap limit keeps one run (the rest becomes preamble), got %+v", got)
+	}
+	if got := Split(gappy, "en", "", 40); len(got) != 4 {
+		t.Errorf("max_gap 40 should keep both runs of a partly enforced text, got %+v", got)
+	}
+	if got := Split("§ 1 A\n§ 2 B", "de", `(?m)^§ (\d+)`, 0); len(got) != 2 || got[1].Num != "2" {
+		t.Errorf("custom split regex not used: %+v", got)
+	}
+}
+
+func TestDecode(t *testing.T) {
+	latin1 := []byte("Art. 1\xba Lei de prote\xe7\xe3o")
+	if got, err := decode(latin1, "text/html; charset=ISO-8859-1"); err != nil || got != "Art. 1º Lei de proteção" {
+		t.Errorf("latin-1 decode = %q, %v", got, err)
+	}
+	if _, err := decode([]byte{0x82, 0xa0, 0x82}, "text/html; charset=Shift_JIS"); err == nil {
+		t.Error("Shift_JIS should be refused, not garbled")
+	}
+	if got := HTMLToText(`<html><head><title>x</title><script>evil()</script></head><body><p>Article&nbsp;1</p><p>Text <b>bold</b></p></body></html>`); got != "Article 1\nText bold" {
+		t.Errorf("HTMLToText = %q", got)
+	}
+}
+
+// corpus builds a small multilingual corpus in a temp dir via the real Sync path.
+func corpus(t *testing.T) string {
+	t.Helper()
+	pages := map[string]string{
+		"/zh":     "<p>第一条　为了保障网络安全，维护网络空间主权。</p><p>第四条　网络运营者应当在一小时内报告重大网络安全事件。</p>",
+		"/tr":     "<p>MADDE 11 – Amaç</p><p>MADDE 12 – Veri sorumlusu, ihlal bildirimi yapar.</p>",
+		"/ar":     "<p>المادة التاسعة عشرة:</p><p>تعريفات</p><p>المادة العشرون:</p><p>يجب إبلاغ الجهة المختصة عن تسرُّب البيانات الشخصية.</p>",
+		"/en":     "<p>Article 32</p><p>Scope</p><p>Article 33</p><p>Notification of a personal data breach to the supervisory authority within 72 hours.</p>",
+		"/en-old": "<p>Article 1</p><p>Scope of the old translation</p>",
+	}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if p, ok := pages[r.URL.Path]; ok {
+			fmt.Fprint(w, p)
+			return
+		}
+		http.NotFound(w, r)
+	}))
+	t.Cleanup(srv.Close)
+	src := func(id, lang, path, kind, translates, date string, terms ...string) Source {
+		return Source{ID: id, Title: id, Jurisdiction: "XX", Lang: lang, Kind: kind, Translates: translates,
+			URL: srv.URL + path, Format: "html", VersionDate: date, Terms: terms}
+	}
+	sources := []Source{
+		src("cn-test", "zh", "/zh", "official", "", "2026-01-01", "网络安全法"),
+		src("tr-test", "tr", "/tr", "official", "", "2025-03-19", "KVKK"),
+		src("sa-test", "ar", "/ar", "official", "", "2024-09-14"),
+		src("eu-test", "en", "/en", "official", "", "2016-05-04", "GDPR"),
+		src("cn-test-en", "en", "/en-old", "reference", "cn-test", "2017-06-01"),
+	}
+	path := filepath.Join(t.TempDir(), "laws.db")
+	res, err := Sync(context.Background(), path, sources, nil, srv.Client())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, r := range res {
+		if r.Err != nil {
+			t.Fatalf("sync %s: %v", r.ID, r.Err)
+		}
+	}
+	return path
+}
+
+func TestCorpusLookupAndSearch(t *testing.T) {
+	st, err := Open(corpus(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer st.Close()
+
+	for _, ref := range []string{"cn-test", "网络安全法", "kvkk", "GDPR"} {
+		if _, err := st.Resolve(ref); err != nil {
+			t.Errorf("Resolve(%q): %v", ref, err)
+		}
+	}
+	if a, err := st.Article("cn-test", "第四条"); err != nil || !strings.Contains(a.Body, "一小时") {
+		t.Errorf("Article(cn-test, 第四条) = %+v, %v", a, err)
+	}
+	if a, err := st.Article("sa-test", "20"); err != nil || !strings.Contains(a.Body, "البيانات") {
+		t.Errorf("Article(sa-test, 20) = %+v, %v", a, err)
+	}
+	if _, err := st.Article("eu-test", "99"); err == nil {
+		t.Error("missing article should error")
+	}
+
+	for _, c := range []struct{ q, law, wantLaw, wantNum string }{
+		{"网络安全事件", "", "cn-test", "4"},            // trigram, CJK
+		{"报告", "", "cn-test", "4"},                // 2 chars: LIKE fallback
+		{"bildirimi", "", "tr-test", "12"},        // Turkish suffix
+		{"البيانات الشخصية", "", "sa-test", "20"}, // Arabic, two words
+		{"تَسَرُّب", "", "sa-test", "20"},         // vowel marks in the query, none in the text
+		{"BREACH 72", "", "eu-test", "33"},        // case-insensitive, mixed lengths
+		{"scope", "eu-test", "eu-test", "32"},     // filtered to one law
+	} {
+		hits, err := st.Search(c.q, c.law, 5)
+		if err != nil || len(hits) == 0 || hits[0].LawID != c.wantLaw || hits[0].Num != c.wantNum {
+			t.Errorf("Search(%q, %q) = %+v, %v; want %s art %s first", c.q, c.law, hits, err, c.wantLaw, c.wantNum)
+		}
+	}
+
+	ref, _ := st.Resolve("cn-test-en")
+	if w := st.Stale(ref); !strings.Contains(w, "2017-06-01") || !strings.Contains(w, "2026-01-01") {
+		t.Errorf("stale translation not flagged: %q", w)
+	}
+	if off, _ := st.Resolve("cn-test"); st.Stale(off) != "" {
+		t.Error("an official text is never stale against itself")
+	}
+}
+
+func TestSyncKeepsOldVersionOnFailure(t *testing.T) {
+	path := corpus(t)
+	dead := []Source{{ID: "eu-test", Title: "x", Jurisdiction: "XX", Lang: "en", Kind: "official",
+		URL: "https://127.0.0.1:1/gone", Format: "html", VersionDate: "2026-01-01"}}
+	res, _ := Sync(context.Background(), path, dead, nil, http.DefaultClient)
+	if res[0].Err == nil {
+		t.Fatal("unreachable source should fail")
+	}
+	st, _ := Open(path)
+	defer st.Close()
+	if _, err := st.Article("eu-test", "33"); err != nil {
+		t.Errorf("failed re-sync dropped the previous version: %v", err)
+	}
+}
+
+func TestSyncRejectsPagesWithoutArticles(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/home":
+			fmt.Fprint(w, "<p>Welcome to the portal</p>")
+		default:
+			fmt.Fprint(w, "<p>Artículo 1. First law</p><p>Artículo 2. Again</p><p>LEY B</p><p>Artículo 1. Second law</p><p>Artículo 2. More</p>")
+		}
+	}))
+	defer srv.Close()
+	src := func(id, path, start string) Source {
+		return Source{ID: id, Title: id, Jurisdiction: "XX", Lang: "es", Kind: "official", URL: srv.URL + path,
+			Format: "html", VersionDate: "2025-01-01", Start: start}
+	}
+	path := filepath.Join(t.TempDir(), "laws.db")
+	res, _ := Sync(context.Background(), path, []Source{src("xx-home", "/home", ""), src("xx-b", "/decree", "LEY B"), src("xx-c", "/decree", "LEY C")}, nil, srv.Client())
+	if res[0].Err == nil {
+		t.Error("a page with no article headings (e.g. a redirect to a home page) must fail")
+	}
+	if res[1].Err != nil || res[1].Articles != 3 { // preamble "LEY B" + 2 articles
+		t.Errorf("start marker: %+v", res[1])
+	}
+	if res[2].Err == nil {
+		t.Error("a missing start marker must fail")
+	}
+	st, _ := Open(path)
+	defer st.Close()
+	if a, _ := st.Article("xx-b", "1"); !strings.Contains(a.Body, "Second law") {
+		t.Errorf("start marker should cut off the first law: %q", a.Body)
+	}
+}
+
+func TestOpenMissing(t *testing.T) {
+	if _, err := Open(filepath.Join(t.TempDir(), "none.db")); err != ErrNoCorpus {
+		t.Errorf("Open(missing) = %v, want ErrNoCorpus", err)
+	}
+}
+
+func TestManifest(t *testing.T) {
+	if _, err := Manifest(); err != nil {
+		t.Fatal(err)
+	}
+	bad := fstest.MapFS{"s/x.json": {Data: []byte(`[
+	 {"id":"xx-a","title":"A","jurisdiction":"XX","lang":"en","kind":"official","url":"http://plain","format":"html","version_date":"2026-01-01"},
+	 {"id":"xx-a","title":"B","jurisdiction":"XX","lang":"en","kind":"reference","translates":"xx-missing","url":"https://ok","format":"pdf","version_date":"soon"}]`)}}
+	_, err := LoadManifest(bad, "s")
+	for _, want := range []string{"url must be https", "duplicate id", "format must be", "version_date", "translates must name"} {
+		if err == nil || !strings.Contains(err.Error(), want) {
+			t.Errorf("manifest validation missed %q: %v", want, err)
+		}
+	}
+}
+
+// TestSkillLawIDsExist: the skills' "Law texts" sections name corpus ids for
+// the model to look up; a renamed or dropped source must not leave them dangling.
+func TestSkillLawIDsExist(t *testing.T) {
+	sources, err := Manifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ids := map[string]bool{}
+	for _, s := range sources {
+		ids[s.ID] = true
+	}
+	files, _ := filepath.Glob("../../skills/*/*/SKILL.md")
+	section := regexp.MustCompile(`(?s)## Law texts\n(.*?)(?:\n## |\z)`)
+	ref := regexp.MustCompile("`([a-z]{2}-[a-z0-9-]+)(?: [^`]+)?`")
+	n := 0
+	for _, f := range files {
+		raw, _ := os.ReadFile(f)
+		m := section.FindSubmatch(raw)
+		if m == nil {
+			continue
+		}
+		for _, r := range ref.FindAllSubmatch(m[1], -1) {
+			n++
+			if !ids[string(r[1])] {
+				t.Errorf("%s names law id %q, which is not in internal/laws/sources", f, r[1])
+			}
+		}
+	}
+	if n == 0 {
+		t.Error("no skill names a law id; the check found nothing to check")
+	}
+}

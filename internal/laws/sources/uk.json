@@ -1,0 +1,58 @@
+[
+  {
+    "id": "gb-dpa-2018",
+    "title": "Data Protection Act 2018",
+    "native_title": "Data Protection Act 2018 (c. 12)",
+    "jurisdiction": "GB",
+    "lang": "en",
+    "kind": "official",
+    "url": "https://www.legislation.gov.uk/ukpga/2018/12/data.htm",
+    "format": "html",
+    "version_date": "2026-11-16",
+    "terms": ["DPA 2018", "DPA", "Data Protection Act 2018"],
+    "split": "(?m)^(\\d+[A-Z]*)[A-Z][^\\n]{2,200}U\\.K\\.$",
+    "note": "Numbered sections, cited as section N. Latest available (revised) version from legislation.gov.uk; version_date is the 'up to date with all changes known to be in force on or before' date shown on the page, not a consolidation point. Sections whose heading line carries an amendment marker (e.g. inserted or substituted sections) may be missing from the index."
+  },
+  {
+    "id": "gb-uk-gdpr",
+    "title": "UK GDPR (retained Regulation (EU) 2016/679)",
+    "native_title": "Regulation (EU) 2016/679 as it forms part of UK law",
+    "jurisdiction": "GB",
+    "lang": "en",
+    "kind": "official",
+    "url": "https://www.legislation.gov.uk/eur/2016/679/data.htm",
+    "format": "html",
+    "version_date": "2026-11-16",
+    "terms": ["UK GDPR", "UK-GDPR", "GDPR UK"],
+    "note": "UK version of GDPR; articles. Latest available (revised) version from legislation.gov.uk; version_date is the 'up to date with all changes known to be in force on or before' date shown on the page, not a consolidation point.",
+    "split": "(?m)^[ \\t]*(?:\\[?F\\d+)?Article[ \\t]+(\\d+[A-Z]*)U\\.K\\."
+  },
+  {
+    "id": "gb-nis-regs-2018",
+    "title": "Network and Information Systems Regulations 2018",
+    "native_title": "The Network and Information Systems Regulations 2018 (SI 2018/506)",
+    "jurisdiction": "GB",
+    "lang": "en",
+    "kind": "official",
+    "url": "https://www.legislation.gov.uk/uksi/2018/506/data.htm",
+    "format": "html",
+    "version_date": "2026-11-16",
+    "terms": ["NIS Regulations", "NIS Regs", "NISR", "NIS Regulations 2018"],
+    "split": "(?m)^(\\d+[A-Z]?)\\.[—\\s\\[]",
+    "note": "Numbered regulations, cited as regulation N. Latest available (revised) version from legislation.gov.uk; version_date is the 'up to date with all changes known to be in force on or before' date shown on the page, not a consolidation point."
+  },
+  {
+    "id": "gb-psti-2022",
+    "title": "Product Security and Telecommunications Infrastructure Act 2022",
+    "native_title": "Product Security and Telecommunications Infrastructure Act 2022 (c. 46)",
+    "jurisdiction": "GB",
+    "lang": "en",
+    "kind": "official",
+    "url": "https://www.legislation.gov.uk/ukpga/2022/46/data.htm",
+    "format": "html",
+    "version_date": "2026-11-16",
+    "terms": ["PSTI", "PSTI Act", "PSTI Act 2022"],
+    "split": "(?m)^(\\d+[A-Z]*)[A-Z][^\\n]{2,200}U\\.K\\.$",
+    "note": "Numbered sections, cited as section N. Latest available (revised) version from legislation.gov.uk; version_date is the 'up to date with all changes known to be in force on or before' date shown on the page, not a consolidation point."
+  }
+]

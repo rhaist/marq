@@ -75,6 +75,10 @@ Canonical text (web-fetch for current wording): eur-lex Regulation (EU) 2016/679
   US is **opt-out / sectoral patchwork** (`load_skill privacy-us`). Don't assume
   a US privacy posture satisfies GDPR, or vice versa.
 
+## Law texts
+
+Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `eu-gdpr 33`, `eu-data-act`.
+
 ## Pairs with
 
 - EU cyber/resilience law: `load_skill nis2-dora`; product security: `load_skill eu-cra`.

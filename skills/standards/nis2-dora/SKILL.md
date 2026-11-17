@@ -115,6 +115,10 @@ EIOPA. These cite RTS that get revised; verify exact figures before relying.
 - **DORA:** supervisory measures + penalties per national/ESA regime; periodic
   penalty payments for critical ICT third-party providers.
 
+## Law texts
+
+Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `eu-nis2 23`, `eu-nis2-implementing`, `eu-dora 19`.
+
 ## Pairs with
 
 - `load_skill privacy-eu` (GDPR), `load_skill eu-cra` (product cybersecurity),

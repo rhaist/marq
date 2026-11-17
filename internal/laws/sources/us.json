@@ -1,0 +1,128 @@
+[
+  {
+    "id": "us-cfr-16-314",
+    "title": "GLBA Safeguards Rule - Standards for Safeguarding Customer Information",
+    "native_title": "16 CFR Part 314",
+    "jurisdiction": "US",
+    "lang": "en",
+    "kind": "official",
+    "url": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2026-11-13/title-16?part=314",
+    "format": "html",
+    "version_date": "2026-11-13",
+    "terms": [
+      "GLBA",
+      "Gramm-Leach-Bliley",
+      "Safeguards Rule",
+      "16 CFR 314",
+      "FTC"
+    ],
+    "split": "(?m)^[ \\t]*§[ \\t]*(\\d+\\.\\d+)\\b",
+    "note": "eCFR text, up to date as of 2026-11-13."
+  },
+  {
+    "id": "us-cfr-45-164-c",
+    "title": "HIPAA Security Rule - Security Standards for the Protection of Electronic PHI",
+    "native_title": "45 CFR Part 164 Subpart C",
+    "jurisdiction": "US",
+    "lang": "en",
+    "kind": "official",
+    "url": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2026-11-13/title-45?part=164&subpart=C",
+    "format": "html",
+    "version_date": "2026-11-13",
+    "terms": ["HIPAA", "Security Rule", "45 CFR 164 Subpart C", "ePHI"],
+    "split": "(?m)^[ \\t]*§[ \\t]*(\\d+\\.\\d+)\\b",
+    "note": "eCFR text, up to date as of 2026-11-13."
+  },
+  {
+    "id": "us-cfr-45-164-d",
+    "title": "HIPAA Breach Notification Rule - Notification in the Case of Breach of Unsecured PHI",
+    "native_title": "45 CFR Part 164 Subpart D",
+    "jurisdiction": "US",
+    "lang": "en",
+    "kind": "official",
+    "url": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2026-11-13/title-45?part=164&subpart=D",
+    "format": "html",
+    "version_date": "2026-11-13",
+    "terms": [
+      "HIPAA",
+      "Breach Notification Rule",
+      "45 CFR 164 Subpart D",
+      "unsecured PHI"
+    ],
+    "split": "(?m)^[ \\t]*§[ \\t]*(\\d+\\.\\d+)\\b",
+    "note": "eCFR text, up to date as of 2026-11-13."
+  },
+  {
+    "id": "us-cfr-17-229-106",
+    "title": "SEC Regulation S-K Item 106 - Cybersecurity",
+    "native_title": "17 CFR 229.106",
+    "jurisdiction": "US",
+    "lang": "en",
+    "kind": "official",
+    "url": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2026-11-13/title-17?part=229&section=229.106",
+    "format": "html",
+    "version_date": "2026-11-13",
+    "terms": [
+      "SEC",
+      "Item 106",
+      "Regulation S-K",
+      "cybersecurity disclosure",
+      "17 CFR 229.106"
+    ],
+    "split": "(?m)^[ \\t]*§[ \\t]*(\\d+\\.\\d+)\\b",
+    "note": "eCFR text, up to date as of 2026-11-13. Item 1.05 of Form 8-K (material incident disclosure) is not in the CFR text; it lives in the form itself."
+  },
+  {
+    "id": "us-cfr-32-170",
+    "title": "CMMC Program - Cybersecurity Maturity Model Certification",
+    "native_title": "32 CFR Part 170",
+    "jurisdiction": "US",
+    "lang": "en",
+    "kind": "official",
+    "url": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2026-11-13/title-32?part=170",
+    "format": "html",
+    "version_date": "2026-11-13",
+    "terms": [
+      "CMMC",
+      "32 CFR 170",
+      "Cybersecurity Maturity Model Certification",
+      "DoD"
+    ],
+    "split": "(?m)^[ \\t]*§[ \\t]*(\\d+\\.\\d+)\\b",
+    "note": "eCFR text, up to date as of 2026-11-13."
+  },
+  {
+    "id": "us-dfars-252-204-7012",
+    "title": "DFARS 252.204-7012 Safeguarding Covered Defense Information and Cyber Incident Reporting",
+    "native_title": "48 CFR 252.204-7012",
+    "jurisdiction": "US",
+    "lang": "en",
+    "kind": "official",
+    "url": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2026-11-13/title-48?part=252&section=252.204-7012",
+    "format": "html",
+    "version_date": "2026-11-13",
+    "terms": [
+      "DFARS",
+      "252.204-7012",
+      "CDI",
+      "covered defense information",
+      "NIST SP 800-171"
+    ],
+    "split": "(?m)^[ \\t]*(252\\.204-7012)\\b",
+    "note": "eCFR text, up to date as of 2026-11-13."
+  },
+  {
+    "id": "us-cfr-16-318",
+    "title": "FTC Health Breach Notification Rule",
+    "native_title": "16 CFR Part 318",
+    "jurisdiction": "US",
+    "lang": "en",
+    "kind": "official",
+    "url": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2026-11-13/title-16?part=318",
+    "format": "html",
+    "version_date": "2026-11-13",
+    "terms": ["HBNR", "Health Breach Notification Rule", "16 CFR 318", "FTC"],
+    "split": "(?m)^[ \\t]*§[ \\t]*(\\d+\\.\\d+)\\b",
+    "note": "eCFR text, up to date as of 2026-11-13."
+  }
+]

@@ -75,6 +75,7 @@ TESTS: dict[str, tuple[str, dict]] = {
     # in-process: engagement, knowledge, findings, jobs
     "set_engagement": (LOCAL, {"engagement": "smoke-test: tool plumbing check"}),
     "load_skill": (LOCAL, {}),
+    "law_lookup": (LOCAL, {}),
     "report_finding": (
         LOCAL,
         {"title": "smoke", "severity": "info", "target": EX_DOMAIN},

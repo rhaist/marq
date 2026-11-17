@@ -78,6 +78,10 @@ verify: https://csrc.nist.gov/projects/protecting-controlled-unclassified-inform
 4. Evidence per **objective**, not per requirement (`load_skill compliance-audit`, `load_skill gap-analysis`).
 5. Honest SPRS score; POA&M within the 170.21 limits; affirming official briefed.
 
+## Law texts
+
+Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `us-cfr-32-170`, `us-dfars-252-204-7012`.
+
 ## Pairs with
 
 `load_skill us-sectoral-regs` (phase state, FedRAMP, FAR CUI), `load_skill control-frameworks` (800-53 lineage), `load_skill cloud-assurance` (FedRAMP/CSP evidence), `load_skill control-mapping`, `load_skill third-party-risk` (subcontractor flowdown), `load_skill incident-response-leadership` (the 72h DC3 clock).

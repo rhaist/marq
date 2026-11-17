@@ -143,6 +143,10 @@ Write it with `write_file /work/notification-matrix.md`:
   ~May 2027, the EU Digital Omnibus single entry point), but put their dates in the diary.
 - Ransomware with no exfiltration is still a GDPR breach and is presumed a HIPAA breach.
 
+## Law texts
+
+Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `eu-gdpr 33`, `eu-nis2 23`, `eu-dora 19`, `eu-cra 14`, `gb-uk-gdpr 33`, `cn-incident-measures 4`, `jp-appi 26`, `au-cyber-security-act-2024 27`, `tr-kvkk 12`, `cl-ley-21663 9`, `mx-lfpdppp 19`, `us-cfr-45-164-d`, `us-cfr-16-318`, `vn-decree-13-2023 23`.
+
 ## Pairs with
 
 `load_skill apac-cyber-regs`, `load_skill middle-east-regs`, `load_skill latam-regs`, `load_skill privacy-apac`, `load_skill privacy-eu`.

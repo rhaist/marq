@@ -75,6 +75,10 @@ done <<<"$names"
 check "all $total skills load via load_skill" "$bad"
 grep -qi 'unknown skill' <<<"$(run load_skill '{"name":"definitely-not-a-skill"}')"
 check "unknown skill fails gracefully" $?
+grep -q 'marq laws sync' <<<"$(run law_lookup '{"law":"GDPR","article":"33"}')"
+check "law_lookup without a corpus says how to install it" $?
+grep -q 'marq laws sync' <<<"$("$BIN" laws list 2>/dev/null)"
+check "marq laws list without a corpus says how to install it" $?
 
 echo "# 3. findings deliverable (report_finding -> render_report)"
 # No severity given + a critical CVSS vector → severity must be derived as critical.

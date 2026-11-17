@@ -42,7 +42,7 @@ docker run --rm marq skills
 ```
 
 A wrong count here is the fastest way to spot a stale image or an unintended
-`MARQ_SKILLS_ONLY=1` (which drops the suite to the 8 in-process tools: `server_info`, `set_engagement`, `list_dir`, `read_file`, `write_file`, `report_finding`, `render_report`, `load_skill`).
+`MARQ_SKILLS_ONLY=1` (which drops the suite to the 9 in-process tools: `server_info`, `set_engagement`, `list_dir`, `read_file`, `write_file`, `report_finding`, `render_report`, `load_skill`, `law_lookup`).
 
 Then run a one-off tool to confirm the wrapped binaries work:
 
@@ -163,6 +163,7 @@ tool dropped on disk. Mount `/work` from the host (`-v ./work:/work`, as the
 | `list_jobs`      | List background jobs and whether each is running or done                                                                                          |
 | `job_status`     | A background job's state (running/done + exit code) + output tail                                                                                 |
 | `load_skill`     | Load a playbook (recon-footprint, ioc-pivoting, nis2-dora, …) tied to these tool names                                                            |
+| `law_lookup`     | Read a law's article text, or search the local law corpus (needs `marq laws sync` first; see below)                                               |
 
 A `report_finding` with a `cvss` vector (e.g. `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`)
 gets its base score computed. Your explicit `severity` stays authoritative; the
@@ -176,6 +177,30 @@ Tools too slow for a synchronous call (`spiderfoot`,
 `stderr.log`, and a `status` file (containing `exit=<code>`) appears when the
 scan finishes. Check progress with `list_jobs` / `job_status` (or `read_file` /
 `list_dir`). The work survives individual tool-call timeouts.
+
+### The law corpus
+
+`law_lookup` reads a local corpus of law and regulation texts, fetched from the
+official government sites listed in `internal/laws/sources/*.json`. The corpus is
+not shipped in the image or the repo: the operator builds it once, and re-runs the
+sync to pick up amendments.
+
+```bash
+marq laws sync                  # fetch every source (one site at a time)
+marq laws sync eu-gdpr br-lgpd  # or just some
+marq laws list                  # what's in the corpus, with version dates
+# in the container (the corpus lands in /work, so it survives restarts):
+docker exec <container> marq laws sync
+```
+
+Texts are stored in their original language, which is the one that binds. Where a
+government publishes an English version it is stored too, marked `reference`
+with its own version date, and a lookup warns when it predates the latest
+amendment of the original. A lookup takes an id, title or key term (`GDPR`,
+`PIPL`, `KVKK`, `个人信息保护法`) plus an article number in any style (`33`,
+`Art. 33`, `第四条`, `المادة الأولى`). Search matches substrings in any script,
+so query with the law's own terms. A source that fails to sync keeps its last
+good version.
 
 † Needs an API key (see _API keys_ below). ‡ GitHub org/repo scans need `GITHUB_TOKEN` (rate limits).
 
@@ -209,6 +234,7 @@ an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.
 | `MARQ_MAX_OUTPUT`  | `60000`                                                               | Max output chars returned to the model                                                                             |
 | `MARQ_SKILLS_ONLY` | `false`                                                               | Knowledge-only mode: serve just the skills + findings/files tools, drop every OSINT exec tool (runs with no image) |
 | `MARQ_WORK_DIR`    | `/work`                                                               | Working area (findings, job dirs)                                                                                  |
+| `MARQ_LAWS_DB`     | `$MARQ_WORK_DIR/.marq-laws.db`                                        | Law corpus file written by `marq laws sync`, read by `law_lookup`                                                  |
 
 The engagement is per-task, so the model sets it at session start with the
 `set_engagement` tool (a label plus the purpose; why in

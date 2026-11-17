@@ -76,6 +76,10 @@ There is no APAC GDPR. Each country has its own law, regulator, transfer rule an
 - **Transfer law ≠ breach law ≠ sector localisation**: three separate checks per dataset (`load_skill data-security`, `load_skill third-party-risk`).
 - Contracts: push regulator-grade clocks into DPAs with APAC processors (`load_skill legal-contractual`).
 
+## Law texts
+
+Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `cn-pipl`, `jp-appi 26`, `tw-pdpa`, `tw-pdpa-en`, `vn-decree-13-2023 23`.
+
 ## Pairs with
 
 `load_skill privacy-eu`, `load_skill privacy-us`, `load_skill apac-cyber-regs`, `load_skill uk-cyber-regs`, `load_skill choosing-a-framework`, `load_skill cloud-assurance` (C-STAR / regional attestations), `load_skill control-mapping`.

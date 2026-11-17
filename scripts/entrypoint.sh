@@ -13,7 +13,7 @@ case "${1:-}" in
 "" | mcp | serve)
   exec marq serve
   ;;
-run | tools | skills | shim | prompt | version)
+run | tools | skills | laws | shim | prompt | version)
   exec marq "$@"
   ;;
 esac

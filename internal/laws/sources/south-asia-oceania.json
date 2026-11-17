@@ -1,0 +1,35 @@
+[
+  {
+    "id": "vn-decree-13-2023",
+    "title": "Decree 13/2023/ND-CP on Personal Data Protection",
+    "native_title": "Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân",
+    "jurisdiction": "VN",
+    "lang": "vi",
+    "kind": "official",
+    "url": "https://xaydungchinhsach.chinhphu.vn/toan-van-nghi-dinh-13-2023-nd-cp-bao-ve-du-lieu-ca-nhan-119230516104357809.htm",
+    "format": "html",
+    "version_date": "2023-04-17",
+    "terms": [
+      "Decree 13",
+      "PDPD",
+      "13/2023/NĐ-CP",
+      "bảo vệ dữ liệu cá nhân",
+      "Vietnam personal data"
+    ],
+    "note": "Full text as published on the Vietnamese Government's policy portal (xaydungchinhsach.chinhphu.vn); the signed gazette copy is a PDF on vanban.chinhphu.vn. Original 17 April 2023 text; later amendments and the 2025 Personal Data Protection Law may supersede parts."
+  },
+  {
+    "id": "au-cyber-security-act-2024",
+    "title": "Cyber Security Act 2024 (Cth)",
+    "native_title": "Cyber Security Act 2024",
+    "jurisdiction": "AU",
+    "lang": "en",
+    "kind": "official",
+    "url": "https://www.legislation.gov.au/C2024A00098/asmade/2024-11-29/text/1/epub/OEBPS/document_1/document_1.html",
+    "format": "html",
+    "version_date": "2024-11-29",
+    "terms": ["Cyber Security Act", "CSA 2024", "ransomware payment reporting"],
+    "split": "(?m)^(\\d+[A-Z]{0,2}) [A-Z][a-z]",
+    "note": "As made (29 Nov 2024), served as the HTML inside legislation.gov.au's EPUB rendition; later compilations not yet tracked."
+  }
+]

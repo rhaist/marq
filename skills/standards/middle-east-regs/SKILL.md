@@ -93,6 +93,10 @@ National frameworks stand on their own terms: ECC-2 is the baseline for in-scope
 - Do not cite Israel or Bahrain figures to a regulator or in a contract; the sources are weak.
 - Re-verify against primary text after each pending item above lands.
 
+## Law texts
+
+Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `tr-kvkk 12`, `tr-kvkk-en`, `tr-cybersecurity 7`.
+
 ## Pairs with
 
 `load_skill breach-notification-matrix` (all clocks side by side), `load_skill ot-compliance`, `load_skill choosing-a-framework`, `load_skill third-party-risk` (customer and MSSP flow-down), `load_skill privacy-eu` (the GDPR baseline and transfer comparisons).

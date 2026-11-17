@@ -29,7 +29,7 @@ of APAC, the Middle East and Latin America) and on to the board report. Every sk
 records the date it was last checked. The pack is Apache-2.0, so it installs into any
 agent, including internal ones.
 
-**The tool server (optional).** 24 passive OSINT tools (34 tools in all: domain,
+**The tool server (optional).** 24 passive OSINT tools (35 tools in all: domain,
 infrastructure, people, leaked secrets in public code). They query public third-party sources (DNS resolvers, WHOIS, certificate logs, Shodan/Censys, web archives, breach databases, social and code-hosting sites) and never scan, crawl or exploit a target's hosts. The only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks). Every OSINT-tool, file and findings call lands in an operator-attributed audit log you can hand to a client or regulator, and an OSINT tool won't run if its start record can't be written (fail-closed).
 
 ## Start
@@ -133,7 +133,7 @@ API keys are listed in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-source
 
 ## What you get
 
-- **Execution:** 24 wrapped passive-OSINT tools (34 tools in all: domain/infra footprint, people,
+- **Execution:** 24 wrapped passive-OSINT tools (35 tools in all: domain/infra footprint, people,
   leaked secrets in public code), audit-logged. File tools and `exif_metadata` are sandboxed to `/work` and `/tmp`. Findings render
   to `findings.md` / `.csv` (with optional CVSS and CWE).
 - **Knowledge:** ~86 `load_skill` playbooks across 13 domains, web-researched to

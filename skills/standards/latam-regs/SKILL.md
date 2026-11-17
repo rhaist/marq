@@ -86,6 +86,10 @@ National rules stand on their own terms, and no country was found to mandate ISO
 - Keep incident records 5 years for Brazil, notified or not.
 - Treat U items as open questions for local counsel, never as settled.
 
+## Law texts
+
+Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `br-anpd-res-19`, `cl-ley-21663 9`, `cl-ley-19628`, `co-ley-1581`, `ar-ley-25326`, `mx-lfpdppp 19`.
+
 ## Pairs with
 
 `load_skill breach-notification-matrix`, `load_skill privacy-eu`, `load_skill ot-compliance`, `load_skill choosing-a-framework`, `load_skill third-party-risk`.

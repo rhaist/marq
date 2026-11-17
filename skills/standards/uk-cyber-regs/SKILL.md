@@ -84,6 +84,10 @@ Northern Ireland follows some EU product rules under the Windsor Framework; chec
 - Citing CAF v3.2 or CE v3.2 in a 2026 assessment; both were superseded.
 - Ransomware-payment ban/reporting for public sector and CNI was announced as policy (2025), but legislation in force is unconfirmed; check before advising on payment decisions (`load_skill incident-response-leadership`).
 
+## Law texts
+
+Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `gb-uk-gdpr 33`, `gb-dpa-2018`, `gb-nis-regs-2018 11`, `gb-psti-2022`.
+
 ## Pairs with
 
 `load_skill nis2-dora` (EU side), `load_skill privacy-eu`, `load_skill eu-cra`, `load_skill choosing-a-framework`, `load_skill control-mapping` (CAF↔ISO 27001↔CSF), `load_skill cloud-assurance` (what to ask a cloud/MSP supplier), `load_skill third-party-risk`.
