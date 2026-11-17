@@ -17,7 +17,7 @@ deeper pivots use `ioc-pivoting`; for sources use
 
 - **IP** → `shodan_host` (keyless InternetDB: ports/CPEs/CVEs; full banners with
   a key), IPinfo (ASN/org/geo: cloud vs residential vs hosting). Reverse-DNS via
-  HackerTarget. ORKL search for prior reporting.
+  HackerTarget. ORKL search for prior reporting (marq's `orkl` tool, `query`).
 - `ioc_lookup` runs the hash, IP and domain lookups below (CIRCL hashlookup,
   GreyNoise, OTX, urlscan) in one call; curl them directly without marq.
 - **Domain** → `ct_search` (cert age/SANs), `rdap` or `whois_lookup` (registration date; newly

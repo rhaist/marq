@@ -47,7 +47,7 @@ plain text won't drive the loop.
 3. Smoke the marq side (no model needed):
    ```bash
    python3 scripts/eval/harness.py --list-tools
-   # → server instructions: ~9500 chars / tools: 33
+   # → server instructions: ~9500 chars / tools: 34
    ```
 
 ## Run: two tiers, cheap one first
@@ -168,7 +168,7 @@ artificial setting. Because the config rides along in the result, the
 comparison stays honest and you can A/B a model to find its sweet spot. For
 strict apples-to-apples runs, leave `profiles.json` at `{"default": {}}` and
 every model runs identically. Thinking models are the clearest case: reasoning
-before each tool call is costly over marq's 33 schemas, so `no_think` plus a modest
+before each tool call is costly over marq's 34 schemas, so `no_think` plus a modest
 `max_steps` keeps them from crawling or flailing on a tool that isn't present.
 
 `results/<model>.json` keeps a history (a measurement per run), so you can
@@ -243,7 +243,7 @@ genuine model failure.
   one early qwen3 sweep scored ~half its real performance. Symptom:
   `trace.jsonl` shows few or no calls while `responses.jsonl` is full of `<tool_call>`.
 - Thinking models are slow and leak. Reasoning before every call is costly over
-  marq's 33 schemas. `/no_think` (set per model in `profiles.json`) speeds it but
+  marq's 34 schemas. `/no_think` (set per model in `profiles.json`) speeds it but
   can route the answer into `reasoning_content` (the harness falls back to it for
   the final answer). It is a real behaviour change, recorded in the measurement, so
   you can A/B `no_think` on and off.

@@ -69,6 +69,7 @@ TESTS: dict[str, tuple[str, dict]] = {
     "rdap":          (EXTERNAL, {"query": EX_DOMAIN}),
     "dnstwist":      (EXTERNAL, {"domain": EX_DOMAIN}),
     "ioc_lookup":    (EXTERNAL, {"indicator": "d41d8cd98f00b204e9800998ecf8427e"}),
+    "orkl":          (EXTERNAL, {"query": "APT29"}),
     "censys_view":   (KEY, {"assets": "8.8.8.8"}),
     # in-process: engagement, knowledge, findings, jobs
     "set_engagement": (LOCAL, {"engagement": "smoke-test: tool plumbing check"}),

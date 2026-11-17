@@ -166,6 +166,13 @@ func TestPassiveOnly(t *testing.T) {
 	if cmd := toolNamed(t, "ct_search").Build(Args{"domain": "acme.com", "include_expired": true}).Argv[2]; strings.Contains(cmd, "exclude=expired") {
 		t.Errorf("ct_search include_expired still excludes: %q", cmd)
 	}
+	refused("orkl", Args{"report_sha1": "../../etc/passwd"})
+	if cmd := toolNamed(t, "orkl").Build(Args{"query": "APT29 & x"}).Argv[2]; !strings.Contains(cmd, "query=APT29+%26+x") {
+		t.Errorf("orkl query not escaped: %q", cmd)
+	}
+	if cmd := toolNamed(t, "orkl").Build(Args{"report_sha1": "46758AA98959FDC1AE34DD3EF0AB1303879CC692"}).Argv[2]; !strings.Contains(cmd, "archive.orkl.eu/46758aa98959fdc1ae34dd3ef0ab1303879cc692.txt") {
+		t.Errorf("orkl report url: %q", cmd)
+	}
 	refused("maigret_username", Args{"username": "--parse=https://acme.com/"})
 	refused("sherlock", Args{"username": "--site"})
 	refused("h8mail_breach", Args{"email": "a@acme.com", "options": "-u https://acme.com"})

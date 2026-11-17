@@ -15,6 +15,7 @@ what else shares its infrastructure. Pivot outward, then verdict (see
 ## First move, always
 
 - ORKL full-text search the raw indicator:
+  marq's `orkl` tool (`query`), or without marq
   `curl -s 'https://orkl.eu/api/v1/library/search?query=<ioc>'`. A hit means the
   indicator already appears in a published APT/threat report; read it for actor,
   campaign, and sibling IOCs. This is the highest-value single pivot.

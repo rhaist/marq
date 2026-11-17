@@ -50,6 +50,7 @@ TOOLS=(
   "rdap@@go-rdap -j -t <domain|ip|autnum> <query>@@go-rdap -h"
   "dnstwist@@dnstwist --registered --format json --threads 8 <domain>   (background)@@dnstwist --help"
   "ioc_lookup@@curl CIRCL hashlookup / GreyNoise community / OTX / urlscan (by indicator type)@@curl --version"
+  "orkl@@curl orkl.eu library search / report text / news@@curl --version"
   "cdncheck@@cdncheck -silent (stdin IPs)@@cdncheck -h"
   "censys_view@@censys view <assets> -O json --no-spinner --no-color@@censys view --help"
   "theharvester@@theHarvester -d <domain> -b <sources> -l <limit>@@theHarvester -h"

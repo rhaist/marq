@@ -1,6 +1,6 @@
 # Usage
 
-How to build, smoke-test and drive marq, your cyber assistant: 23 passive-OSINT tools (33 tools in all)
+How to build, smoke-test and drive marq, your cyber assistant: 24 passive-OSINT tools (34 tools in all)
 and ~83 skill playbooks across 13 domains. To choose a client and model
 for the job (Claude Code / Codex as the expert, Pi for local work, LM
 Studio for testing), see [`CLIENTS.md`](CLIENTS.md); for a guided per-OS install,
@@ -144,6 +144,7 @@ All wrapped tools are passive: they query public third-party sources (DNS resolv
 | `rdap`          | go-rdap      | Registration data over RDAP for a domain, IP or ASN                 |
 | `dnstwist`      | dnstwist     | Registered lookalike domains, DNS-only (background)                 |
 | `ioc_lookup`    | curl         | Hash, IP or domain enrichment: CIRCL hashlookup, GreyNoise community, OTX, urlscan.io |
+| `orkl`          | curl         | Threat-report library search (`query`), report text by sha1 (`report_sha1`), or latest curated news (no args); keyless |
 | `exif_metadata` | exiftool     | Metadata from a staged file/dir                                     |
 | `shodan_host`   | shodan       | Exposed ports/services/CVEs for an IP (keyless via InternetDB)      |
 | `shodan_search` | shodan       | Search exposed assets (e.g. `org:`) †                               |

@@ -18,7 +18,7 @@ sources and never scan, crawl or exploit a target's hosts. The only traffic that
   do not try them against the service they belong to.
 - Several tools call third-party services (Shodan, Censys, GitHub, HIBP,
   numverify, crt.sh, the RDAP registries, GreyNoise, AlienVault OTX, urlscan.io,
-  CIRCL). Your queries leave the box and are logged by those providers, so
+  CIRCL, ORKL). Your queries leave the box and are logged by those providers, so
   do not submit data you are not permitted to disclose to a third party.
 
 ## Guardrail model: passive tools + fail-closed audit
@@ -96,8 +96,8 @@ This applies to the full Docker tool suite (skills-only above needs none of it).
 Everything marq's tools return was written by someone else: WHOIS remarks, DNS TXT
 records, certificate SANs, social profiles, threat-intel pulses, scan titles. Any
 of it can carry instructions aimed at the model (indirect prompt injection). marq
-applies two deterministic layers to all OSINT-tool output, `read_file` and
-`job_status` (`internal/untrusted`):
+applies two deterministic layers to all OSINT-tool output, `read_file`, `list_dir`
+and `job_status` (`internal/untrusted`):
 
 - It strips characters that hide text from the person reading the transcript:
   Unicode tag characters (ASCII smuggling), variation-selector smuggling, bidi
@@ -110,6 +110,10 @@ applies two deterministic layers to all OSINT-tool output, `read_file` and
 
 The OSINT tools also carry the standard MCP `readOnlyHint` and `openWorldHint`
 annotations, so clients can tell they read untrusted external content.
+
+Content the model fetches with the client's own web or shell tools never passes
+through marq and isn't fenced, so the client's tool approval and the Rule of Two
+matter most there.
 
 These layers reduce the risk; they don't remove it. Published measurements show
 delimiting lowers attack success by a few points, and adaptive attacks get past

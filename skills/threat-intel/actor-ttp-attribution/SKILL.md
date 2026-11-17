@@ -15,6 +15,7 @@ tradecraft. Lead with TTPs, treat actor naming as a hypothesis.
 ## 1. Search the evidence: ORKL first
 
 - For every IOC and tool/malware name you have, search ORKL:
+  marq's `orkl` tool (`query`), or without marq
   `curl -s 'https://orkl.eu/api/v1/library/search?query=<ioc-or-tool-or-actor>'`.
   Returns the threat reports that mention it. Overlapping reports across several
   of your indicators = a candidate cluster. Read them for the actor's named TTPs.

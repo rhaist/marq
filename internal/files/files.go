@@ -137,7 +137,7 @@ func ListDir(path string) string {
 		if len(rows) == 0 {
 			return "(empty)", nil
 		}
-		return strings.Join(rows, "\n"), nil
+		return untrusted.Wrap("dir "+path, strings.Join(rows, "\n")), nil // names of staged files are third-party too
 	})
 }
 

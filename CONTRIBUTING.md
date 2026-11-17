@@ -1,7 +1,7 @@
 # Contributing to marq
 
 Thanks for your interest in improving marq. It is a Kali-based cyber assistant:
-23 wrapped passive-OSINT tools (33 tools in all) plus an embedded skills library, exposed from a single Go
+24 wrapped passive-OSINT tools (34 tools in all) plus an embedded skills library, exposed from a single Go
 binary over MCP (`marq serve`) and direct invocation (`marq run`). This guide
 covers how to build it, the quality gates, and how to add a tool or a skill.
 
