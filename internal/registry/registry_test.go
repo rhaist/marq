@@ -137,6 +137,18 @@ func TestPassiveOnly(t *testing.T) {
 	refused("exif_metadata", Args{"path": "/etc/passwd"})
 	refused("whois_lookup", Args{"target": "-h whois.acme.com acme.com"})
 	refused("shodan_host", Args{"ip": "--help"})
+	for _, name := range []string{"ct_search", "dnstwist"} {
+		refused(name, Args{"domain": "--nameservers=ns1.acme.com"})
+		refused(name, Args{"domain": "https://acme.com/x"})
+	}
+	refused("rdap", Args{"query": "https://rdap.acme.com/x"})
+	refused("ioc_lookup", Args{"indicator": "http://acme.com/payload"})
+	if argv := toolNamed(t, "dnstwist").Build(Args{"domain": "Acme.com"}).Argv; !slices.Equal(argv, []string{"dnstwist", "--registered", "--format", "json", "--threads", "8", "acme.com"}) {
+		t.Errorf("dnstwist argv = %q", argv)
+	}
+	if argv := toolNamed(t, "rdap").Build(Args{"query": "as13335"}).Argv; !slices.Equal(argv, []string{"go-rdap", "-j", "-t", "autnum", "13335"}) {
+		t.Errorf("rdap argv = %q", argv)
+	}
 	refused("maigret_username", Args{"username": "--parse=https://acme.com/"})
 	refused("sherlock", Args{"username": "--site"})
 	refused("h8mail_breach", Args{"email": "a@acme.com", "options": "-u https://acme.com"})

@@ -335,7 +335,7 @@ func setEngagementTool() Tool {
 func All() []Tool {
 	tools := slices.Concat(
 		[]Tool{serverInfoTool(), setEngagementTool()},
-		recon(), osint(), people(), fileTools(), reportTools(), knowledgeTools(),
+		recon(), intel(), osint(), people(), fileTools(), reportTools(), knowledgeTools(),
 	)
 	if config.C.SkillsOnly {
 		// Knowledge-only mode: keep the in-process tools (skills, findings, files,

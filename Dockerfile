@@ -13,7 +13,7 @@
 # Kali image carries no Go build toolchain for the server itself. Runs on the
 # native BUILDPLATFORM and cross-compiles to TARGETARCH (CGO off) — fast on both
 # Apple Silicon (arm64) and amd64 hosts, no emulation for the Go build.
-FROM --platform=$BUILDPLATFORM golang:1.27.3 AS gobuild
+FROM --platform=$BUILDPLATFORM golang:1.27.4 AS gobuild
 ARG TARGETOS TARGETARCH
 WORKDIR /build
 COPY go.mod go.sum ./
@@ -42,7 +42,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates curl git \
         python3 python3-pip python3-venv \
         # DNS / registry
-        bind9-dnsutils whois subfinder dnsx \
+        bind9-dnsutils whois rdap subfinder dnsx dnstwist \
         # company & domain footprint
         theharvester spiderfoot libimage-exiftool-perl trufflehog \
         # people footprint
@@ -57,8 +57,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV GOBIN=/usr/local/bin GOPATH=/root/go
 RUN apt-get update \
     && apt-get install -y --no-install-recommends golang-go \
-    && go install github.com/lc/gau/v2/cmd/gau@latest \
-    && go install github.com/projectdiscovery/cdncheck/cmd/cdncheck@latest \
+    && go install github.com/lc/gau/v2/cmd/gau@v2.2.4 \
+    && go install github.com/projectdiscovery/cdncheck/cmd/cdncheck@v1.4.0 \
     && apt-get purge -y --auto-remove golang-go \
     && apt-get clean \
     && rm -rf /root/go /root/.cache/go-build /var/lib/apt/lists/*
