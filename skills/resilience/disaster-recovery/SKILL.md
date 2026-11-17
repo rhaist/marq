@@ -17,12 +17,12 @@ verify: https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloa
 
 ## Strategy tiers (cost ↑ as RTO/RPO ↓)
 
-| Tier                           | How it works                                                                 | RTO        | RPO         | Standby cost              |
-| ------------------------------ | ---------------------------------------------------------------------------- | ---------- | ----------- | ------------------------- |
-| Backup & restore               | Back up; provision + restore on disaster. Nothing running at DR site.        | hours to days | hours       | ~storage only (cheapest)  |
-| Pilot light                    | Core (DB replicated, AMIs/IaC ready) always on; app tier "dark" til failover | 10s of min | seconds to min | low (data + minimal core) |
-| Warm standby                   | Scaled-down _full_ stack always running; scale up on failover                | minutes    | seconds     | ~50 to 70% of prod           |
-| Hot / multi-site active-active | Full prod in 2+ sites serving live; DNS/LB shifts traffic                    | near-zero  | near-zero   | ~2× prod (most expensive) |
+| Tier                           | How it works                                                                 | RTO           | RPO            | Standby cost              |
+| ------------------------------ | ---------------------------------------------------------------------------- | ------------- | -------------- | ------------------------- |
+| Backup & restore               | Back up; provision + restore on disaster. Nothing running at DR site.        | hours to days | hours          | ~storage only (cheapest)  |
+| Pilot light                    | Core (DB replicated, AMIs/IaC ready) always on; app tier "dark" til failover | 10s of min    | seconds to min | low (data + minimal core) |
+| Warm standby                   | Scaled-down _full_ stack always running; scale up on failover                | minutes       | seconds        | ~50 to 70% of prod        |
+| Hot / multi-site active-active | Full prod in 2+ sites serving live; DNS/LB shifts traffic                    | near-zero     | near-zero      | ~2× prod (most expensive) |
 
 The decision is economic: pick where the cost of an outage crosses the cost of
 standby. Don't buy active-active for a Tier-3 app, and don't run a Tier-0 revenue
@@ -60,7 +60,7 @@ system on nightly backups. Tier per-activity, not one tier for the whole estate.
 | ---------------------- | ------------------------------------------------------------- | ----------- |
 | Tabletop / walkthrough | People know roles, runbook, decisions (see crisis-management) | no          |
 | Parallel / simulation  | DR stood up & validated _alongside_ live prod; no cutover     | no          |
-| Full interruption      | Real failover: prod off, run on DR, then failback            | yes (risk)  |
+| Full interruption      | Real failover: prod off, run on DR, then failback             | yes (risk)  |
 
 - Test ≥ annually, more for high-impact systems. A backup/DR you haven't _restored_ is
   a hypothesis, not a control; measure achieved RTO/RPO against target each test.

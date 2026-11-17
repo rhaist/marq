@@ -6,6 +6,31 @@
   "homepage": "https://github.com/rhaist/marq",
   "repository": "https://github.com/rhaist/marq",
   "license": "Apache-2.0",
-  "keywords": ["security", "grc", "compliance", "ot", "ics", "iec-62443", "cra", "nis2", "osint", "threat-intel"],
-  "skills": ["./architecture/", "./ciso/", "./enablers/", "./grc/", "./malware/", "./offensive/", "./physical-human/", "./reference/", "./resilience/", "./secops/", "./standards/", "./technique/", "./threat-intel/"]
+  "keywords": [
+    "security",
+    "grc",
+    "compliance",
+    "ot",
+    "ics",
+    "iec-62443",
+    "cra",
+    "nis2",
+    "osint",
+    "threat-intel"
+  ],
+  "skills": [
+    "./architecture/",
+    "./ciso/",
+    "./enablers/",
+    "./grc/",
+    "./malware/",
+    "./offensive/",
+    "./physical-human/",
+    "./reference/",
+    "./resilience/",
+    "./secops/",
+    "./standards/",
+    "./technique/",
+    "./threat-intel/"
+  ]
 }

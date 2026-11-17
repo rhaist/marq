@@ -20,7 +20,7 @@ A cloud buyer cannot audit AWS, Azure or a SaaS vendor directly, so assurance ar
 | **BSI C5**                | BSI (Germany)            | Criteria catalogue, ISAE 3000 attestation                                     | Type 1 (design) / Type 2 (period)             | German public sector, German health, DACH buyers  |
 | **ISO/IEC 27017 / 27018** | ISO/IEC                  | Cloud control guidance / PII-processor code                                   | Audited within an ISO 27001 certificate scope | Global procurement, GDPR processor diligence      |
 | **FedRAMP**               | GSA FedRAMP PMO          | US federal cloud authorization/certification                                  | 3PAO assessment + continuous monitoring       | US federal agencies; DoD CUI (via equivalency)    |
-| **EUCS**                  | ENISA / Commission       | EU certification scheme (Basic/Substantial/High)                              | **Not adopted**: nothing to certify against  | (eventually) EU public sector, NIS2/DORA evidence |
+| **EUCS**                  | ENISA / Commission       | EU certification scheme (Basic/Substantial/High)                              | **Not adopted**: nothing to certify against   | (eventually) EU public sector, NIS2/DORA evidence |
 | National schemes          | ANSSI, CCN, ACN…         | SecNumCloud (FR), ENS (ES), ACN qualification (IT)                            | Qualification/certification                   | That country's public sector / sensitive data     |
 
 ## CSA STAR, CCM and CAIQ

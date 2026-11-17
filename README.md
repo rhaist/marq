@@ -34,12 +34,12 @@ infrastructure, people, leaked secrets in public code). They query public third-
 
 Pick a path. Start simple and add a layer only when you need it:
 
-| I want…                                      | Path            | Setup                       |
-| :------------------------------------------- | :-------------- | :-------------------------- |
-| **cyber expertise inside my agent**          | skills pack     | one install command         |
-| **…the same, over MCP for any client**       | skills server   | one `go install`, no Docker |
-| **…plus the 24-tool OSINT suite to _run_**   | full MCP server | build/pull the image        |
-| **…driven by a local model**                 | full + Pi       | image + Pi + llama.cpp      |
+| I want…                                    | Path            | Setup                       |
+| :----------------------------------------- | :-------------- | :-------------------------- |
+| **cyber expertise inside my agent**        | skills pack     | one install command         |
+| **…the same, over MCP for any client**     | skills server   | one `go install`, no Docker |
+| **…plus the 24-tool OSINT suite to _run_** | full MCP server | build/pull the image        |
+| **…driven by a local model**               | full + Pi       | image + Pi + llama.cpp      |
 
 ### The skills pack: install into your agent (no server, no Docker)
 
@@ -178,12 +178,12 @@ point for audit logging, timeouts, and output truncation.
 
 ## Documentation
 
-| Doc                                    | What's in it                                                      |
-| :------------------------------------- | :---------------------------------------------------------------- |
+| Doc                                    | What's in it                                                     |
+| :------------------------------------- | :--------------------------------------------------------------- |
 | [`docs/SETUP.md`](docs/SETUP.md)       | Per-OS install: skills-only (no Docker), full suite, local model |
-| [`docs/CLIENTS.md`](docs/CLIENTS.md)   | Pick a client/model: Claude Code, Codex, Pi + llama.cpp           |
-| [`docs/USAGE.md`](docs/USAGE.md)       | Every tool, env vars, API keys, reading the audit log             |
-| [`docs/SECURITY.md`](docs/SECURITY.md) | Legal/ethical baseline, the guardrail model, hardening            |
+| [`docs/CLIENTS.md`](docs/CLIENTS.md)   | Pick a client/model: Claude Code, Codex, Pi + llama.cpp          |
+| [`docs/USAGE.md`](docs/USAGE.md)       | Every tool, env vars, API keys, reading the audit log            |
+| [`docs/SECURITY.md`](docs/SECURITY.md) | Legal/ethical baseline, the guardrail model, hardening           |
 
 ## License
 

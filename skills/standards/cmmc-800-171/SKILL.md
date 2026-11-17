@@ -12,14 +12,14 @@ metadata:
 
 ## Which revision you assess against
 
-| Document                                    | Shape                                                    | Status for DoD work                                                                                                                                               |
-| ------------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Document                                    | Shape                                                    | Status for DoD work                                                                                                                                              |
+| ------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **SP 800-171 Rev 2** (2020)                 | **110 requirements, 14 families**                        | **What 7012 and CMMC L2 require**: locked by class deviation 2024-O0013 (Rev 1, 22 May 2024) "until rescinded"; 32 CFR 170 incorporates Rev 2 by reference       |
-| **SP 800-171A** (Jun 2018)                  | **320 assessment objectives** (determination statements) | The CMMC L2 assessment procedure                                                                                                                                  |
+| **SP 800-171A** (Jun 2018)                  | **320 assessment objectives** (determination statements) | The CMMC L2 assessment procedure                                                                                                                                 |
 | SP 800-171 Rev 3 (May 2024)                 | 97 requirements, 17 families (adds PL, SA, SR), **ODPs** | Final at NIST; DoD will adopt **only by future rulemaking**; none found as of Nov 2026. DoD published its own ODP values (Apr 2025) for voluntary early adopters |
-| SP 800-171A Rev 3 (May 2024)                | Rev 3 assessment procedures                              | Not used for CMMC                                                                                                                                                 |
-| SP 800-172 (Feb 2021)                       | Enhanced requirements                                    | **CMMC L3 = 24 selected requirements** with DoD parameters                                                                                                        |
-| SP 800-172 Rev 3 / 172A Rev 3 (13 May 2026) | Enhanced requirements, new edition                       | NIST withdrew the 2021 text, but CMMC L3 references the 2021 version until DoD amends the rule (verify)                                                           |
+| SP 800-171A Rev 3 (May 2024)                | Rev 3 assessment procedures                              | Not used for CMMC                                                                                                                                                |
+| SP 800-172 (Feb 2021)                       | Enhanced requirements                                    | **CMMC L3 = 24 selected requirements** with DoD parameters                                                                                                       |
+| SP 800-172 Rev 3 / 172A Rev 3 (13 May 2026) | Enhanced requirements, new edition                       | NIST withdrew the 2021 text, but CMMC L3 references the 2021 version until DoD amends the rule (verify)                                                          |
 
 verify: https://csrc.nist.gov/projects/protecting-controlled-unclassified-information and https://dodcio.defense.gov/cmmc/
 
@@ -28,11 +28,11 @@ verify: https://csrc.nist.gov/projects/protecting-controlled-unclassified-inform
 
 ## Levels and scope
 
-| Level                                  | Requirements                     | Who assesses                                 | Cadence                                | POA&M?           |
-| -------------------------------------- | -------------------------------- | -------------------------------------------- | -------------------------------------- | ---------------- |
+| Level                                  | Requirements                     | Who assesses                                 | Cadence                                | POA&M?          |
+| -------------------------------------- | -------------------------------- | -------------------------------------------- | -------------------------------------- | --------------- |
 | **L1** (FCI)                           | 15 requirements = FAR 52.204-21  | Self                                         | Annual self-assessment + affirmation   | **No**: all MET |
-| **L2** (CUI)                           | 110 requirements (800-171 Rev 2) | Self **or** C3PAO, per the contract          | Every 3 years + **annual affirmation** | Limited (below)  |
-| **L3** (CUI, high-priority programmes) | L2 + 24 from 800-172             | DCMA **DIBCAC** (needs L2 C3PAO Final first) | Every 3 years + annual affirmation     | Limited          |
+| **L2** (CUI)                           | 110 requirements (800-171 Rev 2) | Self **or** C3PAO, per the contract          | Every 3 years + **annual affirmation** | Limited (below) |
+| **L3** (CUI, high-priority programmes) | L2 + 24 from 800-172             | DCMA **DIBCAC** (needs L2 C3PAO Final first) | Every 3 years + annual affirmation     | Limited         |
 
 **CUI asset categories (32 CFR 170.19)**. The scoping decision drives cost more than any control:
 

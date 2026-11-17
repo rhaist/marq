@@ -23,8 +23,8 @@ Don't lecture on the framework; fetch its current control text and score against
 
 Per control, rate current state on a 0-5 implementation scale:
 
-| Score | State                                                  |
-| ----- | ------------------------------------------------------ |
+| Score | State                                                 |
+| ----- | ----------------------------------------------------- |
 | 0     | Nonexistent: not done, nobody owns it.                |
 | 1     | Initial: ad hoc, undocumented, person-dependent.      |
 | 2     | Repeatable: done consistently but no written process. |
@@ -42,8 +42,8 @@ Per control, rate current state on a 0-5 implementation scale:
 
 Rank gaps by: gap size x risk x (low) effort. Quick decision rule:
 
-| Gap size | Linked risk   | Effort  | Priority     |
-| -------- | ------------- | ------- | ------------ |
+| Gap size | Linked risk   | Effort  | Priority    |
+| -------- | ------------- | ------- | ----------- |
 | >=2      | High/Critical | Any     | P1: now     |
 | any      | High/Critical | Low     | P1: now     |
 | >=2      | Medium        | Low/Med | P2: quarter |

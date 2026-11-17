@@ -8,10 +8,10 @@ depends on the work.
 
 ## Match the brain to the work
 
-| You want to…                                                                                                             | Use                                                                        | Why                                                                                                         |
-| :----------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- |
-| Run fully local: hands-on OSINT, on-box execution, the model and your data stay local _(recommended default)_ | Pi + a local model on llama.cpp + the `pi/marq` shim               | Terminal-native, no cloud model (OSINT lookups still query third-party sources); the model gets bash and calls `marq run` directly.                               |
-| Reason hard: architecture review, threat modeling, GRC/compliance, IR leadership, write the report, app/code-sec review | Claude Code or Codex (frontier model) + marq over MCP _(fallback)_ | Strongest reasoning. marq hands it the current-standards skills and the tools, and the model supplies judgment. |
+| You want to…                                                                                                            | Use                                                                | Why                                                                                                                                 |
+| :---------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------- |
+| Run fully local: hands-on OSINT, on-box execution, the model and your data stay local _(recommended default)_           | Pi + a local model on llama.cpp + the `pi/marq` shim               | Terminal-native, no cloud model (OSINT lookups still query third-party sources); the model gets bash and calls `marq run` directly. |
+| Reason hard: architecture review, threat modeling, GRC/compliance, IR leadership, write the report, app/code-sec review | Claude Code or Codex (frontier model) + marq over MCP _(fallback)_ | Strongest reasoning. marq hands it the current-standards skills and the tools, and the model supplies judgment.                     |
 
 Rule of thumb: use a local model by default, so hands-on OSINT and
 privacy-sensitive work stays on your box. Fall back to a frontier model

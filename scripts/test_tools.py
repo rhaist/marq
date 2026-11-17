@@ -31,6 +31,7 @@ Usage
 Exit code is non-zero if any tool FAILs the binary check or a tool the server
 registered has no test defined (so new tools don't silently go untested).
 """
+
 from __future__ import annotations
 
 import argparse
@@ -46,56 +47,71 @@ EX_DOMAIN = "example.com"
 STAGE = "/work/smoke"  # created in-container via write_file before file tools
 
 # Categories drive which tools run in which mode.
-LOCAL = "local"        # in-process, staged files, or reserved example.com / public IP — always run
+LOCAL = "local"  # in-process, staged files, or reserved example.com / public IP — always run
 EXTERNAL = "external"  # reaches third-party services — needs --external
-KEY = "key"            # needs an API key; run if reachable, "needs key" is fine
+KEY = "key"  # needs an API key; run if reachable, "needs key" is fine
 
 # tool name -> (mode, arguments dict). Tools the server registers but that are
 # missing here are reported as UNTESTED (and fail the run) so coverage stays honest.
 TESTS: dict[str, tuple[str, dict]] = {
     # meta
-    "server_info":   (LOCAL, {}),
+    "server_info": (LOCAL, {}),
     # files (staging happens first, see stage_files)
-    "write_file":    (LOCAL, {"path": f"{STAGE}/ping.txt", "content": "smoke"}),
-    "read_file":     (LOCAL, {"path": f"{STAGE}/ping.txt"}),
-    "list_dir":      (LOCAL, {"path": STAGE}),
+    "write_file": (LOCAL, {"path": f"{STAGE}/ping.txt", "content": "smoke"}),
+    "read_file": (LOCAL, {"path": f"{STAGE}/ping.txt"}),
+    "list_dir": (LOCAL, {"path": STAGE}),
     # DNS / registration — resolver and WHOIS only
-    "dns_lookup":    (LOCAL, {"domain": EX_DOMAIN, "record_type": "A"}),
-    "whois_lookup":  (LOCAL, {"target": EX_DOMAIN}),
-    "dnsx":          (LOCAL, {"hosts": EX_DOMAIN, "records": "a"}),
-    "cdncheck":      (LOCAL, {"targets": "1.1.1.1"}),
-    "asnmap":        (EXTERNAL, {"target": "1.1.1.1"}),
-    "ct_search":     (EXTERNAL, {"domain": EX_DOMAIN}),
-    "rdap":          (EXTERNAL, {"query": EX_DOMAIN}),
-    "dnstwist":      (EXTERNAL, {"domain": EX_DOMAIN}),
-    "ioc_lookup":    (EXTERNAL, {"indicator": "d41d8cd98f00b204e9800998ecf8427e"}),
-    "orkl":          (EXTERNAL, {"query": "APT29"}),
-    "censys_view":   (KEY, {"assets": "8.8.8.8"}),
+    "dns_lookup": (LOCAL, {"domain": EX_DOMAIN, "record_type": "A"}),
+    "whois_lookup": (LOCAL, {"target": EX_DOMAIN}),
+    "dnsx": (LOCAL, {"hosts": EX_DOMAIN, "records": "a"}),
+    "cdncheck": (LOCAL, {"targets": "1.1.1.1"}),
+    "asnmap": (EXTERNAL, {"target": "1.1.1.1"}),
+    "ct_search": (EXTERNAL, {"domain": EX_DOMAIN}),
+    "rdap": (EXTERNAL, {"query": EX_DOMAIN}),
+    "dnstwist": (EXTERNAL, {"domain": EX_DOMAIN}),
+    "ioc_lookup": (EXTERNAL, {"indicator": "d41d8cd98f00b204e9800998ecf8427e"}),
+    "orkl": (EXTERNAL, {"query": "APT29"}),
+    "censys_view": (KEY, {"assets": "8.8.8.8"}),
     # in-process: engagement, knowledge, findings, jobs
     "set_engagement": (LOCAL, {"engagement": "smoke-test: tool plumbing check"}),
-    "load_skill":    (LOCAL, {}),
-    "report_finding": (LOCAL, {"title": "smoke", "severity": "info", "target": EX_DOMAIN}),
+    "load_skill": (LOCAL, {}),
+    "report_finding": (
+        LOCAL,
+        {"title": "smoke", "severity": "info", "target": EX_DOMAIN},
+    ),
     "render_report": (LOCAL, {}),
-    "list_jobs":     (LOCAL, {}),
-    "job_status":    (LOCAL, {"job": "no-such-job"}),
+    "list_jobs": (LOCAL, {}),
+    "job_status": (LOCAL, {"job": "no-such-job"}),
     "exif_metadata": (LOCAL, {"path": f"{STAGE}/meta.txt"}),
     # osint — these reach the internet, gated behind --external
-    "subfinder":     (EXTERNAL, {"domain": EX_DOMAIN}),
-    "theharvester":  (EXTERNAL, {"domain": EX_DOMAIN, "limit": 50}),
-    "gau_urls":      (EXTERNAL, {"domain": EX_DOMAIN}),
-    "spiderfoot":    (EXTERNAL, {"target": EX_DOMAIN}),
-    "sherlock":      (EXTERNAL, {"username": "octocat", "timeout": 15}),
-    "maigret_username": (EXTERNAL, {"username": "octocat", "timeout": 15, "top_sites": 20}),
+    "subfinder": (EXTERNAL, {"domain": EX_DOMAIN}),
+    "theharvester": (EXTERNAL, {"domain": EX_DOMAIN, "limit": 50}),
+    "gau_urls": (EXTERNAL, {"domain": EX_DOMAIN}),
+    "spiderfoot": (EXTERNAL, {"target": EX_DOMAIN}),
+    "sherlock": (EXTERNAL, {"username": "octocat", "timeout": 15}),
+    "maigret_username": (
+        EXTERNAL,
+        {"username": "octocat", "timeout": 15, "top_sites": 20},
+    ),
     "email_accounts": (EXTERNAL, {"email": "test@example.com"}),
-    "phoneinfoga":   (EXTERNAL, {"number": "+12025550123"}),
-    "trufflehog":    (EXTERNAL, {"source": "git https://github.com/trufflesecurity/test_keys"}),
+    "phoneinfoga": (EXTERNAL, {"number": "+12025550123"}),
+    "trufflehog": (
+        EXTERNAL,
+        {"source": "git https://github.com/trufflesecurity/test_keys"},
+    ),
     # key-gated — run if reachable; "needs key" is an acceptable outcome
     "h8mail_breach": (KEY, {"email": "test@example.com"}),
-    "shodan_host":   (EXTERNAL, {"ip": "1.1.1.1"}),
-    "shodan_search": (KEY, {"query": "org:\"Example\"", "limit": 5}),
+    "shodan_host": (EXTERNAL, {"ip": "1.1.1.1"}),
+    "shodan_search": (KEY, {"query": 'org:"Example"', "limit": 5}),
 }
 
-FORWARD_KEYS = ["SHODAN_API_KEY", "CENSYS_API_TOKEN", "CENSYS_ORG_ID", "GITHUB_TOKEN", "NUMVERIFY_API_KEY"]
+FORWARD_KEYS = [
+    "SHODAN_API_KEY",
+    "CENSYS_API_TOKEN",
+    "CENSYS_ORG_ID",
+    "GITHUB_TOKEN",
+    "NUMVERIFY_API_KEY",
+]
 
 
 class MCP:
@@ -105,7 +121,9 @@ class MCP:
         self.proc = proc
         self._id = 0
 
-    def _send(self, method: str, params: dict | None = None, *, notify: bool = False) -> int | None:
+    def _send(
+        self, method: str, params: dict | None = None, *, notify: bool = False
+    ) -> int | None:
         msg = {"jsonrpc": "2.0", "method": method}
         if params is not None:
             msg["params"] = params
@@ -144,11 +162,15 @@ class MCP:
         return self._recv(rid, timeout)
 
     def initialize(self) -> dict:
-        resp = self.call("initialize", {
-            "protocolVersion": "2025-11-25",
-            "capabilities": {},
-            "clientInfo": {"name": "marq-smoke", "version": "1.0"},
-        }, timeout=30)
+        resp = self.call(
+            "initialize",
+            {
+                "protocolVersion": "2025-11-25",
+                "capabilities": {},
+                "clientInfo": {"name": "marq-smoke", "version": "1.0"},
+            },
+            timeout=30,
+        )
         self._send("notifications/initialized", {}, notify=True)
         return resp
 
@@ -162,7 +184,9 @@ def render_result(resp: dict) -> tuple[str, bool]:
     sc = result.get("structuredContent")
     if isinstance(sc, dict) and "result" in sc:
         return str(sc["result"]), is_err
-    parts = [c.get("text", "") for c in result.get("content", []) if c.get("type") == "text"]
+    parts = [
+        c.get("text", "") for c in result.get("content", []) if c.get("type") == "text"
+    ]
     return "\n".join(parts), is_err
 
 
@@ -172,7 +196,9 @@ def classify(text: str, is_err: bool) -> tuple[str, str]:
     if "binary not found in image" in low:
         return "FAIL", "missing binary"
     if is_err:
-        return "ERROR", text.strip().splitlines()[0][:80] if text.strip() else "wrapper raised"
+        return "ERROR", text.strip().splitlines()[0][
+            :80
+        ] if text.strip() else "wrapper raised"
     if "launched in the background" in low:
         return "PASS", "backgrounded"
     if "[timed out" in low:
@@ -195,26 +221,51 @@ def stage_files(mcp: MCP, timeout: float) -> None:
     """Create the benign input files the file-driven tools need."""
     staged = {f"{STAGE}/meta.txt": "smoke-test metadata sample\n"}
     for path, content in staged.items():
-        mcp.call("tools/call", {"name": "write_file", "arguments": {"path": path, "content": content}}, timeout)
+        mcp.call(
+            "tools/call",
+            {"name": "write_file", "arguments": {"path": path, "content": content}},
+            timeout,
+        )
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Smoke-test every marq tool.")
-    ap.add_argument("--image", default="marq", help="docker image to test (default: marq)")
-    ap.add_argument("--timeout", type=int, default=90, help="server per-command timeout, seconds (default 90)")
-    ap.add_argument("--external", action="store_true", help="also test tools that reach the internet")
-    ap.add_argument("--only", default="", help="comma-separated subset of tool names to test")
-    ap.add_argument("--json", action="store_true", help="emit machine-readable JSON results")
+    ap.add_argument(
+        "--image", default="marq", help="docker image to test (default: marq)"
+    )
+    ap.add_argument(
+        "--timeout",
+        type=int,
+        default=90,
+        help="server per-command timeout, seconds (default 90)",
+    )
+    ap.add_argument(
+        "--external",
+        action="store_true",
+        help="also test tools that reach the internet",
+    )
+    ap.add_argument(
+        "--only", default="", help="comma-separated subset of tool names to test"
+    )
+    ap.add_argument(
+        "--json", action="store_true", help="emit machine-readable JSON results"
+    )
     args = ap.parse_args()
 
     only = {s.strip() for s in args.only.split(",") if s.strip()}
     read_timeout = args.timeout + 20
 
     docker_cmd = [
-        "docker", "run", "--rm", "-i",
-        "-e", f"MARQ_TIMEOUT={args.timeout}",
-        "-e", "MARQ_OPERATOR=smoke-test",
-        "-e", "MARQ_ENGAGEMENT=tool-smoke-test",
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "-e",
+        f"MARQ_TIMEOUT={args.timeout}",
+        "-e",
+        "MARQ_OPERATOR=smoke-test",
+        "-e",
+        "MARQ_ENGAGEMENT=tool-smoke-test",
     ]
     for k in FORWARD_KEYS:
         if os.environ.get(k):
@@ -223,8 +274,13 @@ def main() -> int:
 
     print(f"# launching: {' '.join(docker_cmd)}", file=sys.stderr)
     proc = subprocess.Popen(
-        docker_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL, text=True, bufsize=1, env={**os.environ},
+        docker_cmd,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        bufsize=1,
+        env={**os.environ},
     )
     mcp = MCP(proc)
     results: list[dict] = []
@@ -243,21 +299,29 @@ def main() -> int:
             if only and name not in only:
                 continue
             if name not in TESTS:
-                results.append({"tool": name, "status": "UNTESTED", "note": "no test args defined"})
+                results.append(
+                    {"tool": name, "status": "UNTESTED", "note": "no test args defined"}
+                )
                 continue
             mode, tool_args = TESTS[name]
             if mode == EXTERNAL and not args.external:
-                results.append({"tool": name, "status": "SKIP", "note": "needs --external"})
+                results.append(
+                    {"tool": name, "status": "SKIP", "note": "needs --external"}
+                )
                 continue
             t0 = time.monotonic()
             try:
-                resp = mcp.call("tools/call", {"name": name, "arguments": tool_args}, read_timeout)
+                resp = mcp.call(
+                    "tools/call", {"name": name, "arguments": tool_args}, read_timeout
+                )
                 text, is_err = render_result(resp)
                 status, note = classify(text, is_err)
             except (TimeoutError, EOFError) as exc:
                 status, note = "HANG", str(exc)
             dt = time.monotonic() - t0
-            results.append({"tool": name, "status": status, "note": note, "secs": round(dt, 1)})
+            results.append(
+                {"tool": name, "status": status, "note": note, "secs": round(dt, 1)}
+            )
             print(f"  {status:8} {name:18} {note} ({dt:.1f}s)", file=sys.stderr)
     finally:
         try:
@@ -275,7 +339,10 @@ def main() -> int:
     for r in results:
         counts[r["status"]] = counts.get(r["status"], 0) + 1
     print("\n" + "=" * 60, file=sys.stderr)
-    print("SUMMARY: " + "  ".join(f"{k}={v}" for k, v in sorted(counts.items())), file=sys.stderr)
+    print(
+        "SUMMARY: " + "  ".join(f"{k}={v}" for k, v in sorted(counts.items())),
+        file=sys.stderr,
+    )
     bad = [r for r in results if r["status"] in ("FAIL", "ERROR", "UNTESTED", "HANG")]
     if bad:
         print("\nNeeds attention:", file=sys.stderr)

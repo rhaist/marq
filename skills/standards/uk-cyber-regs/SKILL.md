@@ -65,15 +65,15 @@ The UK left the EU before NIS2, DORA, the CRA and the AI Act, so **none of them 
 
 ## Where the UK diverges from the EU (the comparison clients ask for)
 
-| Topic                | EU                                                | UK                                                                                                                              |
-| -------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Topic                | EU                                                | UK                                                                                                                             |
+| -------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | Scope of cyber law   | NIS2: 18 sectors, essential + important, size-cap | NIS Regs: 5 sectors + RDSPs; Bill adds MSPs, data centres, critical suppliers; **no manufacturing/food/postal/chemicals tier** |
-| Incident clock       | 24h early warning / 72h / 1 month                 | Today ≤72h; Bill: 24h initial / 72h full                                                                                        |
-| Management liability | Explicit NIS2 board accountability + training     | No NIS2-style board-liability clause in the Bill (verify); governance via CAF A1                                   |
-| Privacy              | GDPR; Digital Omnibus pending                     | UK GDPR + DUAA: recognised LIs, looser ADM, own transfer test, complaints duty                                                  |
-| Products             | CRA (full lifecycle, CE marking)                  | PSTI (3 requirements, consumer IoT only)                                                                                        |
-| Finance              | DORA (Regulation, CTPP oversight live)            | PRA/FCA op-res + CTP regime + PS26/2 (2027)                                                                                     |
-| AI                   | AI Act                                            | No AI statute; regulator-led principles                                                                                         |
+| Incident clock       | 24h early warning / 72h / 1 month                 | Today ≤72h; Bill: 24h initial / 72h full                                                                                       |
+| Management liability | Explicit NIS2 board accountability + training     | No NIS2-style board-liability clause in the Bill (verify); governance via CAF A1                                               |
+| Privacy              | GDPR; Digital Omnibus pending                     | UK GDPR + DUAA: recognised LIs, looser ADM, own transfer test, complaints duty                                                 |
+| Products             | CRA (full lifecycle, CE marking)                  | PSTI (3 requirements, consumer IoT only)                                                                                       |
+| Finance              | DORA (Regulation, CTPP oversight live)            | PRA/FCA op-res + CTP regime + PS26/2 (2027)                                                                                    |
+| AI                   | AI Act                                            | No AI statute; regulator-led principles                                                                                        |
 
 Northern Ireland follows some EU product rules under the Windsor Framework; check whether the CRA reaches NI-placed products before assuming PSTI alone (verify).
 

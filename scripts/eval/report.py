@@ -16,6 +16,7 @@ and regenerates scripts/eval/LEADERBOARD.md from all results. Commit both.
 For a quick look without writing anything, add --no-publish — it just prints the
 aggregate + per-task pass-rates.
 """
+
 from __future__ import annotations
 import argparse, datetime, hashlib, json, math, pathlib, subprocess, sys
 
@@ -33,17 +34,30 @@ def wilson(k, n, z=1.96):
     half = (z / denom) * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n))
     return (max(0.0, center - half), min(1.0, center + half))
 
+
 # Tools that never query a third party — everything else is a lookup that
 # engagement_set expects to be preceded by set_engagement.
 SAFE = {
-    "server_info", "set_engagement", "load_skill", "list_dir", "read_file",
-    "write_file", "list_jobs", "job_status", "render_report", "report_finding",
+    "server_info",
+    "set_engagement",
+    "load_skill",
+    "list_dir",
+    "read_file",
+    "write_file",
+    "list_jobs",
+    "job_status",
+    "render_report",
+    "report_finding",
 }
 
 
 def calls_of(rundir):
     f = rundir / "trace.jsonl"
-    return [json.loads(l) for l in f.read_text().splitlines() if l.strip()] if f.exists() else []
+    return (
+        [json.loads(l) for l in f.read_text().splitlines() if l.strip()]
+        if f.exists()
+        else []
+    )
 
 
 def is_aborted(meta):
@@ -59,7 +73,11 @@ def score_one(task, rundir):
     calls = calls_of(rundir)
     names = [c["name"] for c in calls]
     exp = task["expect"]
-    meta = json.loads((rundir / "meta.json").read_text()) if (rundir / "meta.json").exists() else {}
+    meta = (
+        json.loads((rundir / "meta.json").read_text())
+        if (rundir / "meta.json").exists()
+        else {}
+    )
     out = {}
     if "skills" in exp:
         loaded = set()
@@ -89,15 +107,20 @@ def slug(model):
 
 def marq_commit():
     try:
-        return subprocess.check_output(["git", "rev-parse", "--short", "HEAD"],
-                                       cwd=HERE, text=True).strip()
+        return subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"], cwd=HERE, text=True
+        ).strip()
     except Exception:
         return "unknown"
 
 
 def taskset_meta(tasks_path):
     raw = pathlib.Path(tasks_path).read_bytes()
-    version = (HERE / "tasks.version").read_text().strip() if (HERE / "tasks.version").exists() else "v0"
+    version = (
+        (HERE / "tasks.version").read_text().strip()
+        if (HERE / "tasks.version").exists()
+        else "v0"
+    )
     n = sum(1 for l in raw.decode().splitlines() if l.strip())
     return {"version": version, "hash": hashlib.sha256(raw).hexdigest()[:12], "n": n}
 
@@ -119,7 +142,9 @@ def aggregate(runs, tasks):
     abort fraction is returned so main() can refuse to publish a broken sweep
     (survivors must not stand in for 90%-crashed runs — the original 194/210 bug)."""
     by_model, aborts = {}, {}
-    for rundir in sorted(p for p in runs.iterdir() if p.is_dir() and (p / "meta.json").exists()):
+    for rundir in sorted(
+        p for p in runs.iterdir() if p.is_dir() and (p / "meta.json").exists()
+    ):
         meta = json.loads((rundir / "meta.json").read_text())
         task = tasks.get(meta["task"])
         if not task:
@@ -129,7 +154,9 @@ def aggregate(runs, tasks):
         if is_aborted(meta):
             a[0] += 1
             continue
-        cell = by_model.setdefault(meta["model"], {}).setdefault((meta["skills_on"], meta["task"]), [])
+        cell = by_model.setdefault(meta["model"], {}).setdefault(
+            (meta["skills_on"], meta["task"]), []
+        )
         cell.append(passed(task, rundir))
     return by_model, aborts
 
@@ -155,12 +182,19 @@ def measurement(model_cells, tasks, args, sampling, info):
     task_ids = all_ids
 
     def pooled(on):  # pool task x repeat into one binomial → rate + Wilson CI
-        bools = [b for t in task_ids if (on, t) in model_cells for b in model_cells[(on, t)]]
+        bools = [
+            b for t in task_ids if (on, t) in model_cells for b in model_cells[(on, t)]
+        ]
         if not bools:
             return None
         k, n = sum(bools), len(bools)
         lo, hi = wilson(k, n)
-        return {"rate": round(k / n, 3), "ci": [round(lo, 3), round(hi, 3)], "k": k, "n": n}
+        return {
+            "rate": round(k / n, 3),
+            "ci": [round(lo, 3), round(hi, 3)],
+            "k": k,
+            "n": n,
+        }
 
     on, off = pooled(True), pooled(False)
     per_on = {t: rate(model_cells.get((True, t), [])) for t in task_ids}
@@ -170,10 +204,16 @@ def measurement(model_cells, tasks, args, sampling, info):
         "date": datetime.date.today().isoformat(),
         "marq_commit": marq_commit(),
         "taskset": taskset_meta(args.tasks),
-        "runtime": dict({"server": args.runtime, "repeats": args.repeats}, **sampling,
-                        **({"context_length": info["loaded_context_length"]}
-                           if info.get("loaded_context_length") else {}),
-                        **({"note": args.note} if args.note else {})),
+        "runtime": dict(
+            {"server": args.runtime, "repeats": args.repeats},
+            **sampling,
+            **(
+                {"context_length": info["loaded_context_length"]}
+                if info.get("loaded_context_length")
+                else {}
+            ),
+            **({"note": args.note} if args.note else {}),
+        ),
         "scores": {
             "skills_on": on,
             "skills_off": off,
@@ -186,10 +226,14 @@ def measurement(model_cells, tasks, args, sampling, info):
 def publish(model, meas, args, info):
     path = args.results / f"{slug(model)}.json"
     quant = args.quant or info.get("quantization") or "?"
-    doc = json.loads(path.read_text()) if path.exists() else {
-        "model": {"id": model, "quant": quant, "params": args.params},
-        "measurements": [],
-    }
+    doc = (
+        json.loads(path.read_text())
+        if path.exists()
+        else {
+            "model": {"id": model, "quant": quant, "params": args.params},
+            "measurements": [],
+        }
+    )
     doc["model"]["quant"] = quant
     if info.get("arch"):
         doc["model"]["arch"] = info["arch"]
@@ -212,7 +256,9 @@ def _cell(d):  # "0.83 [0.55–0.95]" or "—"
 
 def render_leaderboard(args):
     version = (HERE / "tasks.version").read_text().strip()
-    n_tasks = sum(1 for l in (HERE / "tasks.jsonl").read_text().splitlines() if l.strip())
+    n_tasks = sum(
+        1 for l in (HERE / "tasks.jsonl").read_text().splitlines() if l.strip()
+    )
     rows = []
     for path in sorted(args.results.glob("*.json")):
         doc = json.loads(path.read_text())
@@ -240,8 +286,10 @@ def render_leaderboard(args):
     for _r, model, s, m in rows:
         lift = "—" if s["lift"] is None else f"{s['lift']:+.2f}"
         n = s["skills_on"]["n"]
-        out.append(f"| {model['id']} | {model.get('quant','?')} | {_cell(s['skills_on'])} "
-                   f"| {_cell(s['skills_off'])} | {lift} | {n} | `{m['marq_commit']}` | {m['date']} |")
+        out.append(
+            f"| {model['id']} | {model.get('quant', '?')} | {_cell(s['skills_on'])} "
+            f"| {_cell(s['skills_off'])} | {lift} | {n} | `{m['marq_commit']}` | {m['date']} |"
+        )
     if not rows:
         out.append("| _(no results yet)_ | | | | | | | |")
     # Write the board beside the results it's derived from, so a `--results`
@@ -256,15 +304,39 @@ def render_leaderboard(args):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("runs")
-    ap.add_argument("--quant", default="", help="quant tag, e.g. Q4_K_M (llama.cpp /props can't report it)")
+    ap.add_argument(
+        "--quant",
+        default="",
+        help="quant tag, e.g. Q4_K_M (llama.cpp /props can't report it)",
+    )
     ap.add_argument("--params", default="", help="param count, e.g. 7B (optional)")
-    ap.add_argument("--runtime", default="llama.cpp", help="server name, e.g. llama.cpp")
-    ap.add_argument("--note", default="", help="load-config provenance the harness can't see, e.g. 'ctx=65536, full GPU offload, llama.cpp b####'")
-    ap.add_argument("--repeats", type=int, default=1, help="repeats used in the sweep (for provenance)")
+    ap.add_argument(
+        "--runtime", default="llama.cpp", help="server name, e.g. llama.cpp"
+    )
+    ap.add_argument(
+        "--note",
+        default="",
+        help="load-config provenance the harness can't see, e.g. 'ctx=65536, full GPU offload, llama.cpp b####'",
+    )
+    ap.add_argument(
+        "--repeats",
+        type=int,
+        default=1,
+        help="repeats used in the sweep (for provenance)",
+    )
     ap.add_argument("--tasks", default=str(HERE / "tasks.jsonl"))
     ap.add_argument("--results", type=pathlib.Path, default=HERE / "results")
-    ap.add_argument("--no-publish", action="store_true", help="aggregate + print only, don't write results/")
-    ap.add_argument("--max-abort-frac", type=float, default=0.10, help="refuse to publish a model whose runs aborted above this fraction (default 0.10) — aborts are environment failures, not model behavior, so numbers computed on them are noise")
+    ap.add_argument(
+        "--no-publish",
+        action="store_true",
+        help="aggregate + print only, don't write results/",
+    )
+    ap.add_argument(
+        "--max-abort-frac",
+        type=float,
+        default=0.10,
+        help="refuse to publish a model whose runs aborted above this fraction (default 0.10) — aborts are environment failures, not model behavior, so numbers computed on them are noise",
+    )
     args = ap.parse_args()
     args.results = pathlib.Path(args.results)
 
@@ -284,7 +356,10 @@ def main():
     for model, cells in sorted(by_model.items()):
         meta0 = meta_for(runs, model)
         sampling = meta0.get("sampling") or (
-            {"temperature": meta0["temperature"]} if meta0.get("temperature") is not None else {})
+            {"temperature": meta0["temperature"]}
+            if meta0.get("temperature") is not None
+            else {}
+        )
         info = meta0.get("model_info") or {}
         meas = measurement(cells, tasks, args, sampling, info)
         if meta0.get("no_think") is not None:
@@ -294,15 +369,19 @@ def main():
         oc = f"{on['rate']:.2f} {on['ci']} n={on['n']}" if on else "—"
         na, nt = aborts.get(model, [0, 0])
         afrac = na / nt if nt else 0.0
-        print(f"{model}  on={oc}  off={off['rate'] if off else '—'}  lift={s['lift']}  "
-              f"aborted={na}/{nt} ({afrac:.0%})")
+        print(
+            f"{model}  on={oc}  off={off['rate'] if off else '—'}  lift={s['lift']}  "
+            f"aborted={na}/{nt} ({afrac:.0%})"
+        )
         for t, r in s["per_task"].items():
             print(f"    {t:24} on={r['on']:.2f} off={r['off']:.2f}")
         if not args.no_publish:
             # Fail-closed publish: a broken sweep (too many aborts) must not become a leaderboard row.
             if afrac > args.max_abort_frac:
-                print(f"  -> SKIPPED — {afrac:.0%} of runs aborted (> {args.max_abort_frac:.0%}); "
-                      f"fix the environment and re-run. Not published.")
+                print(
+                    f"  -> SKIPPED — {afrac:.0%} of runs aborted (> {args.max_abort_frac:.0%}); "
+                    f"fix the environment and re-run. Not published."
+                )
                 continue
             print("  ->", publish(model, meas, args, info))
     if not args.no_publish:

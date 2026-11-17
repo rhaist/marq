@@ -20,6 +20,7 @@ Requires a built `marq` image (the default --marq-cmd docker-runs it). For a
 quick local smoke without Kali: --marq-cmd 'go run ./cmd/marq serve' (in-process
 tools only; exec tools like subfinder are listed but their Kali binaries are missing).
 """
+
 from __future__ import annotations
 import argparse, hashlib, json, os, re, select, shlex, subprocess, sys, time, urllib.request, pathlib
 
@@ -78,21 +79,31 @@ class MCP:
         return self._recv(self._send(method, params), timeout)
 
     def initialize(self):
-        resp = self.call("initialize", {
-            "protocolVersion": "2025-11-25",
-            "capabilities": {},
-            "clientInfo": {"name": "marq-eval", "version": "1.0"},
-        }, timeout=120)
+        resp = self.call(
+            "initialize",
+            {
+                "protocolVersion": "2025-11-25",
+                "capabilities": {},
+                "clientInfo": {"name": "marq-eval", "version": "1.0"},
+            },
+            timeout=120,
+        )
         self._send("notifications/initialized", {}, notify=True)
         return resp.get("result", {})
 
     def list_tools(self):
-        return self.call("tools/list", {}, timeout=120).get("result", {}).get("tools", [])
+        return (
+            self.call("tools/list", {}, timeout=120).get("result", {}).get("tools", [])
+        )
 
     def call_tool(self, name, args, timeout=60):
         resp = self.call("tools/call", {"name": name, "arguments": args}, timeout)
         result = resp.get("result", {})
-        parts = [c.get("text", "") for c in result.get("content", []) if c.get("type") == "text"]
+        parts = [
+            c.get("text", "")
+            for c in result.get("content", [])
+            if c.get("type") == "text"
+        ]
         return "\n".join(parts), bool(result.get("isError"))
 
 
@@ -117,14 +128,18 @@ def text_tool_calls(msg):
 
 
 def openai_tools(tools):
-    return [{
-        "type": "function",
-        "function": {
-            "name": t["name"],
-            "description": t.get("description", ""),
-            "parameters": t.get("inputSchema") or {"type": "object", "properties": {}},
-        },
-    } for t in tools]
+    return [
+        {
+            "type": "function",
+            "function": {
+                "name": t["name"],
+                "description": t.get("description", ""),
+                "parameters": t.get("inputSchema")
+                or {"type": "object", "properties": {}},
+            },
+        }
+        for t in tools
+    ]
 
 
 def native_model_info(base_url, model):
@@ -164,7 +179,10 @@ def chat(base_url, api_key, model, messages, tools, timeout, sampling):
     req = urllib.request.Request(
         base_url.rstrip("/") + "/chat/completions",
         data=json.dumps(body).encode(),
-        headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"},
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}",
+        },
     )
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.load(r)["choices"][0]["message"]
@@ -184,8 +202,11 @@ def spawn_marq(marq_cmd, work):
     env.setdefault("MARQ_AUDIT_LOG", str(pathlib.Path(work) / "audit.jsonl"))
     return subprocess.Popen(
         shlex.split(marq_cmd.format(work=work)),
-        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-        text=True, env=env,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        env=env,
     )
 
 
@@ -233,8 +254,10 @@ def priming_fingerprint(marq_cmd, system=None):
 
 def run_task(args, model, skills_on, task, repeat, model_info, cfg):
     slug = model.replace("/", "_").replace(":", "_")
-    rundir = (pathlib.Path(args.out)
-              / f"{slug}__skills-{'on' if skills_on else 'off'}__{task['id']}__r{repeat}")
+    rundir = (
+        pathlib.Path(args.out)
+        / f"{slug}__skills-{'on' if skills_on else 'off'}__{task['id']}__r{repeat}"
+    )
     # Resume: a long sweep can be killed midway (background-task time caps), so
     # skip runs that already completed cleanly — a real trajectory, not an
     # init-aborted stub. Re-run with --fresh to force every run.
@@ -267,20 +290,41 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
         except Exception as e:
             shutdown_marq(proc)
             if attempt < INIT_ATTEMPTS:
-                print(f"  {rundir.name}: init failed ({e}) — retrying ({attempt}/{INIT_ATTEMPTS - 1})")
+                print(
+                    f"  {rundir.name}: init failed ({e}) — retrying ({attempt}/{INIT_ATTEMPTS - 1})"
+                )
                 time.sleep(INIT_BACKOFF * attempt)
                 continue
             (rundir / "trace.jsonl").write_text("")
             (rundir / "responses.jsonl").write_text("")
-            (rundir / "meta.json").write_text(json.dumps({
-                "model": model, "skills_on": skills_on, "task": task["id"], "repeat": repeat,
-                "sampling": {k: v for k, v in cfg.items() if k not in ("no_think", "max_steps")},
-                "no_think": cfg["no_think"], "max_steps": cfg["max_steps"],
-                "base_url": args.base_url, "model_info": model_info,
-                "priming": priming_fingerprint(args.marq_cmd),  # no prompt built yet
-                "steps": 0, "final": f"[harness error: init: {e}]",
-            }, indent=2))
-            print(f"  {rundir.name}: init failed after {INIT_ATTEMPTS} attempts ({e}) — aborted, continuing")
+            (rundir / "meta.json").write_text(
+                json.dumps(
+                    {
+                        "model": model,
+                        "skills_on": skills_on,
+                        "task": task["id"],
+                        "repeat": repeat,
+                        "sampling": {
+                            k: v
+                            for k, v in cfg.items()
+                            if k not in ("no_think", "max_steps")
+                        },
+                        "no_think": cfg["no_think"],
+                        "max_steps": cfg["max_steps"],
+                        "base_url": args.base_url,
+                        "model_info": model_info,
+                        "priming": priming_fingerprint(
+                            args.marq_cmd
+                        ),  # no prompt built yet
+                        "steps": 0,
+                        "final": f"[harness error: init: {e}]",
+                    },
+                    indent=2,
+                )
+            )
+            print(
+                f"  {rundir.name}: init failed after {INIT_ATTEMPTS} attempts ({e}) — aborted, continuing"
+            )
             return rundir
 
     try:
@@ -293,43 +337,74 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
             # comparability with the committed LEADERBOARD; revisit as a
             # methodology change (hold this prompt identical to the on-arm, minus
             # load_skill) if isolating the knowledge-layer effect becomes the goal.
-            system = ("You are a security operator with the following tools. Use them to "
-                      "complete the task.")
+            system = (
+                "You are a security operator with the following tools. Use them to "
+                "complete the task."
+            )
         else:
             system = init.get("instructions") or "You are marq, a security assistant."
         if cfg["no_think"]:
-            system += "\n\n/no_think"  # qwen3 et al.: skip the reasoning block (much faster)
+            system += (
+                "\n\n/no_think"  # qwen3 et al.: skip the reasoning block (much faster)
+            )
 
-        messages = [{"role": "system", "content": system},
-                    {"role": "user", "content": task["prompt"]}]
+        messages = [
+            {"role": "system", "content": system},
+            {"role": "user", "content": task["prompt"]},
+        ]
         tool_schemas = openai_tools(tools)
         # Everything in cfg except the harness-control keys is sampling, so a
         # profile can carry a model's full recommended set (top_k/min_p/
         # repeat_penalty etc.) — llama.cpp's OpenAI server accepts the sampling
         # extras (top_k, min_p, repeat_penalty).
         sampling = {k: v for k, v in cfg.items() if k not in ("no_think", "max_steps")}
-        trace = []      # tool calls (scored)
+        trace = []  # tool calls (scored)
         responses = []  # raw model turns incl. reasoning (for later semantic analysis)
         final = ""
         for step in range(cfg["max_steps"]):
             try:
-                msg = chat(args.base_url, args.api_key, model, messages, tool_schemas, args.timeout, sampling)
+                msg = chat(
+                    args.base_url,
+                    args.api_key,
+                    model,
+                    messages,
+                    tool_schemas,
+                    args.timeout,
+                    sampling,
+                )
             except Exception as e:  # endpoint down / model missing — record and stop
                 final = f"[harness error: {e}]"
                 break
-            responses.append({"step": step, "message": msg})  # full raw response, untrimmed
+            responses.append(
+                {"step": step, "message": msg}
+            )  # full raw response, untrimmed
             structured = msg.get("tool_calls") or []
             text_calls = [] if structured else text_tool_calls(msg)
-            if not structured and not text_calls:  # final answer (content, or reasoning if content empty)
+            if (
+                not structured and not text_calls
+            ):  # final answer (content, or reasoning if content empty)
                 final = msg.get("content") or msg.get("reasoning_content") or ""
                 break
             if structured:
-                messages.append({k: msg[k] for k in ("role", "content", "tool_calls") if msg.get(k) is not None})
+                messages.append(
+                    {
+                        k: msg[k]
+                        for k in ("role", "content", "tool_calls")
+                        if msg.get(k) is not None
+                    }
+                )
             else:  # text-form calls: record the turn as plain assistant text
-                messages.append({"role": "assistant", "content": (msg.get("content") or msg.get("reasoning_content") or "")[:4000]})
+                messages.append(
+                    {
+                        "role": "assistant",
+                        "content": (
+                            msg.get("content") or msg.get("reasoning_content") or ""
+                        )[:4000],
+                    }
+                )
             text_results = []
             aborted = False
-            for tc in (structured or text_calls):
+            for tc in structured or text_calls:
                 if structured:
                     fn = tc.get("function", {})
                     name, raw = fn.get("name", ""), fn.get("arguments") or "{}"
@@ -342,32 +417,75 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
                 try:  # a hung/dead tool fails THIS run, never the whole sweep
                     out, is_err = mcp.call_tool(name, a)
                 except Exception as e:
-                    trace.append({"step": step, "name": name, "args": a, "is_error": True,
-                                  "result_head": f"[tool call failed: {e}]"[:600], "via": via})
+                    trace.append(
+                        {
+                            "step": step,
+                            "name": name,
+                            "args": a,
+                            "is_error": True,
+                            "result_head": f"[tool call failed: {e}]"[:600],
+                            "via": via,
+                        }
+                    )
                     final = final or f"[aborted: {name} {e}]"
                     aborted = True
                     break
-                trace.append({"step": step, "name": name, "args": a, "is_error": is_err,
-                              "result_head": out[:600], "via": via})
+                trace.append(
+                    {
+                        "step": step,
+                        "name": name,
+                        "args": a,
+                        "is_error": is_err,
+                        "result_head": out[:600],
+                        "via": via,
+                    }
+                )
                 if structured:
-                    messages.append({"role": "tool", "tool_call_id": tc.get("id", ""), "content": out})
+                    messages.append(
+                        {
+                            "role": "tool",
+                            "tool_call_id": tc.get("id", ""),
+                            "content": out,
+                        }
+                    )
                 else:
                     text_results.append(f"{name} -> {out}")
             if aborted:  # marq server likely wedged; end this run, next spawns fresh
                 break
             if text_results:  # feed text-call results back as a user turn (no tool_call_id to bind to)
-                messages.append({"role": "user", "content": "[tool results]\n" + "\n".join(text_results)})
+                messages.append(
+                    {
+                        "role": "user",
+                        "content": "[tool results]\n" + "\n".join(text_results),
+                    }
+                )
 
-        (rundir / "trace.jsonl").write_text("".join(json.dumps(t) + "\n" for t in trace))
-        (rundir / "responses.jsonl").write_text("".join(json.dumps(r) + "\n" for r in responses))
+        (rundir / "trace.jsonl").write_text(
+            "".join(json.dumps(t) + "\n" for t in trace)
+        )
+        (rundir / "responses.jsonl").write_text(
+            "".join(json.dumps(r) + "\n" for r in responses)
+        )
         (rundir / "messages.json").write_text(json.dumps(messages, indent=2))
-        (rundir / "meta.json").write_text(json.dumps({
-            "model": model, "skills_on": skills_on, "task": task["id"], "repeat": repeat,
-            "sampling": sampling, "no_think": cfg["no_think"], "max_steps": cfg["max_steps"],
-            "base_url": args.base_url, "model_info": model_info,
-            "priming": priming_fingerprint(args.marq_cmd, system),
-            "steps": len(trace), "final": final,
-        }, indent=2))
+        (rundir / "meta.json").write_text(
+            json.dumps(
+                {
+                    "model": model,
+                    "skills_on": skills_on,
+                    "task": task["id"],
+                    "repeat": repeat,
+                    "sampling": sampling,
+                    "no_think": cfg["no_think"],
+                    "max_steps": cfg["max_steps"],
+                    "base_url": args.base_url,
+                    "model_info": model_info,
+                    "priming": priming_fingerprint(args.marq_cmd, system),
+                    "steps": len(trace),
+                    "final": final,
+                },
+                indent=2,
+            )
+        )
         print(f"  {rundir.name}: {len(trace)} tool calls")
         return rundir
     finally:
@@ -379,15 +497,21 @@ def smoke_verdict(out_dir, model, tasks):
     for the capability sample. Indicative only, no pass/fail gate; returns False
     when no run completed, so a crashed or empty sweep never looks like a result."""
     import report  # sibling module; sys.path[0] is this script's dir when run directly
+
     out = pathlib.Path(out_dir)
     slug = model.replace("/", "_").replace(":", "_")
     bar = "=" * 60
-    print(f"\n{bar}\nSMOKE — {model}  (capability sample, skills-on, completed runs only)\n{bar}")
+    print(
+        f"\n{bar}\nSMOKE — {model}  (capability sample, skills-on, completed runs only)\n{bar}"
+    )
     completed = 0
     for t in tasks:
-        dirs = [d for d in sorted(out.glob(f"{slug}__skills-on__{t['id']}__r*"))
-                if (d / "meta.json").exists()
-                and not report.is_aborted(json.loads((d / "meta.json").read_text()))]
+        dirs = [
+            d
+            for d in sorted(out.glob(f"{slug}__skills-on__{t['id']}__r*"))
+            if (d / "meta.json").exists()
+            and not report.is_aborted(json.loads((d / "meta.json").read_text()))
+        ]
         print(f"  {sum(report.passed(t, d) for d in dirs)}/{len(dirs)}  {t['id']}")
         completed += len(dirs)
     print(bar)
@@ -405,23 +529,67 @@ def _loads(s):
 
 def main():
     p = argparse.ArgumentParser(description="marq eval harness")
-    p.add_argument("--base-url", default="http://localhost:8080/v1", help="OpenAI-compatible endpoint (llama.cpp llama-server default)")
-    p.add_argument("--api-key", default="llama", help="ignored by most local servers; some require non-empty")
+    p.add_argument(
+        "--base-url",
+        default="http://localhost:8080/v1",
+        help="OpenAI-compatible endpoint (llama.cpp llama-server default)",
+    )
+    p.add_argument(
+        "--api-key",
+        default="llama",
+        help="ignored by most local servers; some require non-empty",
+    )
     p.add_argument("--models", default="", help="comma-separated model ids to sweep")
     p.add_argument("--skills", choices=["on", "off", "both"], default="both")
-    p.add_argument("--tasks", default=str(pathlib.Path(__file__).with_name("tasks.jsonl")))
+    p.add_argument(
+        "--tasks", default=str(pathlib.Path(__file__).with_name("tasks.jsonl"))
+    )
     p.add_argument("--out", default=str(pathlib.Path(__file__).with_name("runs")))
-    p.add_argument("--marq-cmd", default=DEFAULT_MARQ_CMD, help="command to start `marq serve`; {work} is substituted")
+    p.add_argument(
+        "--marq-cmd",
+        default=DEFAULT_MARQ_CMD,
+        help="command to start `marq serve`; {work} is substituted",
+    )
     p.add_argument("--max-steps", type=int, default=12)
-    p.add_argument("--repeats", type=int, default=1, help="runs per task (use 3+ for published numbers; LLMs are stochastic)")
-    p.add_argument("--fresh", action="store_true", help="re-run every task even if a completed result exists (default: resume, skipping done runs)")
-    p.add_argument("--temperature", type=float, default=0.2, help="pinned + recorded for reproducibility")
-    p.add_argument("--top-p", type=float, default=1.0, help="pinned + recorded for reproducibility")
-    p.add_argument("--no-think", action="store_true", help="default; append /no_think to skip reasoning (qwen3 et al.) — override per model in profiles.json")
-    p.add_argument("--profiles", default=str(pathlib.Path(__file__).with_name("profiles.json")), help="per-model config overrides (temperature/top_p/no_think/max_steps)")
+    p.add_argument(
+        "--repeats",
+        type=int,
+        default=1,
+        help="runs per task (use 3+ for published numbers; LLMs are stochastic)",
+    )
+    p.add_argument(
+        "--fresh",
+        action="store_true",
+        help="re-run every task even if a completed result exists (default: resume, skipping done runs)",
+    )
+    p.add_argument(
+        "--temperature",
+        type=float,
+        default=0.2,
+        help="pinned + recorded for reproducibility",
+    )
+    p.add_argument(
+        "--top-p", type=float, default=1.0, help="pinned + recorded for reproducibility"
+    )
+    p.add_argument(
+        "--no-think",
+        action="store_true",
+        help="default; append /no_think to skip reasoning (qwen3 et al.) — override per model in profiles.json",
+    )
+    p.add_argument(
+        "--profiles",
+        default=str(pathlib.Path(__file__).with_name("profiles.json")),
+        help="per-model config overrides (temperature/top_p/no_think/max_steps)",
+    )
     p.add_argument("--timeout", type=int, default=300, help="per model call (s)")
-    p.add_argument("--list-tools", action="store_true", help="smoke the marq MCP leg and exit")
-    p.add_argument("--smoke", action="store_true", help="Tier-1 go/no-go: a small capability sample, skills-on, 3x — prints per-task pass counts instead of the leaderboard sweep")
+    p.add_argument(
+        "--list-tools", action="store_true", help="smoke the marq MCP leg and exit"
+    )
+    p.add_argument(
+        "--smoke",
+        action="store_true",
+        help="Tier-1 go/no-go: a small capability sample, skills-on, 3x — prints per-task pass counts instead of the leaderboard sweep",
+    )
     args = p.parse_args()
 
     if args.list_tools:
@@ -432,7 +600,7 @@ def main():
             mcp = MCP(proc)
             init = mcp.initialize()
             tools = mcp.list_tools()
-            print(f"server instructions: {len(init.get('instructions',''))} chars")
+            print(f"server instructions: {len(init.get('instructions', ''))} chars")
             print(f"tools: {len(tools)}")
             print("  " + ", ".join(t["name"] for t in tools[:12]) + " ...")
         finally:
@@ -447,7 +615,11 @@ def main():
     if args.smoke and args.out == p.get_default("out"):
         args.out = str(pathlib.Path(args.out) / "_smoke")
 
-    profiles = json.loads(pathlib.Path(args.profiles).read_text()) if pathlib.Path(args.profiles).is_file() else {}
+    profiles = (
+        json.loads(pathlib.Path(args.profiles).read_text())
+        if pathlib.Path(args.profiles).is_file()
+        else {}
+    )
     models = [m.strip() for m in args.models.split(",") if m.strip()]
     if not models:
         p.error("pass --models (comma-separated) or --list-tools")
@@ -463,12 +635,18 @@ def main():
     for model in models:
         # CLI flags are the defaults; the model's profile (else "default") overrides
         # them, so each model competes under its own recorded config.
-        cfg = {"temperature": args.temperature, "top_p": args.top_p,
-               "no_think": args.no_think, "max_steps": args.max_steps}
+        cfg = {
+            "temperature": args.temperature,
+            "top_p": args.top_p,
+            "no_think": args.no_think,
+            "max_steps": args.max_steps,
+        }
         cfg.update(profiles.get(model) or profiles.get("default") or {})
         info = native_model_info(args.base_url, model)
-        print(f"# {model}: quant={info.get('quantization','?')} ctx={info.get('loaded_context_length','?')} "
-              f"| temp={cfg['temperature']} top_p={cfg['top_p']} no_think={cfg['no_think']} max_steps={cfg['max_steps']}")
+        print(
+            f"# {model}: quant={info.get('quantization', '?')} ctx={info.get('loaded_context_length', '?')} "
+            f"| temp={cfg['temperature']} top_p={cfg['top_p']} no_think={cfg['no_think']} max_steps={cfg['max_steps']}"
+        )
         for on in skills:
             print(f"# model={model} skills={'on' if on else 'off'}")
             for task in tasks:
@@ -480,7 +658,9 @@ def main():
         return 0 if all(ok) else 1
     print(f"\nruns in {args.out}")
     print(f"look:    python3 scripts/eval/report.py {args.out} --no-publish")
-    print(f"publish: python3 scripts/eval/report.py {args.out} --quant <Q> --runtime llama.cpp")
+    print(
+        f"publish: python3 scripts/eval/report.py {args.out} --quant <Q> --runtime llama.cpp"
+    )
     return 0
 
 

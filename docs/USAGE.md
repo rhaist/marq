@@ -102,34 +102,34 @@ All wrapped tools are passive: they query public third-party sources and never s
 
 ### Session
 
-| Tool             | Purpose                                                      |
-| ---------------- | ------------------------------------------------------------ |
-| `server_info`    | Operator, recorded engagement/purpose, what marq covers      |
-| `set_engagement` | Record the investigation label + purpose (GDPR: say why)     |
+| Tool             | Purpose                                                  |
+| ---------------- | -------------------------------------------------------- |
+| `server_info`    | Operator, recorded engagement/purpose, what marq covers  |
+| `set_engagement` | Record the investigation label + purpose (GDPR: say why) |
 
 ### Information gathering: company and domain footprint
 
-| Tool            | Wraps        | Purpose                                                             |
-| --------------- | ------------ | ------------------------------------------------------------------- |
-| `theharvester`  | theHarvester | Emails, employees, hosts, subdomains                                |
-| `spiderfoot`    | spiderfoot   | Broad automated OSINT footprint, passive use case (background)     |
-| `subfinder`     | subfinder    | Passive subdomain enum                                              |
-| `dns_lookup`    | dig          | DNS records (no zone transfers)                                     |
-| `dnsx`          | dnsx         | Bulk DNS resolution / record enum                                   |
-| `whois_lookup`  | whois        | Registration data                                                   |
-| `asnmap`        | whois + curl | IP/domain → ASN, ASN → CIDRs                                        |
-| `cdncheck`      | cdncheck     | CDN/cloud/WAF IP detection                                          |
-| `ct_search`     | curl (crt.sh) | Certificates issued for a domain and subdomains (CT logs)          |
-| `rdap`          | go-rdap      | Registration data over RDAP for a domain, IP or ASN                 |
-| `dnstwist`      | dnstwist     | Registered lookalike domains, DNS-only (background)                 |
-| `ioc_lookup`    | curl         | Hash, IP or domain enrichment: CIRCL hashlookup, GreyNoise community, OTX, urlscan.io |
-| `orkl`          | curl         | Threat-report library search (`query`), report text by sha1 (`report_sha1`), or latest curated news (no args); keyless |
-| `exif_metadata` | exiftool     | Metadata from a staged file/dir                                     |
-| `shodan_host`   | shodan       | Exposed ports/services/CVEs for an IP (keyless via InternetDB)      |
-| `shodan_search` | shodan       | Search exposed assets (e.g. `org:`) †                               |
-| `trufflehog`    | trufflehog   | Leaked secrets in public git hosts (GitHub, GitLab, Bitbucket, Codeberg; unverified) ‡           |
-| `gau_urls`      | gau          | Known URLs from Wayback/CommonCrawl/OTX/URLScan (background)        |
-| `censys_view`   | cencli       | Censys host/web/cert lookup (search is paid-only) †                 |
+| Tool            | Wraps         | Purpose                                                                                                                |
+| --------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `theharvester`  | theHarvester  | Emails, employees, hosts, subdomains                                                                                   |
+| `spiderfoot`    | spiderfoot    | Broad automated OSINT footprint, passive use case (background)                                                         |
+| `subfinder`     | subfinder     | Passive subdomain enum                                                                                                 |
+| `dns_lookup`    | dig           | DNS records (no zone transfers)                                                                                        |
+| `dnsx`          | dnsx          | Bulk DNS resolution / record enum                                                                                      |
+| `whois_lookup`  | whois         | Registration data                                                                                                      |
+| `asnmap`        | whois + curl  | IP/domain → ASN, ASN → CIDRs                                                                                           |
+| `cdncheck`      | cdncheck      | CDN/cloud/WAF IP detection                                                                                             |
+| `ct_search`     | curl (crt.sh) | Certificates issued for a domain and subdomains (CT logs)                                                              |
+| `rdap`          | go-rdap       | Registration data over RDAP for a domain, IP or ASN                                                                    |
+| `dnstwist`      | dnstwist      | Registered lookalike domains, DNS-only (background)                                                                    |
+| `ioc_lookup`    | curl          | Hash, IP or domain enrichment: CIRCL hashlookup, GreyNoise community, OTX, urlscan.io                                  |
+| `orkl`          | curl          | Threat-report library search (`query`), report text by sha1 (`report_sha1`), or latest curated news (no args); keyless |
+| `exif_metadata` | exiftool      | Metadata from a staged file/dir                                                                                        |
+| `shodan_host`   | shodan        | Exposed ports/services/CVEs for an IP (keyless via InternetDB)                                                         |
+| `shodan_search` | shodan        | Search exposed assets (e.g. `org:`) †                                                                                  |
+| `trufflehog`    | trufflehog    | Leaked secrets in public git hosts (GitHub, GitLab, Bitbucket, Codeberg; unverified) ‡                                 |
+| `gau_urls`      | gau           | Known URLs from Wayback/CommonCrawl/OTX/URLScan (background)                                                           |
+| `censys_view`   | cencli        | Censys host/web/cert lookup (search is paid-only) †                                                                    |
 
 ### Information gathering: people footprint
 
@@ -143,11 +143,11 @@ All wrapped tools are passive: they query public third-party sources and never s
 
 ### Working files (`/work`, `/tmp`)
 
-| Tool         | Purpose                                                          |
-| ------------ | ---------------------------------------------------------------- |
-| `list_dir`   | List a directory in the working area                             |
-| `read_file`  | Read back output a tool wrote to disk                             |
-| `write_file` | Stage an input file (a host list for `dnsx`, …)                 |
+| Tool         | Purpose                                         |
+| ------------ | ----------------------------------------------- |
+| `list_dir`   | List a directory in the working area            |
+| `read_file`  | Read back output a tool wrote to disk           |
+| `write_file` | Stage an input file (a host list for `dnsx`, …) |
 
 These, and `exif_metadata`, are sandboxed to `/work`, `/tmp` and `MARQ_WORK_DIR` (see [`SECURITY.md`](SECURITY.md#container-hardening-applied)). Together they make the file-driven tools usable: the model can
 `write_file` a host list then `dnsx` it, or `read_file` a result another
@@ -162,7 +162,7 @@ tool dropped on disk. Mount `/work` from the host (`-v ./work:/work`, as the
 | `render_report`  | Write the severity-sorted `findings.md` + `findings.csv` deliverable                                                                              |
 | `list_jobs`      | List background jobs and whether each is running or done                                                                                          |
 | `job_status`     | A background job's state (running/done + exit code) + output tail                                                                                 |
-| `load_skill`     | Load a playbook (recon-footprint, ioc-pivoting, nis2-dora, …) tied to these tool names                                         |
+| `load_skill`     | Load a playbook (recon-footprint, ioc-pivoting, nis2-dora, …) tied to these tool names                                                            |
 
 A `report_finding` with a `cvss` vector (e.g. `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`)
 gets its base score computed. Your explicit `severity` stays authoritative; the
@@ -199,16 +199,16 @@ an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.
 
 ## Environment variables
 
-| Variable               | Default                     | Meaning                                                                                                           |
-| ---------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `MARQ_OPERATOR`        | `marq` (bare binary), `unknown` (image); `pi/marq` shim: host `$USER` | Recorded in every audit record; the accountability anchor, env-set only                |
-| `MARQ_ENGAGEMENT`      | `unspecified`               | Investigation label + purpose (initial default; overridable by `set_engagement`)                                  |
-| `MARQ_AUDIT_LOG`       | `/var/log/marq/audit.jsonl` | Audit log path                                                                                                    |
-| `MARQ_TIMEOUT`         | `900`                       | Default per-command timeout (seconds)                                                                             |
-| `MARQ_MAX_TIMEOUT`     | `3600`                      | Cap on how long a background job may run                                                                          |
-| `MARQ_MAX_OUTPUT`      | `60000`                     | Max output chars returned to the model                                                                            |
-| `MARQ_SKILLS_ONLY`     | `false`                     | Knowledge-only mode: serve just the skills + findings/files tools, drop every OSINT exec tool (runs with no image) |
-| `MARQ_WORK_DIR`        | `/work`                     | Working area (findings, job dirs)                                                                                 |
+| Variable           | Default                                                               | Meaning                                                                                                            |
+| ------------------ | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `MARQ_OPERATOR`    | `marq` (bare binary), `unknown` (image); `pi/marq` shim: host `$USER` | Recorded in every audit record; the accountability anchor, env-set only                                            |
+| `MARQ_ENGAGEMENT`  | `unspecified`                                                         | Investigation label + purpose (initial default; overridable by `set_engagement`)                                   |
+| `MARQ_AUDIT_LOG`   | `/var/log/marq/audit.jsonl`                                           | Audit log path                                                                                                     |
+| `MARQ_TIMEOUT`     | `900`                                                                 | Default per-command timeout (seconds)                                                                              |
+| `MARQ_MAX_TIMEOUT` | `3600`                                                                | Cap on how long a background job may run                                                                           |
+| `MARQ_MAX_OUTPUT`  | `60000`                                                               | Max output chars returned to the model                                                                             |
+| `MARQ_SKILLS_ONLY` | `false`                                                               | Knowledge-only mode: serve just the skills + findings/files tools, drop every OSINT exec tool (runs with no image) |
+| `MARQ_WORK_DIR`    | `/work`                                                               | Working area (findings, job dirs)                                                                                  |
 
 The engagement is per-task, so the model sets it at session start with the
 `set_engagement` tool (a label plus the purpose; why in

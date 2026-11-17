@@ -61,11 +61,11 @@ DLP enforces the handling matrix by inspecting data in three places:
 
 ## Encryption: at rest, in transit, in use
 
-| State          | Protects against                            | Standard                                         | Catch                                                                                                                             |
-| -------------- | ------------------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| State          | Protects against                            | Standard                                         | Catch                                                                                                                            |
+| -------------- | ------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
 | **At rest**    | Stolen disk/backup/DB file                  | AES-256 (XTS for disk, GCM for records)          | Transparent disk/DB encryption protects a _powered-off_ disk only; a live app/DB sees plaintext. Doesn't stop a compromised app. |
-| **In transit** | Network sniffing / MITM                     | **TLS 1.3** (1.2 floor; kill TLS 1.0/1.1, SSLv3) | Internal/east-west traffic too, not just edge. mTLS for service-to-service.                                                       |
-| **In use**     | Cloud host/hypervisor/insider w/ RAM access | **Confidential computing** (TEEs)                | Newer, perf overhead, attestation complexity.                                                                                     |
+| **In transit** | Network sniffing / MITM                     | **TLS 1.3** (1.2 floor; kill TLS 1.0/1.1, SSLv3) | Internal/east-west traffic too, not just edge. mTLS for service-to-service.                                                      |
+| **In use**     | Cloud host/hypervisor/insider w/ RAM access | **Confidential computing** (TEEs)                | Newer, perf overhead, attestation complexity.                                                                                    |
 
 **Encryption in use / confidential computing** (verify, fast-moving):
 

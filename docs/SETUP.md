@@ -24,11 +24,11 @@ fully-local work).
 
 ## Pick a path
 
-| Path                   | You get                                      | Needs                   | Setup                                                             |
-| ---------------------- | -------------------------------------------- | ----------------------- | ----------------------------------------------------------------- |
-| Skills only            | the knowledge library + findings/files tools | Go, no Docker           | [below](#skills-only-no-docker), one `go install`                |
-| Full MCP server        | skills and the OSINT tool suite              | Docker                  | build the image, then any MCP client                              |
-| Full + local model     | the above, driven by a local model           | Docker + Pi + llama.cpp | the [Pi subsection](#4-run-with-a-local-model-pi--the-marq-skill) |
+| Path               | You get                                      | Needs                   | Setup                                                             |
+| ------------------ | -------------------------------------------- | ----------------------- | ----------------------------------------------------------------- |
+| Skills only        | the knowledge library + findings/files tools | Go, no Docker           | [below](#skills-only-no-docker), one `go install`                 |
+| Full MCP server    | skills and the OSINT tool suite              | Docker                  | build the image, then any MCP client                              |
+| Full + local model | the above, driven by a local model           | Docker + Pi + llama.cpp | the [Pi subsection](#4-run-with-a-local-model-pi--the-marq-skill) |
 
 Start at the top and add a layer only when you need it. The image is the same for
 the two full paths, so build it once. Per-client setup is in [`CLIENTS.md`](CLIENTS.md).

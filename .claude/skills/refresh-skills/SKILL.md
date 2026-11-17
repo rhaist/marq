@@ -20,12 +20,14 @@ Run the periodic review sweep of the `skills/` pack. Today's date is the review 
 3. **Review the diff** (`git diff skills/`) and resolve anything the agents flagged as unverified with the user.
 
 4. **Bump review dates** for every skill the sweep covered, and the pack version:
+
    ```bash
    d=$(date +%F)
    v=$(date +%Y).$((10#$(date +%m))).$((10#$(date +%d)))   # semver: no leading zeros
    find skills -name SKILL.md -exec sed -i '' "s/^  verified: \".*\"/  verified: \"$d\"/" {} +
    sed -i '' "s/\"version\": \".*\"/\"version\": \"$v\"/" skills/.claude-plugin/plugin.json
    ```
+
    (GNU sed: drop the `''` after `-i`.)
 
 5. **Gates:** `go vet ./... && go test ./... && bash scripts/e2e.sh`, `go run ./cmd/marq skills --stale` (expect 0), `claude plugin validate . && claude plugin validate ./skills`, the official validator (`pip install "git+https://github.com/agentskills/agentskills#subdirectory=skills-ref"` in a venv, then `skills-ref validate` on every `skills/*/*/`), and `npx -y skills add ./ --list </dev/null` must report every skill with nothing skipped.

@@ -19,11 +19,11 @@ There is no general US cyber law; obligations attach by **what you do** (public 
 | Nonbank financial institution              | GLBA **Safeguards Rule**               | FTC                | Written infosec program; **notify FTC ≤30 days** (≥500 consumers)                     |
 | Bank / depository institution              | GLBA via banking agencies              | OCC/FDIC/FRB/NCUA  | **36-hour** computer-security incident notice to regulator                            |
 | NY-licensed financial/insurance entity     | **23 NYCRR Part 500** (NYDFS)          | NY DFS             | **72-hour** incident notice; **24-hour** extortion-payment notice                     |
-| DoD contractor handling **CUI**            | **CMMC 2.0** (+ DFARS 252.204-7012)    | DoD / C3PAO        | Level 1 to 3 assessment; **72-hour** incident report to DC3                              |
-| Cloud service sold **to federal agencies** | **FedRAMP**                            | GSA / FedRAMP      | FedRAMP Certification (Class A to D, 2026 rules) before federal use                      |
+| DoD contractor handling **CUI**            | **CMMC 2.0** (+ DFARS 252.204-7012)    | DoD / C3PAO        | Level 1 to 3 assessment; **72-hour** incident report to DC3                           |
+| Cloud service sold **to federal agencies** | **FedRAMP**                            | GSA / FedRAMP      | FedRAMP Certification (Class A to D, 2026 rules) before federal use                   |
 | Federal agency / its IT contractors        | **FISMA / NIST 800-53**                | OMB / CISA / NIST  | Agency ATO program                                                                    |
 | Any federal contractor handling CUI        | **NIST SP 800-171**                    | Contracting agency | 110 controls; SPRS score                                                              |
-| Critical-infrastructure owner/operator     | **CIRCIA** (when final) + sector rules | CISA + sector      | Covered-incident reporting (rule pending; see below)                                 |
+| Critical-infrastructure owner/operator     | **CIRCIA** (when final) + sector rules | CISA + sector      | Covered-incident reporting (rule pending; see below)                                  |
 
 ## SEC cybersecurity disclosure (public companies)
 

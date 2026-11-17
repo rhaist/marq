@@ -204,14 +204,14 @@ what stops two different task sets pooling under one label. With an empty
 a dataset that never existed. Each task declares an `expect` block, and the scorer
 only runs the checks present:
 
-| check                  | meaning                                                            |
-| :--------------------- | :----------------------------------------------------------------- |
-| `skills`               | the named skills were `load_skill`'d                               |
-| `tools_any`            | at least one of these tools was called                             |
-| `tools_all`            | every one of these tools was called (chained tasks)                |
-| `engagement_set`       | `set_engagement` preceded the first third-party-querying tool      |
-| `artifact`             | the named file landed in `work/` (e.g. `findings.md`)              |
-| `answer_contains`      | the final answer states the required facts (knowledge tasks)       |
+| check             | meaning                                                       |
+| :---------------- | :------------------------------------------------------------ |
+| `skills`          | the named skills were `load_skill`'d                          |
+| `tools_any`       | at least one of these tools was called                        |
+| `tools_all`       | every one of these tools was called (chained tasks)           |
+| `engagement_set`  | `set_engagement` preceded the first third-party-querying tool |
+| `artifact`        | the named file landed in `work/` (e.g. `findings.md`)         |
+| `answer_contains` | the final answer states the required facts (knowledge tasks)  |
 
 The `malware-triage` task is most meaningful with a real sample staged at
 `/work/sample.bin`, but it still scores the model's tool and skill choice without one.

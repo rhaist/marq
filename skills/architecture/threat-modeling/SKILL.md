@@ -33,7 +33,7 @@ Microsoft's classification; apply each letter to each DFD element. Each maps to 
 | -------------------------- | --------------- | ----------------------------------------- |
 | **S**poofing               | Authentication  | Forged token, impersonated service        |
 | **T**ampering              | Integrity       | Modified request/data in transit or store |
-| **R**epudiation            | Non-repudiation | "I never did that": no audit trail       |
+| **R**epudiation            | Non-repudiation | "I never did that": no audit trail        |
 | **I**nformation disclosure | Confidentiality | Leaked PII, verbose errors, IDOR          |
 | **D**enial of service      | Availability    | Resource exhaustion, lockout              |
 | **E**levation of privilege | Authorization   | User→admin, container escape              |

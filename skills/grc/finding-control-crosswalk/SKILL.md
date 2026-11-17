@@ -15,12 +15,12 @@ is the regulatory/OT leg of the same evidence chain.
 
 ## Who the obligation binds (decide first)
 
-| Where the finding lives                                       | Primary regime                                                       |
-| ------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Where the finding lives                                       | Primary regime                                                      |
+| ------------------------------------------------------------- | ------------------------------------------------------------------- |
 | In a **product** you make and place on the EU market          | **CRA** (manufacturer): Annex I Part I = product, Part II = process |
-| In the **plant / IT estate** of an essential/important entity | **NIS2** Art. 21(2) (operator)                                       |
-| In an **IACS** (the control system as integrated)             | **IEC 62443-3-3** SRs (system capability, per zone/conduit SL-T)     |
-| Anywhere in ISMS scope                                        | **ISO/IEC 27001:2022** Annex A                                       |
+| In the **plant / IT estate** of an essential/important entity | **NIS2** Art. 21(2) (operator)                                      |
+| In an **IACS** (the control system as integrated)             | **IEC 62443-3-3** SRs (system capability, per zone/conduit SL-T)    |
+| Anywhere in ISMS scope                                        | **ISO/IEC 27001:2022** Annex A                                      |
 
 Don't cite CRA for a misconfigured PLC in a customer plant; that's NIS2 + 62443-3-3.
 Cite CRA when the same weakness ships _in the product by default_ (e.g. a hard-coded
@@ -36,18 +36,18 @@ CRA = Annex I Part I point (2)(x) or Part II point (n). NIS2 = Art. 21(2)(x).
 | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | --------------- | ---------------------- |
 | Default / weak / hard-coded credentials (CWE-1392, 521, 798)     | SR 1.5 Authenticator management, SR 1.7 Strength of password-based authentication (FR 1)                                                                               | Part I (2)(b), (2)(d)                   | (i), (g)        | A.5.17, A.8.5          |
 | Missing MFA on remote / privileged access (CWE-308)              | SR 1.1 Human user identification and authentication, SR 1.13 Access via untrusted networks (FR 1) ¹                                                                    | Part I (2)(d)                           | (j)             | A.8.5                  |
-| Unpatched known-exploited vuln (KEV) (CWE-1395 / CVE)            | None (patch management is IEC 62443-2-3, not a 3-3 SR) ²                                                                                                                  | Part I (2)(a), (2)(c); Part II (2), (8) | (e)             | A.8.8                  |
+| Unpatched known-exploited vuln (KEV) (CWE-1395 / CVE)            | None (patch management is IEC 62443-2-3, not a 3-3 SR) ²                                                                                                               | Part I (2)(a), (2)(c); Part II (2), (8) | (e)             | A.8.8                  |
 | Cleartext / insecure protocols (CWE-319, 311)                    | SR 3.1 Communication integrity (FR 3); SR 4.1 Information confidentiality, SR 4.3 Use of cryptography (FR 4)                                                           | Part I (2)(e), (2)(f)                   | (h)             | A.8.24, A.8.20         |
 | Missing IT/OT segmentation, flat network (CWE-668)               | SR 5.1 Network segmentation, SR 5.2 Zone boundary protection (FR 5)                                                                                                    | Part I (2)(j) (product interfaces only) | (a), (e) ³      | A.8.22, A.8.20         |
-| Excessive privileges / broken access control (CWE-269, 639) | SR 1.3 Account management (FR 1); SR 2.1 Authorization enforcement (FR 2)                                                                                              | Part I (2)(d)                           | (i)             | A.5.15, A.5.18, A.8.2  |
+| Excessive privileges / broken access control (CWE-269, 639)      | SR 1.3 Account management (FR 1); SR 2.1 Authorization enforcement (FR 2)                                                                                              | Part I (2)(d)                           | (i)             | A.5.15, A.5.18, A.8.2  |
 | Missing logging / monitoring (CWE-778)                           | SR 2.8 Auditable events, SR 2.11 Timestamps (FR 2); SR 3.9 Protection of audit information (FR 3); SR 6.1 Audit log accessibility, SR 6.2 Continuous monitoring (FR 6) | Part I (2)(l)                           | (b), (f)        | A.8.15, A.8.16         |
 | Insecure remote access (vendor VPN, exposed RDP/VNC, TeamViewer) | SR 1.13 Access via untrusted networks (FR 1); SR 2.6 Remote session termination (FR 2); SR 5.2 Zone boundary protection (FR 5)                                         | Part I (2)(d), (2)(j)                   | (d), (i), (j)   | A.6.7, A.8.5, A.8.20   |
 | Vulnerable third-party component / no SBOM (CWE-1104, 1395)      | SR 7.8 Control system component inventory (FR 7) ⁴                                                                                                                     | Part I (2)(a); Part II (1), (6)         | (d), (e)        | A.5.21, A.8.8, A.5.9   |
 | No secure / authenticated update mechanism (CWE-494)             | SR 3.4 Software and information integrity (FR 3)                                                                                                                       | Part I (2)(c), (2)(f); Part II (7)      | (e)             | A.8.19, A.8.32         |
-| No vulnerability-disclosure process / contact                    | None (product-supplier process: IEC 62443-4-1, not 3-3) ²                                                                                                                 | Part II (4), (5), (6)                   | (e)             | A.5.24 ⁵               |
+| No vulnerability-disclosure process / contact                    | None (product-supplier process: IEC 62443-4-1, not 3-3) ²                                                                                                              | Part II (4), (5), (6)                   | (e)             | A.5.24 ⁵               |
 | Missing / untested backups and recovery                          | SR 7.3 Control system backup, SR 7.4 Control system recovery and reconstitution (FR 7)                                                                                 | Part I (2)(h)                           | (c)             | A.8.13, A.5.30         |
 | Injection / XSS / SSTI / SSRF web flaws (CWE-79, 89, 1336, 918)  | SR 3.5 Input validation (FR 3)                                                                                                                                         | Part I (2)(a), (2)(f); Part II (3)      | (e)             | A.8.26, A.8.28, A.8.29 |
-| Exposed services / unnecessary attack surface (CWE-1188)     | SR 7.7 Least functionality, SR 7.6 Network and security configuration settings (FR 7); SR 5.2 Zone boundary protection (FR 5)                                          | Part I (2)(b), (2)(j)                   | (a), (g)        | A.8.9, A.8.20, A.8.21  |
+| Exposed services / unnecessary attack surface (CWE-1188)         | SR 7.7 Least functionality, SR 7.6 Network and security configuration settings (FR 7); SR 5.2 Zone boundary protection (FR 5)                                          | Part I (2)(b), (2)(j)                   | (a), (g)        | A.8.9, A.8.20, A.8.21  |
 
 Notes:
 

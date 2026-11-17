@@ -26,6 +26,11 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+      - name: format
+        run: |
+          test -z "$(gofmt -l .)"
+          npx --yes prettier@3.10.1 --check .
+          pipx run ruff==0.17.5 format --check scripts
       - name: build
         run: go build ./...
       - name: vet

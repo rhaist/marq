@@ -36,7 +36,7 @@ The enforcement point _is_ the architecture decision. Closer to the workload = s
 | ------------------------------------ | ---------------------- | ----------------------------------------------------- |
 | Perimeter / NGFW                     | Zone (north-south)     | Internet edge, zone boundaries, DMZ                   |
 | Internal L3 firewall / router ACL    | Subnet/VLAN            | Macro-zones between business tiers                    |
-| Cloud **Security Group** (stateful)  | Instance/ENI           | Default east-west control in cloud: per-workload     |
+| Cloud **Security Group** (stateful)  | Instance/ENI           | Default east-west control in cloud: per-workload      |
 | Cloud **NACL** (stateless, subnet)   | Subnet                 | Coarse subnet guardrail; backstop, not primary        |
 | **Host firewall** / agent (microseg) | Per-host / per-proc    | East-west kill-switch independent of network topology |
 | **Service mesh** (mTLS + L7 policy)  | Per-service / identity | Container/K8s workloads; identity-based allow         |

@@ -17,11 +17,11 @@ survive a silenced or absent endpoint agent.
 
 ## EDR vs XDR vs MDR: what each actually is
 
-|         | What it is                                                                                      | Scope                        | Buy when                                                 |
-| ------- | ----------------------------------------------------------------------------------------------- | ---------------------------- | -------------------------------------------------------- |
+|         | What it is                                                                                     | Scope                        | Buy when                                                 |
+| ------- | ---------------------------------------------------------------------------------------------- | ---------------------------- | -------------------------------------------------------- |
 | **EPP** | Endpoint Protection Platform: the prevention layer (NGAV, device control)                      | One endpoint                 | Table stakes; usually bundled with EDR.                  |
 | **EDR** | Detection + response _on the endpoint_: telemetry, behavioral detection, isolate/kill/rollback | Endpoints only (depth)       | You need host-level visibility + response. Baseline.     |
-| **XDR** | Correlates telemetry **across** endpoint + identity + email + cloud + network                   | The attack surface (breadth) | Attacks move between domains or bypass the host.         |
+| **XDR** | Correlates telemetry **across** endpoint + identity + email + cloud + network                  | The attack surface (breadth) | Attacks move between domains or bypass the host.         |
 | **MDR** | A **service**, not a product: a vendor SOC runs detection/response 24/7 for you                | Your tools + their humans    | You lack a 24/7 SOC (most orgs). Human-led is the point. |
 
 **Decision logic (verify current market via web: it shifts yearly):**
