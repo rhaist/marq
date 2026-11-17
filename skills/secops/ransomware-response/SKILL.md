@@ -1,9 +1,9 @@
 ---
 name: ransomware-response
-description: Provides an end-to-end ransomware incident playbook — scope encryption vs exfiltration, isolate without losing evidence, identify the strain and find a decryptor, watch the leak site, restore clean-room in known-good order, and make the payment decision with its legal duties (OFAC, Australia, NYDFS, CIRCIA, UK). Use when the user faces an active or suspected ransomware incident, an extortion demand, or is preparing a ransomware response plan.
+description: Provides an end-to-end ransomware incident playbook covering scoping encryption vs exfiltration, isolating without losing evidence, identifying the strain and finding a decryptor, watching the leak site, restoring clean-room in known-good order, and making the payment decision with its legal duties (OFAC, Australia, NYDFS, CIRCIA, UK). Use when the user faces an active or suspected ransomware incident, an extortion demand, or is preparing a ransomware response plan.
 license: Apache-2.0
 metadata:
-  verified: "2026-11-06"
+  verified: "2026-11-17"
 ---
 
 # Ransomware response
@@ -25,7 +25,7 @@ The legal parts are practitioner orientation, not legal advice; counsel owns the
    what survives. `load_skill backup-recovery`.
 4. **Identity:** disable (don't delete) compromised accounts, kill sessions/tokens, block C2 and
    exfil paths (rclone/MEGA egress). Hold the krbtgt double reset until you can hold the line.
-5. **Export short-retention telemetry now** (EDR is often 7–30 days; also firewall/VPN, cloud
+5. **Export short-retention telemetry now** (EDR is often 7 to 30 days; also firewall/VPN, cloud
    audit). Keep the ransom note, encrypted samples and a patient-zero memory image, hashed,
    with chain of custody. Don't reimage patient zero before capture.
 6. **Call counsel first** (engage the IR firm through counsel for privilege), then the

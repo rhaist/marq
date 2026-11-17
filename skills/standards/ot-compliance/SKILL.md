@@ -1,9 +1,9 @@
 ---
 name: ot-compliance
-description: Covers which regimes bind a plant or machine builder — NIS2 for manufacturing (NACE C26-C30), the EU CRA plus Machinery Regulation for what is shipped, NERC CIP and TSA directives for US infrastructure, and how they stack. Use when the user asks which regulations apply to a factory, OEM or industrial product, whether NIS2 catches manufacturing, or about Machinery Regulation cybersecurity requirements.
+description: "Covers which regimes bind a plant or machine builder: NIS2 for manufacturing (NACE C26-C30), the EU CRA plus Machinery Regulation for what is shipped, NERC CIP and TSA directives for US infrastructure, and how they stack. Use when the user asks which regulations apply to a factory, OEM or industrial product, whether NIS2 catches manufacturing, or about Machinery Regulation cybersecurity requirements."
 license: Apache-2.0
 metadata:
-  verified: "2026-10-20"
+  verified: "2026-11-17"
 ---
 
 # OT / ICS compliance
@@ -17,19 +17,19 @@ conflating them is the usual mistake:
 Engineering detail lives in `load_skill ot-ics`. This skill is about who can fine
 you and when.
 
-## NIS2 — does it catch a factory?
+## NIS2: does it catch a factory?
 
 - **Annex II sector 5 "Manufacturing" → _important_ entity**, covering: medical
   devices and IVDs; **NACE C26** computer/electronic/optical; **C27** electrical
   equipment; **C28** machinery and equipment n.e.c.; **C29** motor vehicles and
   trailers; **C30** other transport equipment. Chemicals and food are _separate_
-  Annex II sectors, not part of "Manufacturing" — check which row you are in.
+  Annex II sectors, not part of "Manufacturing"; check which row you are in.
 - **Threshold**: medium-sized or larger, i.e. **≥50 staff OR >€10m** turnover /
   balance sheet. Below that you are out of scope absent a national carve-in.
-- **The load-bearing subtlety:** the words "operational technology", "industrial
+- **Coverage argument:** the words "operational technology", "industrial
   control" and "SCADA" appear **nowhere** in the Directive. OT is in scope by
   implication, through the Art. 6(1)(b) definition of a network and information
-  system — _devices which, pursuant to a programme, carry out automatic
+  system: _devices which, pursuant to a programme, carry out automatic
   processing of digital data_. That is what pulls PLCs, DCS and HMIs under the
   Art. 21 measures. **Argue coverage from Art. 6(1)(b)**; do not go looking for
   an OT-specific hook, because there isn't one, and an auditor who expects one
@@ -43,26 +43,26 @@ you and when.
   `load_skill nis2-dora` for transposition status, the incident clocks and the
   DORA overlap.
 
-## What you ship — CRA and the Machinery Regulation both apply
+## What you ship: CRA and the Machinery Regulation both apply
 
-- **EU CRA** (Reg. (EU) 2024/2847) — product cybersecurity. **Art. 14 reporting
+- **EU CRA** (Reg. (EU) 2024/2847): product cybersecurity. **Art. 14 reporting
   of actively exploited vulnerabilities applies since 11 Sep 2026**; full application
   **11 Dec 2027**. `load_skill eu-cra`.
-- **EU Machinery Regulation** (Reg. (EU) 2023/1230) — **applies 20 Jan 2027**
+- **EU Machinery Regulation** (Reg. (EU) 2023/1230), **applies 20 Jan 2027**
   (the 4 Jul 2023 corrigendum fixed the original "14 Jan"), repealing Directive
   2006/42/EC. Cyber-relevant essential requirements:
-  - **Annex III 1.1.9 Protection against corruption** — connecting a device must
+  - **Annex III 1.1.9 Protection against corruption**: connecting a device must
     not create a hazard; hardware carrying safety signals protected against
     **accidental _and intentional_** corruption; evidence of legitimate and
     illegitimate intervention collected; the machine must be able to show the
     list of installed safety-relevant software at any time; changes logged.
-  - **Annex III 1.2.1 Safety and reliability of control systems** — control
+  - **Annex III 1.2.1 Safety and reliability of control systems**: control
     systems must withstand **"reasonably foreseeable malicious attempts from
     third parties"**; safety-function limits must not be modifiable;
     **intervention and software-version logs retained 5 years**. Self-evolving
     systems are constrained to a defined task/movement space, with
     safety-decision data kept 1 year.
-  - **Annex I Part A.5/A.6** — safety components with fully or partially
+  - **Annex I Part A.5/A.6**: safety components with fully or partially
     **self-evolving (ML) behaviour**, and machinery embedding them, take the
     mandatory **notified-body** route. If you are putting ML in a safety
     function, that is a conformity-assessment decision, not a product decision.
@@ -74,17 +74,17 @@ you and when.
   compliance may _facilitate_ 1.1.9/1.2.1 but the synergy must be **demonstrated,
   not assumed**. The only statutory shortcut is **MR Art. 20(9)**: a certificate
   under an EU cybersecurity certification scheme (Reg. (EU) 2019/881) cited in
-  the OJ gives presumption of conformity with 1.1.9 and 1.2.1 — a **CRA CE mark
+  the OJ gives presumption of conformity with 1.1.9 and 1.2.1; a **CRA CE mark
   does not**.
 - **Do not claim "62443 certified = CRA compliant."** Presumption of conformity
   requires a harmonised standard **cited in the OJEU**, and **none has been cited
   yet**. Standardisation request **M/606** (Feb 2025, 41 deliverables) has 62443
   feeding only the **OT vertical** drafts (the prEN 50770 series); the CRA
   horizontals are being written on EN 18031 and EN ISO/IEC 29147/30111 instead.
-  Drafting deadlines run into late 2027 — plan to demonstrate conformity against
+  Drafting deadlines run into late 2027; plan to demonstrate conformity against
   the Regulation's text.
 
-## US — only if you own the assets
+## US: only if you own the assets
 
 - **NERC CIP** (bulk electric system). Currently enforceable includes CIP-002
   categorisation, CIP-003 security management, CIP-005 electronic security
@@ -110,25 +110,25 @@ you and when.
   - A large virtualization package (CIP-002-7/-8, CIP-005-8, CIP-010-5 and
     others) was FERC-approved Mar 2026 and is **effective 1 Jul 2028**.
 
-- **TSA Security Directives** — surface transport cyber runs through the SD
+- **TSA Security Directives**: surface transport cyber runs through the SD
   series for **pipeline, freight rail and passenger rail** (aviation cyber is
   handled through separate security-programme instruments, so don't cite the
   surface SDs at an airline). They are **renewed annually**, so always check the
   current letter suffix and expiry; the pipeline and rail directives currently
   run on Jan and May renewal cycles into 2027 (pipeline: **SD Pipeline-2021-02G**,
-  3 May 2026 – 2 May 2027, a no-substantive-change renewal of 02F). Incident
+  3 May 2026 to 2 May 2027; a no-substantive-change renewal of 02F). Incident
   reporting to CISA was cut from 24h to **72h** in the late-2025 renewals (verify
   the current letter). The surface-cyber rulemaking
   (RIN 1652-AA74) was proposed Nov 2024 but has been **demoted to long-term
-  actions with no final-rule date** — the directives, not a rule, bind you.
+  actions with no final-rule date**: the directives, not a rule, bind you.
 - **CIRCIA** will add incident reporting once final; **it is not yet
   enforceable**. `load_skill us-sectoral-regs`.
 
 ## Rules
 
 - Separate "we operate plants" from "we ship machines" before quoting any
-  deadline — they are different regimes with different regulators.
-- **CRA vulnerability reporting has applied since 11 Sep 2026** — it is live
+  deadline; they are different regimes with different regulators.
+- **CRA vulnerability reporting has applied since 11 Sep 2026**: it is live
   now, not deferred to the 2027 full-application date most planning decks show.
 - For NIS2 in a factory, build the Art. 6(1)(b) coverage argument into the scope
   document up front.

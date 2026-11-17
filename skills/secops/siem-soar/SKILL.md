@@ -1,9 +1,9 @@
 ---
 name: siem-soar
-description: Guides standing up and running a SIEM/SOAR pipeline — log-source priorities, detection content vs noise, SOAR playbook patterns, alert triage and tuning against fatigue, and the current vendor landscape. Use when the user asks which logs to collect, how to build or tune a SIEM (Splunk, Sentinel, Elastic and others), automate SOC response, or fix alert fatigue.
+description: Guides standing up and running a SIEM/SOAR pipeline, covering log-source priorities, detection content vs noise, SOAR playbook patterns, alert triage and tuning against fatigue, and the current vendor landscape. Use when the user asks which logs to collect, how to build or tune a SIEM (Splunk, Sentinel, Elastic and others), automate SOC response, or fix alert fatigue.
 license: Apache-2.0
 metadata:
-  verified: "2026-10-20"
+  verified: "2026-11-17"
 ---
 
 # SIEM & SOAR
@@ -13,34 +13,34 @@ Order of work: get the high-value logs in → write behaviour-based detections
 (not signature noise) → automate the repetitive triage → tune relentlessly.
 Detection content is code: author it with `load_skill detection-engineering`.
 
-## Log sources — collect in this order (value per byte)
+## Log sources: collect in this order (value per byte)
 
-1. **Identity / authN** — IdP + directory (Entra ID, Okta, AD security log: 4624/
+1. **Identity / authN**: IdP + directory (Entra ID, Okta, AD security log: 4624/
    4625/4768/4769/4776), VPN. Most intrusions are credential-driven; this is the
    single highest-signal source.
-2. **Endpoint EDR / process telemetry** — Sysmon (1 process, 3 net, 7 image-load,
+2. **Endpoint EDR / process telemetry**: Sysmon (1 process, 3 net, 7 image-load,
    8 remote-thread, 11 file, 13 registry) or EDR. The detection-engineering
    workhorse; map fields to ATT&CK techniques.
-3. **Cloud control plane** — AWS CloudTrail, Azure Activity, GCP Audit, M365/
+3. **Cloud control plane**: AWS CloudTrail, Azure Activity, GCP Audit, M365/
    Graph audit. Where modern attacks actually land. Enable management _and_ data
    events for crown-jewel buckets.
-4. **DNS + proxy/web + firewall flows** — C2, exfil, beaconing. DNS query logs
+4. **DNS + proxy/web + firewall flows**: C2, exfil, beaconing. DNS query logs
    catch what TLS hides.
-5. **Email security gateway** — phishing is still the front door.
+5. **Email security gateway**: phishing is still the front door.
 6. **App / WAF / auth logs of crown-jewel apps**; then everything else.
 
 Collect for _detections and investigations you'll actually run_, not "all logs."
-Volume = cost + noise. Right-size retention by tier (hot 30–90d, cold 1yr+ for IR/
+Volume = cost + noise. Right-size retention by tier (hot 30 to 90d, cold 1yr+ for IR/
 compliance). Normalize to a schema (OCSF/ASIM/ECS) so detections are portable.
 
 ## Detection content vs noise
 
 - Buy/import a baseline (vendor analytics, SigmaHQ ~3000 rules) but treat each as a
-  candidate — every imported rule is a noise liability until tuned for _your_ env.
-- Prefer behaviour over atomic IOC matches (pyramid of pain — TTP detections
+  candidate; every imported rule is a noise liability until tuned for _your_ env.
+- Prefer behaviour over atomic IOC matches (pyramid of pain: TTP detections
   survive; hash/IP rules churn). ATT&CK's Detection Strategies + Analytics model
   (introduced v18, Oct 2025, replacing the old Detections/Data Sources; current
-  release v20, Oct 2026) — use it to anchor coverage.
+  release v20, Oct 2026); use it to anchor coverage.
   verify: https://attack.mitre.org/resources/updates/updates-october-2026/
 - Every detection needs: a documented hypothesis, ATT&CK id, expected FP sources,
   data-source dependency, and a triage runbook. No runbook = don't ship it.
@@ -65,7 +65,7 @@ compliance). Normalize to a schema (OCSF/ASIM/ECS) so detections are portable.
 ## Alert triage & tuning (fight fatigue)
 
 - Categorize every closed alert: true / benign / false positive. That label _is_
-  the tuning feedback loop — un-labeled closes teach you nothing.
+  the tuning feedback loop; un-labeled closes teach you nothing.
 - The lever order: **suppress** (known-benign) → **dedupe/aggregate** (one
   incident, not 500 alerts) → **enrich** (auto-downgrade in change windows) →
   **threshold/logic tune** → **retire** dead rules.
@@ -73,17 +73,17 @@ compliance). Normalize to a schema (OCSF/ASIM/ECS) so detections are portable.
   top-down, not FIFO.
 - Watch >50% FP rates and rising MTTR as the fatigue signal. Run a monthly
   detection audit: top-noise rules, never-fired rules, rules with no runbook.
-- A confirmed true positive is an incident — hand off to `load_skill
+- A confirmed true positive is an incident: hand off to `load_skill
 incident-response`. A recurring detection gap becomes a hunt
   (`load_skill threat-hunting`).
 
-## Current landscape (verify — consolidating fast)
+## Current landscape (verify: consolidating fast)
 
 - SIEM/SOAR/XDR are converging into single platforms. Leaders 2026: Microsoft
   Sentinel (+ Defender XDR, Security Copilot), Google SecOps (Chronicle + Gemini),
   Splunk (now Cisco), Palo Alto XSIAM, CrowdStrike Next-Gen SIEM, Elastic.
 - QRadar SaaS (QROC/SOAR/Log Insights, sold to Palo Alto) hit end-of-life
-  **2026-04-14**; Palo Alto migrates customers to Cortex XSIAM — an active
+  **2026-04-14**; Palo Alto migrates customers to Cortex XSIAM, an active
   displacement driver.
 - Standalone SOAR is being absorbed; AI/agentic triage is the 2026 pitch (auto-
   enrich + correlate, escalate to human only on genuine need). Treat AI triage as

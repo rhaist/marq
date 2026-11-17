@@ -1,9 +1,9 @@
 ---
 name: cloud-incident-response
-description: Guides incident response in AWS, Azure, GCP and Microsoft 365/Entra — the logs that matter and their default retention, preserving evidence before auto-remediation, credential/session revocation order, identity-plane compromise (federation, app registrations, OAuth grants) and snapshot-based acquisition. Use when the user is responding to a cloud account or tenant compromise, leaked cloud keys, or needs to collect cloud forensic evidence.
+description: Guides incident response in AWS, Azure, GCP and Microsoft 365/Entra, covering the logs that matter and their default retention, preserving evidence before auto-remediation, credential/session revocation order, identity-plane compromise (federation, app registrations, OAuth grants) and snapshot-based acquisition. Use when the user is responding to a cloud account or tenant compromise, leaked cloud keys, or needs to collect cloud forensic evidence.
 license: Apache-2.0
 metadata:
-  verified: "2026-11-06"
+  verified: "2026-11-17"
 ---
 
 # Cloud incident response
@@ -79,7 +79,7 @@ Revoking tips off the attacker. Against a capable actor, plan a coordinated evic
   - AWS: a new SAML/OIDC provider, or a role that trusts one.
   - GCP: workforce or workload identity pool changes.
 - **App registrations and service principals.** The pattern: credentials added to an existing (often forgotten) app, which then gets application permissions like `Mail.Read` or `full_access_as_app` via admin consent and reads data with no user involved.
-  - Audit events: _Add service principal credentials_, _Update application – Certificates and secrets management_, _Add app role assignment to service principal_.
+  - Audit events: `Add service principal credentials`, `Update application – Certificates and secrets management`, `Add app role assignment to service principal`.
   - Read the service-principal sign-in log for what the app did.
 - **OAuth consent grants (delegated).** Illicit apps holding `offline_access` survive a password reset.
   - Enumerate `oauth2PermissionGrants`, revoke the grants and disable the app.
@@ -120,5 +120,5 @@ marq holds no cloud credentials and wraps no cloud CLI.
 
 - Deleting the key, user or instance before recording it.
 - Revoking sessions but not the persistence that mints new ones.
-- Treating Event history or the portal's 7–90-day windows as "the logs".
+- Treating Event history or the portal's 7 to 90-day windows as "the logs".
 - Investigating from an identity that runs through the compromised IdP.

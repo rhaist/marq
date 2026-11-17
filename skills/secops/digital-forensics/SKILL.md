@@ -1,9 +1,9 @@
 ---
 name: digital-forensics
-description: Covers DFIR across host, memory, network, mobile and cloud — order of volatility, sound acquisition and chain of custody, and the current open-source stack (Volatility 3, Plaso, tshark and others). Use when the user asks to acquire or analyze a disk image, memory dump, PCAP, phone or cloud logs, build a timeline, or preserve evidence for legal use.
+description: Covers DFIR across host, memory, network, mobile and cloud, including order of volatility, sound acquisition and chain of custody, and the current open-source stack (Volatility 3, Plaso, tshark and others). Use when the user asks to acquire or analyze a disk image, memory dump, PCAP, phone or cloud logs, build a timeline, or preserve evidence for legal use.
 license: Apache-2.0
 metadata:
-  verified: "2026-10-20"
+  verified: "2026-11-17"
 ---
 
 # Digital forensics (DFIR)
@@ -18,7 +18,7 @@ incident-response`); a found binary goes to `load_skill malware-triage` /
 
 - Acquire in **order of volatility** (RFC 3227): CPU/registers/cache → RAM →
   network state (ARP, routes, sockets) → running procs/open files → disk →
-  logs/archives → physical/topology. The volatile end evaporates on power-off —
+  logs/archives → physical/topology. The volatile end evaporates on power-off, so
   grab it first. Powering off or "just looking" mutates the source.
 - Hash on acquisition (sha256), again after imaging; matching hashes prove the
   copy is faithful. Write-block all originals.
@@ -29,10 +29,10 @@ incident-response`); a found binary goes to `load_skill malware-triage` /
 ## Host / disk forensics
 
 - Image: `dd`/`dcfldd`/`ewfacquire` (E01 w/ embedded hash) or FTK Imager.
-- Analyze with **The Sleuth Kit + Autopsy** (TSK 4.15.0, Autopsy 4.23.x, 2026
-  — verify https://www.sleuthkit.org/). Filesystem timeline, deleted-file
+- Analyze with **The Sleuth Kit + Autopsy** (TSK 4.15.0, Autopsy 4.23.x, 2026;
+  verify https://www.sleuthkit.org/). Filesystem timeline, deleted-file
   recovery, carving.
-- Build a **super-timeline** with Plaso/log2timeline (`psort`) — correlates FS,
+- Build a **super-timeline** with Plaso/log2timeline (`psort`): correlates FS,
   registry, EVTX, browser, prefetch into one chronology.
 - Windows artifacts that answer "what ran / when / who": Prefetch, Amcache/
   Shimcache, SRUM, $MFT/$UsnJrnl, registry (Run keys, Services, UserAssist,
@@ -46,7 +46,7 @@ incident-response`); a found binary goes to `load_skill malware-triage` /
 - Acquire RAM _before_ disk: WinPMEM/DumpIt (Win), AVML/LiME (Linux), `osxpmem`
   (macOS). A page file + hibernation file complement it.
 - Analyze with **Volatility 3** (v2.28.2, Sep 2026; the v2.26 parity release
-  deprecated + archived Vol2 in May 2025 — verify
+  deprecated + archived Vol2 in May 2025; verify
   https://github.com/volatilityfoundation/volatility3). Symbol tables auto-resolve
   most modern OSes. High-value plugins: `pslist`/`pstree`/`psscan` (hidden procs),
   `malfind` (injected code), `cmdline`, `netscan`, `dlllist`/`ldrmodules`,
@@ -63,19 +63,19 @@ ioc-pivoting`. Carve transferred files with Zeek `files.log` / NetworkMiner.
 
 ## Mobile forensics
 
-- Logical vs file-system vs physical acquisition — modern iOS/Android encryption
+- Logical vs file-system vs physical acquisition: modern iOS/Android encryption
   usually limits you to logical/advanced-logical (full-FS needs exploit or vendor
   tooling). Tools: ALEAPP/iLEAPP (artifact parsers), MVT (Mobile Verification
-  Toolkit — spyware/IOC checks), commercial Cellebrite/GrayKey/Oxygen.
+  Toolkit: spyware/IOC checks), commercial Cellebrite/GrayKey/Oxygen.
 - Targets: app DBs (SQLite), call/SMS, location, cloud-sync, keychain, notifications.
 
 ## Cloud forensics (different game)
 
-- No disk to seize — evidence is API logs + snapshots. You depend on what logging
+- No disk to seize: evidence is API logs + snapshots. You depend on what logging
   was enabled _before_ the incident (enable CloudTrail/Azure Activity/GCP Audit +
   data events _now_, in prep).
 - Acquire: control-plane audit logs, EBS/disk snapshots, serial console, IAM/role/
-  key activity, object-store access logs. Beware ephemeral compute — snapshot
+  key activity, object-store access logs. Beware ephemeral compute: snapshot
   before the instance is terminated.
 - Full cloud/identity-plane IR playbook (revocation order, federation/app abuse,
   log retention): `load_skill cloud-incident-response`.
@@ -85,13 +85,13 @@ ioc-pivoting`. Carve transferred files with Zeek `files.log` / NetworkMiner.
 ## Anti-patterns
 
 - Booting/poweroff the evidence machine, or running tools on the original.
-- Skipping RAM because "disk has everything" — fileless attacks live in memory.
-- No hashing / no custody log — turns good evidence into a story you can't prove.
-- Trusting a single artifact — corroborate across at least two independent sources.
+- Skipping RAM because "disk has everything"; fileless attacks live in memory.
+- No hashing / no custody log: that turns good evidence into a story you can't prove.
+- Trusting a single artifact: corroborate across at least two independent sources.
 
 ## marq tie-in
 
-This box is not a full forensic suite — stage evidence copies under `/work` (file
+This box is not a full forensic suite; stage evidence copies under `/work` (file
 tools are sandboxed to `/work` + `/tmp`), then run YARA (IOC sweeps), capa (binary
 capabilities) and rabin2/strings on captured samples in your own isolated
 analysis sandbox (copy only). `report_finding` each artifact-backed conclusion with its source +

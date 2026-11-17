@@ -1,40 +1,40 @@
 ---
 name: ti-research
-description: Guides proactive threat-intel research and current awareness — where to look (feeds, RSS, CISA KEV, advisories, CERTs, ORKL) and how to turn scattered reporting into a tracked, cited picture of an actor, campaign or sector threat. Use when the user asks what is new on a threat, for a threat briefing or landscape for their sector, recent activity of an actor, or which intel sources to follow.
+description: Guides proactive threat-intel research and current awareness, covering where to look (feeds, RSS, CISA KEV, advisories, CERTs, ORKL) and how to turn scattered reporting into a tracked, cited picture of an actor, campaign or sector threat. Use when the user asks what is new on a threat, for a threat briefing or landscape for their sector, recent activity of an actor, or which intel sources to follow.
 license: Apache-2.0
 metadata:
-  verified: "2026-10-20"
+  verified: "2026-11-17"
 ---
 
 # TI research & current awareness
 
-The other threat-intel skills are reactive — you already have an IOC or a
+The other threat-intel skills are reactive: you already have an IOC or a
 behaviour and you pivot/attribute/enrich it (`ioc-pivoting`,
 `actor-ttp-attribution`, `indicator-enrichment`). This one is the opposite
-direction: **you have a question, not an indicator** — "what's this actor doing
-lately", "what's actively exploited this week", "what's hitting my sector" — and
+direction: **you have a question, not an indicator**: "what's this actor doing
+lately", "what's actively exploited this week", "what's hitting my sector", and
 you need to go find the reporting. Fetch the sources, don't answer from memory:
 threat reporting is perishable and your training data lags.
 
-## Sources — fetch these, don't recall them
+## Sources: fetch these, don't recall them
 
-Query with the client's web-fetch or `curl -s '<url>'` from your own shell. All are free / no-login. Rate-limited —
+Query with the client's web-fetch or `curl -s '<url>'` from your own shell. All are free / no-login. Rate-limited:
 query what you need, don't bulk-loop.
 
 ### Report libraries & search (start here)
 
-- **ORKL** — the APT/threat-report library. Full-text search across thousands of
+- **ORKL**: the APT/threat-report library. Full-text search across thousands of
   vendor reports by keyword, actor, tool, or IOC:
   `curl -s 'https://orkl.eu/api/v1/library/search?query=<term>'`. List a specific
   actor's reports, get report text/refs by id (`/library/entry/<id>`). This is
   the single highest-value TI research endpoint.
-- **ORKL news** — a curated security-news firehose (breaches, CVEs, campaigns),
+- **ORKL news**: a curated security-news firehose (breaches, CVEs, campaigns),
   one aggregated feed instead of scraping the RSS table below:
   `curl -s 'https://orkl.eu/api/v1/news/entries?limit=50'` (add `&offset=N` to
-  page). Each entry carries `published_at`, a `base_score` (4–10 importance),
+  page). Each entry carries `published_at`, a `base_score` (4 to 10 importance),
   `feed_group` (e.g. "ORKL Top Sources", "National CERTs/CSIRTs") and any tagged
-  `threat_actors` — sort by `base_score` to triage "what matters this week".
-- **CISA KEV** — the authoritative "actively exploited" list, updated most
+  `threat_actors`; sort by `base_score` to triage "what matters this week".
+- **CISA KEV**: the authoritative "actively exploited" list, updated most
   weekdays: `curl -s https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json`.
   Cross with FIRST EPSS (see `security-apis`) to rank what to care about.
 
@@ -42,7 +42,7 @@ query what you need, don't bulk-loop.
 
 Fetch the feed XML and read the latest `<item>`/`<entry>` titles + links; open
 the ones on-topic. Good, stable, free feeds (CISA's advisory feed has refused
-scripted `curl` with 403 from some networks — if so, read it with the client's
+scripted `curl` with 403 from some networks; if so, read it with the client's
 web fetch, and use the KEV JSON above for exploited-vuln news):
 
 | Source                                                  | Feed URL                                                                        |
@@ -72,18 +72,18 @@ regional vendors (AhnLab, NSFOCUS, QiAnXin). Expect heavier alias sprawl.
 
 ## Workflow
 
-1. **Frame the question** — actor, campaign, CVE, or sector? Pick the axis. Note
+1. **Frame the question**: actor, campaign, CVE, or sector? Pick the axis. Note
    the time window ("lately" = be explicit: last 30/90 days).
-2. **Sweep** — ORKL search for the actor/tool/CVE; pull the last N days from 2–3
+2. **Sweep**: ORKL search for the actor/tool/CVE; pull the last N days from 2 to 3
    relevant feeds. Skim titles, open the on-topic items. Breadth first.
-3. **Read for substance** — from each source extract: TTPs (map to ATT&CK IDs —
+3. **Read for substance**: from each source extract: TTPs (map to ATT&CK IDs;
    hand off to `actor-ttp-attribution`), IOCs (hand to `ioc-pivoting` /
-   `indicator-enrichment` to verify — never assert a report's IOC as live fact
+   `indicator-enrichment` to verify; never assert a report's IOC as live fact
    without checking), victimology (sector/geo), and timeline.
-4. **Corroborate** — one vendor blog is a lead, not a fact. Require a second
+4. **Corroborate**: one vendor blog is a lead, not a fact. Require a second
    independent source before asserting attribution or a campaign link. Note when
    vendors name the same group differently (alias sprawl).
-5. **Synthesise** — build the picture: who, what TTPs, what infra, what targets,
+5. **Synthesise**: build the picture: who, what TTPs, what infra, what targets,
    over what window, with **every claim cited to a URL**. Confidence explicitly
    (default low; raise only when independent axes converge).
 
@@ -95,4 +95,4 @@ regional vendors (AhnLab, NSFOCUS, QiAnXin). Expect heavier alias sprawl.
   (TTPs, confirmed-malicious infra), with report URLs as references. Attribution
   and "assessed intent" go in the narrative as hypotheses, not as finding facts.
 - Freshness matters more here than anywhere: date-stamp the brief and note the
-  window it covers — TI goes stale fast.
+  window it covers; TI goes stale fast.

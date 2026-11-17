@@ -1,9 +1,9 @@
 ---
 name: bec-email-investigation
-description: Guides investigating a business-email-compromise or mailbox takeover in Microsoft 365 or Google Workspace — which logs to pull before they expire, the persistence to hunt (inbox rules, forwarding, delegates, OAuth grants, added MFA/devices), the containment order, and fast funds recovery via bank recall and the FBI IC3 Recovery Asset Team. Use when a mailbox is suspected compromised, a payment was diverted by email, or the user asks how to investigate BEC.
+description: Guides investigating a business-email-compromise or mailbox takeover in Microsoft 365 or Google Workspace, covering which logs to pull before they expire, the persistence to hunt (inbox rules, forwarding, delegates, OAuth grants, added MFA/devices), the containment order, and fast funds recovery via bank recall and the FBI IC3 Recovery Asset Team. Use when a mailbox is suspected compromised, a payment was diverted by email, or the user asks how to investigate BEC.
 license: Apache-2.0
 metadata:
-  verified: "2026-11-06"
+  verified: "2026-11-17"
 ---
 
 # BEC / mailbox-takeover investigation
@@ -41,6 +41,8 @@ If a payment went out, run funds recovery **in parallel, now**. Recall odds fall
   bank details. Evidence is in **their** tenant. You have the inbound headers
   (`load_skill phishing-email-analysis`). Alert the vendor through a known contact.
 - **Impersonation** (lookalike domain, no compromise): header analysis and a takedown.
+  `dnstwist` lists registered lookalikes of your domain; `rdap` gives the
+  registrar and registration date for the takedown request.
   Check your DMARC (`load_skill email-security`).
 
 ## Preserve: retention is short

@@ -1,28 +1,28 @@
 ---
 name: security-apis
-description: Lists free, no-login security APIs to enrich recon via web fetch alongside the wrapped Kali tools — certificate transparency (crt.sh), exposed ports/CVEs (Shodan InternetDB), DNS/host/ASN, EPSS, file-hash and threat-intel lookups — with opsec notes. Use when a task needs data no wrapped tool provides, when looking up a CVE's EPSS, an IP's exposure, a hash's reputation or subdomains from CT logs without API keys.
+description: Lists free, no-login security APIs to enrich recon via web fetch alongside the wrapped Kali tools, covering certificate transparency (crt.sh), exposed ports/CVEs (Shodan InternetDB), DNS/host/ASN, EPSS, file-hash and threat-intel lookups, with opsec notes. Use when a task needs data no wrapped tool provides, when looking up a CVE's EPSS, an IP's exposure, a hash's reputation or subdomains from CT logs without API keys.
 license: Apache-2.0
 metadata:
-  verified: "2026-10-20"
+  verified: "2026-11-17"
 ---
 
 # Security APIs
 
-A few public APIs fill gaps the local tools don't — cert transparency, exposed
-ports/CVEs per IP, exploit-likelihood scores, file-hash and threat-intel lookups
-— without sending a packet at the target. Run them early in recon to seed hosts
+A few public APIs fill gaps the local tools don't cover: cert transparency, exposed
+ports/CVEs per IP, exploit-likelihood scores, file-hash and threat-intel lookups,
+without sending a packet at the target. Run them early in recon to seed hosts
 and to triage findings.
 
 Every endpoint below was probed and confirmed to return data with **no key and
-no login** (last re-probed 6 Nov 2026; the source list's auth column is
-unreliable — several "apiKey" entries are actually open, and several "free"
+no login** (last re-probed 17 Nov 2026; the source list's auth column is
+unreliable; several "apiKey" entries are actually open, and several "free"
 ones now demand an account, so each was tested). Login-gated services
-(VirusTotal, OTX, URLhaus/abuse.ch, EmailRep, …) are deliberately excluded. Full catalogue if you bring your own
+(VirusTotal, URLhaus/abuse.ch, EmailRep, …) are deliberately excluded. OTX is keyless for indicator lookups (`/api/v1/indicators/<type>/<value>/general`); its other features may need a key. Full catalogue if you bring your own
 keys: https://github.com/jaegeral/security-apis
 
 ## How to query
 
-- **Already wrapped — use the tool, not the raw API:** Shodan (`shodan_host`,
+- **Already wrapped (use the tool, not the raw API):** Shodan (`shodan_host`,
   `shodan_search`), Censys lookups (`censys_view`), subdomains (`subfinder`), ASN
   (`asnmap`). The APIs below add what those don't.
 - **Otherwise:** fetch the URL with the client's web-fetch (or `curl` from your own
@@ -47,6 +47,8 @@ keys: https://github.com/jaegeral/security-apis
 | **urlscan.io** (search only) | historical scans, screenshots, linked domains                              | `curl -s 'https://urlscan.io/api/v1/search/?q=domain:example.com'`        |
 | **GreyNoise Community**      | is an IP internet-background noise / a known benign service (RIOT)?        | `curl -s https://api.greynoise.io/v3/community/8.8.8.8`                   |
 
+- marq's `ct_search` wraps crt.sh and `ioc_lookup` wraps CIRCL hashlookup, GreyNoise
+  Community, OTX and urlscan search; use the curl examples when your client has no marq.
 - **crt.sh** is frequently overloaded (502s and timeouts were seen on the last
   probe). Retry once after a pause; if it stays down, `subfinder` already pulls
   certificate-transparency sources among others.
@@ -57,14 +59,14 @@ keys: https://github.com/jaegeral/security-apis
 Highest-value: `crt.sh` + `internetdb` to expand the surface; `CIRCL CVE` +
 `EPSS` together to detail and prioritise a CVE; `hashlookup` to clear known-good
 files off a host; `ORKL` to pivot an IOC (domain/IP/hash you found on a box)
-into the threat reports that reference it — attribution and TTPs.
+into the threat reports that reference it, for attribution and TTPs.
 
-## Opsec — read before querying
+## Opsec: read before querying
 
 These are third-party services. Querying one **discloses the target** to that
 provider. Indicator look-ups (cert transparency, CVE, DNS, ASN) are low-risk.
-But anything that _submits_ — notably a urlscan.io **submit** (not the search
-above) — defaults to **public** and can leak the engagement.
+But anything that _submits_ (notably a urlscan.io **submit**, not the search
+above) defaults to **public** and can leak the engagement.
 
 - Never submit a client's URL/file/sample to a public scanner or sandbox without
   explicit authorization. When unsure, ask the operator.

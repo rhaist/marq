@@ -1,9 +1,9 @@
 ---
 name: phishing-email-analysis
-description: Guides triaging a reported phish (.eml/.msg) — read the Received chain and Authentication-Results (SPF/DKIM/DMARC/ARC/compauth), spot Reply-To/Return-Path mismatches, extract and safely handle URLs and attachments, recognize AiTM/device-code/consent phishing kits, and scope who else got or clicked it. Use when the user shares a suspicious email or headers, asks whether a message is phishing, or needs to analyze a reported phish.
+description: Guides triaging a reported phish (.eml/.msg) by reading the Received chain and Authentication-Results (SPF/DKIM/DMARC/ARC/compauth), spotting Reply-To/Return-Path mismatches, extracting and safely handling URLs and attachments, recognizing AiTM/device-code/consent phishing kits, and scoping who else got or clicked it. Use when the user shares a suspicious email or headers, asks whether a message is phishing, or needs to analyze a reported phish.
 license: Apache-2.0
 metadata:
-  verified: "2026-11-06"
+  verified: "2026-11-17"
 ---
 
 # Phishing email analysis
@@ -60,8 +60,11 @@ smtp.mailfrom=`, `dkim= header.d=` and `dmarc= header.from=`. On M365 also check
   - cousin or homoglyph domains (`rn`/`m`, punycode `xn--`)
 
   Run `whois_lookup` on the From and Reply-To domains, since a domain days old is a
-  strong signal. Check crt.sh for certificates issued just before the send, and
-  `dns_lookup` MX to see whether the domain can even receive replies.
+  strong signal. Check `ct_search` (crt.sh) for certificates issued just before the
+  send, `dnstwist` for registered lookalike or cousin domains of the impersonated
+  brand (background job), and `dns_lookup` MX to see whether the domain can even
+  receive replies. `ioc_lookup` enriches the domains and IPs from URLs and the
+  hashes of attachments.
 
 ## URLs: find the real destination
 
@@ -75,7 +78,7 @@ smtp.mailfrom=`, `dkim= header.d=` and `dmarc= header.from=`. On M365 also check
   It personalizes the kit and leaks who was targeted.
 - **QR codes** in images or PDFs evade text-link scanners, so decode them offline.
   **SVG/HTML attachments** can carry JS, HTML smuggling, or a local fake login page,
-  so treat them as code. SVGs drove most CAPTCHA-gated phish in Q3 2026.
+  so treat them as code. SVGs were 65% of CAPTCHA-gated phishing in Aug 2026 and the leading delivery method at the end of Q3.
   verify: https://www.microsoft.com/en-us/security/blog/2026/11/05/email-threat-landscape-q3-2026-trends-and-insights/
 
 ## Which credential-theft pattern?
@@ -100,7 +103,7 @@ smtp.mailfrom=`, `dkim= header.d=` and `dmarc= header.from=`. On M365 also check
 
 - Decode the MIME parts and hash each one. With raw shell: `python3 -I -c` plus the
   stdlib `email` module. Watch for nested `.eml` and archives. Check CIRCL hashlookup
-  first, since a known-good hit clears the file.
+  first (`ioc_lookup` on the hash), since a known-good hit clears the file.
 - Route by type:
   - Office → `olevba` from oletools (`load_skill malware-maldoc`)
   - PDFs, images, Office docs → `exif_metadata` (author, creating tool, internal paths;

@@ -3,7 +3,7 @@ name: control-mapping
 description: Guides mapping one finding or control across ISO 27001, NIST CSF/800-53, SOC 2 and CIS Controls so it is assessed once and satisfies many. Use when the user asks how a control or finding maps between frameworks, wants a crosswalk, or needs to report one assessment against several standards.
 license: Apache-2.0
 metadata:
-  verified: "2026-10-20"
+  verified: "2026-11-17"
 ---
 
 # Control mapping (assess once, report many)
@@ -19,7 +19,7 @@ it touches (IEC 62443-3-3 SRs, EU CRA Annex I, NIS2 Art. 21(2)), `load_skill fin
 1. Take the finding: `read_file /work/findings.md` (or a single `report_finding` entry).
    Identify the control _intent_ (e.g. "user input isn't validated" -> input validation /
    secure development).
-2. Anchor on the CWE the finding already carries — it's your pivot into framework controls.
+2. Anchor on the CWE the finding already carries; it's your pivot into framework controls.
 3. Pull the equivalent control id in each in-scope framework. Versions change ids and
    wording: `load_skill control-frameworks` for the current catalogues and web-fetch the current text; the table
    below is a starting pointer, confirm the live id before you cite it in a deliverable.
@@ -47,13 +47,13 @@ it touches (IEC 62443-3-3 SRs, EU CRA Annex I, NIS2 Art. 21(2)), `load_skill fin
 | Finding/risk ref | CWE | Theme | ISO | NIST CSF | SOC 2 | CIS | One remediation | Status |
 | ---------------- | --- | ----- | --- | -------- | ----- | --- | --------------- | ------ |
 
-- "One remediation" is the point: a single fix line, then the list of control ids it
-  closes — auditors for different standards each see their id satisfied.
+- Write one remediation as a single fix line, then the list of control ids it
+  closes, so auditors for different standards each see their id satisfied.
 - Roll up: count distinct controls touched per framework to show coverage from the
-  engagement ("this pentest exercised 14 of ISO Annex A's controls").
+  engagement ("these findings touch 14 of ISO Annex A's controls").
 
 ## Rules
 
-- Map by control _intent_, not keyword. A CWE can land in two themes — list both rows.
+- Map by control _intent_, not keyword. A CWE can land in two themes; list both rows.
 - Don't claim a framework id you haven't read the current text of; mark unverified rows.
-- A divergent finding severity vs control criticality is signal — note it, don't smooth it.
+- A divergent finding severity vs control criticality is signal; note it, don't smooth it.

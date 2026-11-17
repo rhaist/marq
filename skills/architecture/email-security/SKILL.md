@@ -1,9 +1,9 @@
 ---
 name: email-security
-description: Covers email authentication and transport architecture — SPF/DKIM/DMARC with a staged rollout to p=reject, the Google/Yahoo/Microsoft bulk-sender rules, DMARCbis (RFC 9989), ARC, MTA-STS/TLS-RPT, BIMI, and secure email gateway vs API-based (ICES) protection. Use when the user asks about SPF, DKIM, DMARC, MTA-STS or BIMI records, spoofing protection, bulk-sender requirements, or choosing an email security gateway.
+description: "Covers email authentication and transport architecture: SPF/DKIM/DMARC with a staged rollout to p=reject, the Google/Yahoo/Microsoft bulk-sender rules, DMARCbis (RFC 9989), ARC, MTA-STS/TLS-RPT, BIMI, and secure email gateway vs API-based (ICES) protection. Use when the user asks about SPF, DKIM, DMARC, MTA-STS or BIMI records, spoofing protection, bulk-sender requirements, or choosing an email security gateway."
 license: Apache-2.0
 metadata:
-  verified: "2026-11-06"
+  verified: "2026-11-17"
 ---
 
 # Email security architecture
@@ -33,7 +33,7 @@ human/process side is `load_skill social-engineering-defense`.
 
 ## Staged rollout to p=reject
 
-1. **Inventory first.** Publish `p=none; rua=mailto:...` for 2–4 weeks, across a
+1. **Inventory first.** Publish `p=none; rua=mailto:...` for 2 to 4 weeks, across a
    month-end and a payroll run. Use a report processor, since raw XML doesn't scale. If
    `rua` points to another domain, that domain must publish
    `<yours>._report._dmarc.<theirs>` TXT.

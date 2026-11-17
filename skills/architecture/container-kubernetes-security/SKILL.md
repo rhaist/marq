@@ -1,9 +1,9 @@
 ---
 name: container-kubernetes-security
-description: Covers securing container images and Kubernetes clusters — minimal/signed images and trivy scanning, Pod Security Admission, RBAC least privilege, NetworkPolicy, secrets, runtime detection (Falco/Tetragon), managed-K8s shared responsibility, CIS/NSA benchmarks and the Kubernetes support cadence. Use when the user is hardening or reviewing a container platform, EKS/AKS/GKE cluster, Kubernetes RBAC or Pod Security settings, or asks about image signing or runtime detection.
+description: "Covers securing container images and Kubernetes clusters: minimal/signed images and trivy scanning, Pod Security Admission, RBAC least privilege, NetworkPolicy, secrets, runtime detection (Falco/Tetragon), managed-K8s shared responsibility, CIS/NSA benchmarks and the Kubernetes support cadence. Use when the user is hardening or reviewing a container platform, EKS/AKS/GKE cluster, Kubernetes RBAC or Pod Security settings, or asks about image signing or runtime detection."
 license: Apache-2.0
 metadata:
-  verified: "2026-11-06"
+  verified: "2026-11-17"
 ---
 
 # Container & Kubernetes security
@@ -29,7 +29,7 @@ Related skills: CNAPP/KSPM categories in `load_skill cloud-security`; CI gates, 
 - **Scan with trivy** (in your CI; marq does not run it): `trivy image` for a registry ref and `trivy fs` for a build context or manifest directory, covering vuln + secret + misconfig (`DS-*` Dockerfile checks).
   - Re-scan running images on a schedule; new CVEs land on images already deployed.
 - **Sign, then verify at admission** (cosign + Kyverno/policy-controller; `load_skill devsecops`). A signature that nothing checks protects nothing.
-- **Your scanner is supply chain too.** On 19 Mar 2026 attackers published a malicious Trivy **v0.69.4** binary and images and force-pushed 76 of 77 `trivy-action` tags. Malicious v0.69.5–v0.69.6 images followed on Docker Hub. Tracked as GHSA-69fq-xp46-6x23 / CVE-2026-33634.
+- **Your scanner is supply chain too.** On 19 Mar 2026 attackers published a malicious Trivy **v0.69.4** binary and images and force-pushed 76 of 77 `trivy-action` tags. Malicious v0.69.5 to v0.69.6 images followed on Docker Hub. Tracked as GHSA-69fq-xp46-6x23 / CVE-2026-33634.
   - Pin CI actions to a commit SHA and scanner images by digest, and verify their signatures. The scanner runs with your CI secrets in reach.
   - Current release is v0.76.2 (5 Nov 2026). Use a release outside the compromised range. verify: https://github.com/aquasecurity/trivy/security/advisories/GHSA-69fq-xp46-6x23
 
@@ -102,7 +102,7 @@ Related skills: CNAPP/KSPM categories in `load_skill cloud-security`; CI gates, 
 
 ## Benchmarks
 
-- **CIS Kubernetes Benchmark v2.1.0** (late Sep 2026) covers about 1.35–1.37; v2.0.x covers 1.34–1.35.
+- **CIS Kubernetes Benchmark v2.1.0** (late Sep 2026) covers about 1.35 to 1.37; v2.0.x covers 1.34 to 1.35.
   - On managed clusters use the CIS EKS/AKS/GKE benchmarks; many self-managed checks don't apply.
   - Tooling: kube-bench or `trivy k8s --compliance`.
   - verify: https://www.cisecurity.org/benchmark/kubernetes
