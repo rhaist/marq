@@ -11,7 +11,7 @@ metadata:
 A few public APIs fill gaps the local tools don't — cert transparency, exposed
 ports/CVEs per IP, exploit-likelihood scores, file-hash and threat-intel lookups
 — without sending a packet at the target. Run them early in recon to seed hosts
-for `httpx_probe` / `nuclei`, and to triage findings.
+and to triage findings.
 
 Every endpoint below was probed and confirmed to return data with **no key and
 no login** (last re-probed 6 Nov 2026; the source list's auth column is
@@ -26,8 +26,7 @@ keys: https://github.com/jaegeral/security-apis
   `shodan_search`), Censys lookups (`censys_view`), subdomains (`subfinder`), ASN
   (`asnmap`). The APIs below add what those don't.
 - **Otherwise:** fetch the URL with the client's web-fetch (or `curl` from your own
-  shell). Not through marq's `exec`/`run_shell`: those are scope-enforced, and a
-  third-party API host isn't in an engagement's scope.
+  shell). marq has no generic HTTP/exec tool.
 - **Search-engine queries/dorks** use the client's web search (marq wraps none;
   Google's Custom Search API closes 2027-01-01). If you have none, tell the user to add a web-search skill or MCP server to their client rather than guessing results.
 - These are free _because_ they're rate-limited (HackerTarget ~50/day per IP,
@@ -69,4 +68,4 @@ above) — defaults to **public** and can leak the engagement.
 
 - Never submit a client's URL/file/sample to a public scanner or sandbox without
   explicit authorization. When unsure, ask the operator.
-- Confirm the asset is in scope (`server_info`) before sending it anywhere.
+- Confirm the client has authorized sending the asset to a third party before submitting it.

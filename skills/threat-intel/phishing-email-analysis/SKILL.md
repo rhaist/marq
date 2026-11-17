@@ -22,8 +22,8 @@ reporter/culture side is `load_skill social-engineering-defense`.
     investigation tool)
 - `.msg` is an OLE file with no parser in the image. Convert it off-box
   (`extract-msg`, `msgconvert`) or ask for `.eml`.
-- Stage it under `/work` and record its **sha256** first (`run_shell sha256sum` if raw
-  shell is enabled, else off-box). Work on a copy.
+- Stage it under `/work` and record its **sha256** first (`sha256sum` in
+  your own shell). Work on a copy.
 - **Handling rules**: never open it in a mail client, because remote images beacon.
   Never click. Defang what you write (`hxxps://evil[.]tld`). **Never submit a URL or
   file to a public scanner or sandbox without authorization.** urlscan submissions
@@ -102,11 +102,10 @@ smtp.mailfrom=`, `dkim= header.d=` and `dmarc= header.from=`. On M365 also check
   stdlib `email` module. Watch for nested `.eml` and archives. Check CIRCL hashlookup
   first, since a known-good hit clears the file.
 - Route by type:
-  - Office → `olevba` (`load_skill malware-maldoc`)
+  - Office → `olevba` from oletools (`load_skill malware-maldoc`)
   - PDFs, images, Office docs → `exif_metadata` (author, creating tool, internal paths;
     lure templates repeat)
-  - executables and scripts → `load_skill malware-triage` (`capa`, `bin_headers`,
-    `yara_scan`)
+  - executables and scripts → `load_skill malware-triage` (capa, rabin2, YARA, in your own sandbox)
   - LNK/ISO/OneNote → `malware-maldoc`
 
 ## Scope and close

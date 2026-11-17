@@ -50,7 +50,7 @@ The legal parts are practitioner orientation, not legal advice; counsel owns the
 ## Identify the strain and check for a decryptor
 
 - Fingerprint: note filename/text, encrypted extension, Tor chat URL or TOX ID, leak-site
-  brand. Triage the binary on a copy: hash, `yara_scan`, `capa`, `bin_headers`
+  brand. Triage the binary on a copy: hash, YARA, capa, rabin2
   (`load_skill malware-triage`). Map TTPs to an actor (`load_skill actor-ttp-attribution`):
   that drives the sanctions check. **Brand ≠ actor**: affiliates move between RaaS programmes
   and sanctioned groups rebrand, so check the infrastructure and the wallet, not the name.
@@ -85,7 +85,7 @@ Never restore into the compromised environment. Build an isolated recovery envir
 4. **Endpoints/servers:** reimage from golden images and restore **data**, not system state.
 
 - Pick a recovery point **before initial access**, not before detonation. Mount and scan
-  backups for the case's IOCs/persistence (`yara_scan`) before restoring.
+  backups for the case's IOCs/persistence (YARA) before restoring.
 - Reconnect only when the entry vector is closed and eradication exit criteria are met
   (hunt clean: `load_skill threat-hunting`). Getting hit again soon after is common.
 

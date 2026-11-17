@@ -67,7 +67,7 @@ Without an inventory nothing else works. One row per system/use case, in `/work/
   privacy, lost opportunity). A system can be low risk to you and high impact on them.
 - **Tier by consequence:** decisions about people (hiring, credit, health, access) → high; then
   autonomy, data sensitivity, scale, reversibility. High tier needs an impact assessment, an
-  oversight design, a pre-launch adversarial test (`load_skill red-teaming`) and committee sign-off.
+  oversight design, a pre-launch adversarial test (red-team / adversarial testing) and committee sign-off.
 - **Re-assess on:** a provider model/version change (often silent, so pin versions), a new data
   source, tool or user population, an incident, or a drift alert. Personal data also means a
   DPIA: run it jointly with the impact assessment, not twice (`load_skill privacy-engineering`).

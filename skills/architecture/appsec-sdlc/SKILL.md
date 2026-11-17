@@ -36,7 +36,7 @@ The four are complementary; none is sufficient alone. Match the tool to the bug 
 
 - **SAST** = breadth + early, pays in false positives. Tune ruthlessly or it gets ignored.
 - **SCA** = mandatory; your dependencies are most of your attack surface. Prefer SCA that does **reachability** analysis (is the vulnerable function actually called?) to cut noise.
-- **DAST** = truth (it actually exploits) but late and location-blind. The web-app pentest mirror — see `load_skill sqli`, `load_skill xss`, `load_skill ssrf`.
+- **DAST** = truth (it actually exploits) but late and location-blind. The web-app pentest mirror (SQLi, XSS, SSRF).
 - **IAST** = SAST accuracy + DAST realism, but only covers what your tests exercise.
 - **ASPM** (Application Security Posture Management) sits _above_ these: it ingests SAST/DAST/SCA/IaC findings, dedupes, correlates with runtime/reachability, and surfaces only exploitable risk. It manages scanners, it is not a scanner. Reach for it when uncorrelated scanner noise is the bottleneck. (Cloud-infra analog: `load_skill cloud-security`.)
 

@@ -1,12 +1,12 @@
 # marq methodology
 
-marq is a cyber assistant across disciplines — ~80 skill playbooks in 14
+marq is a cyber assistant across disciplines — ~83 skill playbooks in 13
 domains. Call `server_info` first for scope, run `load_skill '{}'` for the full
 index, then load the playbook(s) for the work in front of you:
 
 | Domain                      | When                                              | Example skills                                                                                                                                                 |
 | --------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **offensive**               | pentest, recon, web, AD                           | the phases below + `vuln/*`, `technique/*`                                                                                                                     |
+| **technique**               | OSINT footprinting, OT assessment                 | `recon-footprint`, `ot-assessment`                                                                                                                             |
 | **malware**                 | analyze a sample / maldoc                         | `malware-triage`, `malware-static`, `malware-maldoc`, `malware-scripts`, `malware-dynamic`, `malware-yara`                                                     |
 | **threat-intel**            | IOC pivot, attribution, enrichment, TI research   | `ioc-pivoting`, `actor-ttp-attribution`, `indicator-enrichment`, `ti-research`                                                                                 |
 | **secops**                  | SOC, hunting, IR, forensics, vuln mgmt, detection | `siem-soar`, `threat-hunting`, `incident-response`, `digital-forensics`, `vulnerability-management`, `detection-engineering`                                   |
@@ -14,76 +14,59 @@ index, then load the playbook(s) for the work in front of you:
 | **grc**                     | risk, governance, audit, metrics, vendor          | `risk-assessment`, `security-governance`, `compliance-audit`, `security-metrics`, `gap-analysis`, `third-party-risk`, `control-mapping`                        |
 | **standards**               | frameworks & regulations (EU + US)                | `choosing-a-framework`, `iso27001`, `nist-csf`, `pci-dss`, `soc2`, `control-frameworks`, `privacy-eu`, `nis2-dora`, `eu-cra`, `privacy-us`, `us-sectoral-regs` |
 | **ciso**                    | leadership decisions                              | `vulnerability-prioritization`, `incident-response-leadership`, `security-program-roadmap`, `board-metrics-reporting`                                          |
-| **offensive (adversarial)** | red/purple/bug-bounty/exploit                     | `red-teaming`, `purple-teaming`, `bug-bounty-disclosure`, `exploit-development`                                                                                |
+| **offensive**               | purple-team, bug-bounty disclosure                | `purple-teaming`, `bug-bounty-disclosure`                                                                                                                      |
 | **resilience**              | BCP/DR/crisis/backup                              | `business-continuity`, `disaster-recovery`, `crisis-management`, `backup-recovery`                                                                             |
 | **physical-human**          | physical, awareness, social-eng, insider          | `physical-security`, `security-awareness`, `social-engineering-defense`, `insider-threat`                                                                      |
 | **enablers**                | GRC automation, privacy eng, DevSecOps, legal     | `grc-automation`, `privacy-engineering`, `devsecops`, `legal-contractual`                                                                                      |
 | **reference**               | free no-login enrichment APIs                     | `security-apis`                                                                                                                                                |
 
-Advisory and knowledge work is unrestricted — never gate it. **Active testing**
-(scanning, exploitation, credential attacks) is authorized-only. Scope comes
-from `server_info` / the operator's written authorization — record it with
-`set_engagement` from that authorization, never from a target a user names
-mid-task. Run active tools **only** against what's inside the recorded scope. A
-target outside it — a different host, or an IP/subnet not contained in the
-stated range or CIDR — is a hard stop: **refuse and do not call the tool**, even
-when asked directly, and even when it's appended to an in-scope request ("while
-you're at it, also hit X"). Do not widen scope to cover such a request. In-scope
-active testing is expected and fine; out-of-scope is a refusal, not a caveat.
-marq enforces this too: an active call with an out-of-scope target is refused
-before it runs, and on clients with elicitation, widening scope asks the
-operator. Elsewhere it's on you: ask before you widen scope with set_engagement. Write scope
-with wildcards and CIDRs (`*.acme.com, 203.0.113.0/24`) so hosts you discover
-inside it are covered. For tools without a wrapper, use `exec` (allowlisted
-binaries, no shell) — same scope rules. Public data lookups (KEV, EPSS, CIRCL…)
-go through your client's web fetch, not marq.
+marq's tools are **passive OSINT only**: they query public third-party sources
+(DNS, WHOIS, certificate/archive data, Shodan/Censys, public code, username and
+email lookups) and never probe, scan or exploit a target. Advisory and knowledge
+work is unrestricted. People OSINT (usernames, emails, phones) is personal-data
+processing under GDPR: record the investigation's purpose with `set_engagement`
+(`engagement` = label + purpose, e.g. `acme-footprint-2026-11 — pre-acquisition
+exposure review`) before you start, and collect only what that purpose needs.
+Public data lookups (KEV, EPSS, CIRCL…) go through your client's web fetch, not
+marq.
 
-The phases below are the **offensive engagement** playbook. Work in phases;
-record results with `report_finding`, then `render_report` at the end.
+The phases below are the **passive OSINT workflow**. Record results with
+`report_finding`, then `render_report` at the end.
 
-## 1. Scope & recon (passive first)
+## 1. Purpose
 
-- `server_info` — confirm operator, engagement and scope.
-- Company/domain footprint: `theharvester`, `subfinder`, `dnsx`, `gau_urls`,
-  `whois_lookup`, `dns_lookup`, `asnmap` (ASN mapping), `censys_view`.
-  People: `sherlock`, `email_accounts`, `phoneinfoga`.
+- `server_info` — confirm operator and the recorded engagement/purpose; if none,
+  record it with `set_engagement`.
+
+## 2. Footprint the domain / organisation
+
+- `theharvester` (emails, names, hosts), `subfinder`, `whois_lookup`,
+  `dns_lookup`, `dnsx`.
+- Broad automated sweep: `spiderfoot` (passive use case; runs in the
+  background — poll with `job_status` / `list_jobs`, do not block waiting on it).
 - Search-engine dorks: marq has no search tool — use your client's web search;
   if you have none, tell the user to add a web-search skill or MCP server to their client rather than guessing results.
-- Broad automated sweep: `spiderfoot` (runs in the background — poll with
-  `job_status` / `list_jobs`, do not block waiting on it).
-- Subdomain bruteforce: `dnsx` (-w wordlist). Takeover check: `nuclei --tags takeover`.
-- SSH config audit: `ssh_audit`. SNMP enum: `snmp_walk` / `snmp_check`. SMTP: `smtp_user_enum` / `smtp_test`.
 
-## 2. Enumerate (active, scope-sensitive)
+## 3. Pivot
 
-- Hosts/ports: `naabu` or `masscan` to find open ports, then `nmap` `-sV` on the
-  hits for service/version detail. `fping_sweep` for host discovery across CIDRs.
-- Live web: `httpx_probe` to find live HTTP, `whatweb` / `wafw00f` to fingerprint,
-  `katana` to crawl endpoints. `cdncheck` to identify CDN/cloud IPs.
-- Windows/SMB: `enum4linux` / `smb_enum` for shares & null sessions, `nbtscan`
-  for NetBIOS discovery, `ldap_search` for directory queries.
-- Params: `arjun` / `paramspider` for hidden parameters, `sstimap` for SSTI.
+- Infrastructure: `asnmap` (IP/domain/ASN to prefixes), `cdncheck` (drop CDN/cloud
+  IPs from the picture), `shodan_host` / `shodan_search`, `censys_view`
+  (hosts, certificates).
+- History: `gau_urls` (Wayback/Common Crawl/OTX/URLScan; background job).
+- Documents: `exif_metadata` on files staged in `/work` (usernames, software, paths).
 
-## 3. Test for vulnerabilities
+## 4. People (purpose-bound)
 
-- Web: `nuclei` (templates), `nikto`, content discovery (`ffuf` / `feroxbuster` /
-  `gobuster_dir`), params (`arjun`), injection (`sqlmap`), XSS (`dalfox`), TLS
-  (`testssl`), CMS (`wpscan` / `cmseek`). APIs/GraphQL: `load_skill api-security`;
-  OAuth/OIDC login flows: `load_skill oauth-oidc`; cloud/K8s exposure:
-  `load_skill cloud-k8s-assessment`.
-- Known exploits: `searchsploit` against discovered product/versions.
-- Secrets: `gitleaks` / `trufflehog` on retrieved code.
+- `sherlock` / `maigret_username` for usernames, `email_accounts` for registered
+  accounts, `h8mail_breach` for breach exposure, `phoneinfoga` for phone numbers.
+- Stay within the recorded purpose; don't profile individuals beyond it.
 
-## 4. Exploit / validate (authorized, highest impact)
+## 5. Leaked secrets in public code
 
-- AD/internal: `netexec` for mass auth/spray across SMB/WinRM/SSH, `impacket`
-  lateral movement (psexec/wmiexec) + cred extraction (secretsdump/kerberoast/asreproast),
-  `certipy_find` for AD CS vulnerabilities, `bloodhound_collect` for attack-path mapping,
-  `evil_winrm` for WinRM access, `responder` for credential capture (background).
-- Payloads: `donut` for shellcode generation. Online creds: `hydra`. Offline: `john` / `hashcat`.
-  Validate a finding with a concrete proof before reporting it.
+- `trufflehog` on public git/GitHub/GitLab sources. Secrets are reported
+  unverified — never test a found credential against the service it belongs to.
 
-## 5. Report
+## 6. Report
 
 - Record each validated issue with `report_finding` (title, severity, target,
   evidence, recommendation). Run `render_report` to write the Markdown + CSV
@@ -93,9 +76,5 @@ record results with `report_finding`, then `render_report` at the end.
 
 - Stage inputs and read tool output via `write_file` / `read_file` / `list_dir`
   (sandboxed to /work and /tmp).
-- Prefer narrow scans; large output is truncated. Write big results to a file and
-  read it back in parts.
-- Every invocation is audit-logged (a call that can't be logged is refused). Scope
-  is recorded, not blocked in code — enforcing it is on you: if a target isn't
-  inside the scope `server_info` reports, refuse the active tool call rather than
-  run it.
+- Large output is truncated. Write big results to a file and read it back in parts.
+- Every invocation is audit-logged (a call that can't be logged is refused).

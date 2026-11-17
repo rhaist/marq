@@ -10,7 +10,7 @@ metadata:
 
 Two layers: the **image** (what you ship) and the **cluster** (where it runs). Real cluster compromises are rarely kernel 0-days. They come from an exposed API/kubelet/dashboard, an over-privileged service account, a privileged pod, a leaked kubeconfig or cloud key, or an unpatched add-on.
 
-Related skills: CNAPP/KSPM categories in `load_skill cloud-security`; CI gates, SBOM and cosign in `load_skill devsecops`; testing a cluster in `load_skill cloud-k8s-assessment`; responding to one in `load_skill cloud-incident-response`.
+Related skills: CNAPP/KSPM categories in `load_skill cloud-security`; CI gates, SBOM and cosign in `load_skill devsecops`; responding to one in `load_skill cloud-incident-response`.
 
 ## Version currency (an EOL cluster is a finding)
 
@@ -26,13 +26,12 @@ Related skills: CNAPP/KSPM categories in `load_skill cloud-security`; CI gates, 
 
 - **Use minimal bases.** Distroless, Wolfi/Chainguard, or Docker Hardened Images (free under Apache-2.0 since Dec 2025; verify current terms at https://docs.docker.com/dhi/). Build multi-stage, run as a non-root `USER`, and ship no shell or package manager.
 - **Pin by digest** (`@sha256:`). Tags are mutable, so `latest` in a manifest is a finding.
-- **Scan with `trivy`.** Use `mode: image` for a registry ref and `mode: fs` for a build context or manifest directory.
-  - marq runs vuln + secret + misconfig together, so Dockerfiles also get `DS-*` checks.
+- **Scan with trivy** (in your CI; marq does not run it): `trivy image` for a registry ref and `trivy fs` for a build context or manifest directory, covering vuln + secret + misconfig (`DS-*` Dockerfile checks).
   - Re-scan running images on a schedule; new CVEs land on images already deployed.
 - **Sign, then verify at admission** (cosign + Kyverno/policy-controller; `load_skill devsecops`). A signature that nothing checks protects nothing.
 - **Your scanner is supply chain too.** On 19 Mar 2026 attackers published a malicious Trivy **v0.69.4** binary and images and force-pushed 76 of 77 `trivy-action` tags. Malicious v0.69.5–v0.69.6 images followed on Docker Hub. Tracked as GHSA-69fq-xp46-6x23 / CVE-2026-33634.
   - Pin CI actions to a commit SHA and scanner images by digest, and verify their signatures. The scanner runs with your CI secrets in reach.
-  - Current release is v0.76.2 (5 Nov 2026). marq's image installs Kali's trivy 0.76.0, outside the compromised range. verify: https://github.com/aquasecurity/trivy/security/advisories/GHSA-69fq-xp46-6x23
+  - Current release is v0.76.2 (5 Nov 2026). Use a release outside the compromised range. verify: https://github.com/aquasecurity/trivy/security/advisories/GHSA-69fq-xp46-6x23
 
 ## Admission & pod security
 
@@ -75,7 +74,7 @@ Related skills: CNAPP/KSPM categories in `load_skill cloud-security`; CI gates, 
 
 - **Secrets are only base64-encoded.** Enable **encryption at rest with KMS v2** (GA in 1.29), and check each managed provider's default.
 - **Prefer an external store** (Vault or a cloud secret manager), synced in via External Secrets Operator or the Secrets Store CSI driver. Restrict `get`/`list secrets` with RBAC.
-- **Keep secrets out of image layers, Helm values and env vars.** They leak into logs, crash dumps and `docker history`. Scan for them with `gitleaks`, `trufflehog` and `trivy`.
+- **Keep secrets out of image layers, Helm values and env vars.** They leak into logs, crash dumps and `docker history`. Scan for them with gitleaks, trufflehog and trivy.
 
 ## Runtime detection & audit
 
@@ -105,7 +104,7 @@ Related skills: CNAPP/KSPM categories in `load_skill cloud-security`; CI gates, 
 
 - **CIS Kubernetes Benchmark v2.1.0** (late Sep 2026) covers about 1.35–1.37; v2.0.x covers 1.34–1.35.
   - On managed clusters use the CIS EKS/AKS/GKE benchmarks; many self-managed checks don't apply.
-  - Tooling: kube-bench or `trivy k8s --compliance`. The marq `trivy` wrapper doesn't expose k8s mode.
+  - Tooling: kube-bench or `trivy k8s --compliance`.
   - verify: https://www.cisecurity.org/benchmark/kubernetes
 - **NSA/CISA Kubernetes Hardening Guidance v1.2** (Aug 2022) is still the latest edition found.
   - Good for the reasoning, but it predates ValidatingAdmissionPolicy/MutatingAdmissionPolicy, KMS v2 and the ingress-nginx retirement. Take the current control list from CIS.

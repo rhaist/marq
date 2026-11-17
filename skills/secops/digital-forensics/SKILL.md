@@ -92,7 +92,7 @@ ioc-pivoting`. Carve transferred files with Zeek `files.log` / NetworkMiner.
 ## marq tie-in
 
 This box is not a full forensic suite — stage evidence copies under `/work` (file
-tools are sandboxed to `/work` + `/tmp`), then `yara_scan` for IOC sweeps, `capa`
-for binary capabilities, `bin_headers` (`-z`) for strings on captured samples
-(copy only, isolated). `report_finding` each artifact-backed conclusion with its source +
+tools are sandboxed to `/work` + `/tmp`), then run YARA (IOC sweeps), capa (binary
+capabilities) and rabin2/strings on captured samples in your own isolated
+analysis sandbox (copy only). `report_finding` each artifact-backed conclusion with its source +
 hash; `render_report` for the forensic timeline.

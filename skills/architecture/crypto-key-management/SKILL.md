@@ -25,7 +25,7 @@ the math — they're key management, stale algorithms, and rolled-your-own.
 - Hash: **SHA-256+ / SHA-3**. MD5 and SHA-1 are dead — flag any use.
 - Asymmetric (classical): **RSA-3072+** or **ECC P-256/Ed25519**.
 - KDF/passwords: **Argon2id** (or scrypt/bcrypt); PBKDF2 only for compat. Never
-  a bare hash for passwords (see `load_skill password-cracking` for why).
+  a bare hash for passwords (fast hashes fall to GPU cracking).
 - TLS: **1.3** preferred, 1.2 floor; disable everything below.
 - **APAC pitfall (national crypto):** the AES/RSA/ECC floor above is a Western default.
   **China**'s Commercial Cryptography regime mandates the national **SM2/SM3/SM4/SM9**
@@ -78,8 +78,8 @@ the math — they're key management, stale algorithms, and rolled-your-own.
 
 ## Secrets management
 
-- No secrets in code, env files, images, or git. Detect leaks with `gitleaks` /
-  `trufflehog`; if one ships, **rotate it** — masking isn't remediation.
+- No secrets in code, env files, images, or git. Detect leaks with gitleaks /
+  trufflehog; if one ships, **rotate it** — masking isn't remediation.
 - Use a secrets manager (Vault, cloud secret stores) with short-lived/dynamic
   secrets and tight access policies. Pairs with `load_skill devsecops`.
 

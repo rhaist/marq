@@ -8,7 +8,7 @@ metadata:
 
 # Purple teaming
 
-Authorized engagements only — confirm scope with `server_info` first. Purple
+Authorized exercises only (marq runs no techniques; use your own emulation tooling). Purple
 teaming is not a separate team; it's red and blue working _together in the same
 room_ to improve detection. The deliverable is **new detections + measured
 coverage**, not a flag captured. Where a red team hides, a purple team announces

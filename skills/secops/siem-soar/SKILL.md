@@ -92,7 +92,7 @@ incident-response`. A recurring detection gap becomes a hunt
 
 ## marq tie-in
 
-This host is offensive tooling, not a SIEM. Use it to _generate the telemetry a
-detection should catch_ (run `nmap`/`nuclei` and confirm the SIEM alerts), and
+marq is passive OSINT, not a SIEM and generates no attack telemetry. Generate
+test telemetry with your own emulation tooling and confirm the SIEM alerts, then
 `report_finding` any logging blind spot you prove (e.g. an attack with no
-corresponding log source) so it lands in the engagement report.
+corresponding log source).

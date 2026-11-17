@@ -25,14 +25,14 @@ what else shares its infrastructure. Pivot outward, then verdict (see
 
 - **IP** → `shodan_host` (open ports, TLS certs, banners, hostnames), Shodan
   InternetDB (ports/CVEs, no key), IPinfo (ASN/org/geo). Pivot on: shared TLS
-  cert serial/SHA1, JARM, favicon hash, ASN, reverse-DNS, hosting org. Then
-  `nmap -sV` / `httpx_probe` the IP **only if in scope** (`server_info`).
+  cert serial/SHA1, JARM, favicon hash, ASN, reverse-DNS, hosting org. Stay passive:
+  marq does no active probing of the IP.
 - **Domain** → `subfinder` + crt.sh (`%25.<domain>`) for siblings sharing the
   cert; `whois_lookup` + `dns_lookup` for registrant, NS, MX, current A/AAAA;
   `dnsx` to resolve. Pivot on: registrant email/org, NS set, same A record
   (shared host), cert SAN entries, registration date clustering.
 - **URL** → urlscan for redirect chain + resources; extract the host and pivot as
-  domain/IP; `httpx_probe` for live status/title/tech (in scope only).
+  domain/IP.
 - **Hash** → CIRCL hashlookup (known-good NSRL → likely benign), ORKL search,
   urlscan `hash:` for samples seen serving it. No detonation here.
 

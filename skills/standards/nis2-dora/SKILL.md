@@ -42,8 +42,7 @@ EIOPA. These cite RTS that get revised — verify exact figures before relying.
   approve and oversee them.
 - **DORA — five pillars:** (1) ICT risk-management framework, (2) ICT-incident
   management & reporting, (3) digital operational-resilience **testing** (incl.
-  threat-led penetration testing / TLPT for significant entities — see
-  `load_skill red-teaming`), (4) **ICT third-party risk** (incl. an oversight
+  threat-led penetration testing / TLPT for significant entities), (4) **ICT third-party risk** (incl. an oversight
   regime for critical providers), (5) information sharing.
 
 ## Notification clocks (the load-bearing numbers — verify against the RTS)

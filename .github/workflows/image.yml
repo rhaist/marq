@@ -1,6 +1,5 @@
-# Builds the multi-GB Kali image, runs scripts/e2e-image.sh (the promises that
-# only hold for the running image: /work bind-mount persistence and per-container
-# jwt keys), and — on main — publishes it to GHCR so users can pull instead of
+# Builds the Kali image, runs scripts/e2e-image.sh (the promises that
+# only hold for the running image: /work bind-mount persistence), and — on main — publishes it to GHCR so users can pull instead of
 # building. Expensive, so it only triggers when something that ends up IN the
 # image changes: the image definition/scripts, or the Go sources + go:embed'd
 # skills the `marq` binary is built from (cmd/**, internal/**, skills/** via the

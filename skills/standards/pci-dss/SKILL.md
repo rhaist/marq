@@ -65,5 +65,5 @@ Higher transaction volumes (Level 1) require a **QSA-led RoC** (Report on Compli
 
 ## Pairs with
 
-- Network-segmentation validation testing: `load_skill network-enumeration`.
+- Network-segmentation validation testing is done by the assessor/pentester (not marq).
 - Gap assessment / control mapping against your other frameworks: `load_skill gap-analysis`, `load_skill control-mapping`.

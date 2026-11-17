@@ -38,7 +38,7 @@ Microsoft's classification; apply each letter to each DFD element. Each maps to 
 | **D**enial of service      | Availability    | Resource exhaustion, lockout              |
 | **E**levation of privilege | Authorization   | User→admin, container escape              |
 
-These map directly to attacker techniques in the rest of the library: spoofing/EoP → `load_skill auth-jwt`; info disclosure / IDOR → `load_skill idor-access-control`; tampering/injection → `load_skill sqli`, `load_skill ssrf`.
+These map directly to attacker techniques in the rest of the library: spoofing/EoP → auth/JWT flaws; info disclosure → IDOR; tampering/injection → SQLi, SSRF.
 
 ## The other methods — when STRIDE isn't the right tool
 
@@ -54,7 +54,7 @@ A threat that doesn't produce an artifact was theater. For each accepted threat:
 
 - Write a **security requirement** (ideally as an ASVS item — `load_skill appsec-sdlc`) or an **abuse/misuse case**.
 - Decide the response: **mitigate** (add a control), **eliminate** (remove the feature/flow), **transfer** (offload), or **accept** (document, owner + sign-off).
-- Create a **test** that proves the mitigation — feeds DAST/integration suites and the pentest scope. The unmitigated/accepted ones become the target list for `load_skill network-enumeration` / web testing.
+- Create a **test** that proves the mitigation — feeds DAST/integration suites and the pentest scope. The unmitigated/accepted ones become the target list for network / web testing.
 
 ## Worked mini-example — file-upload avatar feature
 
@@ -65,9 +65,9 @@ STRIDE walk on the upload flow:
 - **S** — can an unauthenticated user upload? → require auth on the endpoint.
 - **T** — can the file be a polyglot / malicious payload? → validate content-type + magic bytes, re-encode the image, strip metadata.
 - **R** — is the upload attributed? → log uploader id + hash (audit trail).
-- **I** — can I fetch _another_ user's avatar by guessing the URL? (IDOR / `load_skill idor-access-control`) → authorize per-object access; unguessable ids.
+- **I** — can I fetch _another_ user's avatar by guessing the URL? (IDOR) → authorize per-object access; unguessable ids.
 - **D** — can a 10 GB upload or a decompression bomb exhaust the worker? → size limits, timeouts, resource caps.
-- **E** — can the worker be made to fetch an internal URL (SSRF via image fetch) or execute the upload? → no server-side fetch of user URLs; sandbox the worker; store outside webroot, never execute uploads. (`load_skill ssrf`, `load_skill file-path-traversal`)
+- **E** — can the worker be made to fetch an internal URL (SSRF via image fetch) or execute the upload? → no server-side fetch of user URLs; sandbox the worker; store outside webroot, never execute uploads. (SSRF, path traversal)
 
 LINDDUN overlay (personal data — the image may reveal identity/location): strip EXIF GPS (**Identifying/Detecting**), set retention + deletion (**Non-compliance**), tell the user what's stored (**Unawareness**).
 

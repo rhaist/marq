@@ -181,7 +181,7 @@ func listTools(argv []string) {
 
 // listSkills is the knowledge-side twin of listTools: the library is half of
 // what marq ships, and until now it was only reachable through an MCP client or
-// `marq run load_skill`. Grouped by category so the 14 domains are visible at a
+// `marq run load_skill`. Grouped by category so the domains are visible at a
 // glance; with a name it prints the playbook itself (pipe it to a pager).
 func listSkills(argv []string) {
 	if len(argv) > 0 && argv[0] == "--stale" {

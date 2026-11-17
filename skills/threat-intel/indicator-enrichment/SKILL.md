@@ -21,8 +21,8 @@ deeper pivots use `ioc-pivoting`; for sources use
 - **Domain** → crt.sh (cert age/SANs), `whois_lookup` (registration date — newly
   registered is suspicious), `dns_lookup`/`dnsx` (resolves? parked? sinkholed?),
   urlscan search (screenshots, prior verdicts).
-- **URL** → urlscan search for historical scans/redirects; `httpx_probe` for live
-  status/title/tech (in scope only). Do **not** submit a client URL to a public
+- **URL** → urlscan search for historical scans/redirects; check live status
+  from your own tooling only if the client has authorized contact. Do **not** submit a client URL to a public
   scanner without authorization (opsec — see security-apis).
 - **Hash** → CIRCL hashlookup: NSRL/known-good hit ⇒ very likely benign, clear it.
   ORKL + urlscan `hash:` for malicious sightings. Never detonate here.

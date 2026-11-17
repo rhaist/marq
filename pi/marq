@@ -3,8 +3,8 @@
 #
 # marq's tools live inside the image, but Pi and the local model run on the host.
 # This shim forwards tool calls into a long-lived marq container so the model can
-# just call `marq run <tool> '<json>'` from bash — across any domain (recon, malware
-# triage, threat-intel, GRC, standards, CISO advice; testing is one of them).
+# just call `marq run <tool> '<json>'` from bash — passive OSINT plus the knowledge
+# domains (threat-intel, malware, GRC, standards, CISO advice).
 #
 # Install:  install -m 0755 pi/marq ~/.local/bin/marq
 # Session:  marq up ~/marq/work        # start the container, bind /work to a workspace
@@ -12,7 +12,7 @@
 #           marq down                   # tear down
 #
 # A long-lived container (not `docker run` per call) is required: background tools
-# (spiderfoot, responder, ntlmrelayx) detach inside it and are polled later with
+# (spiderfoot, gau_urls) detach inside it and are polled later with
 # list_jobs/job_status — an ephemeral per-call container would kill them.
 set -euo pipefail
 C="${MARQ_CONTAINER:-marq}"
@@ -20,8 +20,8 @@ IMG="${MARQ_IMAGE:-marq:latest}"
 # Container engine. Default `docker` (OrbStack/Colima expose the same CLI);
 # set MARQ_ENGINE=podman to run rootless/daemonless with no Docker Desktop.
 ENGINE="${MARQ_ENGINE:-docker}"
-# Optional API keys / opt-ins, forwarded only when exported in your shell.
-PASS="SHODAN_API_KEY CENSYS_API_TOKEN CENSYS_ORG_ID GITHUB_TOKEN NUMVERIFY_API_KEY WPSCAN_API_TOKEN MARQ_ALLOW_RAW_SHELL"
+# Optional API keys, forwarded only when exported in your shell.
+PASS="SHODAN_API_KEY CENSYS_API_TOKEN CENSYS_ORG_ID GITHUB_TOKEN NUMVERIFY_API_KEY"
 # Or keep them in a KEY=value file; loaded automatically if present.
 CFG="${MARQ_ENV_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/marq/env}"
 
@@ -36,17 +36,10 @@ case "${1:-}" in
     # Audit attribution: your shell's MARQ_OPERATOR, else the env file's, else $USER.
     if [ -n "${MARQ_OPERATOR:-}" ]; then envargs+=(-e MARQ_OPERATOR)
     elif ! { [ -f "$CFG" ] && grep -q '^MARQ_OPERATOR=' "$CFG"; }; then envargs+=(-e "MARQ_OPERATOR=${USER:-marq}"); fi
-    # caps: nmap/masscan/naabu SYN scans.
     "$ENGINE" run -d --name "$C" \
-      --cap-add NET_ADMIN --cap-add NET_RAW \
       -v "$(cd "$work" && pwd):/work" \
       "${envargs[@]}" \
       "$IMG" sleep infinity >/dev/null
-    # Per-container jwt_tool keypair. The entrypoint only regenerates it on the
-    # serve path; the shim starts `sleep infinity` (exec'd verbatim, skipping
-    # that), so do it here — otherwise every shim container reuses the one keypair
-    # baked at build time, defeating the unique-per-container IOC.
-    "$ENGINE" exec "$C" sh -c 'rm -rf "$HOME/.jwt_tool"; jwt_tool x >/dev/null 2>&1 || true' || true
     echo "marq up: container '$C', /work -> $(cd "$work" && pwd)"
     ;;
   down)

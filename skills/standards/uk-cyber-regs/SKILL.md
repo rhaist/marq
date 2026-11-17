@@ -61,7 +61,7 @@ The UK left the EU before NIS2, DORA, the CRA and the AI Act, so **none of them 
 
 - **PRA/FCA operational resilience** (SS1/21, PS21/3): important business services, impact tolerances, mapping + scenario testing — fully in force since 31 Mar 2025. **Critical third parties** regime (FSMA 2023; rules from 1 Jan 2025) — HM Treasury designates; no designation list confirmed in my check (verify).
 - **FCA PS26/2 + PRA PS7/26 (18 Mar 2026), applying 18 Mar 2027:** a single operational-incident reporting regime (PRA collapsed initial/interim/final into one report) plus notification of **material third-party arrangements** and an annual register. verify: https://www.fca.org.uk/publications/policy-statements/ps26-2-operational-incident-third-party-reporting
-- Intelligence-led testing is **CBEST**, not TIBER-EU/TLPT — `load_skill red-teaming`.
+- Intelligence-led testing is **CBEST**, not TIBER-EU/TLPT.
 
 ## Where the UK diverges from the EU (the comparison clients ask for)
 

@@ -50,8 +50,8 @@ func TestLibraryLoads(t *testing.T) {
 }
 
 func TestLoadMany(t *testing.T) {
-	out := LoadMany("sqli, xss")
-	if !strings.Contains(out, "skill: sqli") || !strings.Contains(out, "skill: xss") {
+	out := LoadMany("recon-footprint, ot-ics")
+	if !strings.Contains(out, "skill: recon-footprint") || !strings.Contains(out, "skill: ot-ics") {
 		t.Errorf("LoadMany did not return both skills: %q", out)
 	}
 	if got := LoadMany("a,b,c,d,e,f"); !strings.Contains(got, "at most 5") {

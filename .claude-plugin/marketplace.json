@@ -6,7 +6,7 @@
     {
       "name": "marq",
       "source": "./skills",
-      "description": "Playbooks across offensive, malware, threat intel, secops, architecture, GRC, EU+US regulation and OT/ICS, refreshed every 6-8 weeks."
+      "description": "Playbooks across malware, threat intel, secops, architecture, GRC, EU+US regulation and OT/ICS, refreshed every 6-8 weeks."
     }
   ]
 }

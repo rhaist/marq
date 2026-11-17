@@ -22,7 +22,7 @@ A spectrum of granularity, not two products. Pick the coarsest level that bounds
 
 ## East-west is the point
 
-Perimeter (north-south) firewalls catch the inbound attacker but see nothing once they're inside. Most damage is **east-west**: lateral movement from a phished workstation to a server to the domain controller. The pentest mirror of this is `load_skill network-enumeration` — if internal enum walks freely host-to-host, your segmentation is decorative.
+Perimeter (north-south) firewalls catch the inbound attacker but see nothing once they're inside. Most damage is **east-west**: lateral movement from a phished workstation to a server to the domain controller. If an internal tester can walk freely host-to-host, your segmentation is decorative.
 
 - Default-deny east-west between tiers; allow only the specific flows the app needs.
 - Block workstation-to-workstation entirely where possible (no business reason for peer SMB/RDP) — kills the most common lateral path.

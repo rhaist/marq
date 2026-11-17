@@ -18,8 +18,7 @@ threat reporting is perishable and your training data lags.
 
 ## Sources — fetch these, don't recall them
 
-Query with the client's web-fetch, or keep it audited on the container network
-with `run_shell` → `curl -s '<url>'`. All are free / no-login. Rate-limited —
+Query with the client's web-fetch or `curl -s '<url>'` from your own shell. All are free / no-login. Rate-limited —
 query what you need, don't bulk-loop.
 
 ### Report libraries & search (start here)

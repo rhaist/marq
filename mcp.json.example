@@ -2,11 +2,10 @@
   "//": "MCP server config for marq — works as-is in Claude Code (.mcp.json)",
   "//2": "and Claude Desktop. Codex uses TOML;",
   "//3": "see docs/CLIENTS.md. Paste the 'marq' entry into your mcpServers — no config needed.",
-  "//4": "stdio (-i keeps it open). Engagement + scope are set at runtime by the model via set_engagement.",
+  "//4": "stdio (-i keeps it open). The engagement label + purpose is set at runtime by the model via set_engagement.",
   "//5": "Optional: export MARQ_OPERATOR (audit attribution, default 'marq') and any API key below in the environment your client runs in; each -e passes it through only if set (clients that don't inherit your shell, e.g. Claude Desktop, take an \"env\": {...} block). Keys: docs/USAGE.md.",
   "//6": "marq-work persists findings/reports; swap for a bind mount (-v /host/dir:/work) to read them on the host.",
-  "//caps": "no-new-privileges hardens the container but blocks the setcap SYN-scan grant: under it masscan/naabu fail and nmap -sS degrades to connect scans (nmap auto-uses -sT). If you need raw-socket SYN scans, drop the no-new-privileges line. TCP-connect scanning works either way.",
-  "//skills-only": "Want just the cyber-skills library + advisory tools for your LLM, without the offensive tool suite? Use the 'marq-skills' entry below instead of 'marq'. MARQ_SKILLS_ONLY=1 loads only the in-process knowledge tools (skills, findings, files), so no Kali binaries or scan capabilities are needed. Drop all caps.",
+  "//skills-only": "Want just the cyber-skills library + advisory tools for your LLM, without the OSINT tool suite? Use the 'marq-skills' entry below instead of 'marq'. MARQ_SKILLS_ONLY=1 loads only the in-process knowledge tools (skills, findings, files), so no Kali binaries are needed.",
   "mcpServers": {
     "marq-skills": {
       "command": "docker",
@@ -27,19 +26,14 @@
         "run", "--rm", "-i",
         "--security-opt", "no-new-privileges:true",
         "--cap-drop", "ALL",
-        "--cap-add", "NET_RAW",
-        "--cap-add", "NET_ADMIN",
-        "--cap-add", "NET_BIND_SERVICE",
         "-v", "marq-audit:/var/log/marq",
         "-v", "marq-work:/work",
         "-e", "MARQ_OPERATOR",
-        "-e", "MARQ_ALLOW_RAW_SHELL",
         "-e", "SHODAN_API_KEY",
         "-e", "CENSYS_API_TOKEN",
         "-e", "CENSYS_ORG_ID",
         "-e", "GITHUB_TOKEN",
         "-e", "NUMVERIFY_API_KEY",
-        "-e", "WPSCAN_API_TOKEN",
         "marq"
       ]
     }

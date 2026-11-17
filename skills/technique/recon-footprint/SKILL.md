@@ -1,6 +1,6 @@
 ---
 name: recon-footprint
-description: Guides opening recon on a domain or organization — passive footprint first (whois, DNS, subfinder, theHarvester, spiderfoot, leaked secrets), then resolving live hosts, active enumeration and web fingerprinting. Use when the user asks to recon a target, map an attack surface or external footprint, find subdomains, or start an authorized pentest or OSINT investigation.
+description: Guides passive OSINT footprinting of a domain or organization — whois, DNS, subfinder, theHarvester, spiderfoot, certificate transparency, historical URLs, leaked secrets in public repos, internet-scan data (Shodan/Censys) and people footprint. Use when the user asks to recon a target, map an external footprint, find subdomains, or start an OSINT investigation.
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"
@@ -8,11 +8,12 @@ metadata:
 
 # Recon / footprint workflow
 
-Start passive (no packets at the target), then go active only in scope.
+Everything here queries public third-party sources; no packet is sent to the
+target. marq does no port scanning, probing or crawling.
 
 Passive doesn't mean lawful-by-default: OSINT on named people collects personal
 data governed by GDPR and APAC privacy regimes (Singapore PDPA, Japan APPI, etc.).
-Collect only what the engagement needs, and keep findings/PoC data in the client's
+Collect only what the investigation needs, and keep findings data in the client's
 region — shipping a dossier of employee data to a home-region host is a common
 cross-border misstep.
 
@@ -23,32 +24,33 @@ cross-border misstep.
 - `subfinder` — passive subdomain enumeration. Feed results onward.
 - `whois_lookup` + `dns_lookup` — registration, name servers, records.
 - `gau_urls` — historical URLs (Wayback/CommonCrawl/OTX/URLScan), forgotten
-  endpoints and params without touching the live target.
-- `spiderfoot` — broad automated sweep (background job; poll with `job_status`).
+  endpoints and params.
+- `spiderfoot` — broad passive sweep (background job; poll with `job_status`).
 - People: `sherlock` / `maigret_username` (a username across sites),
-  `email_accounts` (email → accounts), `phoneinfoga` (phone numbers).
-- Secrets/exposure: `gitleaks` / `trufflehog` on any retrieved repos.
+  `email_accounts` (email → accounts), `h8mail_breach` (email → breaches),
+  `phoneinfoga` (phone numbers), `exif_metadata` (author/device data in
+  retrieved documents).
+- Secrets/exposure: `trufflehog` on public git/GitHub/GitLab sources (never
+  verifies, so it doesn't use any key it finds).
 
-## 2. Resolve & find what's live
+## 2. Resolve & classify
 
-- Collect subdomains into a file with `write_file`, then `dnsx` to resolve and
-  `httpx_probe` to find live HTTP services (status, title, tech).
-- `cdncheck` to flag hosts behind a CDN/WAF (you may be hitting the edge, not the
-  origin). For subdomain takeover on resolved subdomains (dangling CNAMEs), run
-  `nuclei` with `templates="http/takeovers/"` (the wrapper passes `-t`; it has no
-  tags option).
+- Collect subdomains into a file with `write_file`, then `dnsx` to resolve
+  (records via public resolvers).
+- `asnmap` for the ASN/CIDR ranges an org owns; `cdncheck` to flag hosts behind a
+  CDN/WAF/cloud (so an IP is the edge, not the origin).
+- Dangling CNAMEs (subdomain-takeover candidates) show up in `dnsx` CNAME output;
+  report with the DNS evidence only.
 
-## 3. Enumerate hosts (active)
+## 3. Third-party scan data
 
-- `naabu` for a fast port sweep, then `nmap` `-sV` on the open ports for
-  service/version detail. `masscan` for very large ranges.
-
-## 4. Fingerprint web
-
-- `whatweb` and `wafw00f` per live host; `katana` to crawl endpoints.
+- `shodan_host` / `shodan_search` and `censys_view` — ports, banners, TLS certs and
+  CVEs as already indexed by those services (e.g. `ssl.cert.subject.cn:acme.com`).
+  Needs API keys for some queries.
+- Cert transparency, per-IP ports/CVEs and other keyless APIs: `load_skill security-apis`.
 
 ## Hand-off
 
-- Record interesting assets/params as you go (notes in the report via
-  `report_finding` for confirmed issues). Then pick a vuln-class skill
-  (sqli/xss/ssrf/idor/...) for the testing phase.
+- Record interesting assets as you go with `report_finding`, then `render_report`.
+  For prioritising what you found, `load_skill indicator-enrichment` and
+  `load_skill ioc-pivoting`.

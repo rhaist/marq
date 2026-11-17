@@ -36,8 +36,8 @@ Move security checks into the pipeline **without turning the pipeline into a wal
 ## Secrets management & detection
 
 - **Don't store secrets in repos/CI vars** — use a vault / cloud secrets manager + short-lived **OIDC-federated** cloud creds (no long-lived keys in CI).
-- **Detect**: `gitleaks` / `trufflehog` (validates whether a secret is _live_) in pre-commit **and** CI; enable platform **push protection** (GitHub/GitLab secret scanning) to stop the commit at the door.
-- A leaked secret = **rotate first**, then remove from history. Scrubbing git history without rotating is theater. (marq ships gitleaks + trufflehog — see `load_skill recon-footprint` for repo recon.)
+- **Detect**: `gitleaks` / `trufflehog` (validates whether a secret is _live_; run them in your own CI or workstation) in pre-commit **and** CI; enable platform **push protection** (GitHub/GitLab secret scanning) to stop the commit at the door.
+- A leaked secret = **rotate first**, then remove from history. Scrubbing git history without rotating is theater. (marq's `trufflehog` tool can scan public git/GitHub/GitLab sources without verifying; see `load_skill recon-footprint`.)
 
 ## SBOM + supply-chain (SLSA)
 
@@ -60,5 +60,5 @@ Move security checks into the pipeline **without turning the pipeline into a wal
 ## Pairs with
 
 - Program/SDLC view (threat modeling, secure design, AppSec gates by phase): `load_skill appsec-sdlc`.
-- Web vuln classes the SAST/DAST gates are catching: `load_skill sqli`, `load_skill xss`, `load_skill ssrf`.
+- Web vuln classes the SAST/DAST gates are catching: injection (SQLi, SSTI), XSS, SSRF, broken access control; see OWASP Top 10.
 - Feeding pipeline control state into compliance evidence: `load_skill grc-automation`.

@@ -1,6 +1,6 @@
 ---
 name: ot-assessment
-description: Guides safely assessing an OT/ICS environment — why standard scanning is a hazard, which marq tools are safe below the IT/OT boundary, passive-first method, per-activity authorization, and where to test actively instead (labs, consequence-driven methods). Use when the user asks to scan, pentest or assess a plant, SCADA, PLC or industrial network, or whether nmap or nuclei is safe against OT devices.
+description: Guides safely assessing an OT/ICS environment — why standard scanning is a hazard, which tools are safe below the IT/OT boundary, passive-first method, per-activity authorization, and where to test actively instead (labs, consequence-driven methods). Use when the user asks to scan, pentest or assess a plant, SCADA, PLC or industrial network, or whether nmap or nuclei is safe against OT devices (it is not).
 license: Apache-2.0
 metadata:
   verified: "2026-10-20"
@@ -8,7 +8,7 @@ metadata:
 
 # Assessing OT / ICS safely
 
-**The default marq toolkit is unsafe below the IT/OT boundary.** In IT a scan is
+**Standard IT scanners (nmap, nuclei, etc.) are unsafe below the IT/OT boundary.** In IT a scan is
 free; in OT it is a physical-risk action. Guidance going back to the CPNI/DHS
 ICS assessment guide is blunt: _many field devices currently deployed will crash
 or become unresponsive from a simple scan_, and such tools _should never be used
@@ -22,7 +22,7 @@ Engineering context: `load_skill ot-ics`. Adversary context:
 
 ## Rules of engagement — settle before any packet
 
-- **Confirm authorization and scope** (`server_info`) — then narrow it further.
+- **Confirm authorization and scope**, then narrow it further.
   OT needs **per-activity permission, not a blanket scope**: obtain specific
   permission for each testing activity _before it is initiated_. If a component
   cannot be temporarily isolated for a test, that attack vector waits until it
@@ -38,25 +38,24 @@ Engineering context: `load_skill ot-ics`. Adversary context:
   what happens next.
 - **Never fuzz production.** The goal of fuzzing is to cause a crash; that makes
   it categorically unacceptable against a live ICS.
-- Record the whole thing — every marq call is audit-logged, which is exactly the
-  evidence you want when a plant asks what you did at 14:03.
+- Log every action with timestamps; that is exactly the evidence you want when a
+  plant asks what you did at 14:03.
 
-## marq tools — what is safe where
+## Tools — what is safe where
 
-| Tool                                     | L4/IT & IDMZ       | Below the IDMZ (L0–L3)                                                            |
-| :--------------------------------------- | :----------------- | :-------------------------------------------------------------------------------- |
-| `shodan_search`, `censys_view`           | safe               | **safe — the preferred first move** (third-party data, zero packets to the plant) |
-| `whois_lookup`, `dns_lookup`, `asnmap`   | safe               | safe (passive)                                                                    |
-| `nmap`, `masscan`, `naabu`               | normal care        | **do not run** — crash / DoS of critical services                                 |
-| `nuclei`, `nikto`, `ffuf`, `feroxbuster` | IT web apps only   | **do not run** against an HMI or embedded web server                              |
-| `snmp_walk`, `snmp_check`                | care               | **do not run** unattended; SNMP stacks on field gear are fragile                  |
-| `snmp_brute`, `hydra`, `netexec`         | authorized IT only | **never** — lockouts and crashes on control gear                                  |
-| `sqlmap`, `dalfox`, `sstimap`            | IT web apps only   | **never**                                                                         |
-| `searchsploit`, `capa`, `yara_scan`      | safe (offline)     | safe (offline analysis, no target contact)                                        |
+marq itself is passive OSINT and sends nothing to the plant. Of other tooling:
+
+- **Safe everywhere (third-party data, zero packets to the plant):** `shodan_search`,
+  `shodan_host`, `censys_view`, `whois_lookup`, `dns_lookup`, `asnmap`. The preferred
+  first move.
+- **Never below the IDMZ (L0-L3):** port scanners (nmap, masscan), web scanners and
+  fuzzers (nuclei, nikto, ffuf), SNMP walkers, brute-forcers (hydra, netexec),
+  injection tools (sqlmap). Crashes, DoS and lockouts on control gear.
+- **Safe (offline):** exploit-database lookups and static analysis of artefacts.
 
 Packet capture from a **SPAN/mirror port** is the accepted safe alternative for
-live analysis — traditionally Wireshark/tcpdump, which marq does not wrap, so
-capture on the plant side and analyse the artefacts through the `files` tools.
+live analysis (Wireshark/tcpdump on the plant side); analyse the artefacts with
+the `files` tools.
 
 ## Method — passive first, outside-in
 
@@ -122,6 +121,4 @@ it when "prove it's exploitable" is the wrong question.
 
 - `load_skill ot-ics`, `load_skill ot-threat-landscape`,
   `load_skill ot-compliance`.
-- `load_skill network-enumeration` (the IT-side habits to _unlearn_ here),
-  `load_skill red-teaming` (rules of engagement discipline).
 - To map this finding to IEC 62443 / CRA / NIS2 obligations, `load_skill finding-control-crosswalk`.

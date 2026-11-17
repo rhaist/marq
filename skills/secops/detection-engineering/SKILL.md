@@ -98,9 +98,8 @@ but tune each to your environment before trusting it.
 
 ## marq tie-in
 
-Use marq as the _red_ half of the purple loop: run the offensive technique
-(`nmap`, `nuclei`, exploit tooling — in scope per `server_info`) and verify the
-detection would catch it; `yara_scan` patterns can themselves be a host detection.
-`report_finding` any technique you execute that produced no alert — a proven
-detection gap is a deliverable; `run_shell` for ad-hoc rule/log testing on `/work`
-data.
+marq is passive OSINT and runs no offensive technique. Validate detections with
+your own emulation tooling (e.g. Atomic Red Team) and verify the detection would
+catch it; YARA patterns can themselves be a host detection. `report_finding` any
+technique that produced no alert as a detection gap; stage rule/log test data
+under `/work` with the file tools.

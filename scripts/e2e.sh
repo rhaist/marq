@@ -5,11 +5,11 @@
 # binary once and drives the full engagement journey against a temp workdir.
 #
 # These are the promises that live in the Go binary and the in-process tools —
-# scope/engagement, skills, findings, audit, file sandbox, catalog. They need
-# NO Kali image, so this runs in seconds. The image-dependent promises (the ~80
-# wrapped binaries actually executing, /work bind-mount + jwt-key uniqueness
-# across containers) are covered by scripts/e2e-image.sh (and the wrapped binaries by
-# scripts/verify_tools.sh) against a built image.
+# engagement, passive-only guards, skills, findings, audit, file sandbox,
+# catalog. They need NO Kali image, so this runs in seconds. The image-dependent
+# promises (the wrapped binaries actually executing, /work bind-mount
+# persistence across containers) are covered by scripts/e2e-image.sh (and the
+# wrapped binaries by scripts/verify_tools.sh) against a built image.
 #
 # Usage:  scripts/e2e.sh
 set -uo pipefail
@@ -17,7 +17,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORK="${MARQ_E2E_WORK:-$(mktemp -d)}"   # override to a pre-authorized dir if needed
 BIN="$WORK/marq"
 export MARQ_WORK_DIR="$WORK" MARQ_AUDIT_LOG="$WORK/audit.jsonl"
-unset MARQ_OPERATOR MARQ_ENGAGEMENT MARQ_SCOPE   # exercise the defaults
+unset MARQ_OPERATOR MARQ_ENGAGEMENT   # exercise the defaults
 trap 'rm -rf "$WORK"' EXIT
 
 pass=0 fail=0 skip=0
@@ -31,18 +31,18 @@ run() { "$BIN" run "$@" 2>/dev/null; }   # marq run <tool> '<json>'
 echo "# building marq -> $BIN"
 ( cd "$ROOT" && go build -o "$BIN" ./cmd/marq ) || { echo "build failed"; exit 1; }
 
-echo "# 1. scope & engagement"
+echo "# 1. engagement & passive-only notice"
 out="$(run server_info '{}')"
 grep -q 'operator   : marq' <<<"$out"; check "server_info shows default operator 'marq'" $?
-grep -qi 'AUTHORIZED USE ONLY' <<<"$out"; check "server_info carries the authorization notice" $?
+grep -qi 'passive OSINT only' <<<"$out"; check "server_info carries the passive-OSINT notice" $?
 
-run set_engagement '{"engagement":"e2e-2026","scope":"*.e2e.test, 10.0.0.0/8"}' >/dev/null
+run set_engagement '{"engagement":"e2e-2026 — exposure review"}' >/dev/null
 [[ -f "$WORK/.marq-context" ]]; check "set_engagement persists .marq-context" $?
-grep -q '10.0.0.0/8' "$WORK/.marq-context" 2>/dev/null; check ".marq-context holds the scope" $?
 # fresh process must re-read the persisted context (the Pi process-per-call promise)
 fresh="$(run server_info '{}')"
 grep -q 'engagement : e2e-2026' <<<"$fresh"; check "engagement survives across processes" $?
-grep -q 'scope note : \*.e2e.test' <<<"$fresh"; check "scope survives across processes" $?
+# a zone transfer would hit the target's nameservers — refused before anything runs
+grep -q '^refused:' <<<"$(run dns_lookup '{"domain":"e2e.test","record_type":"AXFR"}')"; check "dns_lookup refuses AXFR" $?
 
 echo "# 2. skills library (load_skill)"
 names="$(grep -rh '^name:' "$ROOT/skills" --include='SKILL.md' | sed 's/name: *//' | tr -d '\r')"
@@ -91,7 +91,8 @@ grep -q 'set_engagement' "$WORK/audit.jsonl"; check "set_engagement was audited"
 echo "# 6. tool catalog"
 catalog="$("$BIN" tools)"
 n=$(wc -l <<<"$catalog" | tr -d ' ')
-[[ "$n" -ge 80 ]]; check "catalog lists >= 80 tools ($n)" $?
+[[ "$n" -ge 25 ]]; check "catalog lists >= 25 tools ($n)" $?
+! grep -qE '^(nmap|nuclei|sqlmap|exec|run_shell) ' <<<"$catalog"; check "catalog has no active-testing tools" $?
 for t in server_info set_engagement load_skill report_finding render_report; do
   grep -q "^$t " <<<"$catalog"; check "catalog includes $t" $?
 done
@@ -118,7 +119,7 @@ echo "# 7. skills-only mode (MARQ_SKILLS_ONLY — knowledge server, no Kali bina
 lite="$(MARQ_SKILLS_ONLY=1 "$BIN" tools)"
 grep -q '^load_skill ' <<<"$lite"; check "skills-only keeps load_skill" $?
 grep -q '^report_finding ' <<<"$lite"; check "skills-only keeps report_finding" $?
-! grep -q '^nmap ' <<<"$lite"; check "skills-only drops exec tools (nmap absent)" $?
+! grep -q '^subfinder ' <<<"$lite"; check "skills-only drops exec tools (subfinder absent)" $?
 grep -qi 'knowledge-only mode' <<<"$(MARQ_SKILLS_ONLY=1 run server_info '{}')"; check "server_info announces knowledge-only mode" $?
 
 echo

@@ -39,7 +39,7 @@ it try.
   RCE in checkpoints, typosquatted model/package names, poisoned fine-tune data.
 - **Output handling** — model output rendered as HTML, passed to `eval`, or run
   as SQL/shell. Classic injection with a novel source; treat output as untrusted
-  input (`load_skill xss`, `load_skill sqli`).
+  input (XSS, SQLi).
 - **Denial of wallet** — unbounded token spend rather than downtime.
 
 ## Controls that actually hold
@@ -95,7 +95,7 @@ it try.
 - **Set an acceptable-use policy** with a sanctioned-tool list — banning AI
   outright reliably produces unmonitored personal-account usage.
 - **Test adversarially before launch** and after material prompt/tool changes —
-  red-team the agent's tools, not just its text (`load_skill red-teaming`).
+  red-team the agent's tools, not just its text (red-team / adversarial testing).
 - **Contract for it**: model-provider training-data use, output IP, sub-processor
   disclosure, incident duties (`load_skill legal-contractual`).
 

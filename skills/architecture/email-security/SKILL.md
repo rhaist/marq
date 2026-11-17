@@ -125,11 +125,11 @@ visibility. verify: https://www.gartner.com/reviews/market/email-security
   - `MX`, plus each MX's PTR
 - Follow each SPF `include:` to count lookups. Use `dnsx` to sweep parked domains.
   Fetch the MTA-STS policy with web fetch.
-- `smtp_test` (swaks; **active, own/in-scope MX only**):
+- Active checks with swaks against your **own** MX only (marq runs none):
   - `--to <mailbox> --from <addr> --tls` tests STARTTLS and delivery. Read the delivered
     copy's Authentication-Results.
   - `--quit-after RCPT` with an outside from/to tests for an open relay without sending.
-- `testssl` with `-t smtp` on `host:25` grades STARTTLS.
+- `testssl.sh -t smtp` on `host:25` grades STARTTLS (own MX only).
 - `report_finding` gaps: no DMARC, p=none past 90 days, SPF permerror, no MTA-STS,
   parked domains without reject. Use CWE-290 for spoofability. Inspecting a suspect
   message is `load_skill phishing-email-analysis`.
