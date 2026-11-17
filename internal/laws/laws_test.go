@@ -33,6 +33,12 @@ func TestNormalizeNum(t *testing.T) {
 		"มาตรา ๒๔":            "24",
 		"Điều 7":              "7",
 		"  12  ":              "12",
+		"§ 314.4":             "314.4",
+		"ARTÍCULO 1.-":        "1",
+		"33(1)":               "33",
+		"Art. 6(1)(a)":        "6",
+		"Art. 5 §2":           "5",
+		"(5)":                 "5",
 	} {
 		if got := NormalizeNum(in); got != want {
 			t.Errorf("NormalizeNum(%q) = %q, want %q", in, got, want)
@@ -54,6 +60,7 @@ func TestSplit(t *testing.T) {
 		{"tr", "MADDE 1 – Amaç\nMADDE 2 – Kapsam", []string{"1", "2"}},
 		{"ar", "المادة الأولى:\nالتعريفات\nالمادة الثانية:\nالنطاق\nالمادة الثالثة\nالأحكام", []string{"1", "2", "3"}},
 		{"en", "No headings here at all.", []string{"all"}},
+		{"en", "Article 1\nA\nArticle 2\nB\nANNEX I\nList of sectors", []string{"1", "2", "annex"}},
 		{"zh", "第 1 條 目的\n第 1-1 條 補充\n第 1-2 條 再補充\n第 2 條 定義", nil}, // filled below with a custom split
 		// a table of contents lists the headings before the body does: the body wins
 		{"en", "Contents\nArticle 1\nArticle 2\nArticle 3\nArticle 1\nScope text\nArticle 2\nMore\nArticle 3\nEnd", []string{"preamble", "1", "2", "3"}},
@@ -100,6 +107,16 @@ func TestDecode(t *testing.T) {
 	if got := HTMLToText(`<html><head><title>x</title><script>evil()</script></head><body><p>Article&nbsp;1</p><p>Text <b>bold</b></p></body></html>`); got != "Article 1\nText bold" {
 		t.Errorf("HTMLToText = %q", got)
 	}
+	// a self-closed script must not swallow the body up to a later closing tag
+	if got := HTMLToText(`<script src="x.js"/><p>Article 1</p><p>Kept</p><noscript>n</noscript>`); got != "Article 1\nKept" {
+		t.Errorf("HTMLToText with self-closed script = %q", got)
+	}
+	if _, err := decode([]byte{0xe7, 0xe3}, "text/html"); err == nil {
+		t.Error("non-UTF-8 without a declared charset should be refused, not guessed")
+	}
+	if _, err := decode([]byte{0xe7, 0xe3}, "text/html; charset=utf-8"); err == nil || !strings.Contains(err.Error(), "not valid UTF-8") {
+		t.Errorf("invalid bytes labelled UTF-8: %v", err)
+	}
 }
 
 // corpus builds a small multilingual corpus in a temp dir via the real Sync path.
@@ -125,11 +142,11 @@ func corpus(t *testing.T) string {
 			URL: srv.URL + path, Format: "html", VersionDate: date, Terms: terms}
 	}
 	sources := []Source{
-		src("cn-test", "zh", "/zh", "official", "", "2026-01-01", "网络安全法"),
-		src("tr-test", "tr", "/tr", "official", "", "2025-03-19", "KVKK"),
+		src("cn-test", "zh", "/zh", "official", "", "2026-01-01", "网络安全法", "shared-term"),
+		src("tr-test", "tr", "/tr", "official", "", "2025-03-19", "KVKK", "two-officials"),
 		src("sa-test", "ar", "/ar", "official", "", "2024-09-14"),
-		src("eu-test", "en", "/en", "official", "", "2016-05-04", "GDPR"),
-		src("cn-test-en", "en", "/en-old", "reference", "cn-test", "2017-06-01"),
+		src("eu-test", "en", "/en", "official", "", "2016-05-04", "GDPR", "two-officials"),
+		src("cn-test-en", "en", "/en-old", "reference", "cn-test", "2017-06-01", "shared-term"),
 	}
 	path := filepath.Join(t.TempDir(), "laws.db")
 	res, err := Sync(context.Background(), path, sources, nil, srv.Client())
@@ -164,6 +181,15 @@ func TestCorpusLookupAndSearch(t *testing.T) {
 	}
 	if _, err := st.Article("eu-test", "99"); err == nil {
 		t.Error("missing article should error")
+	}
+	if a, err := st.Article("eu-test", "Art. 33(1)"); err != nil || a.Num != "33" {
+		t.Errorf("a paragraph citation should find its article: %+v, %v", a, err)
+	}
+	if l, err := st.Resolve("SHARED-TERM"); err != nil || l.ID != "cn-test" {
+		t.Errorf("a term shared with a translation should resolve to the official text: %+v, %v", l, err)
+	}
+	if _, err := st.Resolve("TWO-OFFICIALS"); err == nil || !strings.Contains(err.Error(), "eu-test, tr-test") {
+		t.Errorf("a term shared by two official texts must be an error naming both: %v", err)
 	}
 
 	for _, c := range []struct{ q, law, wantLaw, wantNum string }{
@@ -234,6 +260,13 @@ func TestSyncRejectsPagesWithoutArticles(t *testing.T) {
 	defer st.Close()
 	if a, _ := st.Article("xx-b", "1"); !strings.Contains(a.Body, "Second law") {
 		t.Errorf("start marker should cut off the first law: %q", a.Body)
+	}
+}
+
+func TestSyncUnknownID(t *testing.T) {
+	_, err := Sync(context.Background(), filepath.Join(t.TempDir(), "x.db"), []Source{{ID: "eu-gdpr"}}, []string{"eu-gdrp"}, http.DefaultClient)
+	if err == nil || !strings.Contains(err.Error(), "eu-gdrp") {
+		t.Errorf("a mistyped id must be an error, got %v", err)
 	}
 }
 

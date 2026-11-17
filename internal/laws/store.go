@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
+	"sort"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -32,10 +34,14 @@ type Store struct{ db *sql.DB }
 
 // Open opens the corpus read-only; it never creates the file.
 func Open(path string) (*Store, error) {
-	if _, err := os.Stat(path); err != nil {
+	if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
 		return nil, ErrNoCorpus
+	} else if err != nil {
+		return nil, err
 	}
-	db, err := sql.Open("sqlite", "file:"+path+"?mode=ro")
+	// Not mode=ro: a reader must be able to roll back a journal left by a killed
+	// sync. busy_timeout waits out a sync that is committing a law.
+	db, err := sql.Open("sqlite", path+"?_pragma=busy_timeout(10000)")
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +50,7 @@ func Open(path string) (*Store, error) {
 
 // openRW opens (creating if needed) the corpus for sync.
 func openRW(path string) (*Store, error) {
-	db, err := sql.Open("sqlite", path)
+	db, err := sql.Open("sqlite", path+"?_pragma=busy_timeout(10000)")
 	if err != nil {
 		return nil, err
 	}
@@ -137,13 +143,44 @@ func (s *Store) List() ([]Law, error) {
 }
 
 // Resolve finds a law by id, title or key term ("PIPL", "KVKK", "个人信息保护法").
+// An exact id wins. A term shared by an official text and its translation
+// resolves to the official text; a term shared by two official texts is an
+// error naming both, so the caller never gets an arbitrary one.
 func (s *Store) Resolve(ref string) (Law, error) {
-	l, err := scanLaw(s.db.QueryRow(`SELECT `+lawCols+` FROM laws l WHERE l.id = ?
-	  OR l.id = (SELECT law_id FROM terms WHERE term = ? LIMIT 1)`, ref, norm(ref)))
-	if errors.Is(err, sql.ErrNoRows) {
-		return l, fmt.Errorf("no law %q in the corpus (call law_lookup with no arguments to list them)", ref)
+	if l, err := scanLaw(s.db.QueryRow(`SELECT `+lawCols+` FROM laws l WHERE l.id = ?`, ref)); err == nil {
+		return l, nil
 	}
-	return l, err
+	rows, err := s.db.Query(`SELECT `+lawCols+` FROM laws l WHERE l.id IN (SELECT law_id FROM terms WHERE term = ?)
+	  ORDER BY l.kind = 'official' DESC, l.id`, norm(ref))
+	if err != nil {
+		return Law{}, err
+	}
+	defer rows.Close()
+	var official, all []Law
+	for rows.Next() {
+		l, err := scanLaw(rows)
+		if err != nil {
+			return Law{}, err
+		}
+		all = append(all, l)
+		if l.Kind == "official" {
+			official = append(official, l)
+		}
+	}
+	switch {
+	case len(all) == 0:
+		return Law{}, fmt.Errorf("no law %q in the corpus (call law_lookup with no arguments to list them)", ref)
+	case len(official) > 1:
+		var ids []string
+		for _, l := range official {
+			ids = append(ids, l.ID)
+		}
+		sort.Strings(ids)
+		return Law{}, fmt.Errorf("%q matches several laws (%s); pass one of these ids", ref, strings.Join(ids, ", "))
+	case len(official) == 1:
+		return official[0], nil
+	}
+	return all[0], nil
 }
 
 // Article returns one article of a law; num may be in any supported style.
@@ -185,7 +222,8 @@ type Hit struct {
 // index; shorter ones (common in Chinese and Japanese) fall back to LIKE.
 func (s *Store) Search(query, lawID string, limit int) ([]Hit, error) {
 	var long, short []string
-	for _, w := range strings.Fields(norm(query)) {
+	words := strings.Fields(norm(query))
+	for _, w := range words {
 		if utf8.RuneCountInString(w) >= 3 {
 			long = append(long, `"`+strings.ReplaceAll(w, `"`, `""`)+`"`)
 		} else {
@@ -221,7 +259,6 @@ func (s *Store) Search(query, lawID string, limit int) ([]Hit, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	first := strings.Trim(append(long, short...)[0], `"`)
 	var out []Hit
 	for rows.Next() {
 		var h Hit
@@ -229,7 +266,7 @@ func (s *Store) Search(query, lawID string, limit int) ([]Hit, error) {
 		if err := rows.Scan(&h.LawID, &h.Num, &text); err != nil {
 			return nil, err
 		}
-		h.Snippet = snippet(text, first, 90)
+		h.Snippet = snippet(text, words[0], 90) // from the normalised (lower-cased) text: a pointer, fetch the article to quote
 		out = append(out, h)
 	}
 	return out, rows.Err()
@@ -240,7 +277,7 @@ func snippet(text, word string, width int) string {
 	r := []rune(text)
 	i := strings.Index(text, word)
 	if i < 0 {
-		return string(r[:min(len(r), 2*width)])
+		return strings.ReplaceAll(string(r[:min(len(r), 2*width)]), "\n", " ")
 	}
 	at := utf8.RuneCountInString(text[:i])
 	from, to := max(0, at-width), min(len(r), at+utf8.RuneCountInString(word)+width)

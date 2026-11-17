@@ -30,6 +30,15 @@ func Sync(ctx context.Context, path string, sources []Source, only []string, cli
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return nil, err
 	}
+	known := map[string]bool{}
+	for _, s := range sources {
+		known[s.ID] = true
+	}
+	for _, id := range only {
+		if !known[id] {
+			return nil, fmt.Errorf("unknown law id %q (see internal/laws/sources/*.json)", id)
+		}
+	}
 	st, err := openRW(path)
 	if err != nil {
 		return nil, err

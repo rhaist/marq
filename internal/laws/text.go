@@ -9,7 +9,12 @@ import (
 )
 
 var (
-	dropRE    = regexp.MustCompile(`(?is)<(script|style|head|noscript)\b.*?</(script|style|head|noscript)\s*>`)
+	dropRE = []*regexp.Regexp{ // one per tag: RE2 has no backreference to pair <x> with </x>
+		regexp.MustCompile(`(?is)<script\b[^>]*/>|<script\b.*?</script\s*>`),
+		regexp.MustCompile(`(?is)<style\b.*?</style\s*>`),
+		regexp.MustCompile(`(?is)<noscript\b.*?</noscript\s*>`),
+		regexp.MustCompile(`(?is)<head\b.*?</head\s*>`),
+	}
 	commentRE = regexp.MustCompile(`(?s)<!--.*?-->`)
 	blockRE   = regexp.MustCompile(`(?i)<\s*/?\s*(p|div|br|tr|li|h[1-6]|table|section|article|blockquote|dt|dd|title)\b[^>]*>`)
 	cellRE    = regexp.MustCompile(`(?i)<\s*/?\s*t[dh]\b[^>]*>`)
@@ -22,7 +27,9 @@ var (
 // which is all the article splitter needs. It is deliberately simple: official
 // legal texts are mostly headings and paragraphs.
 func HTMLToText(s string) string {
-	s = dropRE.ReplaceAllString(s, "")
+	for _, re := range dropRE {
+		s = re.ReplaceAllString(s, "")
+	}
 	s = commentRE.ReplaceAllString(s, "")
 	s = blockRE.ReplaceAllString(s, "\n")
 	s = cellRE.ReplaceAllString(s, " ")
@@ -43,8 +50,9 @@ func tidy(s string) string {
 }
 
 // decode returns the body as UTF-8. Latin-1 and Windows-1252 (still common on
-// Latin American government sites) are converted; other legacy encodings are
-// refused so a garbled text never reaches the corpus.
+// Latin American government sites) are converted when the page declares them;
+// other legacy encodings, and undeclared ones, are refused so a garbled text
+// never reaches the corpus.
 func decode(body []byte, contentType string) (string, error) {
 	if utf8.Valid(body) {
 		return string(body), nil
@@ -56,7 +64,11 @@ func decode(body []byte, contentType string) (string, error) {
 		cs = strings.ToLower(string(m[1]))
 	}
 	switch cs {
-	case "iso-8859-1", "latin1", "latin-1", "windows-1252", "cp1252", "us-ascii", "":
+	case "":
+		return "", fmt.Errorf("source is not UTF-8 and declares no charset; refusing to guess")
+	case "utf-8", "utf8":
+		return "", fmt.Errorf("source declares UTF-8 but is not valid UTF-8 (truncated or mislabelled)")
+	case "iso-8859-1", "latin1", "latin-1", "windows-1252", "cp1252", "us-ascii":
 		var b strings.Builder
 		for _, c := range body {
 			if r, ok := cp1252[c]; ok {

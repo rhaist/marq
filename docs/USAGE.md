@@ -199,8 +199,8 @@ with its own version date, and a lookup warns when it predates the latest
 amendment of the original. A lookup takes an id, title or key term (`GDPR`,
 `PIPL`, `KVKK`, `个人信息保护法`) plus an article number in any style (`33`,
 `Art. 33`, `第四条`, `المادة الأولى`). Search matches substrings in any script,
-so query with the law's own terms. A source that fails to sync keeps its last
-good version.
+so query with the law's own terms. Annexes after the last article are stored as
+article `annex`. A source that fails to sync keeps its last good version.
 
 † Needs an API key (see _API keys_ below). ‡ GitHub org/repo scans need `GITHUB_TOKEN` (rate limits).
 

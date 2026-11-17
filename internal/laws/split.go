@@ -73,8 +73,12 @@ func Split(text, lang, custom string, gapLimit int) []Article {
 	if pre := strings.TrimSpace(text[:cuts[0].start]); pre != "" {
 		out = append(out, Article{Num: "preamble", Body: pre})
 	}
+	tail := len(text) // annexes after the last article are kept apart from it
+	if m := annexRE.FindStringIndex(text[cuts[len(cuts)-1].start:]); m != nil {
+		tail = cuts[len(cuts)-1].start + m[0]
+	}
 	for i, c := range cuts {
-		end := len(text)
+		end := tail
 		if i+1 < len(cuts) {
 			end = cuts[i+1].start
 		}
@@ -82,8 +86,16 @@ func Split(text, lang, custom string, gapLimit int) []Article {
 		heading, _, _ := strings.Cut(body, "\n")
 		out = append(out, Article{Num: c.num, Heading: strings.TrimSpace(heading), Body: body})
 	}
+	if rest := strings.TrimSpace(text[tail:]); rest != "" {
+		heading, _, _ := strings.Cut(rest, "\n")
+		out = append(out, Article{Num: "annex", Heading: strings.TrimSpace(heading), Body: rest})
+	}
 	return out
 }
+
+// annexRE marks where annexes, schedules or transitory provisions start after
+// the last article, so they don't inflate it.
+var annexRE = regexp.MustCompile(`(?m)^[ \t]*(?:ANNEX|Annex|SCHEDULE|Schedule|ANEXO|Anexo|TRANSITORIOS|Transitorios|DISPOSICIONES TRANSITORIAS|ملحق|附件)\b`)
 
 type cut struct {
 	start int
@@ -184,7 +196,12 @@ var numPrefix = regexp.MustCompile(`(?i)^(?:article|art[íi]culo|artigo|art\.?|m
 func NormalizeNum(s string) string {
 	s = strings.TrimSpace(s)
 	s = numPrefix.ReplaceAllString(s, "")
-	s = strings.NewReplacer("条", "", "조", "", "º", "", "°", "", "ª", "", "の", "-", "의", "-", "(", "", ")", "", ":", "", "：", "").Replace(s)
+	// "(5)" as a whole is a heading style; "33(1)" or "5 §2" cites a paragraph of 33 or 5
+	s = strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(s, "("), ")"))
+	if i := strings.IndexAny(s, "(§"); i > 0 {
+		s = s[:i]
+	}
+	s = strings.NewReplacer("条", "", "조", "", "º", "", "°", "", "ª", "", "の", "-", "의", "-", ":", "", "：", "").Replace(s)
 	s = strings.TrimSpace(s)
 	if v, ok := arabicOrdinal(s); ok {
 		return strconv.Itoa(v)
@@ -218,8 +235,8 @@ func NormalizeNum(s string) string {
 		}
 	}
 	flush()
-	out := b.String()
-	if ordinalO.MatchString(out) { // Mexican "Artículo 1o." is article 1
+	out := strings.Trim(b.String(), "-") // "ARTÍCULO 1.-" is article 1
+	if ordinalO.MatchString(out) {       // Mexican "Artículo 1o." is article 1
 		out = strings.TrimSuffix(out, "o")
 	}
 	return out
