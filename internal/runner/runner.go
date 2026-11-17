@@ -21,7 +21,6 @@ import (
 	"github.com/rhaist/marq/internal/audit"
 	"github.com/rhaist/marq/internal/config"
 	"github.com/rhaist/marq/internal/shellword"
-
 	"github.com/rhaist/marq/internal/untrusted"
 )
 

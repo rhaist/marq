@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	"github.com/rhaist/marq/internal/config"
-
 	"github.com/rhaist/marq/internal/untrusted"
 )
 
