@@ -1,6 +1,6 @@
 ---
 name: breach-notification-matrix
-description: Lists every incident/breach notification clock a security team meets (EU, UK, US federal and state, APAC, contractual) in one table with trigger, recipient, deadline, owner and source, plus how to build the per-incident matrix in the first hour. Use when an incident may trigger reporting duties, or the user asks who must be notified, by when, under GDPR, NIS2, DORA, SEC, CIRCIA, HIPAA or state breach laws.
+description: Lists every incident/breach notification clock a security team meets (EU, UK, US federal and state, APAC, Middle East, LATAM, contractual) in one table with trigger, recipient, deadline, owner and source, plus how to build the per-incident matrix in the first hour. Use when an incident may trigger reporting duties, or the user asks who must be notified, by when, under GDPR, NIS2, DORA, SEC, CIRCIA, HIPAA or state breach laws.
 license: Apache-2.0
 metadata:
   verified: "2026-11-17"
@@ -48,14 +48,44 @@ Clocks and statuses were checked Nov 2026. Re-verify a row before filing under i
 
 ## APAC
 
-| Regime                              | Trigger                                                             | Recipient                               | Deadline (clock start)                                                                                               | Owner               | Source                                                                                                            |
-| ----------------------------------- | ------------------------------------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| India CERT-In Directions (Apr 2022) | Listed incident types on systems in India                           | CERT-In                                 | **6h from noticing**                                                                                                 | CISO / India entity | Still in force; restated in the Feb 2026 space framework. verify: https://www.cert-in.org.in/                     |
-| India DPDP Rules r.7                | **Any** personal-data breach (no risk threshold)                    | Data Protection Board + data principals | Without delay, then a detailed report in **72h**                                                                     | DPO                 | **Not yet applicable**: applies ~May 2027 (18 months after the 13 Nov 2025 notification); verify the Gazette date |
-| Australia SOCI Pt 2B                | Critical cyber incident: significant impact / relevant impact       | ASD's ACSC                              | **12h** (a verbal report needs a written one within 84h) / **72h** (verbal → written within 48h)                     | Responsible entity  | verify: https://www.cyber.gov.au/                                                                                 |
-| Australia NDB (Privacy Act)         | Eligible data breach (likely serious harm)                          | OAIC + individuals                      | Assess within 30 days of suspicion, then notify as soon as practicable                                               | Privacy officer     | verify: https://www.oaic.gov.au/                                                                                  |
-| Australia Cyber Security Act Pt 3   | Ransomware/extortion **payment** (turnover ≥ AUD 3M or SOCI entity) | ASD                                     | **72h from payment**                                                                                                 | CFO / GC            | `load_skill ransomware-response`                                                                                  |
-| Singapore PDPA / Japan APPI         | Notifiable breach                                                   | PDPC / PPC                              | SG: 3 days after the assessment (assess within 30 days). JP: prompt report, final in 30 days (60 for malicious acts) | DPO                 | `load_skill privacy-apac`: also China CAC 1h/4h, Singapore CSA (CII) 2h, MAS 1h, Korea 72h, APRA 72h              |
+| Regime                                                  | Trigger                                                             | Recipient                                       | Deadline (clock start)                                                                                               | Owner               | Source                                                                                                            |
+| ------------------------------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| India CERT-In Directions (Apr 2022)                     | Listed incident types on systems in India                           | CERT-In                                         | **6h from noticing**                                                                                                 | CISO / India entity | Still in force; restated in the Feb 2026 space framework. verify: https://www.cert-in.org.in/                     |
+| India DPDP Rules r.7                                    | **Any** personal-data breach (no risk threshold)                    | Data Protection Board + data principals         | Without delay, then a detailed report in **72h**                                                                     | DPO                 | **Not yet applicable**: applies ~May 2027 (18 months after the 13 Nov 2025 notification); verify the Gazette date |
+| Australia SOCI Pt 2B                                    | Critical cyber incident: significant impact / relevant impact       | ASD's ACSC                                      | **12h** (a verbal report needs a written one within 84h) / **72h** (verbal → written within 48h)                     | Responsible entity  | verify: https://www.cyber.gov.au/                                                                                 |
+| Australia NDB (Privacy Act)                             | Eligible data breach (likely serious harm)                          | OAIC + individuals                              | Assess within 30 days of suspicion, then notify as soon as practicable                                               | Privacy officer     | verify: https://www.oaic.gov.au/                                                                                  |
+| Australia Cyber Security Act Pt 3                       | Ransomware/extortion **payment** (turnover ≥ AUD 3M or SOCI entity) | ASD                                             | **72h from payment**                                                                                                 | CFO / GC            | `load_skill ransomware-response`                                                                                  |
+| Singapore PDPA / Japan APPI                             | Notifiable breach                                                   | PDPC / PPC                                      | SG: 3 days after the assessment (assess within 30 days). JP: prompt report, final in 30 days (60 for malicious acts) | DPO                 | `load_skill privacy-apac`: also China CAC 1h/4h, Singapore CSA (CII) 2h, MAS 1h, Korea 72h, APRA 72h              |
+| China CAC Incident Reporting Measures (from 1 Nov 2025) | "Relatively major" or larger incident; all network operators        | Provincial CAC (CIIO: protection dept + police) | **4h**; CIIO **1h**                                                                                                  | CISO / China entity | V. `load_skill apac-cyber-regs`                                                                                   |
+| Singapore CII code (CSA)                                | Incident at a designated CII owner                                  | CSA                                             | **2h**; follow-ups 72h and 30 days                                                                                   | CII owner           | S. Manufacturing is not a CII sector. `load_skill apac-cyber-regs`                                                |
+| Malaysia NCII (NACSA)                                   | Incident at an NCII entity                                          | NACSA                                           | Immediate notice; particulars **6h**                                                                                 | NCII entity         | V (Malay text). `load_skill apac-cyber-regs`                                                                      |
+| Japan Cyber Response Capability Act                     | Incident at one of 258 designated operators                         | Cabinet Office / NCO                            | Flash "3 to 5 days"; detailed **30 days**                                                                            | Designated operator | V; per-type split **U**. Reaches a foreign-owned plant mainly as a supplier                                       |
+| Korea (ICT providers, designated CII)                   | Incident                                                            | MSIT / KISA                                     | "Immediately"; a numeric 24h is not supported                                                                        | CISO                | **U**: treat as a question for counsel                                                                            |
+
+APAC rows above hold only where the site is designated or is a supplier to a designated operator. Taiwan (1h / 72h), Hong Kong (12h / 48h), Thailand, Vietnam and Indonesia/Philippines: `load_skill apac-cyber-regs`.
+
+## Middle East
+
+| Regime                | Trigger                                            | Recipient                             | Deadline (clock start)                                                                | Owner      | Source                                                                    |
+| --------------------- | -------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------- |
+| Saudi NCA ECC-2       | Incident at an in-scope (CNI or government) entity | NCA                                   | No hour clock in ECC-2; a 2026 draft says "immediately"                               | CISO       | V; draft S. `load_skill middle-east-regs`                                 |
+| Saudi PDPL            | Personal-data breach                               | SDAIA, individuals                    | **72h** sits in the Implementing Regulation                                           | DPO        | Statute V; 72h text **U**                                                 |
+| UAE DIFC / ADGM       | Personal-data breach                               | DIFC Commissioner / ADGM Office of DP | DIFC: as soon as practicable (not 72h). ADGM: without undue delay, where feasible 72h | DPO        | V. UAE federal PDPL: "immediately", Executive Regulations unconfirmed (S) |
+| Qatar PDPPL / QFC     | Personal-data breach                               | NCSA / QFC DPO                        | NCSA guideline within **72h**; QFC **72h**                                            | DPO        | V (guideline)                                                             |
+| Turkey Law 7545; KVKK | Cyber incident; personal-data breach               | Cybersecurity Presidency; KVKK Board  | 7545: "without delay", no number. KVKK **72h**                                        | CISO / DPO | V                                                                         |
+
+Kuwait (24h vs 72h conflict, **U**), Bahrain, Oman and Israel: `load_skill middle-east-regs`.
+
+## Latin America
+
+| Regime                             | Trigger                                                    | Recipient              | Deadline (clock start)                                                                   | Owner | Source                                |
+| ---------------------------------- | ---------------------------------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------- | ----- | ------------------------------------- |
+| Chile Decreto 295 (Ley 21.663)     | Incident at a designated essential-service provider or OIV | CSIRT Nacional (ANCI)  | Alert **3h**; second report **72h** (24h for an OIV whose service is hit); final 15 days | CISO  | V. `load_skill latam-regs`            |
+| Brazil LGPD, ANPD Res. 15/2024     | Personal data affected                                     | ANPD, data subjects    | **3 business days** from knowing; 20 business days to complete                           | DPO   | V. A shorter sector deadline prevails |
+| Peru DS 016-2024-JUS               | Serious incident                                           | ANPD                   | **48h**                                                                                  | DPO   | S                                     |
+| Chile Ley 21.719 (from 1 Dec 2026) | Personal-data breach                                       | Data Protection Agency | Without undue delay, no fixed hours                                                      | DPO   | V                                     |
+
+Mexico (data subjects immediately, no authority clock), Colombia (15 business days, **U**) and Argentina (no statutory duty): `load_skill latam-regs`.
 
 ## Contractual (often the tightest clock)
 
@@ -87,8 +117,8 @@ Clocks and statuses were checked Nov 2026. Re-verify a row before filing under i
    out)**. Add the contract rows for your top customers and the insurer.
 3. **Timestamp each start event** in UTC and local time, compute the deadline, and put
    every deadline in the war-room timeline (`load_skill incident-response-leadership`).
-4. **Sort by deadline.** The usual front of the queue: NERC/FedRAMP 1h, DORA 4h,
-   CERT-In 6h, SOCI 12h, then the 24h clocks (NIS2, NYDFS payment, CRA, contracts).
+4. **Sort by deadline.** The usual front of the queue: NERC/FedRAMP 1h, Chile 3h and
+   China 4h (if designated or in scope), DORA 4h, CERT-In 6h, SOCI 12h, then the 24h clocks (NIS2, NYDFS payment, CRA, contracts).
 5. **Name an owner and a backup** per row, with the template, portal and credentials located.
 6. **Re-run the filter on every new fact**: confirmed exfiltration (GDPR Art. 34, state
    laws, HIPAA), a materiality call (SEC), a payment (AU, NYDFS), a new country.
@@ -112,3 +142,7 @@ Write it with `write_file /work/notification-matrix.md`:
 - Don't file under regimes that aren't live (CIRCIA, the UK Bill, India DPDP r.7 before
   ~May 2027, the EU Digital Omnibus single entry point), but put their dates in the diary.
 - Ransomware with no exfiltration is still a GDPR breach and is presumed a HIPAA breach.
+
+## Pairs with
+
+`load_skill apac-cyber-regs`, `load_skill middle-east-regs`, `load_skill latam-regs`, `load_skill privacy-apac`, `load_skill privacy-eu`.

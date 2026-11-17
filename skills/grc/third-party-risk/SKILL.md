@@ -82,3 +82,8 @@ Any single domain at 5 on a Critical-tier vendor = High overall regardless of av
   **fourth-party / sub-outsourcing** disclosure, and **data-location** clauses; and
   data-localization laws (China PIPL, India DPDP) can block the flows your vendor assumes.
   Tier and contract to the strictest in-scope jurisdiction, not your home one.
+- **Regulated customers push duties down to you.** Designated operators in Japan, Korea, Taiwan and Hong Kong impose logging, forensics and supplier-extension demands by contract. China's CAC Incident Reporting Measures Art. 5 requires operators to contractually bind security and ops service providers (your local MSSP and integrator) to report incidents to them. Saudi ECC-2 requires managed monitoring centres using remote access to be fully in the Kingdom, so a central SOC vendor cannot be assumed. `load_skill apac-cyber-regs`, `load_skill middle-east-regs`.
+
+## Pairs with
+
+`load_skill apac-cyber-regs`, `load_skill middle-east-regs`, `load_skill latam-regs`, `load_skill nis2-dora`.

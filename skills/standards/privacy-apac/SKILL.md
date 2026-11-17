@@ -8,13 +8,13 @@ metadata:
 
 # APAC privacy & breach reporting (practitioner orientation, NOT legal advice)
 
-There is no APAC GDPR. Each country has its own law, regulator, transfer rule and (most importantly for incident response) its **own clock**, several of them **far shorter than GDPR's 72h** (China 1 to 4h, India CERT-In 6h, Singapore CII 2h, MAS 1h). A GDPR programme does not cover these; map per country. Comparison baselines: `load_skill privacy-eu`, `load_skill privacy-us`. Dates checked Nov 2026; re-verify before advising.
+There is no APAC GDPR. Each country has its own law, regulator, transfer rule and (most importantly for incident response) its **own clock**, several of them **far shorter than GDPR's 72h** (China 1 to 4h, India CERT-In 6h, Singapore CII 2h, MAS 1h). A GDPR programme does not cover these; map per country. Cyber-only law (MLPS, CERT-In scope, SOCI, OT rules, data-leaving-the-country, other APAC countries): `load_skill apac-cyber-regs`. Comparison baselines: `load_skill privacy-eu`, `load_skill privacy-us`. Dates checked Nov 2026; re-verify before advising.
 
 ## Breach / incident clocks (the table to keep)
 
 | Country   | Trigger                                                           | To whom                                                             | Clock                                                                              |
 | --------- | ----------------------------------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| China     | Cyber incident "relatively major" (较大) or worse                 | CII: protection dept + police; others: provincial CAC               | **CIIO 1h; other operators 4h**; central organs 2h (CAC measures, from 1 Nov 2025) |
+| China     | Cyber incident "relatively major" (较大) or worse                 | CII: protection dept + police; others: provincial CAC               | **CIIO 1h; other operators 4h**; state organs 2h (CAC measures, from 1 Nov 2025)   |
 | China     | Personal-information leak (PIPL Art. 57)                          | PI regulator + individuals                                          | **Immediately** remediate and notify; no fixed hours                               |
 | India     | Cyber incident (CERT-In Directions 2022)                          | CERT-In                                                             | **6 hours** of noticing                                                            |
 | India     | Personal-data breach (DPDP Rule 7, from 13 May 2027)              | Data Principals + DP Board                                          | Without delay; **detailed report to Board ≤72h**                                   |
@@ -31,12 +31,12 @@ There is no APAC GDPR. Each country has its own law, regulator, transfer rule an
 
 ## China: PIPL, DSL, CSL
 
-- **PIPL** (1 Nov 2021) personal information; **DSL** (1 Sep 2021) data classification, "important data", core data; **CSL** (2017) network security + MLPS 2.0 grading. **CSL amendment in force 1 Jan 2026**: fines up to **RMB 10m** (entities) / **RMB 1m** (individuals), explicit extraterritorial reach over foreign actors harming China's cybersecurity, AI-governance hooks. Plus Network Data Security Management Regulations (1 Jan 2025) and PI compliance-audit measures (2025).
+- **PIPL** (1 Nov 2021) personal information; **DSL** (1 Sep 2021) data classification, "important data", core data; **CSL** (2017) network security + MLPS 2.0 grading. **CSL amendment in force 1 Jan 2026**: tiered fines (Art. 61: **RMB 50k to 500k** for aggravated network-operator breaches, up to **RMB 10m** only when a CII loses its main function; individuals up to RMB 1m at that tier), explicit extraterritorial reach over foreign actors harming China's cybersecurity, AI-governance hooks. Plus Network Data Security Management Regulations (1 Jan 2025) and PI compliance-audit measures (2025).
 - **Incident reporting**: CAC _National Cybersecurity Incident Reporting Measures_, effective **1 Nov 2025**: CIIOs **1h**, other network operators **4h** to the provincial CAC, for incidents graded "relatively major" and above; late, omitted or concealed reports are aggravating. verify: https://www.cac.gov.cn/2025-09/15/c_1759583017717009.htm
 - **Cross-border transfer: pick the route by volume** (Provisions on Promoting and Regulating Cross-Border Data Flows, Mar 2024; counted cumulatively from 1 Jan of the year, non-CIIO):
   - **Exempt:** <100k individuals' non-sensitive PI; transfers necessary for a contract with the individual (e-commerce, payments, travel), cross-border HR under lawful policies, emergencies; data not containing PI/important data; FTZ data outside a published negative list.
   - **Standard Contract filing _or_ certification:** 100k to 1M non-sensitive, or <10k sensitive. **PI-protection certification measures in force 1 Jan 2026** make certification a real alternative to SCC filing.
-  - **CAC security assessment:** >1M non-sensitive, ≥10k sensitive, any CIIO export, or any **important data** (only data regulators have catalogued/notified as important). Approval valid 3 years.
+  - **CAC security assessment:** >1M non-sensitive, ≥10k sensitive, any CIIO export, or any **important data** (data the authorities have notified or publicly released as important; Art. 2). Approval valid 3 years.
   - Every route still needs **separate consent** (where consent is the basis) and a **PI-protection impact assessment**; exemptions waive the filing, not PIPL itself.
 - Pitfalls: remote access from abroad _is_ export; a global SIEM/EDR pulling China telemetry is a transfer; local-language filings; police/CAC data requests have no GDPR-style challenge path. Residency design: `load_skill data-security`.
 
@@ -67,7 +67,7 @@ There is no APAC GDPR. Each country has its own law, regulator, transfer rule an
 
 - **Privacy Act 1988 / APPs**; max penalty the greater of **A$50m, 3× benefit, or 30% of adjusted turnover**. **POLA Act 2024** (Royal Assent 10 Dec 2024): statutory tort for serious invasions of privacy (from 10 Jun 2025), tiered civil penalties + OAIC infringement notices, APP 11 now names technical and organisational measures, **automated-decision transparency in privacy policies from 10 Dec 2026**.
 - **Tranche 2**: exposure draft _Privacy Amendment (Personal Data Protection) Bill 2026_ released **31 Aug 2026**, consultation closed **18 Sep 2026**; government aims to legislate by Dec 2026; proposes a **72h** OAIC breach notice among much else. **Not introduced/enacted as of Nov 2026**; verify: https://consultations.ag.gov.au/rights-and-protections/privacy-reform/
-- **SOCI Act 2018**: CIRMP (annual board-approved report), incident reporting 12h/72h, enhanced obligations for systems of national significance. **Cyber Security Act 2024**: ransomware-payment reporting (from 30 May 2025; education phase ended 31 Dec 2025), smart-device security standards, Cyber Incident Review Board. verify: https://www.cyber.gov.au/report-and-recover/report/ransomware-payment-and-cyber-extortion-payment-reporting
+- **SOCI Act 2018**: CIRMP (annual board-approved report), incident reporting 12h/72h, enhanced obligations for systems of national significance. **Cyber Security Act 2024**: ransomware-payment reporting (from 29/30 May 2025 by source; businesses above AUD 3m turnover; any "education first" grace is not in the legislation, unconfirmed), smart-device security standards, Cyber Incident Review Board. verify: https://www.cyber.gov.au/report-and-recover/report/ransomware-payment-and-cyber-extortion-payment-reporting
 - **APRA**: **CPS 234** (info-sec capability, testing, 72h notice) and **CPS 230** (operational risk, critical operations + tolerances, material service providers) in force **1 Jul 2025**; pre-existing service-provider contracts had until the earlier of renewal or **1 Jul 2026**. verify: https://www.apra.gov.au/
 
 ## Working rules
@@ -78,4 +78,4 @@ There is no APAC GDPR. Each country has its own law, regulator, transfer rule an
 
 ## Pairs with
 
-`load_skill privacy-eu`, `load_skill privacy-us`, `load_skill uk-cyber-regs`, `load_skill choosing-a-framework`, `load_skill cloud-assurance` (C-STAR / regional attestations), `load_skill control-mapping`.
+`load_skill privacy-eu`, `load_skill privacy-us`, `load_skill apac-cyber-regs`, `load_skill uk-cyber-regs`, `load_skill choosing-a-framework`, `load_skill cloud-assurance` (C-STAR / regional attestations), `load_skill control-mapping`.

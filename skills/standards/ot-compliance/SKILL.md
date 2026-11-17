@@ -124,6 +124,18 @@ you and when.
 - **CIRCIA** will add incident reporting once final; **it is not yet
   enforceable**. `load_skill us-sectoral-regs`.
 
+## Outside EU/US
+
+Treat each as a question for local counsel unless tagged V. Designation, not the manufacturing label, usually decides scope.
+
+- **Saudi OTCC-1:2022** (V): OT extension of ECC for ICS in facilities deemed critical by government or CNI owners, in the Kingdom or abroad. No confirmed IEC 62443 mapping. `load_skill middle-east-regs`.
+- **Turkey** (V): Manufacturing Industry and Energy are designated critical sectors; secondary regulations still pending.
+- **Singapore CII code (2026) section 10** (V): OT connection limits, data-flow monitoring, SIS connection limits, firmware integrity.
+- **India CEA Cyber Security in Power Sector Regulations 2026** (S): generators and captive plants at 50 MW or more; effective date 1 Apr 2027 is **U**.
+- **China MIIT industrial internet classification and grading** (S, Wang An [2024] No. 68): covers manufacturing; self-grading and registration. `load_skill apac-cyber-regs`.
+- **Brazil ANEEL REN 964/2021** (**U** against official text): power assets; captive plant coverage is an inference. `load_skill latam-regs`.
+- **Chile**: OT is reached only through essential-service or OIV designation.
+
 ## Rules
 
 - Separate "we operate plants" from "we ship machines" before quoting any
@@ -140,5 +152,6 @@ you and when.
 
 - `load_skill ot-ics` (the engineering), `load_skill nis2-dora`,
   `load_skill eu-cra`, `load_skill us-sectoral-regs`,
-  `load_skill choosing-a-framework`.
+  `load_skill choosing-a-framework`, `load_skill apac-cyber-regs`,
+  `load_skill middle-east-regs`, `load_skill latam-regs`.
 - To map this finding to IEC 62443 / CRA / NIS2 obligations, `load_skill finding-control-crosswalk`.

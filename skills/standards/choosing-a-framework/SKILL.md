@@ -47,10 +47,13 @@ Most companies end up with a **stack**: one program framework (CSF or ISO) + wha
 - **US**: SOC 2 for B2B SaaS; HIPAA for health; sector laws (GLBA finance, state privacy e.g. CCPA; verify current). PCI everywhere cards are taken.
 - **Global SaaS**: SOC 2 (US buyers) + ISO 27001 (everyone else) + GDPR (EU users) is the common trio.
 - **APAC**: no single regime: ISO 27001 is again the procurement cert of choice, but privacy/transfer law is per-country and a common EU/US blind spot: **China PIPL** (data localization + a mandatory cross-border transfer route), **India DPDP Act** (rules notified Nov 2025, phasing in), **Singapore PDPA**, **Japan APPI**, **Australia Privacy Act** (+ **APRA CPS 234** info-security for regulated finance). GDPR compliance does not cover them; verify per country. Per-country detail and breach clocks: `load_skill privacy-apac`.
+- **APAC mandatory cyber frameworks** bind by designation, not by sector label: **China MLPS 2.0** (GB/T 22239-2019; level 2 and above filed with public security, level 3 evaluated at least yearly by a PRC-based agency) applies to every network operator, and no jurisdiction accepts ISO 27001, IEC 62443 or NIST CSF in place of the national act. Singapore's **CII code** (2026) requires CII owners to hold Cyber Trust Mark Advocate (Tier 5). `load_skill apac-cyber-regs`.
+- **Middle East:** **Saudi NCA ECC-2** (and **OTCC-1:2022** for OT) binds government and CNI entities and reaches others through customer flow-down; no ECC-2 crosswalk to ISO 27001 or NIST CSF is confirmed. **Qatar NIA** has no verified binding scope. Turkey's Law 7545 names Manufacturing Industry and Energy as critical sectors, with duties still pending. `load_skill middle-east-regs`.
+- **LATAM:** no country mandates ISO 27001, IEC 62443 or NIST CSF; binding cyber duties sit mainly in **Chile** (Ley 21.663, by designation), the rest is privacy law. `load_skill latam-regs`.
 
 ## Next steps
 
-- Deep-dive a specific regime: `load_skill iso27001`, `soc2`, `pci-dss`, `nist-csf`, `privacy-eu` (GDPR), `nis2-dora`, `eu-cra`, `eu-ai-act`, `privacy-us`, `us-sectoral-regs`, `uk-cyber-regs`, `privacy-apac`, `cloud-assurance`, `cmmc-800-171`, `ai-governance`.
+- Deep-dive a specific regime: `load_skill iso27001`, `soc2`, `pci-dss`, `nist-csf`, `privacy-eu` (GDPR), `nis2-dora`, `eu-cra`, `eu-ai-act`, `privacy-us`, `us-sectoral-regs`, `uk-cyber-regs`, `privacy-apac`, `apac-cyber-regs`, `middle-east-regs`, `latam-regs`, `cloud-assurance`, `cmmc-800-171`, `ai-governance`.
 - **Plants and machine builders**: `load_skill ot-compliance` (which regimes bind a factory or a shipped machine) and `load_skill ot-ics` (the engineering).
 - Confirmed which apply → run a **gap analysis** against the chosen framework: `load_skill gap-analysis`.
 - Then map controls once, satisfy many: `load_skill control-mapping`.
