@@ -181,7 +181,8 @@ scan finishes. Check progress with `list_jobs` / `job_status` (or `read_file` /
 ### The law corpus
 
 `law_lookup` reads a local corpus of law and regulation texts, fetched from the
-official government sites listed in `internal/laws/sources/*.json`. The corpus is
+official government sites listed in `internal/laws/sources/*.json` (HTML, XML or PDF;
+PDF gazettes are converted with `pdftotext`, which the image ships). The corpus is
 not shipped in the image or the repo: the operator builds it once, and re-runs the
 sync to pick up amendments.
 

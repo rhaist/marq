@@ -24,7 +24,7 @@ type Source struct {
 	Kind         string   `json:"kind"`         // "official" (binding text) or "reference" (government translation)
 	Translates   string   `json:"translates"`   // for a reference translation: id of the official source
 	URL          string   `json:"url"`          // official https URL
-	Format       string   `json:"format"`       // "html" (also XML) or "text"
+	Format       string   `json:"format"`       // "html" (also XML), "text" or "pdf" (converted with pdftotext)
 	VersionDate  string   `json:"version_date"` // date of the consolidated version this URL serves (YYYY-MM-DD)
 	Terms        []string `json:"terms"`        // abbreviations and key terms in any language, e.g. "PIPL", "个人信息保护法"
 	Split        string   `json:"split"`        // optional heading regex overriding the language default
@@ -83,8 +83,8 @@ func validate(all []Source) error {
 		if s.Title == "" || s.Jurisdiction == "" || s.Lang == "" {
 			bad(s, "title, jurisdiction and lang are required")
 		}
-		if s.Format != "html" && s.Format != "text" {
-			bad(s, "format must be html or text")
+		if s.Format != "html" && s.Format != "text" && s.Format != "pdf" {
+			bad(s, "format must be html, text or pdf")
 		}
 		if _, err := time.Parse(time.DateOnly, s.VersionDate); err != nil {
 			bad(s, "version_date must be YYYY-MM-DD")

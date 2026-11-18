@@ -46,6 +46,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         theharvester spiderfoot libimage-exiftool-perl trufflehog \
         # people footprint
         sherlock h8mail \
+        # law corpus: PDF-only gazettes (marq laws sync)
+        poppler-utils \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Go-built tools not packaged in Kali apt: the archive harvester + CDN

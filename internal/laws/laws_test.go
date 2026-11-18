@@ -6,11 +6,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
 	"testing/fstest"
+
+	"github.com/rhaist/marq/internal/config"
 )
 
 func TestNormalizeNum(t *testing.T) {
@@ -282,7 +285,7 @@ func TestManifest(t *testing.T) {
 	}
 	bad := fstest.MapFS{"s/x.json": {Data: []byte(`[
 	 {"id":"xx-a","title":"A","jurisdiction":"XX","lang":"en","kind":"official","url":"http://plain","format":"html","version_date":"2026-01-01"},
-	 {"id":"xx-a","title":"B","jurisdiction":"XX","lang":"en","kind":"reference","translates":"xx-missing","url":"https://ok","format":"pdf","version_date":"soon"}]`)}}
+	 {"id":"xx-a","title":"B","jurisdiction":"XX","lang":"en","kind":"reference","translates":"xx-missing","url":"https://ok","format":"docx","version_date":"soon"}]`)}}
 	_, err := LoadManifest(bad, "s")
 	for _, want := range []string{"url must be https", "duplicate id", "format must be", "version_date", "translates must name"} {
 		if err == nil || !strings.Contains(err.Error(), want) {
@@ -321,5 +324,65 @@ func TestSkillLawIDsExist(t *testing.T) {
 	}
 	if n == 0 {
 		t.Error("no skill names a law id; the check found nothing to check")
+	}
+}
+
+// minimalPDF builds a one-page PDF whose text lines are lines, with a correct
+// xref table, so the pdftotext path is tested without a binary fixture.
+func minimalPDF(lines []string) []byte {
+	var content strings.Builder
+	content.WriteString("BT /F1 12 Tf 72 720 Td 16 TL\n")
+	for _, l := range lines {
+		fmt.Fprintf(&content, "(%s) Tj T*\n", l)
+	}
+	content.WriteString("ET")
+	objs := []string{
+		"<< /Type /Catalog /Pages 2 0 R >>",
+		"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+		"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
+		fmt.Sprintf("<< /Length %d >>\nstream\n%s\nendstream", content.Len(), content.String()),
+		"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+	}
+	var b strings.Builder
+	b.WriteString("%PDF-1.4\n")
+	offs := make([]int, len(objs))
+	for i, o := range objs {
+		offs[i] = b.Len()
+		fmt.Fprintf(&b, "%d 0 obj\n%s\nendobj\n", i+1, o)
+	}
+	xref := b.Len()
+	fmt.Fprintf(&b, "xref\n0 %d\n0000000000 65535 f \n", len(objs)+1)
+	for _, o := range offs {
+		fmt.Fprintf(&b, "%010d 00000 n \n", o)
+	}
+	fmt.Fprintf(&b, "trailer\n<< /Size %d /Root 1 0 R >>\nstartxref\n%d\n%%%%EOF\n", len(objs)+1, xref)
+	return []byte(b.String())
+}
+
+func TestSyncPDF(t *testing.T) {
+	if _, err := exec.LookPath("pdftotext"); err != nil {
+		t.Skip("pdftotext not installed (the Docker image has it)")
+	}
+	config.C.AuditLog = filepath.Join(t.TempDir(), "audit.jsonl") // the runner audits the conversion
+	pdf := minimalPDF([]string{"Article 1", "Scope of this act", "Article 2", "Report a breach within 72 hours"})
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/pdf")
+		w.Write(pdf)
+	}))
+	defer srv.Close()
+	path := filepath.Join(t.TempDir(), "laws.db")
+	src := Source{ID: "xx-pdf", Title: "x", Jurisdiction: "XX", Lang: "en", Kind: "official", URL: srv.URL, Format: "pdf", VersionDate: "2025-01-01"}
+	res, err := Sync(context.Background(), path, []Source{src}, nil, srv.Client())
+	if err != nil || res[0].Err != nil || res[0].Articles != 2 {
+		t.Fatalf("pdf sync: %+v, %v", res, err)
+	}
+	st, _ := Open(path)
+	defer st.Close()
+	if a, err := st.Article("xx-pdf", "2"); err != nil || !strings.Contains(a.Body, "72 hours") {
+		t.Errorf("pdf article 2 = %+v, %v", a, err)
+	}
+	log, _ := os.ReadFile(config.C.AuditLog)
+	if !strings.Contains(string(log), "laws_pdftotext") {
+		t.Error("the pdftotext run must be audit-logged like any external binary")
 	}
 }

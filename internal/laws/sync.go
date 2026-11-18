@@ -10,6 +10,9 @@ import (
 	"slices"
 	"strings"
 	"time"
+	"unicode/utf8"
+
+	"github.com/rhaist/marq/internal/runner"
 )
 
 // maxBody caps one source download; the longest consolidated acts are a few MB.
@@ -97,17 +100,49 @@ func fetch(ctx context.Context, src Source, client *http.Client) (string, error)
 	if len(body) > maxBody {
 		return "", fmt.Errorf("larger than %d MB", maxBody>>20)
 	}
-	text, err := decode(body, resp.Header.Get("Content-Type"))
+	var text string
+	switch src.Format {
+	case "pdf":
+		text, err = pdfToText(body, src.URL)
+	default:
+		if text, err = decode(body, resp.Header.Get("Content-Type")); err == nil && src.Format == "html" {
+			text = HTMLToText(text)
+		}
+	}
 	if err != nil {
 		return "", err
 	}
-	if src.Format == "html" {
-		text = HTMLToText(text)
-	} else {
-		text = tidy(text)
-	}
+	text = tidy(text)
 	if strings.TrimSpace(text) == "" {
 		return "", fmt.Errorf("page has no text (a script-rendered page?)")
 	}
 	return text, nil
+}
+
+// pdfToText converts a PDF gazette with poppler's pdftotext, through the audited
+// runner like every other external binary. pdftotext writes to a file because
+// the runner caps stdout at the model's output budget, and a law is longer.
+// The Docker image ships pdftotext; elsewhere, install poppler-utils.
+func pdfToText(body []byte, url string) (string, error) {
+	dir, err := os.MkdirTemp("", "marq-pdf-")
+	if err != nil {
+		return "", err
+	}
+	defer os.RemoveAll(dir)
+	in, out := filepath.Join(dir, "in.pdf"), filepath.Join(dir, "out.txt")
+	if err := os.WriteFile(in, body, 0o600); err != nil {
+		return "", err
+	}
+	res := runner.Run("laws_pdftotext", []string{"pdftotext", "-enc", "UTF-8", "-nopgbrk", in, out}, runner.Opts{Target: url})
+	if res.ExitCode == nil || *res.ExitCode != 0 {
+		return "", fmt.Errorf("pdftotext failed (PDF sources need poppler-utils; the Docker image has it): %s", strings.TrimSpace(res.Stderr))
+	}
+	b, err := os.ReadFile(out)
+	if err != nil {
+		return "", err
+	}
+	if !utf8.Valid(b) {
+		return "", fmt.Errorf("pdftotext produced invalid UTF-8")
+	}
+	return string(b), nil
 }
