@@ -25,7 +25,7 @@ Usage
 -----
     python3 scripts/test_tools.py                  # local + passive-safe tools
     python3 scripts/test_tools.py --external       # also hit internet OSINT
-    python3 scripts/test_tools.py --only dnsx,whois_lookup # a subset
+    python3 scripts/test_tools.py --only dns_lookup,whois_lookup # a subset
     python3 scripts/test_tools.py --image marq --timeout 90
 
 Exit code is non-zero if any tool FAILs the binary check or a tool the server
@@ -63,15 +63,12 @@ TESTS: dict[str, tuple[str, dict]] = {
     # DNS / registration — resolver and WHOIS only
     "dns_lookup": (LOCAL, {"domain": EX_DOMAIN, "record_type": "A"}),
     "whois_lookup": (LOCAL, {"target": EX_DOMAIN}),
-    "dnsx": (LOCAL, {"hosts": EX_DOMAIN, "records": "a"}),
-    "cdncheck": (LOCAL, {"targets": "1.1.1.1"}),
     "asnmap": (EXTERNAL, {"target": "1.1.1.1"}),
     "ct_search": (EXTERNAL, {"domain": EX_DOMAIN}),
     "rdap": (EXTERNAL, {"query": EX_DOMAIN}),
     "dnstwist": (EXTERNAL, {"domain": EX_DOMAIN}),
     "ioc_lookup": (EXTERNAL, {"indicator": "d41d8cd98f00b204e9800998ecf8427e"}),
     "orkl": (EXTERNAL, {"query": "APT29"}),
-    "censys_view": (KEY, {"assets": "8.8.8.8"}),
     # in-process: engagement, knowledge, findings, jobs
     "set_engagement": (LOCAL, {"engagement": "smoke-test: tool plumbing check"}),
     "load_skill": (LOCAL, {}),
@@ -88,30 +85,23 @@ TESTS: dict[str, tuple[str, dict]] = {
     "subfinder": (EXTERNAL, {"domain": EX_DOMAIN}),
     "theharvester": (EXTERNAL, {"domain": EX_DOMAIN, "limit": 50}),
     "gau_urls": (EXTERNAL, {"domain": EX_DOMAIN}),
-    "spiderfoot": (EXTERNAL, {"target": EX_DOMAIN}),
-    "sherlock": (EXTERNAL, {"username": "octocat", "timeout": 15}),
     "maigret_username": (
         EXTERNAL,
         {"username": "octocat", "timeout": 15, "top_sites": 20},
     ),
     "email_accounts": (EXTERNAL, {"email": "test@example.com"}),
-    "phoneinfoga": (EXTERNAL, {"number": "+12025550123"}),
     "trufflehog": (
         EXTERNAL,
         {"source": "git https://github.com/trufflesecurity/test_keys"},
     ),
     # key-gated — run if reachable; "needs key" is an acceptable outcome
-    "h8mail_breach": (KEY, {"email": "test@example.com"}),
     "shodan_host": (EXTERNAL, {"ip": "1.1.1.1"}),
     "shodan_search": (KEY, {"query": 'org:"Example"', "limit": 5}),
 }
 
 FORWARD_KEYS = [
     "SHODAN_API_KEY",
-    "CENSYS_API_TOKEN",
-    "CENSYS_ORG_ID",
     "GITHUB_TOKEN",
-    "NUMVERIFY_API_KEY",
 ]
 
 

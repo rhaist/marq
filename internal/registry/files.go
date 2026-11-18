@@ -29,7 +29,7 @@ func fileTools() []Tool {
 		{
 			Name: "write_file",
 			Desc: "Write a text file into the working area (/work or /tmp), creating parent dirs as needed. " +
-				"Use it to stage inputs for other tools — e.g. a host list for dnsx or notes for the " +
+				"Use it to stage inputs for other tools — e.g. a file for exif_metadata or notes for the " +
 				"report. Overwrites an existing file at `path`.",
 			Params: []Param{
 				{Name: "path", Type: StringParam, Desc: "file inside /work or /tmp", Required: true},

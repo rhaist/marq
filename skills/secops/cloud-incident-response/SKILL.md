@@ -111,7 +111,7 @@ Revoking tips off the attacker. Against a capable actor, plan a coordinated evic
 marq holds no cloud credentials and wraps no cloud CLI.
 
 - **Stage evidence:** put exported logs and IAM dumps under `/work` with `write_file`; read them back with `read_file`.
-- **Enrich source IPs:** `asnmap`, `cdncheck` and `shodan_host`, then `load_skill indicator-enrichment`.
+- **Enrich source IPs:** `asnmap` and `shodan_host`, then `load_skill indicator-enrichment`.
 - **Examine artefacts:** YARA and capa on recovered binaries, and an image scanner such as trivy on the image a compromised pod ran, in your own sandbox.
 - **Trace a leaked key's origin:** `trufflehog` on the public repo (marq's tool never verifies; verifying a key calls the provider with it and pollutes the trail you're reading), or gitleaks in your own checkout.
 - **Report:** `report_finding` for each conclusion with its log source and event ID; `render_report` for the timeline.

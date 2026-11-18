@@ -37,21 +37,25 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # --- Marq tooling -------------------------------------------------------
 # Kept explicit (rather than a kali-linux-* metapackage) so the image is
 # auditable and reproducible. git is for trufflehog's `git` source.
+# Docs, man pages and translations are never needed in this container; keep
+# them out at unpack time (copyright files stay, the licences require them).
+RUN printf '%s\n' 'path-exclude=/usr/share/doc/*' 'path-include=/usr/share/doc/*/copyright' \
+        'path-exclude=/usr/share/man/*' 'path-exclude=/usr/share/info/*' \
+        'path-exclude=/usr/share/locale/*' 'path-exclude=/usr/share/lintian/*' \
+        > /etc/dpkg/dpkg.cfg.d/01-marq-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates curl git \
         python3 python3-venv \
         # DNS / registry
-        bind9-dnsutils whois rdap subfinder dnsx dnstwist \
+        bind9-dnsutils whois rdap subfinder dnstwist \
         # company & domain footprint
-        theharvester spiderfoot libimage-exiftool-perl trufflehog \
-        # people footprint
-        sherlock h8mail \
+        theharvester libimage-exiftool-perl trufflehog \
         # law corpus: PDF-only gazettes (marq laws sync)
         poppler-utils \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Go-built tools not packaged in Kali apt: the archive harvester + CDN
-# classifier. Installed system-wide (GOBIN -> /usr/local/bin) so the
+# Go-built tool not packaged in Kali apt: the web-archive URL harvester.
+# Installed system-wide (GOBIN -> /usr/local/bin) so the
 # dropped-privilege user can run them. golang-go is a *build-time only* dep, so
 # it is installed, used, and purged within this single layer — it never persists
 # in the image (a separate layer can't shrink an earlier one).
@@ -59,44 +63,20 @@ ENV GOBIN=/usr/local/bin GOPATH=/root/go
 RUN apt-get update \
     && apt-get install -y --no-install-recommends golang-go \
     && go install github.com/lc/gau/v2/cmd/gau@v2.2.4 \
-    && go install github.com/projectdiscovery/cdncheck/cmd/cdncheck@v1.4.0 \
     && apt-get purge -y --auto-remove golang-go \
     && apt-get clean \
     && rm -rf /root/go /root/.cache/go-build /var/lib/apt/lists/*
 
-# phoneinfoga can't be `go install`ed (its web client go:embeds built frontend
-# assets that aren't in the module), so use the pinned prebuilt release binary.
-# Arch-aware so the image builds on amd64 (Debian) and arm64 (Apple Silicon).
-ARG TARGETARCH
-RUN case "${TARGETARCH:-amd64}" in \
-        amd64) PA=x86_64 ;; \
-        arm64) PA=arm64 ;; \
-        *)     PA=x86_64 ;; \
-    esac \
-    && curl -fsSL "https://github.com/sundowndev/phoneinfoga/releases/download/v2.11.0/phoneinfoga_Linux_${PA}.tar.gz" \
-        | tar -xz -C /usr/local/bin phoneinfoga \
-    && chmod +x /usr/local/bin/phoneinfoga
-
-# cencli (the `censys` CLI for the Censys Platform API; Legacy Search, which the
-# python3-censys CLI used, was decommissioned 30 Sep 2026). Asset names match
-# TARGETARCH directly.
-RUN curl -fsSL "https://github.com/censys/cencli/releases/download/v1.2.1/cencli_1.2.1_linux_${TARGETARCH:-amd64}.tar.gz" \
-        | tar -xz -C /usr/local/bin censys \
-    && chmod +x /usr/local/bin/censys
-
 # --- Python OSINT tools (no MCP SDK — the server is the Go binary) ---------
-# venv holds pip-only tools: maigret, user-scanner, shodan. user-scanner is
+# venv holds pip-only tools: maigret and user-scanner. user-scanner is
 # pinned — a fast-moving single-maintainer project.
 RUN python3 -m venv --system-site-packages "$VIRTUAL_ENV" \
     && pip install --no-cache-dir maigret user-scanner==1.5.2.5 \
     # user-scanner would check PyPI and prompt for updates on every call
     && sed -i 's/"auto_update_status": true/"auto_update_status": false/' \
         "$VIRTUAL_ENV"/lib/python3*/site-packages/user_scanner/config.json \
-    # shodan CLI imports pkg_resources, removed in setuptools 82 (Kali dropped
-    # python3-pkg-resources), so it lives here with an older setuptools.
-    # --ignore-installed: apt pulls python3-shodan in as a dependency, and pip
-    # would otherwise skip it and leave the broken /usr/bin/shodan on PATH.
-    && pip install --no-cache-dir --ignore-installed shodan 'setuptools<82'
+    # pip is only needed at build time
+    && "$VIRTUAL_ENV"/bin/python -m pip uninstall -y pip
 
 # --- Go MCP server binary -------------------------------------------------
 COPY --from=gobuild /out/marq /usr/local/bin/marq

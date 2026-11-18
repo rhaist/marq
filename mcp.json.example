@@ -30,10 +30,7 @@
         "-v", "marq-work:/work",
         "-e", "MARQ_OPERATOR",
         "-e", "SHODAN_API_KEY",
-        "-e", "CENSYS_API_TOKEN",
-        "-e", "CENSYS_ORG_ID",
         "-e", "GITHUB_TOKEN",
-        "-e", "NUMVERIFY_API_KEY",
         "marq"
       ]
     }

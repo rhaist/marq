@@ -31,5 +31,58 @@
     "terms": ["Cyber Security Act", "CSA 2024", "ransomware payment reporting"],
     "split": "(?m)^(\\d+[A-Z]{0,2}) [A-Z][a-z]",
     "note": "As made (29 Nov 2024), served as the HTML inside legislation.gov.au's EPUB rendition; later compilations not yet tracked."
+  },
+  {
+    "id": "my-cybersecurity-act-854",
+    "title": "Cyber Security Act 2024 (Malaysia, Act 854)",
+    "native_title": "Akta Keselamatan Siber 2024 (Akta 854)",
+    "jurisdiction": "MY",
+    "lang": "en",
+    "kind": "official",
+    "url": "https://lom.agc.gov.my/ilims/upload/portal/akta/outputaktap/2177706_BI/Act%20854.pdf",
+    "format": "pdf",
+    "version_date": "2024-06-26",
+    "terms": [
+      "Act 854",
+      "Cyber Security Act 2024",
+      "NACSA",
+      "NCII",
+      "national critical information infrastructure",
+      "cyber security incident notification"
+    ],
+    "split": "(?m)^[ \\t]*(\\d+)\\.[ \\t]+[A-Z(]",
+    "note": "English text from the Attorney General's Chambers (lom.agc.gov.my); version_date is the gazette publication date (26 Jun 2024)."
+  },
+  {
+    "id": "in-dpdp-act-2023",
+    "title": "Digital Personal Data Protection Act 2023",
+    "native_title": "The Digital Personal Data Protection Act, 2023 (No. 22 of 2023)",
+    "jurisdiction": "IN",
+    "lang": "en",
+    "kind": "official",
+    "url": "https://www.meity.gov.in/static/uploads/2024/06/2bf1f0e9f04e6fb4f8fef35e82c42aa5.pdf",
+    "format": "pdf",
+    "version_date": "2023-08-11",
+    "terms": ["DPDP Act", "DPDPA", "Digital Personal Data Protection Act"],
+    "split": "(?m)^[ \\t]*(\\d+)\\.[ \\t]+[A-Z(]",
+    "note": "Gazette of India text of 11 Aug 2023 as published by MeitY; the DPDP Rules 2025 are separate and not included."
+  },
+  {
+    "id": "my-cs-notification-regs-2024",
+    "title": "Cyber Security (Notification of Cyber Security Incident) Regulations 2024, P.U.(A) 220",
+    "native_title": "Peraturan-Peraturan Keselamatan Siber (Pemberitahuan Insiden Keselamatan Siber) 2024",
+    "jurisdiction": "MY",
+    "lang": "en",
+    "kind": "official",
+    "url": "https://www.nacsa.gov.my/doc/CYBER%20SECURITY%20(NOTIFICATION%20OF%20CYBER%20SECURITY%20INCIDENT).pdf",
+    "format": "pdf",
+    "version_date": "2024-08-22",
+    "terms": [
+      "P.U.(A) 220",
+      "NCII incident notification",
+      "notification of cyber security incident"
+    ],
+    "split": "(?m)^[ \\t]*(\\d+)\\.[ \\t]*$",
+    "note": "Bilingual gazette: the Malay text comes first and lands in the preamble entry; numbered entries are the English text. Both languages are official."
   }
 ]

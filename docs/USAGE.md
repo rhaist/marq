@@ -85,7 +85,7 @@ follow [`SETUP.md`](SETUP.md#4-run-with-a-local-model-pi--the-marq-skill): the s
 `marq run <tool> '<json>'`, calls `server_info` first, works the tools, records
 findings with `report_finding`, and writes the report with `render_report` into `/work`.
 
-A long-lived container is required: background tools (`spiderfoot`, `gau_urls`, `dnstwist`)
+A long-lived container is required: background tools (`gau_urls`, `dnstwist`)
 detach inside it and are polled later, so a per-call `docker run`
 would kill them. The `pi/marq` shim (`marq up` / `marq down`) manages it.
 
@@ -112,13 +112,10 @@ All wrapped tools are passive: they query public third-party sources and never s
 | Tool            | Wraps         | Purpose                                                                                                                |
 | --------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `theharvester`  | theHarvester  | Emails, employees, hosts, subdomains                                                                                   |
-| `spiderfoot`    | spiderfoot    | Broad automated OSINT footprint, passive use case (background)                                                         |
 | `subfinder`     | subfinder     | Passive subdomain enum                                                                                                 |
 | `dns_lookup`    | dig           | DNS records (no zone transfers)                                                                                        |
-| `dnsx`          | dnsx          | Bulk DNS resolution / record enum                                                                                      |
 | `whois_lookup`  | whois         | Registration data                                                                                                      |
 | `asnmap`        | whois + curl  | IP/domain → ASN, ASN → CIDRs                                                                                           |
-| `cdncheck`      | cdncheck      | CDN/cloud/WAF IP detection                                                                                             |
 | `ct_search`     | curl (crt.sh) | Certificates issued for a domain and subdomains (CT logs)                                                              |
 | `rdap`          | go-rdap       | Registration data over RDAP for a domain, IP or ASN                                                                    |
 | `dnstwist`      | dnstwist      | Registered lookalike domains, DNS-only (background)                                                                    |
@@ -129,28 +126,24 @@ All wrapped tools are passive: they query public third-party sources and never s
 | `shodan_search` | shodan        | Search exposed assets (e.g. `org:`) †                                                                                  |
 | `trufflehog`    | trufflehog    | Leaked secrets in public git hosts (GitHub, GitLab, Bitbucket, Codeberg; unverified) ‡                                 |
 | `gau_urls`      | gau           | Known URLs from Wayback/CommonCrawl/OTX/URLScan (background)                                                           |
-| `censys_view`   | cencli        | Censys host/web/cert lookup (search is paid-only) †                                                                    |
 
 ### Information gathering: people footprint
 
 | Tool               | Wraps        | Purpose                             |
 | ------------------ | ------------ | ----------------------------------- |
-| `sherlock`         | sherlock     | Username across ~400 sites          |
 | `maigret_username` | maigret      | Deep username sweep (~2500 sites)   |
 | `email_accounts`   | user-scanner | Sites where an email has an account |
-| `h8mail_breach`    | h8mail       | Email breach/leak exposure †        |
-| `phoneinfoga`      | phoneinfoga  | Phone number OSINT                  |
 
 ### Working files (`/work`, `/tmp`)
 
-| Tool         | Purpose                                         |
-| ------------ | ----------------------------------------------- |
-| `list_dir`   | List a directory in the working area            |
-| `read_file`  | Read back output a tool wrote to disk           |
-| `write_file` | Stage an input file (a host list for `dnsx`, …) |
+| Tool         | Purpose                               |
+| ------------ | ------------------------------------- |
+| `list_dir`   | List a directory in the working area  |
+| `read_file`  | Read back output a tool wrote to disk |
+| `write_file` | Stage an input file (a host list, …)  |
 
 These, and `exif_metadata`, are sandboxed to `/work`, `/tmp` and `MARQ_WORK_DIR` (see [`SECURITY.md`](SECURITY.md#container-hardening-applied)). Together they make the file-driven tools usable: the model can
-`write_file` a host list then `dnsx` it, or `read_file` a result another
+`write_file` a host list, or `read_file` a result another
 tool dropped on disk. Mount `/work` from the host (`-v ./work:/work`, as the
 `pi/marq` shim does) to exchange files with the operator.
 
@@ -171,8 +164,7 @@ vector only sets severity when you omit one, and a divergent vector is flagged i
 the report rather than overriding your call. The skills library is also exposed as
 MCP resources: `marq://skills` (index) and `marq://skills/<name>`.
 
-Tools too slow for a synchronous call (`spiderfoot`,
-`gau_urls`, `dnstwist`) launch in the background and return a job directory under
+Tools too slow for a synchronous call (`gau_urls`, `dnstwist`) launch in the background and return a job directory under
 `/work/jobs/<tool>-<id>/`. Results stream to `stdout.log`, diagnostics to
 `stderr.log`, and a `status` file (containing `exit=<code>`) appears when the
 scan finishes. Check progress with `list_jobs` / `job_status` (or `read_file` /
@@ -213,15 +205,13 @@ shim forwards it, and the `-e VAR` args in `mcp.json.example` pass it to MCP
 clients that inherit your environment) or put `KEY=value` lines in
 `~/.config/marq/env` (shim) / an `"env": {...}` block (Claude Desktop).
 
-| Variable                               | Used by                                                              |
-| -------------------------------------- | -------------------------------------------------------------------- |
-| `SHODAN_API_KEY`                       | `shodan_search`; full banners in `shodan_host` (keyless: InternetDB) |
-| `CENSYS_API_TOKEN` (+ `CENSYS_ORG_ID`) | `censys_view`                                                        |
-| `GITHUB_TOKEN`                         | `trufflehog` (GitHub scans)                                          |
-| `NUMVERIFY_API_KEY`                    | `phoneinfoga`                                                        |
+| Variable         | Used by                                                              |
+| ---------------- | -------------------------------------------------------------------- |
+| `SHODAN_API_KEY` | `shodan_search`; full banners in `shodan_host` (keyless: InternetDB) |
+| `GITHUB_TOKEN`   | `trufflehog` (GitHub scans)                                          |
 
-theHarvester and h8mail read their own config files (`~/.theHarvester/api-keys.yaml`,
-an h8mail config passed via `options`) for Hunter, SecurityTrails, HIBP, etc.
+theHarvester reads its own config file (`~/.theHarvester/api-keys.yaml`) for Hunter,
+SecurityTrails and similar sources.
 
 ## Environment variables
 

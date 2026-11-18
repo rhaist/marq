@@ -24,7 +24,7 @@ translation, rather than relying on memory or on the skill's summary:
 | **reference**      | free no-login enrichment APIs                      | `security-apis`                                                                                                                                                                                                                     |
 
 marq's tools are **passive OSINT only**: they query public third-party sources
-(DNS, WHOIS, certificate/archive data, Shodan/Censys, public code, username and
+(DNS, WHOIS, certificate/archive data, Shodan, public code, username and
 email lookups) and never scan, crawl or exploit a target's hosts — the only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks). Advisory and knowledge
 work is unrestricted. People OSINT (usernames, emails, phones) is personal-data
 processing under GDPR: record the investigation's purpose with `set_engagement`
@@ -44,24 +44,21 @@ The phases below are the **passive OSINT workflow**. Record results with
 ## 2. Footprint the domain / organisation
 
 - `theharvester` (emails, names, hosts), `subfinder`, `whois_lookup`,
-  `dns_lookup`, `dnsx`.
-- Broad automated sweep: `spiderfoot` (passive use case; runs in the
-  background — poll with `job_status` / `list_jobs`, do not block waiting on it).
+  `dns_lookup`.
 - Search-engine dorks: marq has no search tool — use your client's web search;
   if you have none, tell the user to add a web-search skill or MCP server to their client rather than guessing results.
 
 ## 3. Pivot
 
-- Infrastructure: `asnmap` (IP/domain/ASN to prefixes), `cdncheck` (drop CDN/cloud
-  IPs from the picture), `shodan_host` / `shodan_search`, `censys_view`
-  (hosts, certificates).
+- Infrastructure: `asnmap` (IP/domain/ASN to prefixes), `shodan_host` / `shodan_search`
+  (hosts), `ct_search` (certificates).
 - History: `gau_urls` (Wayback/Common Crawl/OTX/URLScan; background job).
 - Documents: `exif_metadata` on files staged in `/work` (usernames, software, paths).
 
 ## 4. People (purpose-bound)
 
-- `sherlock` / `maigret_username` for usernames, `email_accounts` for registered
-  accounts, `h8mail_breach` for breach exposure, `phoneinfoga` for phone numbers.
+- `maigret_username` for usernames, `email_accounts` for registered
+  accounts.
 - Stay within the recorded purpose; don't profile individuals beyond it.
 
 ## 5. Leaked secrets in public code

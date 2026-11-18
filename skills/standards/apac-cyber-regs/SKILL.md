@@ -98,7 +98,7 @@ Inference, not sourced: MLPS level 3 controls roughly correspond to ISO 27001 An
 
 ## Law texts
 
-Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `cn-csl`, `cn-incident-measures 4`, `cn-dsl`, `cn-cross-border-provisions`, `cn-network-data-regs`, `jp-active-cyber-defense`, `tw-csma`, `tw-csma-en`, `au-cyber-security-act-2024 27`.
+Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `cn-csl`, `cn-incident-measures 4`, `cn-dsl`, `cn-cross-border-provisions`, `cn-network-data-regs`, `jp-active-cyber-defense`, `tw-csma`, `tw-csma-en`, `au-cyber-security-act-2024 27`, `my-cybersecurity-act-854 23`, `my-cs-notification-regs-2024 2`.
 
 ## Pairs with
 

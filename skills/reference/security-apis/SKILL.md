@@ -23,7 +23,7 @@ keys: https://github.com/jaegeral/security-apis
 ## How to query
 
 - **Already wrapped (use the tool, not the raw API):** Shodan (`shodan_host`,
-  `shodan_search`), Censys lookups (`censys_view`), subdomains (`subfinder`), ASN
+  `shodan_search`), subdomains (`subfinder`), ASN
   (`asnmap`). The APIs below add what those don't.
 - **Otherwise:** fetch the URL with the client's web-fetch (or `curl` from your own
   shell). marq has no generic HTTP/exec tool.

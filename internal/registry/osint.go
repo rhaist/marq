@@ -74,22 +74,6 @@ func osint() []Tool {
 			},
 		},
 		{
-			Name: "spiderfoot",
-			Desc: "Broad automated OSINT footprint of a target (spiderfoot, 200+ modules) — domains, " +
-				"IPs, netblocks, ASN, emails, names, breach data. `target` may be a domain, IP, email, " +
-				"name or username. Always runs spiderfoot's `passive` use case (no modules that touch " +
-				"the target). Runs in the BACKGROUND and returns a job dir to poll. " +
-				"(Note: the open-source spiderfoot is unmaintained upstream as of 2026 — still functional; " +
-				"cross-check anything critical.)",
-			Params: []Param{
-				{Name: "target", Type: StringParam, Desc: "domain/IP/email/name/username", Required: true},
-			},
-			Build: func(a Args) Invocation {
-				argv := []string{"spiderfoot", "-s", a.S("target"), "-u", "passive", "-o", "json"}
-				return Invocation{Argv: argv, Target: a.S("target"), Background: true}
-			},
-		},
-		{
 			Name: "exif_metadata",
 			Desc: "Extract embedded metadata (author, software, GPS, internal paths, emails) from a file " +
 				"or directory with exiftool. `path` must be inside the working area (/work or /tmp) — stage " +
@@ -117,10 +101,12 @@ func osint() []Tool {
 				if net.ParseIP(a.S("ip")) == nil {
 					return Invocation{Target: a.S("ip"), Refuse: "ip must be an IP address"}
 				}
-				cmd := `if [ -n "$SHODAN_API_KEY" ]; then shodan init "$SHODAN_API_KEY" >/dev/null 2>&1; ` +
-					"shodan host " + shellword.Quote(a.S("ip")) + "; else " +
+				ip := url.PathEscape(a.S("ip"))
+				// The key reaches curl on stdin, so it is in neither the process list nor the audit argv.
+				cmd := `if [ -n "$SHODAN_API_KEY" ]; then printf %s "$SHODAN_API_KEY" | curl -sS --max-time 30 -G --data-urlencode key@- ` +
+					shellword.Quote("https://api.shodan.io/shodan/host/"+ip) + "; else " +
 					"echo '(keyless InternetDB lookup; set SHODAN_API_KEY for full banners)'; " +
-					"curl -sS --max-time 30 " + shellword.Quote("https://internetdb.shodan.io/"+url.PathEscape(a.S("ip"))) + "; fi"
+					"curl -sS --max-time 30 " + shellword.Quote("https://internetdb.shodan.io/"+ip) + "; fi | head -c 30000"
 				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("ip")}
 			},
 		},
@@ -134,10 +120,19 @@ func osint() []Tool {
 				{Name: "limit", Type: IntParam, Desc: "result limit", Default: 100},
 			},
 			Build: func(a Args) Invocation {
-				fields := "ip_str,port,org,hostnames,product"
+				// One compact line per match (ip, port, org, hostnames, product), like the old CLI's --fields.
+				compact := `import json,sys
+raw=sys.stdin.read()
+try: d=json.loads(raw)
+except ValueError: sys.exit("shodan: unexpected response (bad key or plan?): "+raw[:300])
+if "error" in d: sys.exit("shodan: "+d["error"])
+print("total:", d.get("total"))
+for m in d.get("matches", [])[:int(sys.argv[1])]:
+    print(m.get("ip_str"), m.get("port"), m.get("org") or "", ",".join(m.get("hostnames") or []), m.get("product") or "", sep="\t")`
 				cmd := `[ -n "$SHODAN_API_KEY" ] || { echo "shodan_search needs SHODAN_API_KEY; for a single IP use shodan_host (keyless)" >&2; exit 2; }; ` +
-					`shodan init "$SHODAN_API_KEY" >/dev/null 2>&1; ` +
-					"shodan search --fields " + fields + " --limit " + strconv.Itoa(a.I("limit")) + " " + shellword.Quote(a.S("query"))
+					`set -o pipefail; printf %s "$SHODAN_API_KEY" | curl -sS --max-time 60 -G --data-urlencode key@- --data-urlencode minify=true ` +
+					"--data-urlencode " + shellword.Quote("query="+a.S("query")) + " https://api.shodan.io/shodan/host/search | " +
+					"python3 -c " + shellword.Quote(compact) + " " + strconv.Itoa(a.I("limit"))
 				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("query")}
 			},
 		},

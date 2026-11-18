@@ -30,7 +30,7 @@ and document evidence as you go. Competence shows as rigor, not speed.
 marq run server_info '{}'
 ```
 
-It reports the operator, the recorded engagement/purpose and the passive-use notice. marq's tools are **passive OSINT only** — they query public third-party sources (DNS resolvers, WHOIS, certificate logs, Shodan/Censys, web archives, breach databases, social and code-hosting sites) and never scan, crawl or exploit a target's hosts — the only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks). **Advisory and knowledge work is unrestricted.** People
+It reports the operator, the recorded engagement/purpose and the passive-use notice. marq's tools are **passive OSINT only** — they query public third-party sources (DNS resolvers, WHOIS, certificate logs, Shodan, web archives, breach databases, social and code-hosting sites) and never scan, crawl or exploit a target's hosts — the only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks). **Advisory and knowledge work is unrestricted.** People
 OSINT is GDPR personal-data processing: if `server_info` shows no purpose, record
 one once — it persists for the session and tags every audit record:
 
@@ -70,7 +70,7 @@ marq run set_engagement --engagement "acme-footprint-2026-11 — exposure review
 Or pass a single JSON object, quoted for the shell:
 
 ```
-marq run dnsx '{"hosts":"acme.test","records":"a,mx,txt"}'
+marq run dns_lookup '{"domain":"acme.test","record_type":"MX"}'
 ```
 
 - No args needed? Just `marq run server_info`. Don't invent a `--json` flag.
@@ -95,15 +95,15 @@ marq run load_skill '{"name":"<topic>"}'   # a focused playbook (e.g. recon-foot
 
 Typical first moves by phase (run `marq tools` for the full set):
 
-- **Domain / org footprint**: `theharvester`, `subfinder`, `dnsx`, `whois_lookup`, `dns_lookup`, `spiderfoot`
-- **Pivot**: `asnmap`, `cdncheck`, `shodan_host`, `shodan_search`, `censys_view`, `gau_urls`
-- **People (purpose-bound)**: `sherlock`, `maigret_username`, `email_accounts`, `h8mail_breach`, `phoneinfoga`
+- **Domain / org footprint**: `theharvester`, `subfinder`, `whois_lookup`, `dns_lookup`, `ct_search`
+- **Pivot**: `asnmap`, `shodan_host`, `shodan_search`, `gau_urls`
+- **People (purpose-bound)**: `maigret_username`, `email_accounts`
 - **Leaked secrets / metadata**: `trufflehog`, `exif_metadata`
 - **Report**: `report_finding`, `render_report`
 
 ## Long-running scans
 
-Some tools (`spiderfoot`, `gau_urls`) run in the **background** and return
+Some tools (`gau_urls`, `dnstwist`) run in the **background** and return
 a job directory immediately. Don't wait — poll them:
 
 ```

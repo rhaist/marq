@@ -123,7 +123,7 @@ visibility. verify: https://www.gartner.com/reviews/market/email-security
   - `TXT` on the apex (SPF), `_dmarc.<d>`, `<sel>._domainkey.<d>`, `_mta-sts.<d>`,
     `_smtp._tls.<d>` and `default._bimi.<d>`
   - `MX`, plus each MX's PTR
-- Follow each SPF `include:` to count lookups. Use `dnsx` to sweep parked domains.
+- Follow each SPF `include:` to count lookups. Use `dns_lookup` to check parked domains.
   Fetch the MTA-STS policy with web fetch.
 - Active checks with swaks against your **own** MX only (marq runs none):
   - `--to <mailbox> --from <addr> --tls` tests STARTTLS and delivery. Read the delivered

@@ -13,8 +13,8 @@ log and skills, and the result does not count. Bash is ONLY for typing
 
 ## Finding the right tool
 
-`<tool>` is a marq **tool** name — e.g. `subfinder`, `theharvester`, `dnsx`,
-`shodan_host`, `sherlock`. It is **not** a skill name: `recon-footprint`,
+`<tool>` is a marq **tool** name — e.g. `subfinder`, `theharvester`, `dns_lookup`,
+`shodan_host`, `maigret_username`. It is **not** a skill name: `recon-footprint`,
 `ioc-pivoting` etc. are playbooks you load with
 `marq run load_skill --name <skill>`.
 

@@ -155,7 +155,7 @@ func (c *Config) Banner() string {
 	}
 	return fmt.Sprintf(
 		"marq does passive OSINT only: its tools query public third-party sources "+
-			"(DNS resolvers, WHOIS, certificate logs, Shodan/Censys, web archives, breach "+
+			"(DNS resolvers, WHOIS, certificate logs, Shodan, web archives, breach "+
 			"databases, social and code-hosting sites) and %s People OSINT is "+
 			"personal-data processing — keep it to the recorded purpose. Every OSINT-tool, "+
 			"file and findings call is audit-logged; a tool won't run if its start record "+

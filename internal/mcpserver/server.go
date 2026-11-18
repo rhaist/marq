@@ -46,7 +46,7 @@ func New() *mcp.Server {
 // role for the Pi flow.
 func instructions() string {
 	return "marq is a passive-OSINT and cyber-knowledge assistant: OSINT tools that query " +
-		"public third-party sources (DNS resolvers, WHOIS, certificate logs, Shodan/Censys, web " +
+		"public third-party sources (DNS resolvers, WHOIS, certificate logs, Shodan, web " +
 		"archives, breach databases, social and code-hosting sites) plus a skills library of " +
 		"expert playbooks (threat-intel, malware, sec-ops, architecture, GRC, standards & " +
 		"regulation, CISO, resilience, human factors, DevSecOps/privacy). It has no scanners, " +

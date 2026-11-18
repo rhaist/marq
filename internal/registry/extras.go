@@ -86,7 +86,7 @@ func reportTools() []Tool {
 		},
 		{
 			Name: "list_jobs",
-			Desc: "List background jobs (e.g. spiderfoot) and whether each is running or done. Background " +
+			Desc: "List background jobs (e.g. gau_urls, dnstwist) and whether each is running or done. Background " +
 				"tools return a job dir; this is the quick way to see their state without polling files.",
 			Params:  []Param{},
 			Handler: func(a Args) string { return jobs.List() },

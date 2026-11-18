@@ -83,8 +83,10 @@ func fetch(ctx context.Context, src Source, client *http.Client) (string, error)
 	if err != nil {
 		return "", err
 	}
-	// A generic client name: no operator details leave the box.
-	req.Header.Set("User-Agent", "marq-laws-sync/1 (+https://github.com/rhaist/marq)")
+	// An honest, generic client name (no operator details leave the box). Some
+	// government WAFs refuse a User-Agent that carries a URL, so it has none.
+	req.Header.Set("User-Agent", "marq-laws-sync/1")
+	req.Header.Set("Accept", "*/*")
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", err

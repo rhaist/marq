@@ -33,7 +33,7 @@ what else shares its infrastructure. Pivot outward, then verdict (see
   marq does no active probing of the IP.
 - **Domain** → `subfinder` + `ct_search` (crt.sh, `%25.<domain>`) for siblings sharing the
   cert; `whois_lookup` + `dns_lookup` for registrant, NS, MX, current A/AAAA;
-  `dnsx` to resolve. Pivot on: registrant email/org, NS set, same A record
+  `dns_lookup` to resolve. Pivot on: registrant email/org, NS set, same A record
   (shared host), cert SAN entries, registration date clustering.
 - **URL** → urlscan for redirect chain + resources; extract the host and pivot as
   domain/IP.

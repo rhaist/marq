@@ -1,6 +1,6 @@
 ---
 name: recon-footprint
-description: "Guides passive OSINT footprinting of a domain or organization: whois, DNS, subfinder, theHarvester, spiderfoot, certificate transparency, historical URLs, leaked secrets in public repos, internet-scan data (Shodan/Censys) and people footprint. Use when the user asks to recon a target, map an external footprint, find subdomains, or start an OSINT investigation."
+description: "Guides passive OSINT footprinting of a domain or organization: whois, DNS, subfinder, theHarvester, certificate transparency, historical URLs, leaked secrets in public repos, internet-scan data (Shodan) and people footprint. Use when the user asks to recon a target, map an external footprint, find subdomains, or start an OSINT investigation."
 license: Apache-2.0
 metadata:
   verified: "2026-11-17"
@@ -29,11 +29,8 @@ cross-border misstep.
 - `gau_urls`: historical URLs (Wayback/CommonCrawl/OTX/URLScan), forgotten
   endpoints and params. Runs as a background job: poll with `list_jobs` /
   `job_status` and read the job's `stdout.log`.
-- `spiderfoot`: broad passive sweep (passive modules only; background job, poll
-  with `job_status`).
-- People: `sherlock` / `maigret_username` (a username across sites),
-  `email_accounts` (email → accounts), `h8mail_breach` (email → breaches),
-  `phoneinfoga` (phone numbers), `exif_metadata` (author/device data in
+- People: `maigret_username` (a username across sites),
+  `email_accounts` (email → accounts), `exif_metadata` (author/device data in
   retrieved documents, staged under `/work` or `/tmp`).
 - Secrets/exposure: `trufflehog` on public repos at github.com, gitlab.com,
   bitbucket.org or codeberg.org. `source` is `git <https-url>`, `github --org=<org>`
@@ -41,19 +38,16 @@ cross-border misstep.
 
 ## 2. Resolve & classify
 
-- Pass the collected subdomains to `dnsx` as `hosts` (comma or newline separated)
-  to resolve them (no `write_file` staging needed); `records` defaults to `a` (records via public resolvers).
-- `asnmap` for the ASN/CIDR ranges an org owns (`target` is an IP, domain or ASN);
-  `cdncheck` (`targets` are IPs) to flag hosts behind a CDN/WAF/cloud (so an IP is the edge, not the origin).
-- Dangling CNAMEs (subdomain-takeover candidates) show up in `dnsx` CNAME output;
+- `dns_lookup` resolves a collected subdomain (one `domain` per call, via the system resolver); `record_type` picks the record.
+- `asnmap` for the ASN/CIDR ranges an org owns (`target` is an IP, domain or ASN); the ASN owner shows a CDN/cloud edge (so an IP is the edge, not the origin).
+- Dangling CNAMEs (subdomain-takeover candidates) show up in `dns_lookup` CNAME output;
   report with the DNS evidence only.
 
 ## 3. Third-party scan data
 
-- `shodan_host` / `shodan_search` and `censys_view`: ports, banners, TLS certs and
+- `shodan_host` / `shodan_search`: ports, banners, TLS certs and
   CVEs as already indexed by those services (e.g. `ssl.cert.subject.cn:acme.com`).
-  `shodan_host` works keyless; `shodan_search` needs `SHODAN_API_KEY` and
-  `censys_view` needs `CENSYS_API_TOKEN`.
+  `shodan_host` works keyless; `shodan_search` needs `SHODAN_API_KEY`.
 - Cert transparency, per-IP ports/CVEs and other keyless APIs: `load_skill security-apis`.
 
 ## Hand-off

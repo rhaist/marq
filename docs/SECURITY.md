@@ -1,8 +1,7 @@
 # Security & Safe-Use Guide
 
 marq bundles passive OSINT and footprinting tooling that profiles organisations
-and people (theHarvester, spiderfoot, sherlock, user-scanner, h8mail, phoneinfoga,
-…) and exposes it to an LLM through MCP. The tools query public third-party
+and people (theHarvester, maigret, user-scanner, …) and exposes it to an LLM through MCP. The tools query public third-party
 sources and never scan, crawl or exploit a target's hosts. The only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. `dnstwist` resolves lookalike domains through the normal resolver; those are not the target's infrastructure. Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks). People OSINT is still personal-data processing, so read this before you run anything.
 
 ## Legal & ethical baseline
@@ -16,8 +15,7 @@ sources and never scan, crawl or exploit a target's hosts. The only traffic that
   sources over individual profiling.
 - marq never tests credentials. `trufflehog` reports found secrets unverified;
   do not try them against the service they belong to.
-- Several tools call third-party services (Shodan, Censys, GitHub, HIBP,
-  numverify, crt.sh, the RDAP registries, GreyNoise, AlienVault OTX, urlscan.io,
+- Several tools call third-party services (Shodan, GitHub, crt.sh, the RDAP registries, GreyNoise, AlienVault OTX, urlscan.io,
   CIRCL, ORKL). Your queries leave the box and are logged by those providers, so
   do not submit data you are not permitted to disclose to a third party.
   `marq laws sync` downloads law texts from the government sites in
@@ -26,7 +24,7 @@ sources and never scan, crawl or exploit a target's hosts. The only traffic that
 ## Guardrail model: passive tools + fail-closed audit
 
 There is no active-testing capability to gate. The tool set is passive by
-construction: spiderfoot runs only its `passive` use case, trufflehog accepts only
+construction: trufflehog accepts only
 public git hosts (GitHub, GitLab, Bitbucket, Codeberg) and never verifies secrets, and DNS tools refuse zone
 transfers. There is no generic command runner or raw shell.
 
@@ -82,7 +80,7 @@ This applies to the full Docker tool suite (skills-only above needs none of it).
   and `..` escapes) and refuse anything outside `/work`, `/tmp` and `MARQ_WORK_DIR` (the audit log itself is refused), so the model
   can exchange working files without reading or clobbering the rest of the
   container. The other tools aren't path-sandboxed; they are bounded by fixed or
-  allowlisted argv and the container (no wrapper exposes an output-file option; h8mail `-o`/`-j` are refused). These ops are
+  allowlisted argv and the container (no wrapper exposes an output-file option). These ops are
   audit-logged.
 - Output is truncated to a token budget so a runaway query can't flood the model.
 - A per-command timeout (`MARQ_TIMEOUT`, default 900s) bounds runaway tools.

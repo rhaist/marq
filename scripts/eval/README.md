@@ -235,7 +235,7 @@ genuine model failure.
   the final answer). It is a real behaviour change, recorded in the measurement, so
   you can A/B `no_think` on and off.
 - Cap tool execution. If the OSINT binaries are installed on the eval host (running
-  marq as the bare binary, not the image), a model that picks a slow tool (e.g. `spiderfoot`)
+  marq as the bare binary, not the image), a model that picks a slow tool (e.g. `gau_urls`)
   actually runs it and blocks for minutes. The harness defaults `MARQ_TIMEOUT=30`.
   Export it lower (`MARQ_TIMEOUT=10`) for faster sweeps, since the eval scores tool selection,
   not execution.

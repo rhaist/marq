@@ -50,27 +50,20 @@ TOOLS=(
   "dns_lookup@@dig +nocmd +noall +answer <domain> <type>@@dig -h"
   "whois_lookup@@whois <target>@@whois --help"
   "subfinder@@subfinder -silent -d <domain>@@subfinder -h"
-  "dnsx@@dnsx -silent -resp -<record>@@dnsx -h"
   "asnmap@@whois -h whois.cymru.com \" -v <ip>\" + RIPEstat@@whois --version"
   "ct_search@@curl crt.sh/?q=%25.<domain>&output=json (jq summary)@@curl --version"
   "rdap@@go-rdap -j -t <domain|ip|autnum> <query>@@go-rdap -h"
   "dnstwist@@dnstwist --registered --format json --threads 8 <domain>   (background)@@dnstwist --help"
   "ioc_lookup@@curl CIRCL hashlookup / GreyNoise community / OTX / urlscan (by indicator type)@@curl --version"
   "orkl@@curl orkl.eu library search / report text / news@@curl --version"
-  "cdncheck@@cdncheck -silent (stdin IPs)@@cdncheck -h"
-  "censys_view@@censys view <assets> -O json --no-spinner --no-color@@censys view --help"
   "theharvester@@theHarvester -d <domain> -b <sources> -l <limit>@@theHarvester -h"
-  "spiderfoot@@spiderfoot -s <target> -u passive -o json   (run in background)@@spiderfoot -h"
   "exif_metadata@@exiftool -r <path>@@exiftool -ver"
   "shodan_host@@InternetDB (keyless) / shodan host <ip>@@shodan host --help"
   "shodan_search@@shodan search --fields ... --limit <n> <query>@@shodan search --help"
   "trufflehog@@trufflehog <source...> --no-verification --json@@trufflehog --help"
   "gau_urls@@echo <domain> | gau --subs --providers wayback,commoncrawl,otx,urlscan   (background)@@gau --help"
-  "sherlock@@sherlock --print-found --no-color --timeout <t> <username>@@sherlock --help"
   "maigret_username@@maigret <username> --no-color --no-progressbar --timeout <t> --top-sites <n>@@maigret --help"
   "email_accounts@@user-scanner -e <email>@@user-scanner --help"
-  "h8mail_breach@@h8mail -t <email> <options>@@h8mail --help"
-  "phoneinfoga@@phoneinfoga scan -n <number>@@phoneinfoga scan --help"
 )
 
 dump_help() {
@@ -97,7 +90,7 @@ run_tests() {
   echo "############################################################"
   echo "#  MCP SMOKE TEST"
   echo "############################################################"
-  python3 "$REPO_ROOT/scripts/test_tools.py" --image "$IMAGE" "${PASSTHROUGH[@]}"
+  python3 "$REPO_ROOT/scripts/test_tools.py" --image "$IMAGE" ${PASSTHROUGH[@]+"${PASSTHROUGH[@]}"}
 }
 
 # --- main ---

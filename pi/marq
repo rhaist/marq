@@ -12,7 +12,7 @@
 #           marq down                   # tear down
 #
 # A long-lived container (not `docker run` per call) is required: background tools
-# (spiderfoot, gau_urls) detach inside it and are polled later with
+# (gau_urls, dnstwist) detach inside it and are polled later with
 # list_jobs/job_status — an ephemeral per-call container would kill them.
 set -euo pipefail
 C="${MARQ_CONTAINER:-marq}"
@@ -21,7 +21,7 @@ IMG="${MARQ_IMAGE:-marq:latest}"
 # set MARQ_ENGINE=podman to run rootless/daemonless with no Docker Desktop.
 ENGINE="${MARQ_ENGINE:-docker}"
 # Optional API keys, forwarded only when exported in your shell.
-PASS="SHODAN_API_KEY CENSYS_API_TOKEN CENSYS_ORG_ID GITHUB_TOKEN NUMVERIFY_API_KEY"
+PASS="SHODAN_API_KEY GITHUB_TOKEN"
 # Or keep them in a KEY=value file; loaded automatically if present.
 CFG="${MARQ_ENV_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/marq/env}"
 

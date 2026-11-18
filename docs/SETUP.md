@@ -258,7 +258,7 @@ llama-server -hf google/gemma-4-12B-it-qat-q4_0-gguf \
   "12 to 16 GB GPU" means a 16 GB+ Mac (a 12B Q4 is ~7 to 8 GB). Intel Macs and
   CPU-only Linux run but are slow for a 12B, so drop `-ngl -fa -ctk -ctv` there.
 - `--ctx-size` should be as high as VRAM allows (Gemma is 262 K native). Tool outputs
-  (spiderfoot/gau dumps) are large, and a short window truncates them.
+  (gau dumps) are large, and a short window truncates them.
 - Sampling: the flags above are Google's official set for the `-it` model
   (`--temp 1.0 --top-p 0.95 --top-k 64`). Community fine-tunes usually ship
   their own preset on the model card; use theirs, not these. Either way it's the
