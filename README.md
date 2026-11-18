@@ -36,12 +36,12 @@ infrastructure, people and leaked secrets in public code. They query public thir
 
 Pick a path. Start simple and add a layer only when you need it:
 
-| I want…                                    | Path            | Setup                       |
-| :----------------------------------------- | :-------------- | :-------------------------- |
-| **cyber expertise inside my agent**        | skills pack     | one install command         |
-| **…the same, over MCP for any client**     | skills server   | one `go install`, no Docker |
-| **…plus the 24-tool OSINT suite to _run_** | full MCP server | build/pull the image        |
-| **…driven by a local model**               | full + Pi       | image + Pi + llama.cpp      |
+| I want…                                 | Path            | Setup                       |
+| :-------------------------------------- | :-------------- | :-------------------------- |
+| **cyber expertise inside my agent**     | skills pack     | one install command         |
+| **…the same, over MCP for any client**  | skills server   | one `go install`, no Docker |
+| **…plus the OSINT tool suite to _run_** | full MCP server | build/pull the image        |
+| **…driven by a local model**            | full + Pi       | image + Pi + llama.cpp      |
 
 ### The skills pack: install into your agent (no server, no Docker)
 
