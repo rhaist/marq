@@ -128,8 +128,9 @@ func chain(c []cut, gapLimit int) []cut {
 			// on a tie, the later and (for control ids) the deeper candidate wins: a PDF
 			// column can print control 1-4-1 after its subcontrol 1-4-1-1, and the
 			// subcontrol is the one with text
-			if l > length[i] || (l == length[i] && (g < gap[i] || g == gap[i] &&
-				(prev[i] < 0 || strings.Count(c[j].num, "-") >= strings.Count(c[prev[i]].num, "-")))) {
+			// (in a tie l >= 2, so prev[i] is set)
+			tie := l == length[i] && g == gap[i] && strings.Count(c[j].num, "-") >= strings.Count(c[prev[i]].num, "-")
+			if l > length[i] || (l == length[i] && g < gap[i]) || tie {
 				length[i], gap[i], prev[i] = l, g, j
 			}
 		}
@@ -181,18 +182,20 @@ func seqValue(num string) (int, bool) {
 	// subcontrol): base 100 per level, so the whole id rises in document order.
 	// A domain step is a big jump, so such sources need a large max_gap.
 	if parts := strings.Split(num, "-"); len(parts) >= 3 && len(parts) <= 4 {
-		v := 0
+		v, ok := 0, true
 		for i := range 4 {
 			n := 0
 			if i < len(parts) {
 				var err error
-				if n, err = strconv.Atoi(parts[i]); err != nil || n > 99 {
-					return 0, false
-				}
+				n, err = strconv.Atoi(parts[i])
+				ok = ok && err == nil && n <= 99
 			}
 			v = v*100 + n
 		}
-		return v, true
+		if ok {
+			return v, true
+		}
+		// not a control id ("3-2-1bis"): fall through to the leading number
 	}
 	if i := strings.LastIndex(num, "."); i >= 0 {
 		return leadInt(num[i+1:])

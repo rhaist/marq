@@ -96,6 +96,9 @@ func TestSplit(t *testing.T) {
 	if got := strings.Join(ncaNums, ","); got != "preamble,1-1-1,1-1-2,1-2-1,1-2-1-1,1-2-1-2,2-1-1-1,2-1-1-2" {
 		t.Errorf("control ids (a control printed after its first subcontrol is dropped, not the subcontrol) = %s", got)
 	}
+	if v, ok := seqValue("3-2-1bis"); !ok || v != 3 {
+		t.Errorf("a non-control 3-part number falls back to its leading number, got %d %v", v, ok)
+	}
 	gappy := "Article 1\nA\nArticle 2\nB\nArticle 37\nC\nArticle 38\nD"
 	if got := Split(gappy, "en", "", 0); len(got) != 3 || got[0].Num != "preamble" || got[1].Num != "37" {
 		t.Errorf("default gap limit keeps one run (the rest becomes preamble), got %+v", got)
