@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pins the scoring invariants the leaderboard depends on (run: python3
+"""Pins the scoring invariants report.py depends on (run: python3
 scripts/eval/test_report.py). Asserts, no framework."""
 
 import json, pathlib, sys, tempfile

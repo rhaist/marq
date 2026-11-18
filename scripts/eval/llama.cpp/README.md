@@ -25,4 +25,4 @@ llama-server -hf google/gemma-4-12B-it-qat-q4_0-gguf \
 - Add `-ngl 99` to offload all layers to the GPU.
 - **VRAM-constrained?** Add `-ctk q8_0 -ctv q8_0` (needs `-fa on`) to ~halve the
   KV-cache memory so 64K context fits a 12–16 GB GPU. It shifts numerics slightly,
-  so record it in `report.py --note` to keep the leaderboard row honest.
+  so note it alongside any scores you compare.

@@ -5,7 +5,7 @@ right skill, picks the right tool, records the purpose and produces the delivera
 measures the lift the knowledge layer gives a small local model (skills
 on vs off).
 
-It is not a leaderboard benchmark. Published security benchmarks (CyBench, NYU
+It is not a benchmark. Published security benchmarks (CyBench, NYU
 CTF, CVE-Bench) need a live vulnerable range and score the model's exploitation
 skill, and tool-use leaderboards (BFCL, τ-bench) test generic function calling. This harness
 targets the interaction between model and marq, and marq already emits the ground truth: the harness owns
@@ -72,21 +72,20 @@ python3 scripts/eval/harness.py \
     --models qwen2.5-7b-instruct,llama-3.1-8b-instruct,mistral-nemo \
     --skills both
 
-# Quick look — aggregate + per-task pass-rates, writes nothing:
-python3 scripts/eval/report.py scripts/eval/runs --no-publish
+# Pass-rates with intervals, lift and per-task rates:
+python3 scripts/eval/report.py scripts/eval/runs
 ```
 
 The two tiers ask different questions, and their verdicts are not interchangeable.
-Tier 1 is an indicative go/no-go on one model. Tier 2 produces the comparable,
-committed measurement with Wilson intervals. A good Tier-1 count is
-permission to spend the GPU. See the sample-size note under
-[Leaderboard](#leaderboard-finding-the-best-open-weight-model-over-time).
+Tier 1 is an indicative go/no-go on one model. Tier 2 produces the measurement
+with Wilson intervals. A good Tier-1 count is permission to spend the GPU. See
+[Reading the numbers](#reading-the-numbers).
 
 The tiers keep separate run dirs on purpose. `--smoke` defaults to
 `runs/_smoke/`, not `runs/`. Both tiers name runs identically
 (`model__skills-on__task__rN`), so a shared dir would let the sweep's resume
-logic silently adopt smoke runs as sweep data and `report.py` pool them into a
-published row whose recorded `repeats` wouldn't match its own `n`. Passing an
+logic silently adopt smoke runs as sweep data and `report.py` pool them into one
+score. Passing an
 explicit `--out` overrides this, so do that only if you mean to merge them.
 
 Each run lands in `scripts/eval/runs/<model>__skills-<on|off>__<task>__r<n>/`
@@ -110,46 +109,16 @@ The deterministic scorer can't judge quality, such as whether the GRC mapping wa
 right or the reasoning was sound. That needs a later semantic pass (an LLM
 judge or human) over `responses.jsonl` + `meta.final`, which is why the raw
 responses are recorded in full. `runs/` is ephemeral (gitignored,
-overwritten each sweep). To analyse a published measurement later,
-archive its `runs/` dir somewhere durable before re-running, since only the
-distilled scores are committed.
+overwritten each sweep), so archive a `runs/` dir somewhere durable if you want
+to analyse it later.
 
-## Leaderboard: finding the best open-weight model over time
-
-`report.py --no-publish` is the transient view. Without it, `report.py` produces
-the committed record, distilling a sweep into one small JSON per model and
-regenerating [`LEADERBOARD.md`](LEADERBOARD.md):
-
-```bash
-# Use repeats for credible numbers — a single LLM run is noise:
-python3 scripts/eval/harness.py --models qwen2.5-7b-instruct --skills both --repeats 5 --temperature 0.2
-python3 scripts/eval/report.py scripts/eval/runs --quant Q4_K_M --params 7B --runtime llama.cpp \
-    --repeats 5 --note "ctx=65536, full GPU offload, llama.cpp b####"
-git add scripts/eval/results scripts/eval/LEADERBOARD.md && git commit -m "eval: qwen2.5-7b"
-```
-
-A score is only comparable alongside its context, so every measurement pins it:
-
-- `marq_commit`: the skills and tools change, so a score belongs to a marq version.
-- `taskset.version` + `hash`: the leaderboard ranks only within one task-set
-  version (`tasks.version`). Bump it when you change tasks materially and there
-  are published results the change would invalidate. Old results stay valid
-  under their version. Only `version` gates comparability; `hash` is provenance.
-- sampling: the harness pins and records `temperature` + `top_p` (`--temperature`
-  / `--top-p`), so don't rely on the server's hidden defaults.
-- load config: when the server is llama.cpp, the harness reads the
-  loaded context length (`n_ctx`) and model id/path from its `/props` endpoint.
-  Quant isn't reported there, and it matters because a Q3 and a Q6 tool-call very differently,
-  so pass `--quant`, and add `--note` for anything else the API can't see
-  (GPU offload, server build). Other runtimes fall back to the flags.
-
-### Per-model config (`profiles.json`)
+## Per-model config (`profiles.json`)
 
 Every model has preferences. qwen3 needs `/no_think` (a mode, not a luxury),
-and others want a different temperature or step budget. A single fixed harness config
-would quietly bias the comparison, so `profiles.json` maps a model id to config
-overrides (`temperature`, `top_p`, `top_k`, `min_p`, `repeat_penalty`, `no_think`, `max_steps`) merged over the CLI
-defaults, and the effective config is stamped into every measurement:
+and others want a different temperature or step budget. `profiles.json` maps a
+model id to config overrides (`temperature`, `top_p`, `top_k`, `min_p`,
+`repeat_penalty`, `no_think`, `max_steps`) merged over the CLI defaults, and the
+effective config is recorded in each run's `meta.json`:
 
 ```json
 {
@@ -158,50 +127,29 @@ defaults, and the effective config is stamped into every measurement:
 }
 ```
 
-This is a deliberate methodology choice. The leaderboard ranks each model at the
-config it best drives marq with (what you'd actually run), not at one
-artificial setting. Because the config rides along in the result, the
-comparison stays honest and you can A/B a model to find its sweet spot. For
-strict apples-to-apples runs, leave `profiles.json` at `{"default": {}}` and
-every model runs identically. Thinking models are the clearest case: reasoning
-before each tool call is costly over marq's tool schemas, so `no_think` plus a modest
-`max_steps` keeps them from crawling or flailing on a tool that isn't present.
+Each model runs at the config it best drives marq with. For strict
+apples-to-apples runs, leave `profiles.json` at `{"default": {}}`. Thinking
+models are the clearest case: reasoning before each tool call is costly over
+marq's tool schemas, so `no_think` plus a modest `max_steps` keeps them from
+crawling or flailing on a tool that isn't present.
 
-`results/<model>.json` keeps a history (a measurement per run), so you can
-watch a model move as marq evolves and see new models slot in.
+## Reading the numbers
 
-Only the distilled JSON + leaderboard are committed; the bulky `runs/` artifacts
-are not.
-
-### Honesty about the numbers
-
-This is a good harness but a small experiment, so don't oversell it. Pass-rates
-carry a 95% Wilson confidence interval over task×repeat observations, and the
-leaderboard leads with a disclaimer: with 15 tasks the intervals are wide, so
-overlapping intervals mean the ranking isn't reliable. The board measures
-models as driven by this harness at the recorded config, not models in the
-abstract, and rows differ in quant and config. Treat it as a smoke test until the
-task set is large (50+) and a rubric'd judge (with human-agreement spot-checks)
-replaces the weakest proxies. The weakest is `answer_contains` keyword matching, which
-stands in for semantic correctness only until the judge lands.
-
-The board is empty until the first clean sweep: run Tier 1, then Tier 2, then publish
-under `llama-server` (see [`llama.cpp/`](llama.cpp/README.md)). Runtimes are not
-cross-comparable, so a row measured elsewhere cannot be carried over.
+`report.py` pools repeats into pass-rates with 95% Wilson intervals over
+task×repeat observations. With 15 tasks the intervals are wide, so two models
+whose intervals overlap are not distinguishable. The scores describe a model as
+driven by this harness at its recorded config, quant and runtime, and are only
+comparable for the same marq commit and task set. Treat them as a smoke test:
+the weakest check is `answer_contains` keyword matching, which stands in for
+semantic correctness until a rubric'd judge replaces it. `report.py` flags a
+sweep where more than 10% of runs aborted; those are environment failures, and
+the surviving runs don't measure the model.
 
 ## Tasks (`tasks.jsonl`)
 
-The set has fifteen seeds (v2) spanning passive OSINT, people OSINT, threat-intel, malware
+The set has fifteen seeds spanning passive OSINT, people OSINT, threat-intel, malware
 knowledge (skills only, no malware tools), GRC, standards and secops. Add your own as one
-JSON object per line. v2 dropped every task needing a removed tool or skill. The
-leaderboard is not comparable across task versions (v1 rows are historical).
-Bump `tasks.version` when you change the set materially and `results/` holds a
-measurement the change would invalidate. Old results stay valid under their
-version. `report.py` filters comparability on that string alone (the content
-hash in `taskset_meta` is provenance, never read for filtering), so the bump is
-what stops two different task sets pooling under one label. With an empty
-`results/` there is nothing to separate, and a fresh version number only implies
-a dataset that never existed. Each task declares an `expect` block, and the scorer
+JSON object per line. Each task declares an `expect` block, and the scorer
 only runs the checks present:
 
 | check             | meaning                                                       |

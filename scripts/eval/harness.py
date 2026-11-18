@@ -227,9 +227,8 @@ def shutdown_marq(proc):
 
 
 # A wedged init is transient (a prior run's container may still be reaping), but an
-# aborted run is unusable data — and report.py refuses to publish a sweep whose
-# abort fraction exceeds --max-abort-frac, so a cluster of them sinks the whole
-# sweep. Retrying with a fresh process costs seconds; not retrying costs a re-run.
+# aborted run is unusable data — and report.py flags a sweep whose abort
+# fraction exceeds 10%, so a cluster of them sinks the whole sweep. Retrying with a fresh process costs seconds; not retrying costs a re-run.
 INIT_ATTEMPTS = 3
 INIT_BACKOFF = 5  # seconds, multiplied by the attempt number
 
@@ -334,7 +333,7 @@ def run_task(args, model, skills_on, task, repeat, model_info, cfg):
             # arm's full server instructions (methodology + engagement/
             # skill-loading/reporting briefing), so the measured "lift" reflects briefing+skills
             # combined, not the skill content alone. Kept as-is to preserve
-            # comparability with the committed LEADERBOARD; revisit as a
+            # comparability with earlier measurements; revisit as a
             # methodology change (hold this prompt identical to the on-arm, minus
             # load_skill) if isolating the knowledge-layer effect becomes the goal.
             system = (
@@ -588,7 +587,7 @@ def main():
     p.add_argument(
         "--smoke",
         action="store_true",
-        help="Tier-1 go/no-go: a small capability sample, skills-on, 3x — prints per-task pass counts instead of the leaderboard sweep",
+        help="Tier-1 go/no-go: a small capability sample, skills-on, 3x — prints per-task pass counts instead of the full sweep",
     )
     args = p.parse_args()
 
@@ -609,8 +608,7 @@ def main():
 
     # Keep the two tiers' run dirs apart. Smoke uses the same naming as a sweep
     # (model__skills-on__task__rN), so sharing --out would let the sweep's resume
-    # logic adopt smoke runs as sweep data and report.py pool them into a
-    # published row — whose recorded `repeats` would then not match its own n.
+    # logic adopt smoke runs as sweep data and report.py pool them into one score.
     # An explicit --out still wins, so you can point both tiers anywhere.
     if args.smoke and args.out == p.get_default("out"):
         args.out = str(pathlib.Path(args.out) / "_smoke")
@@ -657,10 +655,7 @@ def main():
         ok = [smoke_verdict(args.out, m, tasks) for m in models]
         return 0 if all(ok) else 1
     print(f"\nruns in {args.out}")
-    print(f"look:    python3 scripts/eval/report.py {args.out} --no-publish")
-    print(
-        f"publish: python3 scripts/eval/report.py {args.out} --quant <Q> --runtime llama.cpp"
-    )
+    print(f"score:   python3 scripts/eval/report.py {args.out}")
     return 0
 
 

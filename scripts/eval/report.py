@@ -1,24 +1,13 @@
 #!/usr/bin/env python3
-"""Aggregate eval runs into the committed, comparable-over-time leaderboard.
+"""Score eval runs: per model, the skills-on and skills-off pass-rates with 95%
+Wilson intervals over task x repeat observations, the lift, and per-task rates.
+Repeats are pooled (a single LLM run is noise). Prints only; nothing is written.
 
-A score is only meaningful alongside its context, so each published measurement
-pins: the marq commit, the task-set version + content hash, the model quant, the
-sampling temperature, and the runtime. The leaderboard ranks only within one
-task-set version. Repeats are averaged into pass-rates (a single LLM run is
-noise).
-
-    # after a harness sweep (use --repeats 3+ for credible numbers):
-    python3 scripts/eval/report.py scripts/eval/runs --quant Q4_K_M --runtime llama.cpp
-
-Writes scripts/eval/results/<model>.json (appends a measurement to its history)
-and regenerates scripts/eval/LEADERBOARD.md from all results. Commit both.
-
-For a quick look without writing anything, add --no-publish — it just prints the
-aggregate + per-task pass-rates.
+    python3 scripts/eval/report.py scripts/eval/runs
 """
 
 from __future__ import annotations
-import argparse, datetime, hashlib, json, math, pathlib, subprocess, sys
+import argparse, json, math, pathlib, sys
 
 HERE = pathlib.Path(__file__).resolve().parent
 
@@ -101,30 +90,6 @@ def score_one(task, rundir):
     return out
 
 
-def slug(model):
-    return model.replace("/", "_").replace(":", "_").replace(" ", "_")
-
-
-def marq_commit():
-    try:
-        return subprocess.check_output(
-            ["git", "rev-parse", "--short", "HEAD"], cwd=HERE, text=True
-        ).strip()
-    except Exception:
-        return "unknown"
-
-
-def taskset_meta(tasks_path):
-    raw = pathlib.Path(tasks_path).read_bytes()
-    version = (
-        (HERE / "tasks.version").read_text().strip()
-        if (HERE / "tasks.version").exists()
-        else "v0"
-    )
-    n = sum(1 for l in raw.decode().splitlines() if l.strip())
-    return {"version": version, "hash": hashlib.sha256(raw).hexdigest()[:12], "n": n}
-
-
 def passed(task, rundir):
     # `skills` (did the model call load_skill) is informational, not gating: the
     # skills-off arm has load_skill removed, so gating on it would make every
@@ -139,8 +104,8 @@ def passed(task, rundir):
 def aggregate(runs, tasks):
     """Return ({model: {(on, task): [pass bools]}}, {model: [aborted, total]}).
     Aborted runs measure nothing, so they're excluded from rate denominators; the
-    abort fraction is returned so main() can refuse to publish a broken sweep
-    (survivors must not stand in for 90%-crashed runs — the original 194/210 bug)."""
+    abort fraction is returned so main() can flag a broken sweep (survivors must
+    not stand in for 90%-crashed runs — the original 194/210 bug)."""
     by_model, aborts = {}, {}
     for rundir in sorted(
         p for p in runs.iterdir() if p.is_dir() and (p / "meta.json").exists()
@@ -165,21 +130,8 @@ def rate(bools):
     return round(sum(bools) / len(bools), 3) if bools else 0.0
 
 
-def meta_for(runs, model):
-    """A representative run's meta for one model — carries the sampling + model_info
-    provenance (read from disk, so it reflects what actually ran)."""
-    for p in sorted(runs.iterdir()):
-        f = p / "meta.json"
-        if f.is_file():
-            m = json.loads(f.read_text())
-            if m.get("model") == model:
-                return m
-    return {}
-
-
-def measurement(model_cells, tasks, args, sampling, info):
-    all_ids = sorted({t for (_on, t) in model_cells})
-    task_ids = all_ids
+def measurement(model_cells):
+    task_ids = sorted({t for (_on, t) in model_cells})
 
     def pooled(on):  # pool task x repeat into one binomial → rate + Wilson CI
         bools = [
@@ -189,204 +141,50 @@ def measurement(model_cells, tasks, args, sampling, info):
             return None
         k, n = sum(bools), len(bools)
         lo, hi = wilson(k, n)
-        return {
-            "rate": round(k / n, 3),
-            "ci": [round(lo, 3), round(hi, 3)],
-            "k": k,
-            "n": n,
-        }
+        return {"rate": round(k / n, 3), "ci": [round(lo, 3), round(hi, 3)], "n": n}
 
     on, off = pooled(True), pooled(False)
-    per_on = {t: rate(model_cells.get((True, t), [])) for t in task_ids}
-    per_off = {t: rate(model_cells.get((False, t), [])) for t in task_ids}
-    lift = round(on["rate"] - off["rate"], 3) if (on and off) else None
     return {
-        "date": datetime.date.today().isoformat(),
-        "marq_commit": marq_commit(),
-        "taskset": taskset_meta(args.tasks),
-        "runtime": dict(
-            {"server": args.runtime, "repeats": args.repeats},
-            **sampling,
-            **(
-                {"context_length": info["loaded_context_length"]}
-                if info.get("loaded_context_length")
-                else {}
-            ),
-            **({"note": args.note} if args.note else {}),
-        ),
-        "scores": {
-            "skills_on": on,
-            "skills_off": off,
-            "lift": lift,
-            "per_task": {t: {"on": per_on[t], "off": per_off[t]} for t in task_ids},
+        "skills_on": on,
+        "skills_off": off,
+        "lift": round(on["rate"] - off["rate"], 3) if (on and off) else None,
+        "per_task": {
+            t: {
+                "on": rate(model_cells.get((True, t), [])),
+                "off": rate(model_cells.get((False, t), [])),
+            }
+            for t in task_ids
         },
     }
-
-
-def publish(model, meas, args, info):
-    path = args.results / f"{slug(model)}.json"
-    quant = args.quant or info.get("quantization") or "?"
-    doc = (
-        json.loads(path.read_text())
-        if path.exists()
-        else {
-            "model": {"id": model, "quant": quant, "params": args.params},
-            "measurements": [],
-        }
-    )
-    doc["model"]["quant"] = quant
-    if info.get("arch"):
-        doc["model"]["arch"] = info["arch"]
-    if args.params:
-        doc["model"]["params"] = args.params
-    doc["measurements"].append(meas)
-    args.results.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(doc, indent=2) + "\n")
-    return path
-
-
-def latest_for_version(doc, version):
-    ms = [m for m in doc["measurements"] if m["taskset"]["version"] == version]
-    return ms[-1] if ms else None
-
-
-def _cell(d):  # "0.83 [0.55–0.95]" or "—"
-    return "—" if not d else f"{d['rate']:.2f} [{d['ci'][0]:.2f}–{d['ci'][1]:.2f}]"
-
-
-def render_leaderboard(args):
-    version = (HERE / "tasks.version").read_text().strip()
-    n_tasks = sum(
-        1 for l in (HERE / "tasks.jsonl").read_text().splitlines() if l.strip()
-    )
-    rows = []
-    for path in sorted(args.results.glob("*.json")):
-        doc = json.loads(path.read_text())
-        m = latest_for_version(doc, version)
-        if not m or not m["scores"].get("skills_on"):
-            continue
-        rows.append((m["scores"]["skills_on"]["rate"], doc["model"], m["scores"], m))
-    rows.sort(key=lambda r: r[0], reverse=True)
-
-    out = [
-        f"# marq model leaderboard — task-set {version} ({n_tasks} tasks)",
-        "",
-        "_Generated by `scripts/eval/report.py` — do not edit by hand._",
-        "",
-        "> ⚠️ **Indicative, not statistically significant.** Brackets are 95% Wilson",
-        "> score intervals over task×repeat observations. With a small task set they are",
-        "> wide — **overlapping intervals mean the ranking is not reliable.** This",
-        "> measures models _as driven by this harness, at the recorded per-model config_,",
-        "> not models in the abstract; quant, config and runtime differ per row. Comparable only",
-        "> within one task-set version. Treat as a smoke test, not a benchmark.",
-        "",
-        "| Model | Quant | skills-on (95% CI) | skills-off | lift | n | marq | date |",
-        "| :--- | :--- | :--- | :--- | ---: | ---: | :--- | :--- |",
-    ]
-    for _r, model, s, m in rows:
-        lift = "—" if s["lift"] is None else f"{s['lift']:+.2f}"
-        n = s["skills_on"]["n"]
-        out.append(
-            f"| {model['id']} | {model.get('quant', '?')} | {_cell(s['skills_on'])} "
-            f"| {_cell(s['skills_off'])} | {lift} | {n} | `{m['marq_commit']}` | {m['date']} |"
-        )
-    if not rows:
-        out.append("| _(no results yet)_ | | | | | | | |")
-    # Write the board beside the results it's derived from, so a `--results`
-    # override lands its own LEADERBOARD.md instead of clobbering the canonical
-    # one (default --results is HERE/results, whose parent is HERE — unchanged).
-    dest = args.results.parent
-    dest.mkdir(parents=True, exist_ok=True)  # may not exist if nothing was published
-    (dest / "LEADERBOARD.md").write_text("\n".join(out) + "\n")
-    return len(rows)
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("runs")
-    ap.add_argument(
-        "--quant",
-        default="",
-        help="quant tag, e.g. Q4_K_M (llama.cpp /props can't report it)",
-    )
-    ap.add_argument("--params", default="", help="param count, e.g. 7B (optional)")
-    ap.add_argument(
-        "--runtime", default="llama.cpp", help="server name, e.g. llama.cpp"
-    )
-    ap.add_argument(
-        "--note",
-        default="",
-        help="load-config provenance the harness can't see, e.g. 'ctx=65536, full GPU offload, llama.cpp b####'",
-    )
-    ap.add_argument(
-        "--repeats",
-        type=int,
-        default=1,
-        help="repeats used in the sweep (for provenance)",
-    )
     ap.add_argument("--tasks", default=str(HERE / "tasks.jsonl"))
-    ap.add_argument("--results", type=pathlib.Path, default=HERE / "results")
-    ap.add_argument(
-        "--no-publish",
-        action="store_true",
-        help="aggregate + print only, don't write results/",
-    )
-    ap.add_argument(
-        "--max-abort-frac",
-        type=float,
-        default=0.10,
-        help="refuse to publish a model whose runs aborted above this fraction (default 0.10) — aborts are environment failures, not model behavior, so numbers computed on them are noise",
-    )
     args = ap.parse_args()
-    args.results = pathlib.Path(args.results)
 
     tasks = {t["id"]: t for t in (json.loads(l) for l in open(args.tasks) if l.strip())}
-    runs = pathlib.Path(args.runs)
-    by_model, aborts = aggregate(runs, tasks)
+    by_model, aborts = aggregate(pathlib.Path(args.runs), tasks)
     if not by_model:
-        # Still re-render: the committed LEADERBOARD.md stamps the task-set
-        # version in its header, so bumping tasks.version with an empty
-        # results/ would otherwise strand it advertising the old one forever.
         print("no runs found in", args.runs)
-        if not args.no_publish:
-            n = render_leaderboard(args)
-            print(f"leaderboard re-rendered: {n} models")
         return 1
-
     for model, cells in sorted(by_model.items()):
-        meta0 = meta_for(runs, model)
-        sampling = meta0.get("sampling") or (
-            {"temperature": meta0["temperature"]}
-            if meta0.get("temperature") is not None
-            else {}
-        )
-        info = meta0.get("model_info") or {}
-        meas = measurement(cells, tasks, args, sampling, info)
-        if meta0.get("no_think") is not None:
-            meas["runtime"]["no_think"] = meta0["no_think"]
-        s = meas["scores"]
+        s = measurement(cells)
         on, off = s["skills_on"], s["skills_off"]
         oc = f"{on['rate']:.2f} {on['ci']} n={on['n']}" if on else "—"
         na, nt = aborts.get(model, [0, 0])
-        afrac = na / nt if nt else 0.0
         print(
             f"{model}  on={oc}  off={off['rate'] if off else '—'}  lift={s['lift']}  "
-            f"aborted={na}/{nt} ({afrac:.0%})"
+            f"aborted={na}/{nt} ({na / nt if nt else 0:.0%})"
         )
+        # Aborts are environment failures, not model behaviour; the rates above exclude them.
+        if nt and na / nt > 0.10:
+            print(
+                "  ! over 10% of runs aborted: fix the environment before trusting these numbers"
+            )
         for t, r in s["per_task"].items():
             print(f"    {t:24} on={r['on']:.2f} off={r['off']:.2f}")
-        if not args.no_publish:
-            # Fail-closed publish: a broken sweep (too many aborts) must not become a leaderboard row.
-            if afrac > args.max_abort_frac:
-                print(
-                    f"  -> SKIPPED — {afrac:.0%} of runs aborted (> {args.max_abort_frac:.0%}); "
-                    f"fix the environment and re-run. Not published."
-                )
-                continue
-            print("  ->", publish(model, meas, args, info))
-    if not args.no_publish:
-        n = render_leaderboard(args)
-        print(f"leaderboard: {args.results.parent / 'LEADERBOARD.md'} ({n} models)")
     return 0
 
 

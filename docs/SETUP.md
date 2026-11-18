@@ -213,10 +213,9 @@ q4_0, and fits a 12 to 16 GB GPU at a long context. Launch it with the flags bel
 without them it leaks reasoning tokens into its answers and (without SYSTEM.md)
 bypasses marq.
 
-> Not yet on the leaderboard. This is the default on provenance grounds
-> (official weights, no third-party fine-tune in the trust path), not because it
-> measured better. Treat it as unmeasured until a clean run publishes (see
-> `scripts/eval/`).
+> This is the default on provenance grounds (official weights, no third-party
+> fine-tune in the trust path), not because it measured better. Measure it and
+> alternatives with `scripts/eval/`.
 > A stock instruction-tuned model may also refuse some legitimate people OSINT.
 > If that blocks you, evaluate alternatives with the harness rather than
 > swapping blind.
