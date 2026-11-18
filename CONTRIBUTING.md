@@ -8,7 +8,7 @@ covers how to build it, the quality gates, and how to add a tool or a skill.
 > **Passive and attributable is the contract.** marq's tools query public sources
 > only and never scan, crawl or exploit a target's hosts (only ordinary DNS resolution can reach its nameservers). Its safety model is _attribution_: every OSINT-tool, file and findings call is audit-logged, and an OSINT tool funnels through one audited choke point
 > (`runner.Run`) that fails closed if it can't log. Any contribution must preserve
-> that. See [Design invariants](#design-invariants)
+> that. See [Design invariants](#design-invariants-and-adding-a-tool-or-skill)
 > below and [`docs/SECURITY.md`](docs/SECURITY.md). Contributions that add
 > active scanning, exploitation, evasion, anti-forensics, or that bypass the audit
 > log will not be merged.
@@ -40,48 +40,21 @@ Run these before opening a PR. CI enforces the first three on every push/PR, and
 
 `go test ./...` is the sanity gate; keep it green.
 
-## Design invariants
+## Design invariants and adding a tool or skill
 
-These are load-bearing, and breaking them silently defeats marq's safety model:
+The design invariants (the `runner.Run` choke point, no interactive tools, no file
+upload, background jobs, passive-only wrappers and `TestPassiveOnly`), the steps to
+add a tool, and the skill frontmatter rules are in [`CLAUDE.md`](CLAUDE.md). Rules
+that are only here:
 
-- **Never call `os/exec` directly.** Every exec tool funnels through
-  `internal/runner/runner.go::Run` (or `RunBackground`). That is the single choke
-  point for audit logging, timeout, and output truncation.
-- **No interactive tools.** The transport is synchronous, one-shot, stateless,
-  with no TTY. Always pass non-interactive flags (`--batch`, `-x "...; exit"`, etc.),
-  because anything that prompts will hang until timeout.
-- **No file upload.** The model passes strings only. File inputs and outputs go
-  through the `/work` mount and the `files` tools, which are sandboxed to
-  `/work`, `/tmp` and `MARQ_WORK_DIR` (as is `exif_metadata`).
-- **Long-running tools go to the background** (`Invocation.Background = true`),
-  polled via `list_jobs` / `job_status`.
 - **API keys degrade quietly.** Tools needing keys must still run (with reduced
   capability) when the key env var is absent.
-
-## Adding a tool
-
-1. Prefer a **Kali apt package** (verify on [pkg.kali.org](https://pkg.kali.org)).
-   If it isn't packaged, install it in the Go-built block of the `Dockerfile`.
-2. Add the `Tool` to the relevant `internal/registry/*.go` (recon, intel, osint, people,
-   files, extras). `Tool.Desc` is the model's only guidance, so make it informative
-   (usage, defaults, API-key needs, caveats).
-3. Set `Invocation.Target` to the lookup target so the call is audited. The tool must
-   query public third-party sources only, never the target's own hosts.
-4. Extend `TestPassiveOnly` in `internal/registry/registry_test.go`. A wrapper must not
-   let model input reach the target: fixed flags, allowlisted values, and
-   `Invocation{Refuse: …}` for anything else.
-5. Document it in [`docs/USAGE.md`](docs/USAGE.md).
-
-## Adding a skill
-
-Create `skills/<category>/<name>/SKILL.md` with `name` (equal to the directory
-name), `description` and `metadata.verified` (the date you checked it) in its
-frontmatter (see the [Agent Skills spec](https://agentskills.io/specification));
-`go test ./internal/skills/` enforces it. A new category also needs adding to
-`skills` in `skills/.claude-plugin/plugin.json`. The pack is embedded in the
-binary (`load_skill`, `marq://skills/<name>`) and installs natively via the
-Claude Code plugin or `npx skills add rhaist/marq`. The periodic review sweep is
-the `/refresh-skills` skill (`.claude/skills/refresh-skills/`).
+- If a tool isn't a Kali apt package, install it in the Go-built block of the `Dockerfile`.
+- Set `Invocation.Target` to the lookup target so the call is audited.
+- A new skill category also needs adding to `skills` in
+  `skills/.claude-plugin/plugin.json`. The periodic review sweep is the
+  `/refresh-skills` skill (`.claude/skills/refresh-skills/`). Spec:
+  [Agent Skills](https://agentskills.io/specification).
 
 **Regional review wanted.** The regional skills (`apac-cyber-regs`,
 `middle-east-regs`, `latam-regs`, `privacy-apac`) were researched mostly from English
@@ -102,8 +75,7 @@ Corrections from local practitioners outrank our sources.
 
 ## Reporting security issues
 
-Do **not** open a public issue for a vulnerability in marq itself. See
-[`SECURITY.md`](SECURITY.md).
+See [`SECURITY.md`](SECURITY.md); do not open a public issue.
 
 ## License
 

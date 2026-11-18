@@ -83,8 +83,8 @@ breach-notification clock under GDPR and NIS2?"_ and the model loads the right
 playbook (current 2026 standards) and drafts the deliverable. Scripted
 end-to-end demo: [`scripts/demo-skills.sh`](scripts/demo-skills.sh).
 
-Prefer containers, or already pulled the image? The same mode runs there too. Use
-the `marq-skills` entry in [`mcp.json.example`](mcp.json.example). Add the full tool
+Prefer containers, or already pulled the image? The same mode runs there too. Add
+`-e MARQ_SKILLS_ONLY=1` to the args of the `marq` entry in [`mcp.json.example`](mcp.json.example). Add the full tool
 suite below when you need to _run_ something, not just reason about it.
 
 ### The full tool suite

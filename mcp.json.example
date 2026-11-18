@@ -5,21 +5,8 @@
   "//4": "stdio (-i keeps it open). The engagement label + purpose is set at runtime by the model via set_engagement.",
   "//5": "Optional: export MARQ_OPERATOR (audit attribution, default 'marq' for the bare binary, 'unknown' in the image) and any API key below in the environment your client runs in; each -e passes it through only if set (clients that don't inherit your shell, e.g. Claude Desktop, take an \"env\": {...} block). Keys: docs/USAGE.md.",
   "//6": "marq-work persists findings/reports; swap for a bind mount (-v /host/dir:/work) to read them on the host.",
-  "//skills-only": "Want just the cyber-skills library + advisory tools for your LLM, without the OSINT tool suite? Use the 'marq-skills' entry below instead of 'marq'. MARQ_SKILLS_ONLY=1 loads only the in-process knowledge tools (skills, findings, files, server_info, set_engagement), so no Kali binaries are needed.",
+  "//skills-only": "Want just the cyber-skills library + advisory tools, without the OSINT tool suite? Add \"-e\", \"MARQ_SKILLS_ONLY=1\", to the args of the 'marq' entry (before \"marq\"). It loads only the in-process knowledge tools (skills, findings, files, server_info, set_engagement), so no Kali binaries are needed.",
   "mcpServers": {
-    "marq-skills": {
-      "command": "docker",
-      "args": [
-        "run", "--rm", "-i",
-        "--security-opt", "no-new-privileges:true",
-        "--cap-drop", "ALL",
-        "-v", "marq-audit:/var/log/marq",
-        "-v", "marq-work:/work",
-        "-e", "MARQ_OPERATOR",
-        "-e", "MARQ_SKILLS_ONLY=1",
-        "marq"
-      ]
-    },
     "marq": {
       "command": "docker",
       "args": [

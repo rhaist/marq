@@ -1,7 +1,7 @@
 # Setup
 
 Install and run steps for macOS (Apple Silicon or Intel) and Debian Testing
-(rolling). marq is a universal cyber assistant: it brings the tools and
+(rolling), as one flow with platform notes. marq is a universal cyber assistant: it brings the tools and
 the knowledge, and your client brings the model.
 
 Start with the "Pick a path" table below. The simplest option, the skills
@@ -18,8 +18,7 @@ fully-local work).
 
 - [Pick a path](#pick-a-path)
 - [Skills only, no Docker](#skills-only-no-docker)
-- [macOS](#macos)
-- [Debian Testing (rolling)](#debian-testing-rolling)
+- [Install and run (macOS and Linux)](#install-and-run-macos-and-linux)
 - [Verify](#verify)
 
 ## Pick a path
@@ -48,20 +47,21 @@ claude mcp add marq-skills \
   -- marq serve
 ```
 
-Any MCP client works (the same `marq serve` stdio server with a smaller tool
-set); see [`CLIENTS.md`](CLIENTS.md). Add the full tool suite below when you need
-to _run_ something as well as reason about it. To try it with no client at all:
-`scripts/demo-skills.sh`.
+Any MCP client works; see [`CLIENTS.md`](CLIENTS.md). To try it with no client at
+all: `scripts/demo-skills.sh`.
 
 ---
 
-## macOS
+## Install and run (macOS and Linux)
 
 ### 1. Prerequisites
 
 You need a container engine that provides the `docker` CLI. Docker Desktop is
-not required (its licence is commercial for larger orgs), and a lighter,
-open alternative is preferable:
+not required (its licence is commercial for larger orgs); an open alternative is
+preferable. All options expose the same `docker` command, so every command below
+is the same on both OSes.
+
+macOS:
 
 ```bash
 # Recommended: OrbStack — fast, light, native Apple-Silicon, drop-in `docker` CLI
@@ -75,9 +75,27 @@ brew install orbstack
 brew install go
 ```
 
-All three expose the same `docker` command, so every command below is unchanged.
-If you prefer Podman, see the Debian note and set `MARQ_ENGINE=podman` for the `pi/marq`
-shim.
+Debian Testing: Docker Engine is free and open-source (only Docker _Desktop_ is
+the commercial GUI you don't need). You can also run Podman, which is rootless,
+daemonless, and a drop-in for `docker`:
+
+```bash
+# Option A — Docker Engine (open-source; docker.io from Testing ships BuildKit)
+sudo apt update && sudo apt install -y docker.io docker-buildx git curl
+sudo usermod -aG docker "$USER"        # log out/in (or: newgrp docker) so this takes effect
+sudo systemctl enable --now docker
+
+# Option B — Podman (rootless/daemonless). `podman-docker` adds a `docker` alias:
+sudo apt install -y podman podman-docker git curl
+#   then either use `podman` directly, or set MARQ_ENGINE=podman for the pi/marq shim.
+
+# Optional, only for local Go dev
+sudo apt install -y golang
+```
+
+Podman needs no extra capabilities. Docker's official CE repo is also fine
+instead of `docker.io`. On macOS with Podman, set `MARQ_ENGINE=podman` for the
+`pi/marq` shim.
 
 ### 2. Build the image
 
@@ -89,7 +107,7 @@ docker pull ghcr.io/rhaist/marq && docker tag ghcr.io/rhaist/marq marq
 
 # …or build from source (native arch):
 git clone https://github.com/rhaist/marq.git && cd marq
-docker build -t marq .     # builds natively for your arch (arm64 on M-series)
+docker build -t marq .     # builds natively for your arch (arm64 on M-series, amd64, or arm64 boards)
 ```
 
 ### 3. Run as an MCP server (external client brings the model)
@@ -215,7 +233,7 @@ bypasses marq.
 > A stock instruction-tuned model may also refuse some legitimate people OSINT.
 
 Step 2a, start `llama-server` for Gemma. Install it once. On macOS, `brew install
-llama.cpp` builds with Metal on Apple Silicon and runs on CPU on Intel Macs. On Linux, use
+llama.cpp` builds with Metal on Apple Silicon and runs on CPU on Intel Macs. On Linux (including a headless GPU box), use
 Linuxbrew `brew install llama.cpp`, a prebuilt CPU binary from the
 [llama.cpp releases](https://github.com/ggml-org/llama.cpp/releases), or a
 source/container build with CUDA/ROCm/Vulkan for GPU (the prebuilt Linux
@@ -298,56 +316,12 @@ drives `marq run` from bash; the shim runs it inside the container.
 The shim env vars (`MARQ_CONTAINER`, `MARQ_IMAGE`, `MARQ_ENGINE`, `MARQ_ENV_FILE`) and why a
 long-lived container is required are in [`USAGE.md`](USAGE.md#4-run-with-a-local-model-pi).
 
----
-
-## Debian Testing (rolling)
-
-### 1. Prerequisites
-
-On Linux the Docker Engine is free and open-source (only Docker _Desktop_ is
-the commercial GUI you don't need). You can also run Podman, which is rootless,
-daemonless, and a drop-in for `docker`:
-
-```bash
-# Option A — Docker Engine (open-source; docker.io from Testing ships BuildKit)
-sudo apt update && sudo apt install -y docker.io docker-buildx git curl
-sudo usermod -aG docker "$USER"        # log out/in (or: newgrp docker) so this takes effect
-sudo systemctl enable --now docker
-
-# Option B — Podman (rootless/daemonless). `podman-docker` adds a `docker` alias:
-sudo apt install -y podman podman-docker git curl
-#   then either use `podman` directly, or set MARQ_ENGINE=podman for the pi/marq shim.
-
-# Optional, only for local Go dev
-sudo apt install -y golang
-```
-
-Podman note: no extra capabilities are needed. Docker's official CE repo is also
-fine instead of `docker.io`.
-
-### 2. Build the image
-
-```bash
-git clone https://github.com/rhaist/marq.git && cd marq
-docker build -t marq .          # native amd64 (or arm64 on ARM boards)
-```
-
-### 3. Run as an MCP server (external client brings the model)
-
-Same as macOS step 3 above: the command is identical.
-
-### 4. Run with a local model (Pi + the marq skill)
-
-Same as macOS step 4: install the `pi/marq` shim, run `marq up <dir>`, and drive it
-from Pi with [`pi/SKILL.md`](../pi/SKILL.md) loaded. Run `llama-server` on the box
-(see the install options in macOS step 2a; on a headless GPU box, a source or
-container build with CUDA/ROCm/Vulkan) and point Pi at it. The runtime lives in
-Pi, not in marq.
-
 > Bind-mount permissions (Linux): the container runs as the non-root `marq`
 > user, so the working dir you pass to `marq up` must be writable by it.
 > `chmod a+rwx <dir>` is the simplest way. macOS Docker Desktop handles this
 > automatically.
+
+---
 
 ---
 

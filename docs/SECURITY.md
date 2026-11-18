@@ -146,6 +146,4 @@ interceptor (experimental).
 
 ## Reporting issues
 
-For a vulnerability in marq itself, report it privately as described in
-[`SECURITY.md`](../SECURITY.md); do not open a public issue. Other bugs can go in a normal
-issue. Do not file vulnerabilities discovered in third-party targets here.
+Report vulnerabilities privately as described in [`SECURITY.md`](../SECURITY.md); other bugs can go in a normal issue. Do not file vulnerabilities found in third-party targets here.
