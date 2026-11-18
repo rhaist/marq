@@ -145,7 +145,7 @@ func TestPassiveOnly(t *testing.T) {
 		"D41D8CD98F00B204E9800998ECF8427E": "hashlookup.circl.lu/lookup/md5/d41d8cd98f00b204e9800998ecf8427e",
 		"::ffff:1.2.3.4":                   "/indicators/IPv4/1.2.3.4/general",
 		"2606:4700::1111":                  "/indicators/IPv6/2606:4700::1111/general",
-		"acme.com":                         "q=domain%3Aacme.com",
+		"acme.com":                         "q=page.domain%3Aacme.com",
 	} {
 		if cmd := toolNamed(t, "ioc_lookup").Build(Args{"indicator": ind}).Argv[2]; !strings.Contains(cmd, want) {
 			t.Errorf("ioc_lookup %q: want %q in %q", ind, want, cmd)
@@ -174,8 +174,11 @@ func TestPassiveOnly(t *testing.T) {
 	if argv := toolNamed(t, "dns_lookup").Build(Args{"domain": "acme.com", "record_type": "MX"}).Argv; !slices.Equal(argv[4:], []string{"acme.com", "mx"}) {
 		t.Errorf("dns_lookup argv = %q", argv)
 	}
-	if argv := toolNamed(t, "trufflehog").Build(Args{"source": "github --org=acme"}).Argv; !slices.Contains(argv, "--no-verification") {
-		t.Errorf("trufflehog verifies secrets: %q", argv)
+	if cmd := toolNamed(t, "trufflehog").Build(Args{"source": "github --org=acme"}).Argv[2]; !strings.Contains(cmd, "trufflehog github '--org=acme' --no-verification --no-update --json 2>&1 | python3") {
+		t.Errorf("trufflehog verifies secrets: %q", cmd)
+	}
+	if cmd := toolNamed(t, "maigret_username").Build(Args{"username": "jdoe", "timeout": 30, "top_sites": 500}).Argv[2]; !strings.Contains(cmd, "--no-recursion") {
+		t.Errorf("maigret must not re-search usernames it extracts (other people): %q", cmd)
 	}
 }
 
@@ -210,5 +213,64 @@ func TestShodanWrappers(t *testing.T) {
 		if !strings.Contains(string(out), want) {
 			t.Errorf("formatter(%.30s) = %q, want %q", in, out, want)
 		}
+	}
+}
+
+// TestOutputFormatters runs the inline formatters on sample tool output: the
+// trufflehog one must never print a raw secret, the banner filter must keep
+// output that has no banner, and OTX/urlscan come back as one line per item.
+func TestOutputFormatters(t *testing.T) {
+	py, err := exec.LookPath("python3")
+	if err != nil {
+		t.Skip("python3 not installed")
+	}
+	run := func(argv []string, in string) string {
+		c := exec.Command(argv[0], argv[1:]...)
+		c.Stdin = strings.NewReader(in)
+		out, _ := c.CombinedOutput()
+		return string(out)
+	}
+	truffle := `{"SourceMetadata":{"Data":{"Git":{"commit":"f832872a3b1ce389","file":"keys","line":3,"repository":"https://github.com/o/r"}}},"DetectorName":"AWS","Raw":"AKIA2UC3BSXMLSCLTUUS","RawV2":"AKIA2UC3BSXMLSCLTUUS:y1ZZUiLI0krfqmUIZ","Redacted":"AKIA2UC3BSXMLSCLTUUS","ExtraData":{"is_canary":"true"},"SecretParts":{"secret_access_key":"y1ZZUiLI0krfqmUIZ"}}
+{"SourceMetadata":{"Data":{"Git":{"file":"k"}}},"DetectorName":"Slack","Raw":"xoxb-1234567890-secret","Redacted":"xoxb-1234567890-secret"}
+{"DetectorName":"URI","Raw":"hunter2","Redacted":""}
+{"level":"info-0","msg":"scanning repo"}
+{"level":"info-0","msg":"finished scanning","chunks":9,"unverified_secrets":2}
+{"level":"error","msg":"failed to clone","error":"repository not found"}`
+	out := run([]string{py, "-I", "-c", truffleCompact}, truffle)
+	for _, want := range []string{"AWS | https://github.com/o/r | keys:3 | commit f832872a3b1c", "canary token", "xoxb...(redacted, 22 chars)", "2 unverified results", "repository not found"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("trufflehog formatter: want %q in\n%s", want, out)
+		}
+	}
+	for _, leak := range []string{"y1ZZUiLI0krfqmUIZ", "xoxb-1234567890-secret", "hunter", "scanning repo"} {
+		if strings.Contains(out, leak) {
+			t.Errorf("trufflehog formatter printed %q:\n%s", leak, out)
+		}
+	}
+
+	awk := []string{"/bin/sh", "-c", fromLine("Checking email", `\[~\]|partner=`)}
+	if out := run(awk, "ART\nVersion 1\n Checking email: a@b.c\n  [~] skipped\n  [+] hit partner=x\n  [✔] Site: Registered\n"); out != " Checking email: a@b.c\n  [✔] Site: Registered\n" {
+		t.Errorf("banner filter = %q", out)
+	}
+	if out := run(awk, "error: no such option\n"); out != "error: no such option\n" {
+		t.Errorf("banner filter must keep output with no start line: %q", out)
+	}
+
+	otx := `{"validation":[{"message":"Whitelisted domain"}],"pulse_info":{"count":1,"pulses":[{"name":"Phish kit","modified":"2026-11-18T10:00:00","description":"LONG FREE TEXT","tags":["a","b"],"malware_families":[{"display_name":"Emotet"}],"TLP":"green"}]}}`
+	if out := run([]string{py, "-I", "-c", otxCompact}, otx); !strings.Contains(out, "pulses: 1") || !strings.Contains(out, "2026-11-18 | Phish kit | adversary - | malware Emotet | TLP green") || strings.Contains(out, "LONG FREE TEXT") {
+		t.Errorf("otx formatter = %q", out)
+	}
+	scan := `{"total":1,"results":[{"task":{"time":"2026-11-18T14:36:20Z","url":"https://acme.com/"},"page":{"url":"https://acme.com/","ip":"1.2.3.4","asnname":"ACME","title":"Acme","status":"200"},"result":"https://urlscan.io/api/v1/result/x/"}]}`
+	if out := run([]string{py, "-I", "-c", urlscanCompact}, scan); !strings.Contains(out, "2026-11-18 | https://acme.com/ | 1.2.3.4 | ACME | Acme | HTTP 200 | https://urlscan.io/api/v1/result/x/") {
+		t.Errorf("urlscan formatter = %q", out)
+	}
+	if out := run([]string{py, "-I", "-c", otxCompact}, "<html>502</html>"); !strings.Contains(out, "OTX returned no JSON") {
+		t.Errorf("otx formatter on an error page = %q", out)
+	}
+	if out := run([]string{py, "-I", "-c", otxCompact}, `{"detail":"rate limited"}`); !strings.Contains(out, "no pulse data") || strings.Contains(out, "pulses: 0") {
+		t.Errorf("otx formatter must flag an error body, not report 0 pulses: %q", out)
+	}
+	if out := run([]string{py, "-I", "-c", urlscanCompact}, `{"message":"Quota exceeded"}`); !strings.Contains(out, "Quota exceeded") || strings.Contains(out, "scans: 0") {
+		t.Errorf("urlscan formatter must flag an error body: %q", out)
 	}
 }

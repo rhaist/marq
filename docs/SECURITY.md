@@ -80,7 +80,7 @@ This applies to the full Docker tool suite (skills-only above needs none of it).
   container. The other tools aren't path-sandboxed; they are bounded by fixed or
   allowlisted argv and the container (no wrapper exposes an output-file option). These ops are
   audit-logged.
-- Output is truncated to a token budget so a runaway query can't flood the model.
+- Output is truncated to a token budget so a runaway query can't flood the model; the full output is kept under `$MARQ_WORK_DIR/out` for paging with `read_file`.
 - A per-command timeout (`MARQ_TIMEOUT`, default 900s) bounds runaway tools.
 - Audit completeness depends on the driver. Every OSINT-tool call through `marq run` /
   `marq serve` is logged at `runner.Run`. The `pi/marq` shim, however, hands the

@@ -25,6 +25,46 @@ func fetch(label, u string) string {
 		shellword.Quote(u) + ` 2>&1); if [ ${#r} -gt 12000 ]; then printf '%s\n... (truncated at 12 kB) %s\n' "${r:0:12000}" "${r##*$'\n'}"; else printf '%s\n' "$r"; fi; `
 }
 
+// fetchJSON is a curl of one fixed URL piped through an inline formatter, for
+// sources whose raw JSON is mostly noise to a model.
+func fetchJSON(label, u, py string) string {
+	return "echo " + shellword.Quote("# "+label) + "; curl -sS --max-time 30 " + shellword.Quote(u) +
+		" | python3 -I -c " + shellword.Quote(py) + "; "
+}
+
+// otxCompact prints an OTX indicator's verdict fields and one line per pulse
+// (no descriptions or tag lists: those run to kilobytes of free text).
+const otxCompact = `import json,sys
+raw=sys.stdin.read()
+try: d=json.loads(raw)
+except ValueError: sys.exit("OTX returned no JSON: %.200r" % raw[:200])
+if not isinstance(d, dict): sys.exit("OTX returned an unexpected response: %.200r" % raw[:200])
+v=[str(x.get("message")) for x in d.get("validation") or [] if isinstance(x, dict)]
+if v: print("validation:", "; ".join(v))
+if "reputation" in d: print("reputation:", d.get("reputation"))
+if d.get("asn"): print("asn:", d.get("asn"))
+if not isinstance(d.get("pulse_info"), dict): sys.exit("OTX returned no pulse data (error or rate limit?): %.200r" % raw[:200])
+p=d["pulse_info"]
+pulses=sorted((x for x in p.get("pulses") or [] if isinstance(x, dict)), key=lambda x: str(x.get("modified") or ""), reverse=True)
+print("pulses:", p.get("count", len(pulses)), "(newest 15 shown)" if len(pulses) > 15 else "")
+for x in pulses[:15]:
+    fam=", ".join(str(m.get("display_name") if isinstance(m, dict) else m) for m in x.get("malware_families") or [])
+    print(" ", str(x.get("modified") or "")[:10], "|", str(x.get("name") or "")[:150], "| adversary", x.get("adversary") or "-", "| malware", fam or "-", "| TLP", x.get("TLP") or "-")`
+
+// urlscanCompact prints one line per urlscan.io search result.
+const urlscanCompact = `import json,sys
+raw=sys.stdin.read()
+try: d=json.loads(raw)
+except ValueError: sys.exit("urlscan returned no JSON: %.200r" % raw[:200])
+if not isinstance(d, dict): sys.exit("urlscan returned an unexpected response: %.200r" % raw[:200])
+if not isinstance(d.get("results"), list): sys.exit("urlscan returned no results list (error or rate limit?): %.200r" % raw[:200])
+rs=[r for r in d["results"] if isinstance(r, dict)]
+print("scans:", d.get("total", len(rs)), "(newest %d shown)" % len(rs) if rs else "")
+for r in rs:
+    t=r.get("task") if isinstance(r.get("task"), dict) else {}
+    p=r.get("page") if isinstance(r.get("page"), dict) else {}
+    print(str(t.get("time") or "")[:10], "|", p.get("url") or t.get("url"), "|", p.get("ip") or "-", "|", p.get("asnname") or "-", "|", str(p.get("title") or "-")[:100], "| HTTP", p.get("status") or "-", "|", r.get("result") or "")`
+
 // intel returns the certificate, registration, lookalike-domain and
 // threat-intel lookups. Every one queries a third-party service only.
 func intel() []Tool {
@@ -50,8 +90,9 @@ func intel() []Tool {
 					u += "&exclude=expired"
 				}
 				cmd := "set -o pipefail; curl -sS --max-time 90 " + shellword.Quote(u) + ` | python3 -I -c 'import json,sys
-try: rows=json.load(sys.stdin)
-except Exception as e: sys.exit("crt.sh returned no JSON (it times out on big domains): %r" % e)
+raw=sys.stdin.read()
+try: rows=json.loads(raw)
+except ValueError: sys.exit("crt.sh returned no JSON (it is often overloaded, and times out on big domains); retry in a minute: %.200r" % raw[:200])
 if not isinstance(rows, list): sys.exit("crt.sh returned an unexpected response: %.300r" % rows)
 f=lambda r,k: str(r.get(k) or "") if isinstance(r, dict) else ""
 rows=sorted(rows, key=lambda r: f(r,"not_before"), reverse=True)
@@ -109,8 +150,9 @@ print("(%d certificates%s)" % (len(rows), ", newest 300 shown" if len(rows) > 30
 			Desc: "Enrich an INDICATOR against keyless threat-intel sources. A file hash (MD5/SHA-1/" +
 				"SHA-256) goes to CIRCL hashlookup (known-good/known-file database); an IP to GreyNoise " +
 				"community (internet scanner / benign service?) and AlienVault OTX pulses; a domain to OTX " +
-				"and urlscan.io's public scan history. Lookups only — nothing is submitted for scanning. " +
-				"Note the services see what you query. Each response is capped at 12 kB (two sources must fit the 30 kB stdout budget).",
+				"and urlscan.io's public scans of that domain. OTX and urlscan come back summarized (one " +
+				"line per pulse or scan). Lookups only — nothing is submitted for scanning. Note the " +
+				"services see what you query.",
 			Params: []Param{
 				{Name: "indicator", Type: StringParam, Desc: "hash, IP or domain", Required: true},
 			},
@@ -132,10 +174,11 @@ print("(%d certificates%s)" % (len(rows), ", newest 300 shown" if len(rows) > 30
 						fam, ind = "IPv6", ip.String()
 					}
 					cmd = fetch("GreyNoise community (404 = not seen scanning)", "https://api.greynoise.io/v3/community/"+ind) +
-						fetch("AlienVault OTX", "https://otx.alienvault.com/api/v1/indicators/"+fam+"/"+ind+"/general")
+						fetchJSON("AlienVault OTX", "https://otx.alienvault.com/api/v1/indicators/"+fam+"/"+ind+"/general", otxCompact)
 				case domainRE.MatchString(ind):
-					cmd = fetch("AlienVault OTX", "https://otx.alienvault.com/api/v1/indicators/domain/"+ind+"/general") +
-						fetch("urlscan.io search", "https://urlscan.io/api/v1/search/?size=20&q="+url.QueryEscape("domain:"+ind))
+					// page.domain: plain domain: also matches every scan whose page merely loaded something from it.
+					cmd = fetchJSON("AlienVault OTX", "https://otx.alienvault.com/api/v1/indicators/domain/"+ind+"/general", otxCompact) +
+						fetchJSON("urlscan.io scans of the domain", "https://urlscan.io/api/v1/search/?size=20&q="+url.QueryEscape("page.domain:"+ind), urlscanCompact)
 				default:
 					return Invocation{Target: ind, Refuse: "indicator must be an MD5/SHA-1/SHA-256 hash, an IP or a domain"}
 				}

@@ -41,13 +41,23 @@ type Result struct {
 	DurationS float64
 	TimedOut  bool
 	Truncated bool
+	FullOut   string // when Truncated: file holding the untruncated output ("" if it couldn't be saved)
 	TimeoutS  int
 }
 
 // Render formats the result for model consumption.
 func (r Result) Render() string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "$ %s", strings.Join(r.Argv, " "))
+	// The first line of the command, capped: inline formatter scripts are noise to the
+	// model, and the full argv is in the audit log.
+	cmd, _, cut := strings.Cut(strings.Join(r.Argv, " "), "\n")
+	if len(cmd) > 160 {
+		cmd, cut = strings.ToValidUTF8(cmd[:160], ""), true
+	}
+	if cut {
+		cmd += " …"
+	}
+	fmt.Fprintf(&b, "$ %s", cmd)
 	if r.TimedOut {
 		fmt.Fprintf(&b, "\n[timed out after %ds]", r.TimeoutS)
 	}
@@ -69,11 +79,32 @@ func (r Result) Render() string {
 		b.WriteString("\n[no output — the tool failed silently; check that input files/paths exist, " +
 			"required flags are set, and any needed API key is present in the container env]")
 	}
-	if r.Truncated {
-		fmt.Fprintf(&b, "\n\n[output truncated to %d chars — narrow the query or "+
-			"write results to a file inside the container]", config.C.MaxOutputChars)
+	if r.Truncated && r.FullOut != "" {
+		fmt.Fprintf(&b, "\n\n[output truncated to %d chars. The full output is in %s: read it in parts "+
+			"with read_file and `offset`, or narrow the query]", config.C.MaxOutputChars, r.FullOut)
+	} else if r.Truncated {
+		fmt.Fprintf(&b, "\n\n[output truncated to %d chars — narrow the query]", config.C.MaxOutputChars)
 	}
 	return b.String()
+}
+
+// saveFull writes untruncated output under WorkDir/out so a model can page
+// through it with read_file. Returns the path, or "" if it couldn't be written.
+// shortcut: never pruned, like jobs/ dirs; add a size or age cap if /work fills up.
+func saveFull(tool string, stdout, stderr []byte) string {
+	dir := filepath.Join(config.C.WorkDir, "out")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return ""
+	}
+	p := filepath.Join(dir, fmt.Sprintf("%s-%s.log", tool, shortID()))
+	data := stdout
+	if len(stderr) > 0 {
+		data = append(append(append([]byte{}, stdout...), "\n--- stderr ---\n"...), stderr...)
+	}
+	if os.WriteFile(p, data, 0o644) != nil {
+		return ""
+	}
+	return p
 }
 
 // truncateTailBudget is reserved for the truncation marker so a truncated
@@ -120,6 +151,11 @@ func Run(tool string, argv []string, opts Opts) Result {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(limit)*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, argv[0], argv[1:]...)
+	// Wrappers are often `bash -c 'tool | filter'`: on timeout kill the whole process
+	// group, or the orphaned tool keeps the output pipe open and Wait never returns.
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	cmd.Cancel = func() error { return syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL) }
+	cmd.WaitDelay = 5 * time.Second
 	var outBuf, errBuf bytes.Buffer
 	cmd.Stdout = &outBuf
 	cmd.Stderr = &errBuf
@@ -155,10 +191,14 @@ func Run(tool string, argv []string, opts Opts) Result {
 	if errMsg != "" && out == "" {
 		out = errMsg
 	}
+	var full string
+	if outTrunc || errTrunc {
+		full = saveFull(tool, outBuf.Bytes(), errBuf.Bytes())
+	}
 	return Result{
 		Tool: tool, Argv: argv, ExitCode: exitCode,
 		Stdout: out, Stderr: er, DurationS: duration,
-		TimedOut: timedOut, Truncated: outTrunc || errTrunc, TimeoutS: limit,
+		TimedOut: timedOut, Truncated: outTrunc || errTrunc, FullOut: full, TimeoutS: limit,
 	}
 }
 

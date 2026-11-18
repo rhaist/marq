@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/rhaist/marq/internal/config"
 )
@@ -41,5 +42,47 @@ func TestFailClosedOnAuditError(t *testing.T) {
 	}
 	if _, err := os.Stat(marker); err == nil {
 		t.Fatal("tool executed despite audit failure — fail-closed invariant VIOLATED")
+	}
+}
+
+// TestTruncatedOutputIsSaved: output over the budget is cut for the model but
+// kept whole under WorkDir/out, and Render points at that file; the echoed
+// command is the first line only, capped.
+func TestTruncatedOutputIsSaved(t *testing.T) {
+	origLog, origDir, origMax := config.C.AuditLog, config.C.WorkDir, config.C.MaxOutputChars
+	t.Cleanup(func() { config.C.AuditLog, config.C.WorkDir, config.C.MaxOutputChars = origLog, origDir, origMax })
+	config.C.AuditLog = filepath.Join(t.TempDir(), "audit.log")
+	config.C.WorkDir = t.TempDir()
+	config.C.MaxOutputChars = 1000
+
+	res := Run("big", []string{"/bin/sh", "-c", "seq 1 5000 # " + strings.Repeat("x", 300) + "\necho done"}, Opts{})
+	if !res.Truncated || res.FullOut == "" {
+		t.Fatalf("want a truncated result with a saved file, got truncated=%v file=%q", res.Truncated, res.FullOut)
+	}
+	data, err := os.ReadFile(res.FullOut)
+	if err != nil || !strings.HasSuffix(string(data), "\n5000\ndone\n") {
+		t.Fatalf("saved file must hold the full output (err %v, %d bytes)", err, len(data))
+	}
+	out := res.Render()
+	if !strings.Contains(out, res.FullOut) || !strings.Contains(out, "offset") {
+		t.Errorf("Render must name the saved file and how to page it: %s", out[len(out)-200:])
+	}
+	if first := strings.SplitN(out, "\n", 2)[0]; len(first) > 170 || !strings.HasSuffix(first, " …") || strings.Contains(first, "echo done") {
+		t.Errorf("command echo must be the capped first line: %q", first)
+	}
+}
+
+// TestTimeoutKillsPipeline: a `bash -c 'tool | filter'` wrapper that times out
+// must not hang on the orphaned tool still holding the output pipe.
+func TestTimeoutKillsPipeline(t *testing.T) {
+	origLog, origT := config.C.AuditLog, config.C.CommandTimeout
+	t.Cleanup(func() { config.C.AuditLog, config.C.CommandTimeout = origLog, origT })
+	config.C.AuditLog = filepath.Join(t.TempDir(), "audit.log")
+	config.C.CommandTimeout = 1
+
+	start := time.Now()
+	res := Run("slow", []string{"/bin/sh", "-c", "sleep 30 | cat"}, Opts{})
+	if !res.TimedOut || time.Since(start) > 10*time.Second {
+		t.Fatalf("want a timeout within seconds, got timedOut=%v after %s", res.TimedOut, time.Since(start))
 	}
 }

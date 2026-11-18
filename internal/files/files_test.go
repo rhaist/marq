@@ -1,6 +1,7 @@
 package files
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -39,7 +40,7 @@ func TestSandboxRejectsSymlinkEscape(t *testing.T) {
 	}
 
 	// (1) read through the escaping symlink must be refused
-	out := ReadFile(filepath.Join(root, "escape", "secret"), 0)
+	out := ReadFile(filepath.Join(root, "escape", "secret"), 0, 0)
 	if strings.Contains(out, "TOPSECRET") {
 		t.Fatal("symlink escape read a file outside the sandbox — Resolve() failed")
 	}
@@ -48,7 +49,7 @@ func TestSandboxRejectsSymlinkEscape(t *testing.T) {
 	}
 
 	// (2) `..` traversal must be refused
-	if out := ReadFile(filepath.Join(root, "..", "etc-ish"), 0); !strings.Contains(out, "outside the allowed area") {
+	if out := ReadFile(filepath.Join(root, "..", "etc-ish"), 0, 0); !strings.Contains(out, "outside the allowed area") {
 		// a non-existent target is fine; what matters is it never resolves outside
 		if !strings.Contains(out, "not a file") {
 			t.Errorf("`..` traversal not contained: %q", out)
@@ -59,7 +60,7 @@ func TestSandboxRejectsSymlinkEscape(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(root, "ok.txt"), []byte("HELLO"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if out := ReadFile(filepath.Join(root, "ok.txt"), 0); !strings.Contains(out, "HELLO") {
+	if out := ReadFile(filepath.Join(root, "ok.txt"), 0, 0); !strings.Contains(out, "HELLO") {
 		t.Errorf("legit in-sandbox read failed: %q", out)
 	}
 }
@@ -84,7 +85,7 @@ func TestSandboxAllowsWorkDir(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(work, "findings.md"), []byte("REPORT"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if out := ReadFile(filepath.Join(work, "findings.md"), 0); !strings.Contains(out, "REPORT") {
+	if out := ReadFile(filepath.Join(work, "findings.md"), 0, 0); !strings.Contains(out, "REPORT") {
 		t.Errorf("read inside MARQ_WORK_DIR refused: %q", out)
 	}
 	if err := os.WriteFile(filepath.Join(outside, "secret"), []byte("TOPSECRET"), 0o644); err != nil {
@@ -93,7 +94,7 @@ func TestSandboxAllowsWorkDir(t *testing.T) {
 	if err := os.Symlink(outside, filepath.Join(work, "escape")); err != nil {
 		t.Fatal(err)
 	}
-	if out := ReadFile(filepath.Join(work, "escape", "secret"), 0); strings.Contains(out, "TOPSECRET") {
+	if out := ReadFile(filepath.Join(work, "escape", "secret"), 0, 0); strings.Contains(out, "TOPSECRET") {
 		t.Fatal("symlink escape out of MARQ_WORK_DIR read a file outside the sandbox")
 	}
 	// a WorkDir of / or one containing $HOME must not widen the sandbox
@@ -104,7 +105,7 @@ func TestSandboxAllowsWorkDir(t *testing.T) {
 	}
 	for _, wd := range []string{"/", home, filepath.Dir(home)} {
 		config.C.WorkDir = wd
-		if out := ReadFile(filepath.Join(home, "secret"), 0); strings.Contains(out, "HOMESECRET") {
+		if out := ReadFile(filepath.Join(home, "secret"), 0, 0); strings.Contains(out, "HOMESECRET") {
 			t.Errorf("MARQ_WORK_DIR=%s exposed $HOME", wd)
 		}
 	}
@@ -136,5 +137,56 @@ func TestSandboxRefusesAuditLog(t *testing.T) {
 	}
 	if _, err := Resolve(filepath.Join(work, "findings.md")); err != nil {
 		t.Errorf("ordinary work file refused: %v", err)
+	}
+}
+
+// TestReadFileOffset: a file over the budget is read in parts, and the cut says
+// where to continue; MARQ_WORK_DIR equal to a fixed root isn't listed twice.
+func TestReadFileOffset(t *testing.T) {
+	config.C.AuditLog = filepath.Join(t.TempDir(), "audit.log")
+	root, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	orig, origDir, origMax := allowedRoots, config.C.WorkDir, config.C.MaxOutputChars
+	t.Cleanup(func() { allowedRoots, config.C.WorkDir, config.C.MaxOutputChars = orig, origDir, origMax })
+	allowedRoots, config.C.WorkDir, config.C.MaxOutputChars = []string{root}, root, 10
+
+	if n := len(roots()); n != 1 {
+		t.Errorf("roots() = %q, want the work dir once", roots())
+	}
+	p := filepath.Join(root, "big.txt")
+	if err := os.WriteFile(p, []byte("0123456789abcdefghijKLMN"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if out := ReadFile(p, 0, 0); !strings.Contains(out, "0123456789") || !strings.Contains(out, "offset=10") || strings.Contains(out, "abc") {
+		t.Errorf("first part: %q", out)
+	}
+	if out := ReadFile(p, 0, 20); !strings.Contains(out, "KLMN") || strings.Contains(out, "truncated") {
+		t.Errorf("last part: %q", out)
+	}
+	if out := ReadFile(p, 0, 99); !strings.Contains(out, "past the end") {
+		t.Errorf("offset past the end: %q", out)
+	}
+	// "ééééé…" in 10-byte parts: 2-byte runes must never straddle a cut.
+	u := filepath.Join(root, "utf8.txt")
+	if err := os.WriteFile(u, []byte("aéééééééééé"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	var got strings.Builder
+	for off, n := 0, 0; n < 5; n++ {
+		out := ReadFile(u, 0, off)
+		body := out[strings.Index(out, "\n")+1:]
+		body = body[:strings.Index(body, "\n[untrusted-data")]
+		if i := strings.Index(body, "\n…[truncated: continue with offset="); i >= 0 {
+			fmt.Sscanf(body[i:], "\n…[truncated: continue with offset=%d", &off)
+			got.WriteString(body[:i])
+			continue
+		}
+		got.WriteString(body)
+		break
+	}
+	if got.String() != "aéééééééééé" {
+		t.Errorf("paged read = %q, want the file back intact", got.String())
 	}
 }

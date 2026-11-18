@@ -18,13 +18,14 @@ func fileTools() []Tool {
 		{
 			Name: "read_file",
 			Desc: "Read a text file from the working area (/work or /tmp). Returns the contents (truncated " +
-				"to the server output budget, or to `max_bytes` if smaller). Use it to retrieve results " +
-				"tools wrote to disk.",
+				"to the server output budget, or to `max_bytes` if smaller); `offset` skips that many bytes, " +
+				"so a long file (e.g. a truncated tool output saved under /work/out) is read in parts.",
 			Params: []Param{
 				{Name: "path", Type: StringParam, Desc: "file inside /work or /tmp", Required: true},
 				{Name: "max_bytes", Type: IntParam, Desc: "max bytes to read (0 = budget)", Default: 0},
+				{Name: "offset", Type: IntParam, Desc: "byte offset to start reading at", Default: 0},
 			},
-			Handler: func(a Args) string { return files.ReadFile(a.S("path"), a.I("max_bytes")) },
+			Handler: func(a Args) string { return files.ReadFile(a.S("path"), a.I("max_bytes"), a.I("offset")) },
 		},
 		{
 			Name: "write_file",

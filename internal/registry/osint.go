@@ -69,8 +69,9 @@ func osint() []Tool {
 				if sources == "" {
 					sources = harvesterKeyless
 				}
-				argv := []string{"theHarvester", "-d", a.S("domain"), "-b", sources, "-l", strconv.Itoa(a.I("limit"))}
-				return Invocation{Argv: argv, Target: a.S("domain")}
+				cmd := "set -o pipefail; " + shellword.Join([]string{"theHarvester", "-d", a.S("domain"), "-b", sources, "-l", strconv.Itoa(a.I("limit"))}) +
+					" | " + fromLine("Target:", `Read (proxies|api-keys)\.yaml`)
+				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("domain")}
 			},
 		},
 		{
@@ -135,7 +136,7 @@ func osint() []Tool {
 			Desc: "Find leaked secrets in PUBLIC code with trufflehog. `source` is 'git <https-url>', " +
 				"'github --org=<org>' or 'github --repo=<url>', on github.com, gitlab.com, bitbucket.org " +
 				"or codeberg.org only (GitLab repos via 'git <url>') — no self-hosted servers, no extra " +
-				"flags. Provide GITHUB_TOKEN for GitHub org scans (rate limits). Secrets are reported " +
+				"flags. Provide GITHUB_TOKEN for GitHub org scans (rate limits). Secrets are reported redacted and " +
 				"unverified — marq never tests found credentials against the service they belong to.",
 			Params: []Param{
 				{Name: "source", Type: StringParam, Desc: "subcommand + target, e.g. 'git https://github.com/org/repo'", Required: true},
@@ -145,9 +146,11 @@ func osint() []Tool {
 				if msg := publicCodeSource(src); msg != "" {
 					return Invocation{Target: a.S("source"), Refuse: msg}
 				}
-				argv := append([]string{"trufflehog"}, src...)
-				argv = append(argv, "--no-verification", "--json")
-				return Invocation{Argv: argv, Target: a.S("source")}
+				// Only the redacted form reaches the model: the raw secret would otherwise land
+				// in the model provider's logs and the transcript, and triage doesn't need it.
+				argv := append(append([]string{"trufflehog"}, src...), "--no-verification", "--no-update", "--json")
+				cmd := "set -o pipefail; " + shellword.Join(argv) + " 2>&1 | python3 -I -c " + shellword.Quote(truffleCompact)
+				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("source")}
 			},
 		},
 		{
@@ -181,3 +184,32 @@ if "error" in d: sys.exit("shodan: "+d["error"])
 print("total:", d.get("total"))
 for m in d.get("matches", [])[:int(sys.argv[1])]:
     print(m.get("ip_str"), m.get("port"), m.get("org") or "", ",".join(m.get("hostnames") or []), m.get("product") or "", sep="\t")`
+
+// truffleCompact reads trufflehog's --json stream (stdout and stderr merged)
+// and prints one line per finding with the redacted secret only, plus the scan
+// summary and any warning or error; info-level progress logs are dropped.
+const truffleCompact = `import json,sys
+n=0
+for line in sys.stdin:
+    line=line.strip()
+    if not line: continue
+    try: r=json.loads(line)
+    except ValueError:
+        print(line[:300]); continue
+    if not isinstance(r, dict): continue
+    if "DetectorName" in r:
+        n+=1
+        sm=r.get("SourceMetadata") if isinstance(r.get("SourceMetadata"), dict) else {}
+        data=sm.get("Data") if isinstance(sm.get("Data"), dict) else {}
+        m=next((v for v in data.values() if isinstance(v, dict)), {})
+        where=str(m.get("file") or "-") + (":%s" % m["line"] if m.get("line") else "")
+        extra=r.get("ExtraData") if isinstance(r.get("ExtraData"), dict) else {}
+        red, raw = str(r.get("Redacted") or ""), str(r.get("Raw") or "")
+        if not red or red == raw: red = (raw[:4] if len(raw) >= 16 else "") + "...(redacted, %d chars)" % len(raw)
+        print(r.get("DetectorName"), "|", m.get("repository") or m.get("link") or "-", "|", where, "| commit", str(m.get("commit") or "-")[:12], "|", red.replace("\n", " ")[:80], "| canary token" if str(extra.get("is_canary")) == "true" else "")
+    elif str(r.get("level", "")).startswith("info"):
+        if r.get("msg") == "finished scanning":
+            print("(scan finished: %s unverified results, %s chunks)" % (r.get("unverified_secrets"), r.get("chunks")))
+    else:
+        print("trufflehog %s: %s %s" % (r.get("level"), r.get("msg"), r.get("error") or ""))
+if n == 0: print("(no secrets found)")`

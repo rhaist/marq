@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/rhaist/marq/internal/audit"
 	"github.com/rhaist/marq/internal/config"
@@ -38,6 +39,9 @@ func roots() []string {
 	}
 	w = realpath(w)
 	if home, err := os.UserHomeDir(); w == "/" || (err == nil && (realpath(home) == w || strings.HasPrefix(realpath(home), w+string(os.PathSeparator)))) {
+		return rs
+	}
+	if slices.Contains(rs, w) { // MARQ_WORK_DIR=/work (the image default) is already a root
 		return rs
 	}
 	return append(rs, w)
@@ -143,7 +147,7 @@ func ListDir(path string) string {
 
 // ReadFile reads a text file from the working area, truncated to the output
 // budget (or maxBytes if smaller).
-func ReadFile(path string, maxBytes int) string {
+func ReadFile(path string, maxBytes, offset int) string {
 	return audited("read_file", path, func() (string, error) {
 		real, err := Resolve(path)
 		if err != nil {
@@ -164,9 +168,20 @@ func ReadFile(path string, maxBytes int) string {
 		if err != nil {
 			return "", err
 		}
+		if offset < 0 {
+			offset = 0
+		}
+		if offset >= len(data) && len(data) > 0 {
+			return fmt.Sprintf("offset %d is past the end of %s (%d bytes)", offset, path, len(data)), nil
+		}
+		data = data[min(offset, len(data)):]
 		s := string(data)
-		if len(s) > budget {
-			s = s[:budget] + "\n…[truncated — narrow with max_bytes or read in parts]…"
+		if len(data) > budget {
+			cut := budget
+			for cut > 1 && !utf8.RuneStart(data[cut]) { // never split a character across two parts
+				cut--
+			}
+			s = string(data[:cut]) + fmt.Sprintf("\n…[truncated: continue with offset=%d]…", offset+cut)
 		}
 		return untrusted.Wrap("file "+path, s), nil // files hold tool output: same fence as runner
 	})
