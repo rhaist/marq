@@ -1,15 +1,18 @@
 // Package jobs surfaces background-job status. Long lookups launched via
 // runner.RunBackground stream to /work/jobs/<id>/; list_jobs/job_status read the
-// `status` file (written last by the background wrapper) and tail stdout so the
-// model gets a clean running|done answer.
+// `status` file (written last by the background wrapper) and the pid file, and
+// tail stdout, so the model gets a clean running|done|stopped answer.
 package jobs
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+	"syscall"
 
 	"github.com/rhaist/marq/internal/config"
 	"github.com/rhaist/marq/internal/untrusted"
@@ -17,16 +20,40 @@ import (
 
 func jobsRoot() string { return filepath.Join(config.C.WorkDir, "jobs") }
 
-// statusOf reads a job dir's status file. ok=false means still running.
-func statusOf(dir string) (exitCode string, done bool) {
-	data, err := os.ReadFile(filepath.Join(dir, "status"))
-	if err != nil {
-		return "", false
+// state reads a job dir: done (the wrapper wrote status), running, or a job
+// that ended without a status. The pid file holds "<host> <pid>"; in Docker
+// the host is the container, whose processes all stop with it.
+func state(dir string) string {
+	if data, err := os.ReadFile(filepath.Join(dir, "status")); err == nil {
+		return "done (" + strings.TrimSpace(string(data)) + ")"
 	}
-	// status file contains: exit=<code>
-	s := strings.TrimSpace(string(data))
-	s = strings.TrimPrefix(s, "exit=")
-	return s, true
+	var host string
+	var pid int
+	data, err := os.ReadFile(filepath.Join(dir, "pid"))
+	if err != nil {
+		return "running" // pre-pid job dirs, or the launch is still writing it
+	}
+	if _, err := fmt.Sscanf(string(data), "%s %d", &host, &pid); err != nil || pid <= 0 {
+		return "running"
+	}
+	if me, _ := os.Hostname(); host != me {
+		return "unknown (started in container " + host + "; it stopped if that container did)"
+	}
+	if err := syscall.Kill(pid, 0); (err == nil || errors.Is(err, syscall.EPERM)) && !zombie(pid) {
+		return "running"
+	}
+	return "stopped without an exit status (killed, or its container stopped); results may be partial"
+}
+
+// zombie reports a process that has exited but was never reaped (it still
+// answers kill -0), as happens under a PID 1 that doesn't reap, like `sleep`.
+func zombie(pid int) bool {
+	b, err := os.ReadFile(fmt.Sprintf("/proc/%d/stat", pid))
+	if err != nil {
+		return false // no /proc (macOS): trust kill -0
+	}
+	i := bytes.LastIndexByte(b, ')') // comm may contain spaces; the state follows ") "
+	return i >= 0 && i+2 < len(b) && b[i+2] == 'Z'
 }
 
 // List returns one line per background job with its running/done state.
@@ -50,12 +77,7 @@ func List() string {
 	sort.Strings(names)
 	var rows []string
 	for _, name := range names {
-		code, done := statusOf(filepath.Join(jobsRoot(), name))
-		if done {
-			rows = append(rows, fmt.Sprintf("done    (exit=%s)  %s", code, name))
-		} else {
-			rows = append(rows, fmt.Sprintf("running           %s", name))
-		}
+		rows = append(rows, fmt.Sprintf("%-18s %s", name, state(filepath.Join(jobsRoot(), name))))
 	}
 	return strings.Join(rows, "\n")
 }
@@ -67,13 +89,10 @@ func Status(job string) string {
 	if dir == "" {
 		return fmt.Sprintf("error: job %q not found under %s", job, jobsRoot())
 	}
-	code, done := statusOf(dir)
-	state := "running"
-	if done {
-		state = fmt.Sprintf("done (exit=%s)", code)
-	}
+	st := state(dir)
+	done := strings.HasPrefix(st, "done")
 	var b strings.Builder
-	fmt.Fprintf(&b, "job    : %s\nstatus : %s\n", filepath.Base(dir), state)
+	fmt.Fprintf(&b, "job    : %s\nstatus : %s\n", filepath.Base(dir), st)
 	fmt.Fprintf(&b, "results: %s/stdout.log\n", dir)
 	src := "job " + filepath.Base(dir)
 	if tail := tailFile(filepath.Join(dir, "stdout.log"), 40); tail != "" {

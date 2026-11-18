@@ -80,10 +80,10 @@ func (r Result) Render() string {
 			"required flags are set, and any needed API key is present in the container env]")
 	}
 	if r.Truncated && r.FullOut != "" {
-		fmt.Fprintf(&b, "\n\n[output truncated to %d chars. The full output is in %s: read it in parts "+
-			"with read_file and `offset`, or narrow the query]", config.C.MaxOutputChars, r.FullOut)
+		fmt.Fprintf(&b, "\n\n[output truncated: stdout and stderr are capped at %d chars each. The full output "+
+			"is in %s: read it in parts with read_file and `offset`, or narrow the query]", config.C.MaxOutputChars/2, r.FullOut)
 	} else if r.Truncated {
-		fmt.Fprintf(&b, "\n\n[output truncated to %d chars — narrow the query]", config.C.MaxOutputChars)
+		fmt.Fprintf(&b, "\n\n[output truncated: stdout and stderr are capped at %d chars each — narrow the query]", config.C.MaxOutputChars/2)
 	}
 	return b.String()
 }
@@ -238,6 +238,10 @@ func RunBackground(tool string, argv []string, target string) (jobDir string, er
 		audit.LogEnd(id, tool+":bg", nil, 0, false, err.Error())
 		return "", fmt.Sprintf("failed to launch: %v", err)
 	}
+	// host+pid let job_status tell a job that died without writing status (its
+	// container stopped, it was killed) from one still running.
+	host, _ := os.Hostname()
+	_ = os.WriteFile(filepath.Join(jobDir, "pid"), fmt.Appendf(nil, "%s %d\n", host, c.Process.Pid), 0o644)
 	go func() { _ = c.Wait() }() // reap the bash wrapper without blocking
 	audit.LogEnd(id, tool+":bg", nil, 0, false, "")
 	return jobDir, ""

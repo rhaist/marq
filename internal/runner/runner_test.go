@@ -64,7 +64,7 @@ func TestTruncatedOutputIsSaved(t *testing.T) {
 		t.Fatalf("saved file must hold the full output (err %v, %d bytes)", err, len(data))
 	}
 	out := res.Render()
-	if !strings.Contains(out, res.FullOut) || !strings.Contains(out, "offset") {
+	if !strings.Contains(out, res.FullOut) || !strings.Contains(out, "offset") || !strings.Contains(out, "capped at 500 chars each") {
 		t.Errorf("Render must name the saved file and how to page it: %s", out[len(out)-200:])
 	}
 	if first := strings.SplitN(out, "\n", 2)[0]; len(first) > 170 || !strings.HasSuffix(first, " …") || strings.Contains(first, "echo done") {

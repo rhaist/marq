@@ -37,7 +37,11 @@ up)
   if [ -n "${MARQ_OPERATOR:-}" ]; then
     envargs+=(-e MARQ_OPERATOR)
   elif ! { [ -f "$CFG" ] && grep -q '^MARQ_OPERATOR=' "$CFG"; }; then envargs+=(-e "MARQ_OPERATOR=${USER:-marq}"); fi
-  "$ENGINE" run -d --name "$C" \
+  # Same hardening as the MCP entries; --init reaps finished background jobs; the
+  # audit log lives in a volume so `marq up`/`down` (which remove the container) keep it.
+  "$ENGINE" run -d --name "$C" --init \
+    --cap-drop ALL --security-opt no-new-privileges:true \
+    -v marq-audit:/var/log/marq \
     -v "$(cd "$work" && pwd):/work" \
     "${envargs[@]}" \
     "$IMG" sleep infinity >/dev/null

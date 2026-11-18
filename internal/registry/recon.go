@@ -83,7 +83,9 @@ func recon() []Tool {
 						` | python3 -I -c 'import json,sys
 try: ps=[p["prefix"] for p in json.load(sys.stdin)["data"]["prefixes"]]
 except Exception as e: sys.exit("RIPEstat lookup failed: %r" % e)
-print("\n".join(ps) or "(no announced prefixes)")'`
+v4=[p for p in ps if ":" not in p]; v6=[p for p in ps if ":" in p]
+print("%d prefixes (%d IPv4, %d IPv6)%s" % (len(ps), len(v4), len(v6), ", first 300 shown, IPv4 first" if len(ps) > 300 else ""))
+print("\n".join((v4 + v6)[:300]) or "(no announced prefixes)")'`
 				} else if net.ParseIP(t) != nil {
 					cmd = cymru(t)
 				} else if strings.Contains(t, ".") && !strings.ContainsAny(t, " /") && !strings.ContainsAny(t[:1], "-+@") { // no dig options
