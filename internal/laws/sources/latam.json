@@ -100,5 +100,46 @@
     ],
     "start": "Se expide la Ley Federal de Protección de Datos Personales en Posesión de los Particulares",
     "note": "Published in the DOF on 20 Mar 2025 as Article Three of a decree that also enacts two other laws; only the LFPDPPP part is kept. The decree's own transitory articles follow the last article."
+  },
+  {
+    "id": "br-anpd-res-15",
+    "title": "ANPD Resolution CD/ANPD 15/2024 - security incident reporting regulation",
+    "native_title": "Resolução CD/ANPD nº 15, de 24 de abril de 2024 (Regulamento de Comunicação de Incidente de Segurança)",
+    "jurisdiction": "BR",
+    "lang": "pt",
+    "kind": "official",
+    "url": "https://bibliotecadigital.mj.gov.br/bitstream/1/12879/2/RES_ANPD_2024_15.html",
+    "format": "html",
+    "version_date": "2024-04-24",
+    "terms": [
+      "Resolução 15/2024",
+      "comunicação de incidente de segurança",
+      "incidente de segurança",
+      "três dias úteis",
+      "LGPD art. 48",
+      "ANPD",
+      "security incident reporting"
+    ],
+    "note": "Copy of the SEI text from the Ministry of Justice digital library (the in.gov.br Diário Oficial page refuses non-browser clients). Articles are those of the Regulamento annexed to the resolution (arts. 1-24); the resolution's own three articles are not separate entries."
+  },
+  {
+    "id": "pe-ds-016-2024-jus",
+    "title": "Peru Supreme Decree 016-2024-JUS - Regulation of Law 29733 (personal data protection)",
+    "native_title": "Decreto Supremo N° 016-2024-JUS que aprueba el Reglamento de la Ley N° 29733, Ley de Protección de Datos Personales",
+    "jurisdiction": "PE",
+    "lang": "es",
+    "kind": "official",
+    "url": "https://cdn.www.gob.pe/uploads/document/file/7756037/6554453-reglamento-de-la-ley-n-29733.pdf?v=1743779969",
+    "format": "pdf",
+    "version_date": "2024-11-30",
+    "terms": [
+      "DS 016-2024-JUS",
+      "Reglamento de la Ley 29733",
+      "Ley 29733",
+      "ANPD",
+      "protección de datos personales",
+      "notificación de incidentes"
+    ],
+    "note": "El Peruano special edition (30 Nov 2024) served by the ANPD on gob.pe; the decree's own articles precede the Reglamento. Two-column PDF: arts. 18, 33, 61, 67, 82-84, 110 and 119 are lost to reading order, and text near them may be misordered; check the gazette for those."
   }
 ]

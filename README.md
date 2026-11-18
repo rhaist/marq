@@ -143,7 +143,7 @@ API keys are listed in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-source
   purple-team, resilience, human factors, DevSecOps/privacy. Run them standalone with `MARQ_SKILLS_ONLY=1`, with no tool
   suite and no OSINT binaries.
 - **Law texts:** `law_lookup` quotes articles from a local corpus of official
-  texts (45 laws across the EU, UK, US, APAC, the Middle East and Latin America,
+  texts (50 laws across the EU, UK, US, APAC, the Middle East and Latin America,
   original language plus government English where published). `marq laws sync`
   fetches it from the official sites; nothing is shipped or committed.
 - **Audit:** every external-tool call funnels through one choke

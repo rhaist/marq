@@ -107,7 +107,13 @@ func validate(all []Source) error {
 		}
 	}
 	for _, s := range all {
-		if s.Kind == "reference" {
+		switch {
+		case s.Kind != "reference":
+		case s.Translates == "": // the original can't be fetched usefully (scanned, garbled)
+			if s.Note == "" {
+				bad(s, "a reference text without translates needs a note saying why the original is missing")
+			}
+		default:
 			if o, ok := byID[s.Translates]; !ok || o.Kind != "official" {
 				bad(s, "translates must name an official source")
 			}

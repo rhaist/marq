@@ -124,7 +124,12 @@ func chain(c []cut, gapLimit int) []cut {
 			if d < 0 || d > gapLimit || (d == 0 && subRank(c[i].num) <= subRank(c[j].num)) {
 				continue
 			}
-			if l, g := length[j]+1, gap[j]+d; l > length[i] || (l == length[i] && g <= gap[i]) {
+			l, g := length[j]+1, gap[j]+d
+			// on a tie, the later and (for control ids) the deeper candidate wins: a PDF
+			// column can print control 1-4-1 after its subcontrol 1-4-1-1, and the
+			// subcontrol is the one with text
+			if l > length[i] || (l == length[i] && (g < gap[i] || g == gap[i] &&
+				(prev[i] < 0 || strings.Count(c[j].num, "-") >= strings.Count(c[prev[i]].num, "-")))) {
 				length[i], gap[i], prev[i] = l, g, j
 			}
 		}
@@ -172,6 +177,23 @@ func subRank(num string) int {
 // seqValue is the number headings count up by: the leading integer ("48-3" ->
 // 48), or for dotted CFR-style sections the last part ("314.4" -> 4).
 func seqValue(num string) (int, bool) {
+	// control ids such as Saudi NCA "1-2-1" or "4-1-3-2" (domain-subdomain-control-
+	// subcontrol): base 100 per level, so the whole id rises in document order.
+	// A domain step is a big jump, so such sources need a large max_gap.
+	if parts := strings.Split(num, "-"); len(parts) >= 3 && len(parts) <= 4 {
+		v := 0
+		for i := range 4 {
+			n := 0
+			if i < len(parts) {
+				var err error
+				if n, err = strconv.Atoi(parts[i]); err != nil || n > 99 {
+					return 0, false
+				}
+			}
+			v = v*100 + n
+		}
+		return v, true
+	}
 	if i := strings.LastIndex(num, "."); i >= 0 {
 		return leadInt(num[i+1:])
 	}

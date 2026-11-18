@@ -121,6 +121,10 @@ func fetch(ctx context.Context, src Source, client *http.Client) (string, error)
 	return text, nil
 }
 
+// ligatures undoes the typographic ligatures PDFs keep, so "notiﬁcación" is
+// found by a search for "notificación".
+var ligatures = strings.NewReplacer("ﬀ", "ff", "ﬁ", "fi", "ﬂ", "fl", "ﬃ", "ffi", "ﬄ", "ffl", "ﬅ", "st", "ﬆ", "st")
+
 // pdfToText converts a PDF gazette with poppler's pdftotext, through the audited
 // runner like every other external binary. pdftotext writes to a file because
 // the runner caps stdout at the model's output budget, and a law is longer.
@@ -146,5 +150,5 @@ func pdfToText(body []byte, url string) (string, error) {
 	if !utf8.Valid(b) {
 		return "", fmt.Errorf("pdftotext produced invalid UTF-8")
 	}
-	return string(b), nil
+	return ligatures.Replace(string(b)), nil
 }

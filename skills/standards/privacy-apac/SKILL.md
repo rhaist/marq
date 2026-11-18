@@ -78,7 +78,7 @@ There is no APAC GDPR. Each country has its own law, regulator, transfer rule an
 
 ## Law texts
 
-Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `cn-pipl`, `jp-appi 26`, `tw-pdpa`, `tw-pdpa-en`, `vn-decree-13-2023 23`, `in-dpdp-act-2023 8`.
+Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `cn-pipl`, `jp-appi 26`, `tw-pdpa`, `tw-pdpa-en`, `vn-decree-13-2023 23`, `in-dpdp-act-2023 8`, `th-pdpa-2562 37`, `th-pdpa-2562-en 37`.
 
 ## Pairs with
 

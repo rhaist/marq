@@ -88,7 +88,7 @@ National rules stand on their own terms, and no country was found to mandate ISO
 
 ## Law texts
 
-Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `br-anpd-res-19`, `cl-ley-21663 9`, `cl-ley-19628`, `co-ley-1581`, `ar-ley-25326`, `mx-lfpdppp 19`.
+Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `br-anpd-res-19`, `br-anpd-res-15 6`, `pe-ds-016-2024-jus 34`, `cl-ley-21663 9`, `cl-ley-19628`, `co-ley-1581`, `ar-ley-25326`, `mx-lfpdppp 19`.
 
 ## Pairs with
 

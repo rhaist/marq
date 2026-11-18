@@ -87,6 +87,15 @@ func TestSplit(t *testing.T) {
 	if len(tw) != 4 || tw[2].Num != "1-2" {
 		t.Errorf("sub-articles 1-1, 1-2 must each be kept: %+v", tw)
 	}
+	nca := Split("Contents\n1-1-1\n1-2-1\nControls\n1-1-1\nPolicies\n1-1-2\nReview\n1-2-1\nRoles:\n1-2-1-1 RACI\n1-2-1\n1-2-1-2 Job duties\n2-1-1-1 Inventory\n2-1-1\n2-1-1-2 Labels",
+		"en", `(?m)^[ \t]*(\d-\d+-\d+(?:-\d+)?)\b`, 1000000)
+	var ncaNums []string
+	for _, a := range nca {
+		ncaNums = append(ncaNums, a.Num)
+	}
+	if got := strings.Join(ncaNums, ","); got != "preamble,1-1-1,1-1-2,1-2-1,1-2-1-1,1-2-1-2,2-1-1-1,2-1-1-2" {
+		t.Errorf("control ids (a control printed after its first subcontrol is dropped, not the subcontrol) = %s", got)
+	}
 	gappy := "Article 1\nA\nArticle 2\nB\nArticle 37\nC\nArticle 38\nD"
 	if got := Split(gappy, "en", "", 0); len(got) != 3 || got[0].Num != "preamble" || got[1].Num != "37" {
 		t.Errorf("default gap limit keeps one run (the rest becomes preamble), got %+v", got)
@@ -285,9 +294,10 @@ func TestManifest(t *testing.T) {
 	}
 	bad := fstest.MapFS{"s/x.json": {Data: []byte(`[
 	 {"id":"xx-a","title":"A","jurisdiction":"XX","lang":"en","kind":"official","url":"http://plain","format":"html","version_date":"2026-01-01"},
-	 {"id":"xx-a","title":"B","jurisdiction":"XX","lang":"en","kind":"reference","translates":"xx-missing","url":"https://ok","format":"docx","version_date":"soon"}]`)}}
+	 {"id":"xx-a","title":"B","jurisdiction":"XX","lang":"en","kind":"reference","translates":"xx-missing","url":"https://ok","format":"docx","version_date":"soon"},
+	 {"id":"xx-b","title":"C","jurisdiction":"XX","lang":"en","kind":"reference","url":"https://ok","format":"pdf","version_date":"2026-01-01"}]`)}}
 	_, err := LoadManifest(bad, "s")
-	for _, want := range []string{"url must be https", "duplicate id", "format must be", "version_date", "translates must name"} {
+	for _, want := range []string{"url must be https", "duplicate id", "format must be", "version_date", "translates must name", "xx-b: a reference text without translates needs a note"} {
 		if err == nil || !strings.Contains(err.Error(), want) {
 			t.Errorf("manifest validation missed %q: %v", want, err)
 		}
@@ -384,5 +394,15 @@ func TestSyncPDF(t *testing.T) {
 	log, _ := os.ReadFile(config.C.AuditLog)
 	if !strings.Contains(string(log), "laws_pdftotext") {
 		t.Error("the pdftotext run must be audit-logged like any external binary")
+	}
+}
+
+// TestPDFTextFolds: PDF text artefacts must not hide a match from search.
+func TestPDFTextFolds(t *testing.T) {
+	if norm("อำนาจ") != norm("อานาจ") {
+		t.Error("Thai sara am must fold to sara aa (gazette PDFs drop the nikhahit)")
+	}
+	if got := ligatures.Replace("Notiﬁcación ﬂujo"); got != "Notificación flujo" {
+		t.Errorf("ligatures = %q", got)
 	}
 }

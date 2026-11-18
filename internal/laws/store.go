@@ -105,8 +105,11 @@ func (s *Store) put(src Source, arts []Article, fetched time.Time) error {
 }
 
 // norm is applied to both indexed text and queries: lower-case, Arabic vowel
-// marks and letter variants unified.
-func norm(s string) string { return strings.ToLower(normArabic(strings.TrimSpace(s))) }
+// marks and letter variants unified, and Thai sara am folded to sara aa (Thai
+// gazette PDFs lose the nikhahit, so อำนาจ comes out as อานาจ).
+func norm(s string) string {
+	return strings.ReplaceAll(strings.ToLower(normArabic(strings.TrimSpace(s))), "ำ", "า")
+}
 
 // Law is one corpus entry's metadata.
 type Law struct {

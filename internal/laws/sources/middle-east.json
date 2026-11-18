@@ -55,5 +55,26 @@
       "Siber Güvenlik Başkanlığı",
       "7590"
     ]
+  },
+  {
+    "id": "sa-nca-otcc-2022-en",
+    "title": "NCA Operational Technology Cybersecurity Controls (OTCC-1:2022)",
+    "native_title": "ضوابط الأمن السيبراني للأنظمة التشغيلية",
+    "jurisdiction": "SA",
+    "lang": "en",
+    "kind": "reference",
+    "url": "https://nca.gov.sa/otcc_en.pdf",
+    "format": "pdf",
+    "version_date": "2022-06-02",
+    "terms": [
+      "OTCC",
+      "OTCC-1:2022",
+      "NCA",
+      "National Cybersecurity Authority",
+      "Saudi OT controls"
+    ],
+    "split": "(?m)^[ \\t]*(\\d-\\d+-\\d+(?:-\\d+)?)\\b",
+    "max_gap": 1000000,
+    "note": "NCA's English version; the Arabic text is binding but its PDF extracts in visual order (garbled), so it is not in the corpus. Entries are controls (1-2-1) and subcontrols (1-2-1-1), not articles; about 15 of the 169, where the PDF's columns put a control id after its first subcontrol, are merged into the neighbouring entry (search finds their text). version_date is NCA's publication date on its OTCC page (the PDF states only 2022). ECC-2:2024 is missing: its PDF has no extractable text."
   }
 ]

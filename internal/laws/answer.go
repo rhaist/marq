@@ -62,7 +62,10 @@ func header(st *Store, l Law) string {
 		fmt.Fprintf(&b, " (%s)", l.NativeTitle)
 	}
 	fmt.Fprintf(&b, "\njurisdiction %s, language %s, %s text", l.Jurisdiction, l.Lang, l.Kind)
-	if l.Kind == "reference" {
+	switch {
+	case l.Kind == "reference" && l.Translates == "":
+		b.WriteString(" (translation; the official original, not in the corpus, governs)")
+	case l.Kind == "reference":
 		fmt.Fprintf(&b, " (translation of %s; the official text governs)", l.Translates)
 	}
 	fmt.Fprintf(&b, "\nversion %s, fetched %s from %s\n", l.VersionDate, l.FetchedAt, l.URL)

@@ -95,7 +95,7 @@ National frameworks stand on their own terms: ECC-2 is the baseline for in-scope
 
 ## Law texts
 
-Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `tr-kvkk 12`, `tr-kvkk-en`, `tr-cybersecurity 7`.
+Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `tr-kvkk 12`, `tr-kvkk-en`, `tr-cybersecurity 7`, `sa-nca-otcc-2022-en 4-1-1` (OTCC by control id; English, the Arabic is binding).
 
 ## Pairs with
 

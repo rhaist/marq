@@ -84,5 +84,46 @@
     ],
     "split": "(?m)^[ \\t]*(\\d+)\\.[ \\t]*$",
     "note": "Bilingual gazette: the Malay text comes first and lands in the preamble entry; numbered entries are the English text. Both languages are official."
+  },
+  {
+    "id": "th-pdpa-2562",
+    "title": "Thailand Personal Data Protection Act B.E. 2562 (2019)",
+    "native_title": "พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. ๒๕๖๒",
+    "jurisdiction": "TH",
+    "lang": "th",
+    "kind": "official",
+    "url": "https://www.ocs.go.th/searchlaw/power_link/download/eyJ1dWlkIjoiMTc5NmU0ZjQtZTgxNi00ODgxLTg1ZWEtYTU4OWI2NjRjZTdhIiwiZmlsZW5hbWUiOiLguIQwMTM2IOC4nuC4o-C4sOC4o-C4suC4iuC4muC4seC4jeC4jeC4seC4leC4tCAyNTYyLTY54LiBLTUyLlBERiJ9.jZ8Egjp9J2zvIyWGwH-Ybn87GnkibJawbe4dDpKCfls",
+    "format": "pdf",
+    "version_date": "2019-05-27",
+    "terms": [
+      "PDPA",
+      "พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล",
+      "คุ้มครองข้อมูลส่วนบุคคล",
+      "PDPC",
+      "Thailand PDPA",
+      "เหตุการณ์ละเมิดข้อมูลส่วนบุคคล"
+    ],
+    "note": "Royal Gazette text (Vol. 136, Part 69 Kor, 27 May 2019) as served by the Office of the Council of State; amendments, if any, are not reflected. The PDF text layer renders sara am as plain sara aa (e.g. อานาจ for อำนาจ; search folds the two, so either spelling matches) and has stray spacing."
+  },
+  {
+    "id": "th-pdpa-2562-en",
+    "title": "Thailand Personal Data Protection Act B.E. 2562 (2019) - English translation",
+    "native_title": "Personal Data Protection Act, B.E. 2562 (2019) (Unofficial Translation)",
+    "jurisdiction": "TH",
+    "lang": "en",
+    "kind": "reference",
+    "translates": "th-pdpa-2562",
+    "url": "https://mdes.go.th/uploads/tinymce/source/%E0%B8%AA%E0%B8%84%E0%B8%AA/Personal%20Data%20Protection%20Act%202019.pdf",
+    "format": "pdf",
+    "version_date": "2019-05-27",
+    "terms": [
+      "PDPA",
+      "Thailand PDPA",
+      "Personal Data Protection Act",
+      "personal data breach 72 hours",
+      "PDPC"
+    ],
+    "note": "Unofficial translation published by the Ministry of Digital Economy and Society; the Thai gazette text is authoritative.",
+    "split": "(?m)^[ \\t-]*Section[ \\t]+(\\d+)\\b"
   }
 ]
