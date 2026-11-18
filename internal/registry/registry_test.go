@@ -124,6 +124,7 @@ func TestPassiveOnly(t *testing.T) {
 	refused("trufflehog", Args{"source": "git file:///work/repo"})
 	refused("trufflehog", Args{"source": "gitlab --repo=https://gitlab.com/o/r --endpoint=https://gitlab.acme.com"})
 	refused("trufflehog", Args{"source": "github"})
+	refused("trufflehog", Args{"source": `git "https://github.com/o/r"`}) // quotes are refused, never unquoted
 	refused("exif_metadata", Args{"path": "/etc/passwd"})
 	refused("whois_lookup", Args{"target": "-h whois.acme.com acme.com"})
 	refused("shodan_host", Args{"ip": "--help"})
