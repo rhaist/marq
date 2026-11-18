@@ -7,7 +7,7 @@
 #      one container survive into a *fresh* container on the same mount.
 #
 # Needs a built image. Build it yourself (`docker build -t marq .`) or pass
-# --build. The wrapped-binary plumbing is covered separately by verify_tools.sh.
+# --build. The wrapped-binary plumbing is covered separately by scripts/test_tools.py.
 #
 # Usage:  scripts/e2e-image.sh [--build] [--image NAME]
 set -uo pipefail

@@ -45,7 +45,7 @@ marq run load_skill '{"name":"choosing-a-framework"}'   # one or more skills
 marq tools                                              # the executable catalog
 ```
 
-~83 skills across 13 domains — run `marq run load_skill '{}'` for the full index.
+Skills across 13 domains — run `marq run load_skill '{}'` for the full index.
 The domains: **offensive** (purple-team, bug-bounty disclosure), **technique**
 (`recon-footprint`, `ot-assessment`), **malware**,
 **threat-intel**, **secops** (SIEM/SOAR, hunting, IR, forensics, vuln-mgmt,
@@ -100,7 +100,6 @@ Typical first moves by phase (run `marq tools` for the full set):
 - **People (purpose-bound)**: `maigret_username`, `email_accounts`
 - **Leaked secrets / metadata**: `trufflehog`, `exif_metadata`
 - **Report**: `report_finding`, `render_report`
-- **Law text**: `law_lookup` (`{"law":"NIS2","article":"23"}`, or `{"query":"..."}` in the law's own language). Quote deadlines and article numbers from it, never from memory.
 
 ## Long-running scans
 

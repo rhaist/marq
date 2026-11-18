@@ -1,26 +1,8 @@
-// Package shellword provides shell word-splitting and quoting (the shlex
-// split / quote / join trio) for the tool wrappers.
+// Package shellword provides shell quoting (Python shlex's
+// quote / join pair) for the tool wrappers.
 package shellword
 
-import (
-	"strings"
-
-	"github.com/google/shlex"
-)
-
-// Split parses a string into shell words (like shlex.split). On a parse error
-// it falls back to whitespace splitting so a malformed `options` string never
-// hard-fails a tool call.
-func Split(s string) []string {
-	if strings.TrimSpace(s) == "" {
-		return nil
-	}
-	parts, err := shlex.Split(s)
-	if err != nil {
-		return strings.Fields(s)
-	}
-	return parts
-}
+import "strings"
 
 // Quote returns a POSIX-shell-safe single token (like shlex.quote).
 func Quote(s string) string {

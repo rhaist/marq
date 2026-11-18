@@ -70,13 +70,6 @@ func Resolve(path string) (string, error) {
 	if a, err := filepath.Abs(config.C.AuditLog); config.C.AuditLog != "" && err == nil && real == realpath(a) {
 		return "", fmt.Errorf("path %q is the audit log, which is off-limits", path)
 	}
-	// The law corpus is served as official text; the model must not be able to
-	// rewrite it (or its journal) through write_file.
-	if d, err := filepath.Abs(config.C.LawsDB); config.C.LawsDB != "" && err == nil {
-		if db := realpath(d); real == db || strings.HasPrefix(real, db+"-") {
-			return "", fmt.Errorf("path %q is the law corpus, which is off-limits", path)
-		}
-	}
 	rs := roots()
 	for _, root := range rs {
 		if real == root || strings.HasPrefix(real, root+string(os.PathSeparator)) {

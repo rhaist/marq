@@ -36,7 +36,7 @@ Run these before opening a PR. CI enforces the first three on every push/PR, and
 | **Fast gate**     | `go build ./... && go vet ./... && go test ./...`                 | Compiles, vets, and the registry unit test: no duplicate tool names, every tool has exactly one of `Build`/`Handler`, generated input schemas are well-formed.        |
 | **End-to-end**    | `scripts/e2e.sh`                                                  | User-facing promises through the real `marq run` CLI (engagement persistence, skills load, findings + CVSS, audit, file sandbox, catalog). No image; runs in seconds. |
 | **Image e2e**     | `scripts/e2e-image.sh`                                            | Promises that only hold for the running image (`/work` persistence across containers). Needs a built image.                                                           |
-| **Tool plumbing** | `scripts/test_tools.py` / `scripts/verify_tools.sh`               | Drives the built image over MCP for wrapped-binary coverage.                                                                                                          |
+| **Tool plumbing** | `scripts/test_tools.py`                                           | Drives the built image over MCP for wrapped-binary coverage.                                                                                                          |
 
 `go test ./...` is the sanity gate; keep it green.
 

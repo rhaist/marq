@@ -100,10 +100,6 @@ to **€7.5M or 1.5%**. Caps are lower for SMEs.
 - The **CRA** applies in parallel to AI shipped as a product with digital
   elements: two conformity regimes, one CE marking exercise.
 
-## Law texts
-
-Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `eu-ai-act 50`.
-
 ## Pairs with
 
 - `load_skill ai-security` (securing the systems + ISO 42001 / NIST AI RMF).

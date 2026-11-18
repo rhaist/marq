@@ -141,7 +141,7 @@ func osint() []Tool {
 				{Name: "source", Type: StringParam, Desc: "subcommand + target, e.g. 'git https://github.com/org/repo'", Required: true},
 			},
 			Build: func(a Args) Invocation {
-				src := shellword.Split(a.S("source"))
+				src := strings.Fields(a.S("source")) // a quoted token fails publicCodeSource: refused, not unquoted
 				if msg := publicCodeSource(src); msg != "" {
 					return Invocation{Target: a.S("source"), Refuse: msg}
 				}

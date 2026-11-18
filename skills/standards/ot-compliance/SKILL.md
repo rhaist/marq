@@ -148,10 +148,6 @@ Treat each as a question for local counsel unless tagged V. Designation, not the
   once with `load_skill control-mapping`, then run
   `load_skill gap-analysis` per regime.
 
-## Law texts
-
-Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `eu-machinery-regulation`, `eu-cra 14`, `eu-nis2 23`.
-
 ## Pairs with
 
 - `load_skill ot-ics` (the engineering), `load_skill nis2-dora`,

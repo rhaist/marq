@@ -22,15 +22,15 @@ server. It works with any model and agent.
 "Footprint acme.com from public sources."                       → OSINT
 ```
 
-**The knowledge pack.** About 86 playbooks for security and GRC practitioners in any
+**The knowledge pack.** Playbooks for security and GRC practitioners in any
 sector and region. They take you from a finding to the obligation it touches (IEC 62443,
 EU CRA, NIS2, ISO 27001, NIST, US sector rules, and the national cyber and privacy laws
 of APAC, the Middle East and Latin America) and on to the board report. Every skill
 records the date it was last checked. The pack is Apache-2.0, so it installs into any
 agent, including internal ones.
 
-**The tool server (optional).** 17 passive OSINT tools (28 tools in all: domain,
-infrastructure, people, leaked secrets in public code). They query public third-party sources (DNS resolvers, WHOIS, certificate logs, Shodan, web archives, breach databases, social and code-hosting sites) and never scan, crawl or exploit a target's hosts. The only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks). Every OSINT-tool, file and findings call lands in an operator-attributed audit log you can hand to a client or regulator, and an OSINT tool won't run if its start record can't be written (fail-closed).
+**The tool server (optional).** Passive OSINT tools for domain,
+infrastructure, people and leaked secrets in public code. They query public third-party sources (DNS resolvers, WHOIS, certificate logs, Shodan, web archives, breach databases, social and code-hosting sites) and never scan, crawl or exploit a target's hosts. The only traffic that can reach a target's own infrastructure is ordinary DNS resolution hitting its authoritative nameservers. Username and email tools send lookup requests to third-party sites (`email_accounts` uses silent registration/login checks). Every OSINT-tool, file and findings call lands in an operator-attributed audit log you can hand to a client or regulator, and an OSINT tool won't run if its start record can't be written (fail-closed).
 
 ## Start
 
@@ -45,7 +45,7 @@ Pick a path. Start simple and add a layer only when you need it:
 
 ### The skills pack: install into your agent (no server, no Docker)
 
-The ~86 playbooks are a standard [Agent Skills](https://agentskills.io) pack under
+The playbooks are a standard [Agent Skills](https://agentskills.io) pack under
 [`skills/`](skills/), so agents that read `SKILL.md` load them natively:
 
 ```bash
@@ -70,7 +70,7 @@ binaries, so it is a single static Go binary you run natively:
 
 ```bash
 go install github.com/rhaist/marq/cmd/marq@latest   # ~10 MB, skills embedded
-marq skills                                          # browse all 86, by domain
+marq skills                                          # browse them all, by domain
 marq skills nis2-dora                                # read one, no client needed
 
 claude mcp add marq-skills -e MARQ_SKILLS_ONLY=1 -e MARQ_WORK_DIR=$HOME/.marq -- marq serve
@@ -133,19 +133,15 @@ API keys are listed in [`docs/USAGE.md`](docs/USAGE.md#api-keys-for-osint-source
 
 ## What you get
 
-- **Execution:** 17 wrapped passive-OSINT tools (28 tools in all: domain/infra footprint, people,
+- **Execution:** wrapped passive-OSINT tools (domain/infra footprint, people,
   leaked secrets in public code), audit-logged. File tools and `exif_metadata` are sandboxed to `/work` and `/tmp`. Findings render
   to `findings.md` / `.csv` (with optional CVSS and CWE).
-- **Knowledge:** ~86 `load_skill` playbooks across 13 domains, web-researched to
+- **Knowledge:** `load_skill` playbooks across 13 domains, web-researched to
   current (2026) standards. They tell the model how to use the tools and what to
   do where there is no tool: malware, threat-intel, sec-ops, architecture,
   GRC, standards and regulation (EU, US, APAC, Middle East, LATAM), CISO,
   purple-team, resilience, human factors, DevSecOps/privacy. Run them standalone with `MARQ_SKILLS_ONLY=1`, with no tool
   suite and no OSINT binaries.
-- **Law texts:** `law_lookup` quotes articles from a local corpus of official
-  texts (50 laws across the EU, UK, US, APAC, the Middle East and Latin America,
-  original language plus government English where published). `marq laws sync`
-  fetches it from the official sites; nothing is shipped or committed.
 - **Audit:** every external-tool call funnels through one choke
   point: an append-only, `fsync`'d audit log, a timeout, and an output cap. File
   access is sandboxed to `/work`+`/tmp`, and the image runs non-root (the
@@ -172,7 +168,7 @@ terminal agent (Pi) ──bash──▶  pi/marq shim ─┤   both hit the same
                                              │
                                   runner.Run ──▶ audit.jsonl (OSINT/file/findings calls)
 
-           load_skill ──▶ skills library (markdown, ~86 playbooks / 13 domains)
+           load_skill ──▶ skills library (markdown playbooks, 13 domains)
 ```
 
 Every tool funnels through `internal/runner/runner.go::Run`, the single

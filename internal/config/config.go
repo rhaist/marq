@@ -38,8 +38,6 @@ type Config struct {
 	SkillsOnly bool
 	// WorkDir is the engagement working area (findings, job dirs live here).
 	WorkDir string
-	// LawsDB is the law corpus file `marq laws sync` writes and law_lookup reads.
-	LawsDB string
 }
 
 func env(name, def string) string {
@@ -87,7 +85,6 @@ func Load() Config {
 		Operator:          env("MARQ_OPERATOR", "marq"),
 		Engagement:        env("MARQ_ENGAGEMENT", "unspecified"),
 	}
-	cfg.LawsDB = env("MARQ_LAWS_DB", filepath.Join(cfg.WorkDir, ".marq-laws.db"))
 	if e := readContext(cfg.WorkDir); e != "" {
 		cfg.Engagement = e
 	}

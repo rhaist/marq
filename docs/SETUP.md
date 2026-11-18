@@ -49,10 +49,7 @@ claude mcp add marq-skills \
 ```
 
 Any MCP client works (the same `marq serve` stdio server with a smaller tool
-set); see [`CLIENTS.md`](CLIENTS.md). Optionally fetch the law corpus once so
-`law_lookup` can quote the laws themselves (HTML and XML sources; PDF sources need
-`pdftotext` from poppler-utils, which the image has):
-`MARQ_WORK_DIR=$HOME/.marq marq laws sync`. Add the full tool suite below when you need
+set); see [`CLIENTS.md`](CLIENTS.md). Add the full tool suite below when you need
 to _run_ something as well as reason about it. To try it with no client at all:
 `scripts/demo-skills.sh`.
 
@@ -214,11 +211,8 @@ without them it leaks reasoning tokens into its answers and (without SYSTEM.md)
 bypasses marq.
 
 > This is the default on provenance grounds (official weights, no third-party
-> fine-tune in the trust path), not because it measured better. Measure it and
-> alternatives with `scripts/eval/`.
+> fine-tune in the trust path), not because it measured better.
 > A stock instruction-tuned model may also refuse some legitimate people OSINT.
-> If that blocks you, evaluate alternatives with the harness rather than
-> swapping blind.
 
 Step 2a, start `llama-server` for Gemma. Install it once. On macOS, `brew install
 llama.cpp` builds with Metal on Apple Silicon and runs on CPU on Intel Macs. On Linux, use
@@ -226,9 +220,7 @@ Linuxbrew `brew install llama.cpp`, a prebuilt CPU binary from the
 [llama.cpp releases](https://github.com/ggml-org/llama.cpp/releases), or a
 source/container build with CUDA/ROCm/Vulkan for GPU (the prebuilt Linux
 binaries are CPU-only). Then run one command with the model's recommended
-settings baked into flags (the same values marq's eval pins in
-[`scripts/eval/profiles.json`](../scripts/eval/profiles.json), and the quickstarts
-in [`scripts/eval/llama.cpp/`](../scripts/eval/llama.cpp/)):
+settings baked into flags:
 
 ```bash
 # "Balanced" build (the default above). -hf pulls the GGUF from HF.

@@ -96,10 +96,6 @@ Inference, not sourced: MLPS level 3 controls roughly correspond to ISO 27001 An
 - Local-language text governs; use local counsel for filings and keep templates ready for the 1h to 6h clocks (`load_skill incident-response-leadership`).
 - A cross-border or central SIEM design needs three checks per country: cyber clock, log or data location, and personal-data transfer route.
 
-## Law texts
-
-Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `cn-csl`, `cn-incident-measures 4`, `cn-dsl`, `cn-cross-border-provisions`, `cn-network-data-regs`, `jp-active-cyber-defense`, `tw-csma`, `tw-csma-en`, `au-cyber-security-act-2024 27`, `my-cybersecurity-act-854 23`, `my-cs-notification-regs-2024 2`.
-
 ## Pairs with
 
 `load_skill privacy-apac`, `load_skill breach-notification-matrix`, `load_skill ot-compliance`, `load_skill choosing-a-framework`, `load_skill third-party-risk`, `load_skill ot-ics`, `load_skill data-security`.

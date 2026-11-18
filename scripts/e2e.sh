@@ -9,7 +9,7 @@
 # catalog. They need NO Kali image, so this runs in seconds. The image-dependent
 # promises (the wrapped binaries actually executing, /work bind-mount
 # persistence across containers) are covered by scripts/e2e-image.sh (and the
-# wrapped binaries by scripts/verify_tools.sh) against a built image.
+# wrapped binaries by scripts/test_tools.py) against a built image.
 #
 # Usage:  scripts/e2e.sh
 set -uo pipefail
@@ -75,10 +75,6 @@ done <<<"$names"
 check "all $total skills load via load_skill" "$bad"
 grep -qi 'unknown skill' <<<"$(run load_skill '{"name":"definitely-not-a-skill"}')"
 check "unknown skill fails gracefully" $?
-grep -q 'marq laws sync' <<<"$(run law_lookup '{"law":"GDPR","article":"33"}')"
-check "law_lookup without a corpus says how to install it" $?
-grep -q 'marq laws sync' <<<"$("$BIN" laws list 2>/dev/null)"
-check "marq laws list without a corpus says how to install it" $?
 
 echo "# 3. findings deliverable (report_finding -> render_report)"
 # No severity given + a critical CVSS vector → severity must be derived as critical.

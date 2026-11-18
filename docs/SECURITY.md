@@ -18,8 +18,6 @@ sources and never scan, crawl or exploit a target's hosts. The only traffic that
 - Several tools call third-party services (Shodan, GitHub, crt.sh, the RDAP registries, GreyNoise, AlienVault OTX, urlscan.io,
   CIRCL, ORKL). Your queries leave the box and are logged by those providers, so
   do not submit data you are not permitted to disclose to a third party.
-  `marq laws sync` downloads law texts from the government sites in
-  `internal/laws/sources/` (no query data is sent); `law_lookup` itself is offline.
 
 ## Guardrail model: passive tools + fail-closed audit
 
@@ -31,7 +29,7 @@ transfers. There is no generic command runner or raw shell.
 Every OSINT-tool, file and findings call is audit-logged as JSON lines, before and after
 it runs. An exec or file tool whose start record can't be persisted is
 refused (fail-closed), so the log can't be silently skipped. In-process tools
-(`server_info`, `load_skill`, `law_lookup`, `list_jobs`, `job_status`) are not logged;
+(`server_info`, `load_skill`, `list_jobs`, `job_status`) are not logged;
 `set_engagement` and the findings tools log but don't fail closed. Each record carries:
 
 - a correlation id, UTC timestamps and duration

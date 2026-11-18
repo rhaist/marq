@@ -15,8 +15,6 @@
 //	marq tools               list every tool with a one-line description
 //	marq skills [name]       browse the embedded playbook library, or print one
 //	marq skills --stale [w]  list skills not reviewed in w weeks (default 8); exit 1 if any
-//	marq laws sync [id...]   fetch the law corpus from official sites (all, or the ids given)
-//	marq laws list           list the laws in the local corpus
 //	marq shim                emit the pi/marq host shim (no git clone needed)
 //	marq prompt <which>      emit pi/SYSTEM.md or pi/SKILL.md
 //	marq version             build identity (which binary/image am I running?)
@@ -31,7 +29,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"os"
 	"runtime"
 	"runtime/debug"
@@ -42,7 +39,6 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
 	"github.com/rhaist/marq/internal/config"
-	"github.com/rhaist/marq/internal/laws"
 	"github.com/rhaist/marq/internal/mcpserver"
 	"github.com/rhaist/marq/internal/registry"
 	"github.com/rhaist/marq/internal/skills"
@@ -63,8 +59,6 @@ func main() {
 		listTools(os.Args[2:])
 	case "skills":
 		listSkills(os.Args[2:])
-	case "laws":
-		lawsCmd(os.Args[2:])
 	case "shim":
 		fmt.Print(pi.Shim)
 	case "prompt":
@@ -270,44 +264,6 @@ func printVersion() {
 	fmt.Printf("%d tools, %d skills\n", len(registry.All()), len(skills.List()))
 }
 
-// lawsCmd syncs or lists the law corpus. Sync is an operator action (it fetches
-// from government sites), so it is a CLI command, not a tool the model can call.
-func lawsCmd(argv []string) {
-	sub := ""
-	if len(argv) > 0 {
-		sub = argv[0]
-	}
-	switch sub {
-	case "sync":
-		sources, err := laws.Manifest()
-		if err != nil {
-			fatal(err)
-		}
-		client := &http.Client{Timeout: 2 * time.Minute}
-		res, err := laws.Sync(context.Background(), config.C.LawsDB, sources, argv[1:], client)
-		if err != nil {
-			fatal(err)
-		}
-		ok := 0
-		for _, r := range res {
-			if r.Err != nil {
-				fmt.Printf("FAIL %-28s %v\n", r.ID, r.Err)
-				continue
-			}
-			ok++
-			fmt.Printf("ok   %-28s %d articles\n", r.ID, r.Articles)
-		}
-		fmt.Printf("%d of %d synced into %s\n", ok, len(res), config.C.LawsDB)
-		if ok == 0 {
-			os.Exit(1)
-		}
-	case "list", "":
-		fmt.Println(strings.TrimRight(laws.Answer(config.C.LawsDB, "", "", "", 0, config.C.MaxOutputChars), "\n"))
-	default:
-		fatal(fmt.Errorf("unknown laws command %q (want sync or list)", sub))
-	}
-}
-
 func usage() {
 	fmt.Fprint(os.Stderr, `marq — passive-OSINT toolkit + cyber skills library (MCP server + direct tool runner)
 
@@ -317,8 +273,6 @@ usage:
   marq tools [name]       list every tool, or show one tool's parameter schema
   marq skills [name]      list every skill by domain, or print one playbook
   marq skills --stale [w] skills not reviewed in w weeks (default 8); exit 1 if any
-  marq laws sync [id...]  fetch law texts from official sites into the local corpus
-  marq laws list          list the laws in the local corpus ($MARQ_LAWS_DB)
   marq shim               print the host shim script (chmod +x it; drives this image)
   marq prompt <system|skill>  print the host-side agent prompt / portable skill
   marq version            build revision, tool and skill counts

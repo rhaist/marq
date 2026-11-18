@@ -138,23 +138,3 @@ func TestSandboxRefusesAuditLog(t *testing.T) {
 		t.Errorf("ordinary work file refused: %v", err)
 	}
 }
-
-// TestSandboxRefusesLawCorpus: the corpus is served as official law text, so
-// the model's file tools must not be able to rewrite it or its journal.
-func TestSandboxRefusesLawCorpus(t *testing.T) {
-	work, err := filepath.EvalSymlinks(t.TempDir())
-	if err != nil {
-		t.Fatal(err)
-	}
-	origRoots, origWork, origDB := allowedRoots, config.C.WorkDir, config.C.LawsDB
-	allowedRoots, config.C.WorkDir, config.C.LawsDB = []string{"/nonexistent-root"}, work, filepath.Join(work, ".marq-laws.db")
-	t.Cleanup(func() { allowedRoots, config.C.WorkDir, config.C.LawsDB = origRoots, origWork, origDB })
-	for _, p := range []string{".marq-laws.db", ".marq-laws.db-journal", ".marq-laws.db-wal"} {
-		if _, err := Resolve(filepath.Join(work, p)); err == nil || !strings.Contains(err.Error(), "law corpus") {
-			t.Errorf("Resolve(%s) = %v, want the law-corpus refusal", p, err)
-		}
-	}
-	if _, err := Resolve(filepath.Join(work, "notes.md")); err != nil {
-		t.Errorf("other work files must stay reachable: %v", err)
-	}
-}

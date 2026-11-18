@@ -17,11 +17,9 @@ Run the periodic review sweep of the `skills/` pack. Today's date is the review 
    - Minimal, surgical edits in place; keep frontmatter, style and the agentskills.io rules (name == directory, description 1-1024 chars in third person saying what the skill covers and "Use when ...", double-quote a description containing `: `). Don't restructure or add skills. Don't commit.
    - Report per file: one line per change with the source URL, then the unverified suspects.
 
-3. **Law sources** (`internal/laws/sources/*.json`). Their URLs are pinned to a version on purpose, so the stored `version_date` stays true. For each source, check the official site for a newer consolidation or amendment; if there is one, update `url` and `version_date` together (read the date from the page, never guess). Then run `MARQ_LAWS_DB=$(mktemp -d)/laws.db go run ./cmd/marq laws sync` and spot-check the key article each skill's "Law texts" section names. A source that now fails (site moved, PDF only, access blocked) is reported to the user, not worked around.
+3. **Review the diff** (`git diff skills/`) and resolve anything the agents flagged as unverified with the user.
 
-4. **Review the diff** (`git diff skills/ internal/laws/sources/`) and resolve anything the agents flagged as unverified with the user.
-
-5. **Bump review dates** for every skill the sweep covered, and the pack version:
+4. **Bump review dates** for every skill the sweep covered, and the pack version:
 
    ```bash
    d=$(date +%F)
@@ -32,6 +30,6 @@ Run the periodic review sweep of the `skills/` pack. Today's date is the review 
 
    (GNU sed: drop the `''` after `-i`.)
 
-6. **Gates:** `go vet ./... && go test ./... && bash scripts/e2e.sh`, `go run ./cmd/marq skills --stale` (expect 0), `claude plugin validate . && claude plugin validate ./skills`, the official validator (`pip install "git+https://github.com/agentskills/agentskills#subdirectory=skills-ref"` in a venv, then `skills-ref validate` on every `skills/*/*/`), and `npx -y skills add ./ --list </dev/null` must report every skill with nothing skipped.
+5. **Gates:** `go vet ./... && go test ./... && bash scripts/e2e.sh`, `go run ./cmd/marq skills --stale` (expect 0), `claude plugin validate . && claude plugin validate ./skills`, the official validator (`pip install "git+https://github.com/agentskills/agentskills#subdirectory=skills-ref"` in a venv, then `skills-ref validate` on every `skills/*/*/`), and `npx -y skills add ./ --list </dev/null` must report every skill with nothing skipped.
 
-7. **Release:** commit on a branch (`skills: <month> review sweep` with the per-file change list in the body), merge to main locally, and tag `pack-<date>`. Leave pushing (commits and tag) to the user.
+6. **Release:** commit on a branch (`skills: <month> review sweep` with the per-file change list in the body), merge to main locally, and tag `pack-<date>`. Leave pushing (commits and tag) to the user.

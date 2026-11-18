@@ -50,8 +50,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         bind9-dnsutils whois rdap subfinder dnstwist \
         # company & domain footprint
         theharvester libimage-exiftool-perl trufflehog \
-        # law corpus: PDF-only gazettes (marq laws sync)
-        poppler-utils \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Go-built tool not packaged in Kali apt: the web-archive URL harvester.

@@ -11,4 +11,3 @@ audit.jsonl
 *.log
 reports
 research_notes
-scripts/eval/runs*

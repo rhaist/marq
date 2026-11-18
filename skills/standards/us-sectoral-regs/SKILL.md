@@ -76,10 +76,6 @@ There is no general US cyber law; obligations attach by **what you do** (public 
 
 - The US equivalent of NIS2/DORA is **not one law**: it is this **sectoral spread** (SEC ≈ disclosure governance, NYDFS/GLBA ≈ DORA-ish for finance, CMMC/FISMA ≈ federal supply chain, CIRCIA ≈ NIS2-ish but narrower and pending). See `load_skill privacy-eu` for the EU side.
 
-## Law texts
-
-Quote the law itself, not this summary. `law_lookup` reads it from the local corpus (`{"law": "<id>", "article": "<n>"}`; run `marq laws sync` once if it's missing); texts are in their original language. Ids here, with the key article where there is one: `us-cfr-16-314 314.4`, `us-cfr-45-164-c`, `us-cfr-45-164-d`, `us-cfr-17-229-106`, `us-cfr-16-318`.
-
 ## Pairs with
 
 - US privacy patchwork + breach notification: `load_skill privacy-us`.
