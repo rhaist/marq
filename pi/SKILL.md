@@ -100,6 +100,7 @@ Typical first moves by phase (run `marq tools` for the full set):
 - **People (purpose-bound)**: `maigret_username`, `email_accounts`
 - **Leaked secrets / metadata**: `trufflehog`, `exif_metadata`
 - **Report**: `report_finding`, `render_report`
+- **Law text**: `law_lookup` (`{"law":"NIS2","article":"23"}`, or `{"query":"..."}` in the law's own language). Quote deadlines and article numbers from it, never from memory.
 
 ## Long-running scans
 

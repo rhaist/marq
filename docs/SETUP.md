@@ -41,7 +41,7 @@ external-binary tool, so marq is a single static Go binary with no image and no
 network lookups:
 
 ```bash
-go install github.com/rhaist/marq/cmd/marq@latest    # ~10 MB, skills embedded
+go install github.com/rhaist/marq/cmd/marq@latest    # ~19 MB, skills embedded
 claude mcp add marq-skills \
   -e MARQ_SKILLS_ONLY=1 -e MARQ_WORK_DIR=$HOME/.marq \
   -e MARQ_AUDIT_LOG=$HOME/.marq/audit.jsonl \
@@ -49,7 +49,10 @@ claude mcp add marq-skills \
 ```
 
 Any MCP client works (the same `marq serve` stdio server with a smaller tool
-set); see [`CLIENTS.md`](CLIENTS.md). Add the full tool suite below when you need
+set); see [`CLIENTS.md`](CLIENTS.md). Optionally fetch the law corpus once so
+`law_lookup` can quote the laws themselves (HTML and XML sources; PDF sources need
+`pdftotext` from poppler-utils, which the image has):
+`MARQ_WORK_DIR=$HOME/.marq marq laws sync`. Add the full tool suite below when you need
 to _run_ something as well as reason about it. To try it with no client at all:
 `scripts/demo-skills.sh`.
 
@@ -361,7 +364,7 @@ Pi, not in marq.
 
 Quality gates and local Go iteration are in [`CONTRIBUTING.md`](../CONTRIBUTING.md); image
 smoke tests are in [`USAGE.md`](USAGE.md#2-smoke-test-the-image). To check the
-image exposes the full tool set (expects 34):
+image exposes the full tool set (expects 28):
 
 ```bash
 docker run --rm marq tools | wc -l
