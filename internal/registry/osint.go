@@ -103,10 +103,12 @@ func osint() []Tool {
 				}
 				ip := url.PathEscape(a.S("ip"))
 				// The key reaches curl on stdin, so it is in neither the process list nor the audit argv.
-				cmd := `if [ -n "$SHODAN_API_KEY" ]; then printf %s "$SHODAN_API_KEY" | curl -sS --max-time 30 -G --data-urlencode key@- ` +
-					shellword.Quote("https://api.shodan.io/shodan/host/"+ip) + "; else " +
+				// The reply is captured whole and then capped, so curl's own exit status is reported.
+				cmd := `if [ -n "$SHODAN_API_KEY" ]; then r=$(printf %s "$SHODAN_API_KEY" | curl -sS --max-time 30 -G --data-urlencode key@- ` +
+					shellword.Quote("https://api.shodan.io/shodan/host/"+ip) + "); else " +
 					"echo '(keyless InternetDB lookup; set SHODAN_API_KEY for full banners)'; " +
-					"curl -sS --max-time 30 " + shellword.Quote("https://internetdb.shodan.io/"+ip) + "; fi | head -c 30000"
+					"r=$(curl -sS --max-time 30 " + shellword.Quote("https://internetdb.shodan.io/"+ip) + "); fi; rc=$?; " +
+					`if [ ${#r} -gt 30000 ]; then printf '%s\n... (truncated at 30 kB)\n' "${r:0:30000}"; else printf '%s\n' "$r"; fi; exit $rc`
 				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("ip")}
 			},
 		},
@@ -120,19 +122,11 @@ func osint() []Tool {
 				{Name: "limit", Type: IntParam, Desc: "result limit", Default: 100},
 			},
 			Build: func(a Args) Invocation {
-				// One compact line per match (ip, port, org, hostnames, product), like the old CLI's --fields.
-				compact := `import json,sys
-raw=sys.stdin.read()
-try: d=json.loads(raw)
-except ValueError: sys.exit("shodan: unexpected response (bad key or plan?): "+raw[:300])
-if "error" in d: sys.exit("shodan: "+d["error"])
-print("total:", d.get("total"))
-for m in d.get("matches", [])[:int(sys.argv[1])]:
-    print(m.get("ip_str"), m.get("port"), m.get("org") or "", ",".join(m.get("hostnames") or []), m.get("product") or "", sep="\t")`
+				limit := min(max(a.I("limit"), 1), 100) // one API page holds 100 matches
 				cmd := `[ -n "$SHODAN_API_KEY" ] || { echo "shodan_search needs SHODAN_API_KEY; for a single IP use shodan_host (keyless)" >&2; exit 2; }; ` +
 					`set -o pipefail; printf %s "$SHODAN_API_KEY" | curl -sS --max-time 60 -G --data-urlencode key@- --data-urlencode minify=true ` +
 					"--data-urlencode " + shellword.Quote("query="+a.S("query")) + " https://api.shodan.io/shodan/host/search | " +
-					"python3 -c " + shellword.Quote(compact) + " " + strconv.Itoa(a.I("limit"))
+					"python3 -c " + shellword.Quote(shodanCompact) + " " + strconv.Itoa(limit)
 				return Invocation{Argv: []string{"/bin/bash", "-c", cmd}, Target: a.S("query")}
 			},
 		},
@@ -175,3 +169,15 @@ for m in d.get("matches", [])[:int(sys.argv[1])]:
 		},
 	}
 }
+
+// shodanCompact prints one line per Shodan search match (ip, port, org,
+// hostnames, product), the fields the old CLI's --fields gave; argv[1] is the
+// already-clamped limit.
+const shodanCompact = `import json,sys
+raw=sys.stdin.read()
+try: d=json.loads(raw)
+except ValueError: sys.exit("shodan: unexpected response (bad key or plan?): "+raw[:300])
+if "error" in d: sys.exit("shodan: "+d["error"])
+print("total:", d.get("total"))
+for m in d.get("matches", [])[:int(sys.argv[1])]:
+    print(m.get("ip_str"), m.get("port"), m.get("org") or "", ",".join(m.get("hostnames") or []), m.get("product") or "", sep="\t")`

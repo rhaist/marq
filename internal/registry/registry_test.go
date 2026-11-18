@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"os/exec"
 	"slices"
 	"strings"
 	"testing"
@@ -174,5 +175,39 @@ func TestPassiveOnly(t *testing.T) {
 	}
 	if argv := toolNamed(t, "trufflehog").Build(Args{"source": "github --org=acme"}).Argv; !slices.Contains(argv, "--no-verification") {
 		t.Errorf("trufflehog verifies secrets: %q", argv)
+	}
+}
+
+// TestShodanWrappers: the key stays out of argv (it reaches curl on stdin), the
+// limit is clamped, a failing curl isn't masked by the output cap, and the
+// inline formatter handles a result, an API error and a non-JSON reply.
+func TestShodanWrappers(t *testing.T) {
+	for limit, want := range map[int]string{-1: " 1", 0: " 1", 7: " 7", 500: " 100"} {
+		cmd := toolNamed(t, "shodan_search").Build(Args{"query": `org:"x"; rm -rf /`, "limit": limit}).Argv[2]
+		if !strings.HasSuffix(cmd, want) {
+			t.Errorf("limit %d: command ends %q, want %q", limit, cmd[len(cmd)-6:], want)
+		}
+		if !strings.Contains(cmd, `'query=org:"x"; rm -rf /'`) || !strings.Contains(cmd, `printf %s "$SHODAN_API_KEY" | curl`) {
+			t.Errorf("query must be one quoted argument and the key must go to curl's stdin: %s", cmd)
+		}
+	}
+	if cmd := toolNamed(t, "shodan_host").Build(Args{"ip": "8.8.8.8"}).Argv[2]; !strings.Contains(cmd, "rc=$?") || !strings.HasSuffix(cmd, "exit $rc") || strings.Contains(cmd, "| head") {
+		t.Errorf("shodan_host must report curl's exit status and cap output without cutting the pipe: %s", cmd)
+	}
+	py, err := exec.LookPath("python3")
+	if err != nil {
+		t.Skip("python3 not installed")
+	}
+	for in, want := range map[string]string{
+		`{"total": 2, "matches": [{"ip_str": "1.2.3.4", "port": 443, "org": "Acme", "hostnames": ["a.acme.com"], "product": "nginx"}, {"ip_str": "5.6.7.8", "port": 22}]}`: "total: 2\n1.2.3.4\t443\tAcme\ta.acme.com\tnginx\n",
+		`{"error": "Access denied (403 Forbidden)"}`: "shodan: Access denied",
+		`<html>401</html>`:                           "unexpected response",
+	} {
+		c := exec.Command(py, "-c", shodanCompact, "1")
+		c.Stdin = strings.NewReader(in)
+		out, _ := c.CombinedOutput()
+		if !strings.Contains(string(out), want) {
+			t.Errorf("formatter(%.30s) = %q, want %q", in, out, want)
+		}
 	}
 }

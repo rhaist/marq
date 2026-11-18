@@ -9,18 +9,6 @@ import (
 	"github.com/rhaist/marq/internal/shellword"
 )
 
-// splitHosts turns a comma/newline-separated list into trimmed host entries.
-func splitHosts(s string) []string {
-	s = strings.ReplaceAll(s, ",", "\n")
-	var out []string
-	for line := range strings.SplitSeq(s, "\n") {
-		if h := strings.TrimSpace(line); h != "" {
-			out = append(out, h)
-		}
-	}
-	return out
-}
-
 // dnsTypes are the record types the DNS tools may query: normal resolution
 // only — no AXFR/IXFR (zone transfer against the target's nameservers) and no
 // way to smuggle a tool flag in as a "record type".
